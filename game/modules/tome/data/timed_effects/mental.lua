@@ -71,12 +71,11 @@ newEffect{
 	type = "mental",
 	subtype = { confusion=true },
 	status = "detrimental",
-	parameters = { power=50 },
+	parameters = { power=30 },
 	on_gain = function(self, err) return "#Target# wanders around!.", "+Confused" end,
 	on_lose = function(self, err) return "#Target# seems more focused.", "-Confused" end,
 	activate = function(self, eff)
-		eff.power = math.floor(math.max(eff.power - (self:attr("confusion_immune") or 0) * 100, 10))
-		eff.power = util.bound(eff.power, 0, 50)
+		eff.power = util.bound(eff.power, 0, 30)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
 	end,
@@ -261,7 +260,7 @@ newEffect{
 newEffect{
 	name = "GLOOM_STUNNED", image = "effects/gloom_stunned.png",
 	desc = "Stunned by the gloom",
-	long_desc = function(self, eff) return ("The gloom has stunned the target, reducing damage by 70%%, putting random talents on cooldown and reducing movement speed by 50%%. While stunned talents do not cooldown."):format() end,
+	long_desc = function(self, eff) return ("The gloom has stunned the target, reducing damage by 70%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format() end,
 	type = "mental",
 	subtype = { gloom=true, stun=true },
 	status = "detrimental",
@@ -272,7 +271,6 @@ newEffect{
 		eff.particle = self:addParticles(Particles.new("gloom_stunned", 1))
 
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
-		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
 
 		local tids = {}
@@ -283,14 +281,12 @@ newEffect{
 		for i = 1, 4 do
 			local t = rng.tableRemove(tids)
 			if not t then break end
-			self.talents_cd[t.id] = 1 -- Just set cooldown to 1 since cooldown does not decrease while stunned
+			self.talents_cd[t.id] = 1
 		end
 	end,
 	deactivate = function(self, eff)
 		self:removeParticles(eff.particle)
-
 		self:removeTemporaryValue("stunned", eff.tmpid)
-		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
 	end,
 }
@@ -307,8 +303,7 @@ newEffect{
 	on_lose = function(self, err) return "#Target# overcomes the gloom", "-Confused" end,
 	activate = function(self, eff)
 		eff.particle = self:addParticles(Particles.new("gloom_confused", 1))
-		eff.power = math.floor(math.max(eff.power - (self:attr("confusion_immune") or 0) * 100, 10))
-		eff.power = util.bound(eff.power, 0, 50)
+		eff.power = util.bound(eff.power, 0, 30)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
 	end,
@@ -905,7 +900,7 @@ newEffect{
 newEffect{
 	name = "MADNESS_STUNNED", image = "effects/madness_stunned.png",
 	desc = "Stunned by madness",
-	long_desc = function(self, eff) return ("Madness has stunned the target, reducing damage by 70%%, lowering mind resistance by %d%%, putting random talents on cooldown and reducing movement speed by 50%%. While stunned talents do not cooldown."):format(eff.mindResistChange) end,
+	long_desc = function(self, eff) return ("Madness has stunned the target, reducing damage by 70%%, lowering mind resistance by %d%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format(eff.mindResistChange) end,
 	type = "mental",
 	subtype = { madness=true, stun=true },
 	status = "detrimental",
@@ -917,7 +912,6 @@ newEffect{
 
 		eff.mindResistChangeId = self:addTemporaryValue("resists", { [DamageType.MIND]=eff.mindResistChange })
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
-		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
 
 		local tids = {}
@@ -928,7 +922,7 @@ newEffect{
 		for i = 1, 4 do
 			local t = rng.tableRemove(tids)
 			if not t then break end
-			self.talents_cd[t.id] = 1 -- Just set cooldown to 1 since cooldown does not decrease while stunned
+			self.talents_cd[t.id] = 1
 		end
 	end,
 	deactivate = function(self, eff)
@@ -936,7 +930,6 @@ newEffect{
 
 		self:removeTemporaryValue("resists", eff.mindResistChangeId)
 		self:removeTemporaryValue("stunned", eff.tmpid)
-		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
 	end,
 }
@@ -944,7 +937,7 @@ newEffect{
 newEffect{
 	name = "MADNESS_CONFUSED", image = "effects/madness_confused.png",
 	desc = "Confused by madness",
-	long_desc = function(self, eff) return ("Madness has confused the target, lowering mind resistance by %d%% and making it act randomly (%d%% chance) and unable to perform complex actions."):format(eff.mindResistChange, eff.power) end,
+	long_desc = function(self, eff) return ("Madness has confused the target, lowering mind resistance by %d%% and making it act randomly (%d%% chance)"):format(eff.mindResistChange, eff.power) end,
 	type = "mental",
 	subtype = { madness=true, confusion=true },
 	status = "detrimental",
@@ -954,8 +947,7 @@ newEffect{
 	activate = function(self, eff)
 		eff.particle = self:addParticles(Particles.new("gloom_confused", 1))
 		eff.mindResistChangeId = self:addTemporaryValue("resists", { [DamageType.MIND]=eff.mindResistChange })
-		eff.power = math.floor(math.max(eff.power - (self:attr("confusion_immune") or 0) * 100, 10))
-		eff.power = util.bound(eff.power, 0, 50)
+		eff.power = util.bound(eff.power, 0, 30)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 	end,
 	deactivate = function(self, eff)
@@ -1574,7 +1566,7 @@ newEffect{
 				end
 			elseif chance == 3 then
 				if self:canBe("confusion") then
-					self:setEffect(self.EFF_CONFUSED, 3, {power=50})
+					self:setEffect(self.EFF_CONFUSED, 3, {power=30})
 				end
 			end
 			game.logSeen(self, "#F53CBE#%s succumbs to the nightmare!", self.name:capitalize())
@@ -2420,8 +2412,7 @@ newEffect{
 	parameters = { power=1, confuse=10, dam=1 },
 	activate = function(self, eff)
 		DamageType:get(DamageType.MIND).projector(eff.src or self, self.x, self.y, DamageType.MIND, {dam=eff.dam, alwaysHit=true})
-		eff.confuse = math.floor(math.max(eff.confuse - (self:attr("confusion_immune") or 0) * 100, 10))
-		eff.confuse = util.bound(eff.confuse, 0, 50) -- Confusion cap of 50%
+		eff.confuse = util.bound(eff.confuse, 0, 30) -- Confusion cap of 30%
 		eff.tmpid = self:addTemporaryValue("confused", eff.confuse)
 		eff.cid = self:addTemporaryValue("inc_stats", {[Stats.STAT_CUN]=-eff.power/2})
 		if eff.power <= 0 then eff.dur = 0 end

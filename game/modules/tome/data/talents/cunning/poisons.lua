@@ -49,7 +49,7 @@ newTalent{
 	getDamage = function(self, t) return 8 + self:combatTalentStatDamage(t, "cun", 10, 60) * 0.6 end,
 	ApplyPoisons = function(self, t, target, weapon) -- apply poison(s) to a target
 		if self:knowTalent(self.T_VULNERABILITY_POISON) then -- apply vulnerability first
-			target:setEffect(target.EFF_VULNERABILITY_POISON, t.getDuration(self, t), {src=self, power=self:callTalent(self.T_VULNERABILITY_POISON, "getDamage") , apply_power=self:combatAttack(), no_ct_effect=true})
+			target:setEffect(target.EFF_VULNERABILITY_POISON, t.getDuration(self, t), {src=self, power=self:callTalent(self.T_VULNERABILITY_POISON, "getDamage") , no_ct_effect=true})
 		end
 		if target:canBe("poison") then
 			local insidious = 0
@@ -63,7 +63,7 @@ newTalent{
 			local volatile = 0
 			if self:isTalentActive(self.T_VOLATILE_POISON) then volatile = self:callTalent(self.T_VOLATILE_POISON, "getEffect")/100 end
 			local dam = t.getDamage(self,t) * (1 + volatile)
-			target:setEffect(target.EFF_DEADLY_POISON, t.getDuration(self, t), {src=self, power=dam, max_power=dam*4, insidious=insidious, crippling=crippling, numbing=numbing, leeching=leeching, volatile=volatile, apply_power=self:combatAttack(), no_ct_effect=true})
+			target:setEffect(target.EFF_DEADLY_POISON, t.getDuration(self, t), {src=self, power=dam, max_power=dam*4, insidious=insidious, crippling=crippling, numbing=numbing, leeching=leeching, volatile=volatile, no_ct_effect=true})
 			if self.vile_poisons then
 				for tid, val in pairs(self.vile_poisons) do -- apply any special procs
 					local tal = self:getTalentFromId(tid)

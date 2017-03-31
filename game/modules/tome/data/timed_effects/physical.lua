@@ -444,7 +444,7 @@ newEffect{
 newEffect{
 	name = "BURNING_SHOCK", image = "talents/flameshock.png",
 	desc = "Burning Shock",
-	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 70%%, putting random talents on cooldown and reducing movement speed by 50%%. While flameshocked talents do not cooldown."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 70%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format(eff.power) end,
 	type = "physical",
 	subtype = { fire=true, stun=true },
 	status = "detrimental",
@@ -453,7 +453,6 @@ newEffect{
 	on_lose = function(self, err) return "#Target# is not stunned anymore.", "-Burning Shock" end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
-		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
 
 		local tids = {}
@@ -464,7 +463,7 @@ newEffect{
 		for i = 1, 4 do
 			local t = rng.tableRemove(tids)
 			if not t then break end
-			self:startTalentCooldown(t.id, 1) -- Just set cooldown to 1 since cooldown does not decrease while stunned
+			self:startTalentCooldown(t.id, 1)
 		end
 	end,
 	on_timeout = function(self, eff)
@@ -472,7 +471,6 @@ newEffect{
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stunned", eff.tmpid)
-		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
 	end,
 }
@@ -480,7 +478,7 @@ newEffect{
 newEffect{
 	name = "STUNNED", image = "effects/stunned.png",
 	desc = "Stunned",
-	long_desc = function(self, eff) return ("The target is stunned, reducing damage by 60%%, putting 3 random talents on cooldown and reducing movement speed by 50%%. While stunned talents do not cooldown."):format() end,
+	long_desc = function(self, eff) return ("The target is stunned, reducing damage by 70%%, putting 3 random talents on cooldown and reducing movement speed by 50%%."):format() end,
 	type = "physical",
 	subtype = { stun=true },
 	status = "detrimental",
@@ -489,9 +487,7 @@ newEffect{
 	on_lose = function(self, err) return "#Target# is not stunned anymore.", "-Stunned" end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
-		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
-
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
@@ -505,7 +501,6 @@ newEffect{
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stunned", eff.tmpid)
-		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
 	end,
 }
@@ -3963,7 +3958,7 @@ newEffect{
 			self:doFOV()
 		end
 		if self:canBe("confusion") then
-			eff.cid = self:addTemporaryValue("confused", 50)
+			eff.cid = self:addTemporaryValue("confused", 30)
 		end
 		if core.shader.active() then
 			self:effectParticles(eff, {type="shader_shield", args={size_factor=1.5, img="shadow_shot_debuff_tentacles"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=2000, noup=0.0}})
