@@ -260,7 +260,7 @@ newEffect{
 newEffect{
 	name = "GLOOM_STUNNED", image = "effects/gloom_stunned.png",
 	desc = "Stunned by the gloom",
-	long_desc = function(self, eff) return ("The gloom has stunned the target, reducing damage by 70%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format() end,
+	long_desc = function(self, eff) return ("The gloom has stunned the target, reducing damage by 50%%, putting 4 random talents on cooldown and reducing movement speed by 50%%.  While stunned talents cooldown twice as slow."):format() end,
 	type = "mental",
 	subtype = { gloom=true, stun=true },
 	status = "detrimental",
@@ -269,10 +269,9 @@ newEffect{
 	on_lose = function(self, err) return "#Target# overcomes the gloom", "-Stunned" end,
 	activate = function(self, eff)
 		eff.particle = self:addParticles(Particles.new("gloom_stunned", 1))
-
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
-
+		eff.lockid = self:addTemporaryValue("half_talents_cooldown", 1)
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
@@ -288,6 +287,7 @@ newEffect{
 		self:removeParticles(eff.particle)
 		self:removeTemporaryValue("stunned", eff.tmpid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
+		self:removeTemporaryValue("half_talents_cooldown", eff.lockid)
 	end,
 }
 
@@ -900,7 +900,7 @@ newEffect{
 newEffect{
 	name = "MADNESS_STUNNED", image = "effects/madness_stunned.png",
 	desc = "Stunned by madness",
-	long_desc = function(self, eff) return ("Madness has stunned the target, reducing damage by 70%%, lowering mind resistance by %d%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format(eff.mindResistChange) end,
+	long_desc = function(self, eff) return ("Madness has stunned the target, reducing damage by 50%%, lowering mind resistance by %d%%, putting 4 random talents on cooldown and reducing movement speed by 50%%.  While stunned talents cooldown twice as slow."):format(eff.mindResistChange) end,
 	type = "mental",
 	subtype = { madness=true, stun=true },
 	status = "detrimental",
@@ -913,6 +913,7 @@ newEffect{
 		eff.mindResistChangeId = self:addTemporaryValue("resists", { [DamageType.MIND]=eff.mindResistChange })
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
+		eff.lockid = self:addTemporaryValue("half_talents_cooldown", 1)
 
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
@@ -931,6 +932,7 @@ newEffect{
 		self:removeTemporaryValue("resists", eff.mindResistChangeId)
 		self:removeTemporaryValue("stunned", eff.tmpid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
+		self:removeTemporaryValue("half_talents_cooldown", eff.lockid)
 	end,
 }
 

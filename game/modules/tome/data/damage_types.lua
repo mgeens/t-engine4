@@ -148,7 +148,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		end
 
 		if src:attr("stunned") then
-			dam = dam * 0.3
+			dam = dam * 0.5
 			print("[PROJECTOR] stunned dam", dam)
 		end
 		if src:attr("invisible_damage_penalty") then

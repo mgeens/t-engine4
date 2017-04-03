@@ -444,7 +444,7 @@ newEffect{
 newEffect{
 	name = "BURNING_SHOCK", image = "talents/flameshock.png",
 	desc = "Burning Shock",
-	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 70%%, putting 4 random talents on cooldown and reducing movement speed by 50%%."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 50%%, putting 4 random talents on cooldown and reducing movement speed by 50%%.  While stunned talents cooldown twice as slow."):format(eff.power) end,
 	type = "physical",
 	subtype = { fire=true, stun=true },
 	status = "detrimental",
@@ -454,6 +454,7 @@ newEffect{
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
+		eff.lockid = self:addTemporaryValue("half_talents_cooldown", 1)
 
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
@@ -472,13 +473,14 @@ newEffect{
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stunned", eff.tmpid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
+		self:removeTemporaryValue("half_talents_cooldown", eff.lockid)
 	end,
 }
 
 newEffect{
 	name = "STUNNED", image = "effects/stunned.png",
 	desc = "Stunned",
-	long_desc = function(self, eff) return ("The target is stunned, reducing damage by 70%%, putting 3 random talents on cooldown and reducing movement speed by 50%%."):format() end,
+	long_desc = function(self, eff) return ("The target is stunned, reducing damage by 50%%, putting 3 random talents on cooldown and reducing movement speed by 50%%.  While stunned talents cooldown twice as slow."):format() end,
 	type = "physical",
 	subtype = { stun=true },
 	status = "detrimental",
@@ -488,6 +490,7 @@ newEffect{
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("stunned", 1)
 		eff.speedid = self:addTemporaryValue("movement_speed", -0.5)
+		eff.lockid = self:addTemporaryValue("half_talents_cooldown", 1)
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
@@ -502,6 +505,7 @@ newEffect{
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stunned", eff.tmpid)
 		self:removeTemporaryValue("movement_speed", eff.speedid)
+		self:removeTemporaryValue("half_talents_cooldown", eff.lockid)
 	end,
 }
 

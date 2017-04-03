@@ -598,7 +598,19 @@ function _M:actBase()
 	end
 
 	-- Cooldown talents after effects, because some of them involve breaking sustains.
-	if not self:attr("no_talents_cooldown") then self:cooldownTalents() end
+
+	if not self:attr("no_talents_cooldown") then
+		if self:attr("half_talents_cooldown") then
+			if self.half_talents_cooldown > 1 then
+				self:cooldownTalents()
+				self.half_talents_cooldown = 1
+			else
+				self.half_talents_cooldown = 2
+			end
+		else
+			self:cooldownTalents()
+		end
+	end
 end
 
 function _M:act()
