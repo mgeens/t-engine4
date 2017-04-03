@@ -3948,9 +3948,9 @@ newEffect{
 	desc = "Shadow Smoke",
 	long_desc = function(self, eff) return ("The target is wrapped in disorientating smoke, confusing them and reducing vision range by %d."):format(eff.sight) end,
 	type = "physical",
-	subtype = { sense=true },
+	subtype = { sense=true, confusion=true },
 	status = "detrimental",
-	parameters = { sight=5 },
+	parameters = { sight=5, power=30 },
 	on_gain = function(self, err) return "#Target# is surrounded by a thick smoke.", "+Shadow Smoke" end,
 	on_lose = function(self, err) return "The smoke around #target# dissipate.", "-Shadow Smoke" end,
 	charges = function(self, eff) return -eff.sight end,
@@ -3962,7 +3962,7 @@ newEffect{
 			self:doFOV()
 		end
 		if self:canBe("confusion") then
-			eff.cid = self:addTemporaryValue("confused", 30)
+			eff.cid = self:addTemporaryValue("confused", eff.power)
 		end
 		if core.shader.active() then
 			self:effectParticles(eff, {type="shader_shield", args={size_factor=1.5, img="shadow_shot_debuff_tentacles"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=2000, noup=0.0}})

@@ -75,7 +75,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# wanders around!.", "+Confused" end,
 	on_lose = function(self, err) return "#Target# seems more focused.", "-Confused" end,
 	activate = function(self, eff)
-		eff.power = util.bound(eff.power, 0, 30)
+		eff.power = util.bound(eff.power, 0, 50)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
 	end,
@@ -303,7 +303,7 @@ newEffect{
 	on_lose = function(self, err) return "#Target# overcomes the gloom", "-Confused" end,
 	activate = function(self, eff)
 		eff.particle = self:addParticles(Particles.new("gloom_confused", 1))
-		eff.power = util.bound(eff.power, 0, 30)
+		eff.power = util.bound(eff.power, 0, 50)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
 	end,
@@ -941,7 +941,7 @@ newEffect{
 	desc = "Confused by madness",
 	long_desc = function(self, eff) return ("Madness has confused the target, lowering mind resistance by %d%% and making it act randomly (%d%% chance)"):format(eff.mindResistChange, eff.power) end,
 	type = "mental",
-	subtype = { madness=true, confusion=true },
+	subtype = { madness=true, confusion=true, power=50 },
 	status = "detrimental",
 	parameters = { power=10 },
 	on_gain = function(self, err) return "#F53CBE##Target# is lost in madness!", "+Confused" end,
@@ -949,7 +949,7 @@ newEffect{
 	activate = function(self, eff)
 		eff.particle = self:addParticles(Particles.new("gloom_confused", 1))
 		eff.mindResistChangeId = self:addTemporaryValue("resists", { [DamageType.MIND]=eff.mindResistChange })
-		eff.power = util.bound(eff.power, 0, 30)
+		eff.power = util.bound(eff.power, 0, 50)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 	end,
 	deactivate = function(self, eff)
@@ -2414,7 +2414,7 @@ newEffect{
 	parameters = { power=1, confuse=10, dam=1 },
 	activate = function(self, eff)
 		DamageType:get(DamageType.MIND).projector(eff.src or self, self.x, self.y, DamageType.MIND, {dam=eff.dam, alwaysHit=true})
-		eff.confuse = util.bound(eff.confuse, 0, 30) -- Confusion cap of 30%
+		eff.confuse = util.bound(eff.confuse, 0, 50) -- Confusion cap of 50%
 		eff.tmpid = self:addTemporaryValue("confused", eff.confuse)
 		eff.cid = self:addTemporaryValue("inc_stats", {[Stats.STAT_CUN]=-eff.power/2})
 		if eff.power <= 0 then eff.dur = 0 end

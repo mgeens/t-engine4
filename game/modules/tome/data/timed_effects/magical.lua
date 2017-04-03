@@ -402,7 +402,7 @@ newEffect{
 		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dam)
 	end,
 	activate = function(self, eff)
-		eff.power = util.bound(eff.power, 0, 30)
+		eff.power = util.bound(eff.power, 0, 50)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
 	end,
