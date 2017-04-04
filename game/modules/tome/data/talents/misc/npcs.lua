@@ -541,15 +541,16 @@ newTalent{
 	tactical = { DISABLE = { confusion = 3 } },
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
+	getConfusion = function(self, t) return math.floor(self:combatTalentScale(t, 15, 50)) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:project(tg, x, y, DamageType.CONFUSION, {dur=t.getDuration(self, t), dam=50+self:getTalentLevelRaw(t)*10}, {type="manathrust"})
+		self:project(tg, x, y, DamageType.CONFUSION, {dur=t.getDuration(self, t), dam=t.getConfusion(self,t)}, {type="manathrust"})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Try to confuse the target's mind for %d turns.]]):format(t.getDuration(self, t))
+		return ([[Try to confuse the target's mind for %d (power %d%%) turns.]]):format(t.getDuration(self, t), t.getConfusion(self, t))
 	end,
 }
 
