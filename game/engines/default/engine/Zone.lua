@@ -1107,6 +1107,9 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	-- Delete the room_map if it's no longer needed
 	if not self._retain_level_room_map then map.room_map = nil end
 
+	-- Call a "post" finisher
+	if level_data.post_process_end then level_data.post_process_end(level, self) end
+
 	return level
 end
 
