@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -78,6 +78,7 @@ newBirthDescriptor{
 	descriptor_choices = default_eyal_descriptors{},
 	game_state = {
 		campaign_name = "maj-eyal",
+		stores_restock_by_level = 1,
 		__allow_rod_recall = true,
 		__allow_transmo_chest = true,
 		grab_online_event_zone = function() return "wilderness-1" end,
@@ -107,6 +108,7 @@ newBirthDescriptor{
 		"Every 10 levels after level 50 the maximum points of each talent will increase by one.",
 	},
 	descriptor_choices = default_eyal_descriptors{ difficulty = { Tutorial = "never"} },
+	random_escort_possibilities = { {"infinite-dungeon", 5, 40} },
 	copy = {
 		-- Can levelup forever
 		resolvers.generic(function(e) e.max_level = nil end),

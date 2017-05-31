@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -307,7 +307,7 @@ This is countered by armour penetration and is applied before all kinds of criti
 ]]
 TOOLTIP_ARMOR_HARDINESS = [[#GOLD#Armour Hardiness#LAST#
 Armour hardiness represents how much of each incoming blows the armour will affect.
-Absorbs (hardiness)% of incoming physical damage, up to a maximum of (armour) damage absorbed.
+Absorbs (hardiness)% of incoming weapon damage, up to a maximum of (armour) damage absorbed.
 ]]
 TOOLTIP_CRIT_REDUCTION = [[#GOLD#Crit Reduction#LAST#
 Crit reduction reduces the chance an opponent has of landing a critical strike with a melee or ranged attack.
@@ -316,10 +316,10 @@ TOOLTIP_CRIT_SHRUG = [[#GOLD#Crits Shrug Off#LAST#
 Gives a chance to ignore the bonus critical damage from any direct damage attacks (melee, spells, ranged, mind powers, ...).
 ]]
 TOOLTIP_DEFENSE = [[#GOLD#Defense#LAST#
-Defense represents your chance to avoid physical melee attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
+Defense represents your chance to avoid melee weapon attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
 ]]
 TOOLTIP_RDEFENSE = [[#GOLD#Ranged Defense#LAST#
-Defense represents your chance to avoid physical ranged attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
+Defense represents your chance to avoid ranged weapon attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
 ]]
 TOOLTIP_SAVES = [[#GOLD#Saves#LAST#
 Saving throws represent your ability to shrug off, partially or fully, detrimental effects applied to you.  Most detrimental effects will check their power (physical, spell, mental) vs your corresponding save type to determine if they take effect or not.  The chance is usually ~50% when power and save are equal.
@@ -433,16 +433,28 @@ TOOLTIP_STATUS_IMMUNE = [[#GOLD#Status resistance#LAST#
 Most bad status effects can be avoided by having an appropriate immunity, represented by a percent chance to completely avoid the effect in question.  This chance is applied in addition to any saving throws or other checks that may apply.
 ]]
 TOOLTIP_SPECIFIC_IMMUNE = [[#GOLD#Effect resistance chance#LAST#
-This represents your chance to completely avoid this specific effect.
+This represents your chance to completely resist this specific effect.
 ]]
 TOOLTIP_STUN_IMMUNE = [[#GOLD#Stun immunity chance#LAST#
 This represents your chance to completely avoid being stunned, dazed, or frozen.
 ]]
+TOOLTIP_ANOMALY_IMMUNE = [[#GOLD#Anomaly immunity chance#LAST#
+This represents your chance to avoid most chronomatic anomaly effects.
+]]
 TOOLTIP_INSTAKILL_IMMUNE = [[#GOLD#Instant death resistance#LAST#
 This represents your chance to avoid being instantly killed, severely incapacitated, or controlled by certain abilities.
 ]]
-TOOLTIP_NEGATIVE_STATUS_IMMUNE = [[#GOLD#Negative effect immunity chance#LAST#
-This represents your chance to completely avoid ANY bad effects applied to you from others.
+TOOLTIP_NEGATIVE_STATUS_IMMUNE = [[#GOLD#Negative status effect immunity chance#LAST#
+This represents your chance to completely avoid ANY persistent bad effects applied to you from others.
+]]
+TOOLTIP_NEGATIVE_MENTAL_STATUS_IMMUNE = [[#GOLD#Negative mental effect immunity chance#LAST#
+This represents your chance to completely avoid ANY persistent bad mental effects applied to you from others.
+]]
+TOOLTIP_NEGATIVE_PHYSICAL_STATUS_IMMUNE = [[#GOLD#Negative physical effect immunity chance#LAST#
+This represents your chance to completely avoid ANY persistent bad physical effects applied to you from others.
+]]
+TOOLTIP_NEGATIVE_SPELL_STATUS_IMMUNE = [[#GOLD#Negative magical effect immunity chance#LAST#
+This represents your chance to completely avoid ANY persistent bad magical effects applied to you from others.
 ]]
 TOOLTIP_ON_HIT_DAMAGE = [[#GOLD#Damage when hit#LAST#
 Each time a creature hits you with a melee attack, it will suffer damage or other effects.
@@ -470,7 +482,6 @@ If you have 50% penetration against a creature with 50% resistance it will have 
 ]]
 TOOLTIP_FLAT_RESIST = [[#GOLD#Flat resistances#LAST#
 Reduces each hit of a certain damage type (or all) by this amount.
-This has disminishing returns, every tier of 40 it takes one more point to increase by 1. The value showed here is the one after computation of disminishing returns.
 ]]
 
 -------------------------------------------------------------

@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ newTalent{
 	requires_target = true,
 	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
 	target = function(self, t)
-		return {type="bolt", range=self:getTalentRange(t), scan_on=engine.Map.PROJECTILE, no_first_target_filter=true}
+		return {type="bolt", range=self:getTalentRange(t), scan_on=engine.Map.PROJECTILE, no_first_target_filter=true, talent=t}
 	end,
-	tactical = {SPECIAL=10},
+	tactical = {SPECIAL=2},
 	action = function(self, t)
 		for i = 1, t.getNb(self, t) do
 			local targets = self:archeryAcquireTargets(self:getTalentTarget(t), {one_shot=true, no_energy=true})

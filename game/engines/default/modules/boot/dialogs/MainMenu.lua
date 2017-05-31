@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ function _M:init()
 	l[#l+1] = {name="New Game", fct=function() game:registerDialog(require("mod.dialogs.NewGame").new()) end}
 	l[#l+1] = {name="Load Game", fct=function() game:registerDialog(require("mod.dialogs.LoadGame").new()) end}
 --	l[#l+1] = {name="Online Profile", fct=function() game:registerDialog(require("mod.dialogs.Profile").new()) end}
-	l[#l+1] = {name="View High Scores", fct=function() game:registerDialog(require("mod.dialogs.ViewHighScores").new()) end}
+	-- l[#l+1] = {name="View High Scores", fct=function() game:registerDialog(require("mod.dialogs.ViewHighScores").new()) end}
 	l[#l+1] = {name="Addons", fct=function() game:registerDialog(require("mod.dialogs.Addons").new()) end}
 --	if config.settings.install_remote then l[#l+1] = {name="Install Module", fct=function() end} end
 --	l[#l+1] = {name="Update", fct=function() game:registerDialog(require("mod.dialogs.UpdateAll").new()) end}
@@ -84,6 +84,7 @@ function _M:init()
 
 	self.c_list = List.new{width=self.iw, nb_items=#self.list, list=self.list, fct=function(item) end, font={FontPackage:getFont("default")}}
 
+	self.c_discord = ButtonImage.new{no_decoration=true, alpha_unfocus=0.5, file="discord.png", fct=function() util.browserOpenUrl("https://discord.gg/tales-of-majeyal", {is_external=true}) end}
 	self.c_facebook = ButtonImage.new{no_decoration=true, alpha_unfocus=0.5, file="facebook.png", fct=function() util.browserOpenUrl("https://www.facebook.com/tales.of.maj.eyal", {is_external=true}) end}
 	self.c_twitter = ButtonImage.new{no_decoration=true, alpha_unfocus=0.5, file="twitter.png", fct=function() util.browserOpenUrl("https://twitter.com/TalesOfMajEyal", {is_external=true}) end}
 	self.c_forums = ButtonImage.new{no_decoration=true, alpha_unfocus=0.5, file="forums.png", fct=function() util.browserOpenUrl("http://forums.te4.org/", {is_external=true}) end}
@@ -92,6 +93,7 @@ function _M:init()
 		{left=0, top=0, ui=self.c_list},
 		{left=0, bottom=0, absolute=true, ui=self.c_background},
 		{right=self.c_facebook.w, bottom=0, absolute=true, ui=self.c_version},
+		{right=0, bottom=self.c_facebook.h+self.c_twitter.h+self.c_forums.h, absolute=true, ui=self.c_discord},
 		{right=0, bottom=self.c_facebook.h+self.c_twitter.h, absolute=true, ui=self.c_forums},
 		{right=0, bottom=self.c_twitter.h, absolute=true, ui=self.c_facebook},
 		{right=0, bottom=0, absolute=true, ui=self.c_twitter},
@@ -121,10 +123,12 @@ end
 function _M:updateUI()
 	local uis = table.clone(self.base_uis)
 
-	if profile.auth then
-		self:uiStats(uis)
-	else
-		self:uiLogin(uis)
+	if not config.settings.disable_all_connectivity then
+		if profile.auth then
+			self:uiStats(uis)
+		else
+			self:uiLogin(uis)
+		end
 	end
 
 	self:loadUI(uis)

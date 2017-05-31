@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -65,27 +65,61 @@ newEntity{ base = "BASE_GEM",
 	},
 }
 
--- Low base values because you can stack affinity and resist
--- The 3rd type is pretty meaningless balance-wise.  Magic debuffs hardly matter.  The real advantage is the affinity.
 newEntity{ base = "BASE_INFUSION",
 	name = "Primal Infusion", unique=true, image = "object/artifact/primal_infusion.png",
 	desc = [[This wild infusion has evolved.]],
 	unided_name = "pulsing infusion",
-	level_range = {15, 40},
+	level_range = {15, 50},
 	rarity = 300,
-	cost = 300,
-	material_level = 3,
+	cost = 500,
 
 	inscription_kind = "protect",
 	inscription_data = {
 		cooldown = 18,
-		dur = 6,
+		dur = 5,
+		reduce = 1,
 		power = 10,
-		use_stat_mod = 0.1, 
-		use_stat = "con",
-		what = {physical=true, mental=true, magical=true},
+		use_stat_mod = 0.02, -- +2 duration reduction and +20% affinity at 100 stat
+		use_stat = "wil",
 	},
 	inscription_talent = "INFUSION:_PRIMAL",
+}
+
+newEntity{ base = "BASE_RUNE",
+	name = "Prismatic Rune", unique=true, define_as="RUNE_PRISMATIC",
+	level_range = {5, 50},
+	rarity = 300,
+	cost = 500,
+	inscription_kind = "protect",
+	types = {"FIRE", "LIGHTNING", "COLD", "ACID", "MIND", "ARCANE", "BLIGHT", "NATURE", "TEMPORAL", "LIGHT", "DARKNESS"},
+	inscription_data = {
+		cooldown = 18,
+		dur = 6,
+		num_types = resolvers.rngrange(3, 5),
+		wards = {},
+		resolvers.genericlast(function(e)
+			e.inscription_data.wards["PHYSICAL"] = resolvers.rngrange(2, 4) -- guarantee physical wards
+			for _ = 1,e.inscription_data.num_types do
+				local pick = rng.tableRemove(e.types)
+				e.inscription_data.wards[pick] = resolvers.rngrange(3, 5)
+			end
+		end)
+	},
+	inscription_talent = "RUNE:_PRISMATIC",
+}
+
+newEntity{ base = "BASE_RUNE",
+	name = "Mirror Image Rune", unique=true, define_as="RUNE_MIRROR_IMAGE",
+	level_range = {5, 50},
+	rarity = 300,
+	cost = 500,
+	inscription_kind = "protect",
+	inscription_data = {
+		cooldown = 24,
+		dur = 6,
+		inheritance = 1,
+	},
+	inscription_talent = "RUNE:_MIRROR_IMAGE",
 }
 
 newEntity{ base = "BASE_STAFF",
@@ -197,6 +231,7 @@ newEntity{ base = "BASE_RING",
 	cost = 500,
 	material_level = 4,
 	special_desc = function(self) return "Will bring you back from death, but only once!" end,
+	special = true,
 	wielder = {
 		inc_stats = { [Stats.STAT_LCK] = 10, },
 		die_at = -100,
@@ -643,6 +678,7 @@ newEntity{
 	unique = true,
 	type = "misc", subtype="egg",
 	unided_name = "dark egg",
+	define_as = "MUMMIFIED_EGGSAC",
 	name = "Mummified Egg-sac of Ungolë", image = "object/artifact/mummified_eggsack.png",
 	level_range = {20, 35},
 	rarity = 190,
@@ -895,7 +931,7 @@ newEntity{ base = "BASE_GREATMAUL",
 	use_talent = { id = Talents.T_FEARLESS_CLEAVE, level = 3, power = 18 },
 }
 
-newEntity{ base = "BASE_MACE",
+newEntity{ base = "BASE_MACE", define_as = "CROOKED_CLUB",
 	power_source = {technique=true},
 	unique = true,
 	name = "Crooked Club", color = colors.GREEN, image = "object/artifact/weapon_crooked_club.png",
@@ -965,7 +1001,7 @@ newEntity{ base = "BASE_HELM", define_as = "HELM_KROLTAR",
 	name = "Dragon-helm of Kroltar", image = "object/artifact/dragon_helm_of_kroltar.png",
 	unided_name = "dragon-helm",
 	desc = [[A visored steel helm, embossed and embellished with gold, that bears as its crest the head of Kroltar, the greatest of the fire drakes.]],
-	require = { talent = { {Talents.T_ARMOUR_TRAINING,1} }, stat = { str=35 }, },
+	require = { stat = { str=35 }, },
 	level_range = {37, 45},
 	rarity = 280,
 	cost = 400,
@@ -1165,10 +1201,10 @@ newEntity{ base = "BASE_LEATHER_BELT",
 	unided_name = "massive, stained girdle",
 	desc = [[This girdle is enchanted with mighty wards against expanding girth. Whatever the source of its wondrous strength, it will prove of great aid in the transport of awkward burdens.]],
 	color = colors.LIGHT_RED,
-	level_range = {1, 25},
+	level_range = {5, 14},
 	rarity = 170,
 	cost = 150,
-	material_level = 2,
+	material_level = 1,
 	wielder = {
 		knockback_immune = 0.4,
 		max_encumber = 70,
@@ -1486,10 +1522,10 @@ newEntity{ base = "BASE_LEATHER_BELT",
 	unided_name = "golden belt",
 	desc = [[A belt rumoured to have been worn by the Conclave healers.]],
 	color = colors.GOLD,
-	level_range = {5, 14},
+	level_range = {1, 25},
 	rarity = 120,
-	cost = 75,
-	material_level = 1,
+	cost = 150,
+	material_level = 2,
 	wielder = {
 		inc_stats = { [Stats.STAT_WIL] = 3,  },
 		resists = {
@@ -1515,24 +1551,24 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	cost = 250,
 	material_level = 2,
 	wielder = {
-		inc_stats = { [Stats.STAT_STR] = 2, [Stats.STAT_CON] = 2 },
+		inc_stats = { [Stats.STAT_STR] = 5, [Stats.STAT_CON] = 3 },
 
 		combat_armor = 6,
 		combat_def = 4,
 		combat_def_ranged = 8,
 
 		max_encumber = 20,
-		life_regen = 0.7,
-		stamina_regen = 0.7,
+		life_regen = 2,
+		stamina_regen = 1,
 		fatigue = 10,
-		max_stamina = 43,
+		max_stamina = 45,
 		max_life = 45,
-		knockback_immune = 0.1,
+		knockback_immune = 0.5,
 		size_category = 1,
 	},
 }
 
-newEntity{ base = "BASE_LIGHT_ARMOR",
+newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SKIN_OF_MANY",
 	power_source = {technique=true},
 	unique = true,
 	name = "Skin of Many", image = "object/artifact/robe_skin_of_many.png",
@@ -2871,7 +2907,7 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 1,
 	combat = {
 		range = 9,
-		physspeed = 0.75,
+		physspeed = 0.95,
 	},
 	wielder = {
 		inc_damage={ [DamageType.PHYSICAL] = 5, },
@@ -3142,7 +3178,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		range =5,
 		target = function(self, who) return {type="beam", range=self.use_power.range} end,
 		requires_target = true,
-		tactical = {ATTACK = {PHYSICAL = 2}, ESCAPE = 1.5},
+		tactical = {ATTACK = {PHYSICAL = 2}, ESCAPE = {knockback = 1.5}},
 		use = function(self, who)
 			local dam = self.use_power.damage(self, who)
 			local tg = self.use_power.target(self, who)
@@ -3807,7 +3843,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 3,
 	combat = {
 		range = 9,
-		physspeed = 0.8,
 		travel_speed = 4,
 		talent_on_hit = { [Talents.T_ARCANE_EYE] = {level=4, chance=100} },
 	},
@@ -4039,7 +4074,7 @@ newEntity{ base = "BASE_MINDSTAR",
 
 newEntity{ base = "BASE_LEATHER_BOOT", --Thanks Grayswandir!
 	power_source = {arcane=true},
-	unique = true,
+	unique = true, define_as = "AETHERWALK",
 	name = "Aetherwalk", image = "object/artifact/aether_walk.png",
 	moddable_tile = "special/aether_walk",
 	unided_name = "ethereal boots",
@@ -4049,10 +4084,18 @@ newEntity{ base = "BASE_LEATHER_BOOT", --Thanks Grayswandir!
 	rarity = 200,
 	cost = 100,
 	material_level = 4,
+	callbackOnTeleport = function(self, who, teleported, ox, oy, x, y) game.level.map:particleEmitter(who.x, who.y, 2, "generic_sploom", {rm=150, rM=180, gm=20, gM=60, bm=180, bM=200, am=80, aM=150, radius=2, basenb=120})
+	local damage =  who:combatStatScale("mag", 50, 250) -- Generous because scaling Arcane is hard and its not exactly easy to proc this .. I think
+	who:project({type="ball", range=0, radius=3, friendlyfire=false}, who.x, who.y, engine.DamageType.ARCANE, who:spellCrit(damage))
+	end,
+	special_desc = function(self, who) return ("Creates an arcane explosion dealing %d arcane damage based on magic in a radius of 3 around the user after any teleport."):format(who:combatStatScale("mag", 50, 250)) end,
 	wielder = {
 		combat_def = 6,
 		fatigue = 1,
 		combat_spellpower=5,
+		resist_all_on_teleport = 20,
+		defense_on_teleport = 20,
+		effect_reduction_on_teleport = 20,
 		inc_stats = { [Stats.STAT_MAG] = 8, [Stats.STAT_CUN] = 8,},
 		resists={
 			[DamageType.ARCANE] = 12,
@@ -4063,33 +4106,18 @@ newEntity{ base = "BASE_LEATHER_BOOT", --Thanks Grayswandir!
 	},
 	max_power = 24, power_regen = 1,
 	use_power = { name = "phase door up to range 6, within radius 2 of the target location", power = 24,
-		tactical = {ESCAPE = 2, CLOSEIN = 2},
+		tactical = {ESCAPE = 2, CLOSEIN = 1.5},
+		on_pre_use = function(self, who, silent, fake) return not who:attr("encased_in_ice") and not who:attr("cant_teleport") end,
 		use = function(self, who)
-			local tg = {type="ball", nolock=true, pass_terrain=true, nowarning=true, range=6, radius=2, requires_knowledge=false}
+			local tg = {type="ball", nolock=true, pass_terrain=true, nowarning=true, range=6, radius=2, requires_knowledge=false,
+			grid_params = {want_range = (not who.ai_target.actor or who.ai_state.tactic == "escape") and 6 or 1	}
+			}
 			local tx, ty = who:getTarget(tg)
-			if not tx or not ty then return nil end
-			local x, y = tx, ty
+			if not tx or not ty or core.fov.distance(who.x, who.y, tx, ty) <=1 then return nil end
 			
-			if not who.player then
-				if who.ai_state.tactic == "closein" then  -- teleport to target location
-					local _ _, x, y = who:canProject(tg, tx, ty)
-	--game.log("--%s trying to jump to (%s, %s)", who.name, x, y)
-					if not x or not y then return {id=true} end
-				else  -- try to teleport away
-	--			if who.ai_state.tactic == "escape" then -- try to teleport away
-	--game.log("--%s trying to jump away from (%s, %s)", who.name, tx, ty)
-					x = who.x + (who.x - tx)*100
-					y = who.y + (who.y - ty)*100
-					local _ _, x, y = who:canProject(tg, x, y)
-					if not x or not y then return nil end
-	--game.log("--%s trying to jump to (%s, %s)", who.name, x, y)
-					if not x or not y or core.fov.distance(x, y, tx, ty) <=1 then return nil end
-	--			else -- teleport to target location
-	--				local _ _, x, y = who:canProject(tg, tx, ty)
-	--game.log("--%s trying to jump to (%s, %s)", who.name, x, y)
-	--				if not x or not y then return {id=true} end
-				end
-			end
+			local _ _, x, y = who:canProject(tg, tx, ty)
+			if not x or not y then return {id=true} end
+
 			local rad = 2
 			game.logSeen(who, "%s is #PURPLE#ENVELOPED#LAST# in a deep purple aura from %s %s!", who.name:capitalize(), who:his_her(), self:getName({do_color = true, no_add_name = true}))
 			game.level.map:particleEmitter(who.x, who.y, 1, "teleport")
@@ -5454,7 +5482,7 @@ newEntity{ base = "BASE_SLING",
 	material_level = 5,
 	combat = {
 		range = 10,
-		physspeed = 0.7,
+		physspeed = 0.9,
 	},
 	wielder = {
 		pin_immune = 0.3,
@@ -5537,7 +5565,10 @@ newEntity{ base = "BASE_LONGSWORD",
 		apr = 10,
 		physcrit = 18,
 		dammod = {str=1},
-		convert_damage={[DamageType.FIRE] = 50,},
+		damtype = DamageType.FIRE,
+		talent_on_hit = {
+				[Talents.T_FIRE_BREATH] = {level=4, chance=15},
+		},
 	},
 	wielder = {
 		resists = {
@@ -5548,12 +5579,10 @@ newEntity{ base = "BASE_LONGSWORD",
 			[DamageType.FIRE] = 20,
 		},
 		resists_pen = {
-			[DamageType.FIRE] = 15,
+			[DamageType.FIRE] = 15,	
 		},
 		inc_stats = { [Stats.STAT_STR] = 7, [Stats.STAT_WIL] = 7 },
 	},
-	max_power = 25, power_regen = 1,
-	use_talent = { id = Talents.T_FIRE_BREATH, level = 2, power = 25 },
 }
 
 newEntity{ base = "BASE_STAFF",
@@ -6074,16 +6103,16 @@ newEntity{ base = "BASE_LONGSWORD",
 		dam = 33,
 		apr = 4,
 		physcrit = 10,
+		damtype = DamageType.ACID,
 		dammod = {str=1},
 		burst_on_crit = {
 			[DamageType.ACID_CORRODE] = 40,
 		},
-		melee_project={[DamageType.ACID] = 12},
 	},
 	wielder = {
-		inc_damage={ [DamageType.ACID] = 15,},
+		inc_damage={ [DamageType.ACID] = 20,},
 		resists={[DamageType.ACID] = 15,},
-		resists_pen={[DamageType.PHYSICAL] = 10,}, --Burns right through your pathetic physical resists
+		resists_pen={[DamageType.ACID] = 20,}, --Burns right through your pathetic ACID resists
 		combat_physcrit = 10,
 		combat_spellcrit = 10,
 	},
@@ -6478,13 +6507,15 @@ newEntity{ base = "BASE_TOOL_MISC",
 			m:resolve()
 			who:logCombat(target or {name = "a spot nearby"}, "#Source# points %s %s at #target#, releasing a brilliant orb of light!", who:his_her(), self:getName({do_color = true, no_add_name = true}))
 			game.zone:addEntity(game.level, m, "actor", x, y)
-			m.remove_from_party_on_death = true,
-			game.party:addMember(m, {
-				control=false,
-				type="summon",
-				title="Summon",
-				orders = {target=true, leash=true, anchor=true, talents=true},
-			})
+			m.remove_from_party_on_death = true
+			if game.party:hasMember(who) then
+				game.party:addMember(m, {
+					control=false,
+					type="summon",
+					title="Summon",
+					orders = {target=true, leash=true, anchor=true, talents=true},
+				})
+			end
 			return {id=true, used=true}
 		end
 	},
@@ -7315,17 +7346,21 @@ newEntity{ base = "BASE_MASSIVE_ARMOR",
 		tactical = {DISABLE = function(who, t, aitarget)
 				if not (aitarget and who.aiSeeTargetPos) or aitarget:hasEffect(aitarget.EFF_SLOW_MOVE) then return end
 				local tx, ty = who:aiSeeTargetPos(aitarget)
-				if core.fov.distance(who.x, who.y, tx, ty) <= 1 then return {pin = 1.5} end
+				if core.fov.distance(who.x, who.y, tx, ty) <= 1 then return {slow = 1} end
 			end,
-			DEFEND = function(who, t, aitarget)
+			SELF = function(who, t, aitarget)
 				local resist = (util.bound(who.global_speed * (who.movement_speed), 0.3, 1) - (util.bound(who.global_speed * (who.movement_speed - .4), 0.3, 1)))*5
-				if resist > 0 then return resist end
-			end},
+				if resist > 0 then
+					return {defend=2*resist, escape=-resist, closein=-resist}
+				end
+			end,
+			__wt_cache_turns = 1,
+		},
 		on_pre_use_ai = function(self, who) return not who:hasEffect(who.EFF_SLOW_MOVE) end,
 		use = function(self, who)
 			local tg = self.use_power.target(self, who)
 			tg.selffire = true -- set here so that the ai will use it
-			game.logSeen(who, "%s rebalances the bulky plates of %s %s, and thngs slow down a bit.", who.name:capitalize(), who:his_her(), self:getName({do_color = true, no_add_name = true}))
+			game.logSeen(who, "%s rebalances the bulky plates of %s %s, and things slow down a bit.", who.name:capitalize(), who:his_her(), self:getName({do_color = true, no_add_name = true}))
 			who:project(tg, who.x, who.y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target then return end
@@ -7652,25 +7687,42 @@ newEntity{ base = "BASE_WIZARD_HAT",
 	unique = true,
 	name = "Cloud Caller",
 	unided_name = "broad brimmed hat",
-	desc = [[This hat's broad brim protects you from harsh sunlight and sudden storms.]],
+	desc = [[This hat's broad brim protects you from biting colds and sudden storms.]],
 	color = colors.BLUE, image = "object/artifact/cloud_caller.png",
 	moddable_tile = "special/cloud_caller",
 	level_range = {1, 10},
 	rarity = 300,
 	cost = 30,
 	material_level = 1,
+	special_desc = function(self) return "A small storm cloud follows you, dealing 15 lightning damage to all enemies in a radius of 3 each turn." end,
 	wielder = {
 		resists = { 
-			[DamageType.LIGHT] 	= 10,
+			[DamageType.COLD]	= 10,
 			[DamageType.LIGHTNING]	= 10,
 		},
 		inc_damage={
-			[DamageType.LIGHT] 	= 10,
+			[DamageType.COLD]	= 10,
 			[DamageType.LIGHTNING]	= 10,
 		},
 	},
 	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_CALL_LIGHTNING, level=1, power = 20 },
+	use_talent = { id = Talents.T_CALL_LIGHTNING, level=1, power = 15 },
+	on_takeoff = function(self, who)
+		self.worn_by=nil
+	end,
+	on_wear = function(self, who)
+		self.worn_by=who
+	end,
+	act = function(self)
+		self:regenPower()
+		self:useEnergy()
+		if not self.worn_by then return end
+		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by=nil return end
+		if self.worn_by:attr("dead") then return end
+		local who = self.worn_by
+		local blast = {type="ball", range=0, radius=3, friendlyfire=false}
+		who:project(blast, who.x, who.y, engine.DamageType.LIGHTNING, 15)
+	end,
 }
 
 newEntity{ base = "BASE_TOOL_MISC",

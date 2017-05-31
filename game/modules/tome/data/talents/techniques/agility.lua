@@ -82,9 +82,11 @@ newTalent{
 	mode = "passive",
 	getChance = function(self, t) return math.floor(self:combatTalentScale(t, 15, 45)) end,
 	on_learn = function(self, t)
+		self:attr("allow_wear_shield", 1)
 		self:attr("show_shield_combat", 1)
 	end,
 	on_unlearn = function(self, t)
+		self:attr("allow_wear_shield", -1)
 		self:attr("show_shield_combat", 1)
 	end,
 	callbackOnTakeDamage = function(self, t, src, x, y, type, dam, tmp)
@@ -228,7 +230,7 @@ newTalent{
 			self.talents_cd[t.id] = math.max(cooldown - 1, 0)
 		end
 	end,
-	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 1.2, 2.5) end, --high damage, high opportunity cost
+	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 1.0, 2.2) end, --high damage, high opportunity cost
 	getDist = function(self, t) if self:getTalentLevel(t) >= 3 then return 2 else return 1 end end,
 	archery_onhit = function(self, t, target, x, y)
 		if not target or not target:canBe("knockback") then return end

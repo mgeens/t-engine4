@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ newTalent{
 		end
 	end,
 	info = function(self, t)
-		return ([[Inflicting pain and death invogorates you.
+		return ([[Inflicting pain and death invigorates you.
 		Each time you deal a critical strike you gain %d life (this effect can only happen once per turn).
 		Each time you kill a creature you gain %d life (this effect can only happen once per turn).]]):
 		format(t.heal(self, t), t.heal(self, t))
@@ -101,7 +101,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Use elemental damage deal to you to trigger terrible effects on the source:
+		return ([[Use elemental damage dealt to you to trigger terrible effects on the source:
 		- Fire: burn for %0.2f fire damage over 5 turns
 		- Cold: freeze for 3 turns with %d iceblock power
 		- Acid: blind for %d turns

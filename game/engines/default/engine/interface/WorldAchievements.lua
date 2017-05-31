@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ function _M:gainPersonalAchievement(silent, id, src, ...)
 		local color = a.huge and "GOLD" or "LIGHT_GREEN"
 		game.log("#"..color.."#Personal New Achievement: %s!", a.name)
 		self:showAchievement("Personal New Achievement: #"..color.."#"..a.name, a)
-		profile.chat:achievement(a.name, a.huge, false)
+		if not a.no_chat_broadcast then profile.chat:achievement(a.name, a.huge, false) end
 	end
 	if a.on_gain then a:on_gain(src, true) end
 	return true

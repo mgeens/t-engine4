@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -103,6 +103,10 @@ function _M:init(actor, on_finish, on_birth)
 				-- package.loaded["mod.dialogs.debug.PlotTalent"] = nil
 				game:registerDialog(require("mod.dialogs.debug.PlotTalent").new(self.actor, self.actor:getTalentFromId(tid)))
 			end
+		end end,
+		[{"_l","ctrl"}] = function() if profile.auth and profile.hash_valid then
+			local tid = self.last_drawn_talent
+			if tid then profile.chat.uc_ext:sendTalentLink(tid) end
 		end end,
 		__TEXTINPUT = function(c)
 			if self.focus_ui.ui.last_mz then

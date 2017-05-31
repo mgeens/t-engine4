@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -274,11 +274,10 @@ end
 
 --- Computes a logarithmic chance to hit, opposing chance to hit to chance to miss
 -- This will be used for melee attacks, physical and spell resistance
-
 function _M:checkHitOld(atk, def, min, max, factor)
 	if atk < 0 then atk = 0 end
 	if def < 0 then def = 0 end
-	print("checkHit", atk, def)
+	print("checkHitOld", atk, def)
 	if atk == 0 then atk = 1 end
 	local hit = nil
 	factor = factor or 5
@@ -293,7 +292,7 @@ function _M:checkHitOld(atk, def, min, max, factor)
 	return rng.percent(hit), hit
 end
 
---Tells the tier difference between two values
+--- Applies crossTierEffects according to the tier difference between power and save
 function _M:crossTierEffect(eff_id, apply_power, apply_save, use_given_e)
 	local q = game.player:hasQuest("tutorial-combat-stats")
 	if q and not q:isCompleted("final-lesson")then
@@ -328,7 +327,12 @@ function _M:getTierDiff(atk, def)
 	def = math.floor(def)
 	return math.max(0, math.max(math.ceil(atk/20), 1) - math.max(math.ceil(def/20), 1))
 end
-
+--[[
+--- Gets the duration for crossTier effects based on the tier difference between atk and def
+function _M:getTierDiff(atk, def)
+	return math.floor(math.max(0, self:combatScale(atk - def, 1, 20, 5, 100)))
+end
+--]]
 --New, simpler checkHit that relies on rescaleCombatStats() being used elsewhere
 function _M:checkHit(atk, def, min, max, factor, p)
 	if atk < 0 then atk = 0 end
@@ -483,10 +487,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 	
 	if target:isTalentActive(target.T_INTUITIVE_SHOTS) then
 		local chance = target:callTalent(target.T_INTUITIVE_SHOTS, "getChance")
-		self.turn_procs.intuitive_shots = self.turn_procs.intuitive_shots or target:callTalent(target.T_INTUITIVE_SHOTS, "proc", self)
-		if self.turn_procs.intuitive_shots == true then
-			repelled = true
-		end
+		repelled = target:callTalent(target.T_INTUITIVE_SHOTS, "proc", self)
 	end
 
 	-- Dwarves stoneskin
@@ -1671,8 +1672,10 @@ function _M:combatDamage(weapon, adddammod, damage)
 	end
 	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then totstat = totstat + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
-	local power = self:combatDamagePower(damage or weapon)
-	return self:rescaleDamage(0.3*self:combatPhysicalpower(nil, weapon, totstat) * power * talented_mod)
+	if talented_mod > 1 then totstat = totstat + 30 end -- This is horrible, but its to prevent the +30 constant put in to help keep the weapon damage changes symmetric from effecting things without a mastery
+	local power = self:combatDamagePower(damage or weapon, totstat)
+	local phys = self:combatPhysicalpower(nil, weapon, totstat)
+	return 0.3 * phys * power * talented_mod
 end
 
 --- Gets the 'power' portion of the damage
@@ -2210,7 +2213,7 @@ end
 function _M:combatGetFlatResist(type)
 	if not self.flat_damage_armor then return 0 end
 	local dec = (self.flat_damage_armor.all or 0) + (self.flat_damage_armor[type] or 0)
-	return self:rescaleCombatStats(dec, 40)
+	return dec
 end
 
 --- Returns the resistance
@@ -2223,7 +2226,7 @@ function _M:combatGetResist(type)
 
 	local a = math.min((self.resists.all or 0) / 100,1) -- Prevent large numbers from inverting the resist formulas
 	local b = math.min((self.resists[type] or 0) / 100,1)
-	local r = math.min(100 * (1 - (1 - a) * (1 - b)), (self.resists_cap.all or 0) + (self.resists_cap[type] or 0))
+	local r = util.bound(100 * (1 - (1 - a) * (1 - b)), -100, (self.resists_cap.all or 0) + (self.resists_cap[type] or 0))
 	return r * power / 100
 end
 
@@ -2232,6 +2235,12 @@ function _M:combatGetResistPen(type)
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
 	return pen
+end
+
+--- Returns the damage affinity
+function _M:combatGetAffinity(type)
+	if not self.damage_affinity then return 0 end
+	return (self.damage_affinity.all or 0) + (self.damage_affinity[type] or 0)
 end
 
 --- Returns the damage increase
@@ -2333,6 +2342,20 @@ function _M:hasAxeWeapon()
 	if not self:getInven("MAINHAND") then return end
 	local weapon = self:getInven("MAINHAND")[1]
 	if not weapon or (weapon.subtype ~= "battleaxe" and weapon.subtype ~= "waraxe") then
+		return nil
+	end
+	return weapon
+end
+
+--- Check if the actor has a 1H in mainhand
+function _M:hasMHWeapon()
+	if self:attr("disarmed") then
+		return nil, "disarmed"
+	end
+
+	if not self:getInven("MAINHAND") then return end
+	local weapon = self:getInven("MAINHAND")[1]
+	if not weapon or not weapon.combat then
 		return nil
 	end
 	return weapon

@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ local url = require "socket.url"
 local ltn12 = require "ltn12"
 local Dialog = require "engine.ui.Dialog"
 local UserChat = require "engine.UserChat"
+local sha1 = require("sha1").sha1
 require "Json2"
 
 --- Handles the player profile, possibly online
@@ -79,6 +80,7 @@ function _M:init()
 	self.generic = {}
 	self.modules = {}
 	self.evt_cbs = {}
+	self.data_log = {log={}}
 	self.stats_fields = {}
 	local checkstats = function(self, field) return self.stats_fields[field] end
 	self.config_settings =
@@ -97,6 +99,12 @@ function _M:start()
 	self:loadGenericProfile()
 
 	if self.generic.online and self.generic.online.login and self.generic.online.pass then
+		-- Convert to encrypted pass
+		if not self.generic.online.v2 then
+			self.generic.online.pass = sha1(self.generic.online.pass)
+			self:saveGenericProfile("online", {login=self.generic.online.login, pass=self.generic.online.pass, v2=true})
+		end
+
 		self.login = self.generic.online.login
 		self.pass = self.generic.online.pass
 		self:tryAuth()
@@ -129,7 +137,7 @@ function _M:mountProfile(online, module)
 	fs.mkdir(string.format("/profiles/%s/generic/", online and "online" or "offline"))
 	if module then fs.mkdir(string.format("/profiles/%s/modules/%s", online and "online" or "offline", module)) end
 
-	local path = engine.homepath.."/profiles/"..(online and "online" or "offline")
+	local path = engine.homepath..fs.getPathSeparator().."profiles"..fs.getPathSeparator()..(online and "online" or "offline")
 	fs.mount(path, "/current-profile")
 	print("[PROFILE] mounted ", online and "online" or "offline", "on /current-profile")
 	fs.setWritePath(path)
@@ -137,7 +145,7 @@ function _M:mountProfile(online, module)
 	return restore
 end
 function _M:umountProfile(online, pop)
-	local path = engine.homepath.."/profiles/"..(online and "online" or "offline")
+	local path = engine.homepath..fs.getPathSeparator().."profiles"..fs.getPathSeparator()..(online and "online" or "offline")
 	fs.umount(path)
 	print("[PROFILE] unmounted ", online and "online" or "offline", "from /current-profile")
 
@@ -146,9 +154,9 @@ end
 
 -- Define the fields that are sync'ed online, and how they are sync'ed
 local generic_profile_defs = {
-	firstrun = {nosync=true, {firstrun="number"}, receive=function(data, save) save.firstrun = data.firstrun end },
-	online = {nosync=true, {login="string:40", pass="string:40"}, receive=function(data, save) save.login = data.login save.pass = data.pass end },
-	onlinesteam = {nosync=true, {autolog="boolean"}, receive=function(data, save) save.autolog = data.autolog end },
+	firstrun = {nosync=true, no_sync=true, {firstrun="number"}, receive=function(data, save) save.firstrun = data.firstrun end },
+	online = {nosync=true, no_sync=true, {login="string:40", pass="string:40", v2="number"}, receive=function(data, save) save.login = data.login save.pass = data.pass save.v2 = data.v2 end },
+	onlinesteam = {nosync=true, no_sync=true, {autolog="boolean"}, receive=function(data, save) save.autolog = data.autolog end },
 	modules_played = { {name="index:string:30"}, {time_played="number"}, receive=function(data, save) max_set(save, data.name, data, "time_played") end, export=function(env) for k, v in pairs(env) do add{name=k, time_played=v} end end },
 	modules_loaded = { {name="index:string:30"}, {nb="number"}, receive=function(data, save) max_set(save, data.name, data, "nb") end, export=function(env) for k, v in pairs(env) do add{name=k, nb=v} end end },
 }
@@ -236,6 +244,7 @@ function _M:loadModuleProfile(short_name, mod_def)
 	-- Delay when we are currently saving
 	if savefile_pipe and savefile_pipe.saving then savefile_pipe:pushGeneric("loadModuleProfile", function() self:loadModuleProfile(short_name) end) return end
 
+	local def = mod_def.profile_defs or {}
 	local function load(online)
 		local pop = self:mountProfile(online, short_name)
 		local d = "/current-profile/modules/"..short_name.."/"
@@ -251,6 +260,12 @@ function _M:loadModuleProfile(short_name, mod_def)
 					else
 						self.modules[short_name][field] = self.modules[short_name][field] or {}
 						self:loadData(f, self.modules[short_name][field])
+						if def[field].incr_only then
+							if not self.modules[short_name][field].incr_only then
+								print("[PROFILE] Old non incremental data for "..field..": discarding")
+								self.modules[short_name][field] = {}
+							end
+						end
 					end
 				end
 			end
@@ -319,6 +334,7 @@ function _M:saveModuleProfile(name, data, nosync, nowrite)
 	if module == "boot" then return end
 	core.game.resetLocale()
 	if not game or not game.__mod_info.profile_defs then return end
+	if game.__mod_info.profile_defs[name].incr_only then print("[PROFILE] data in incr only mode but called with saveModuleProfile", name) return end
 
 	-- Delay when we are currently saving
 	if savefile_pipe and savefile_pipe.saving then savefile_pipe:pushGeneric("saveModuleProfile", function() self:saveModuleProfile(name, data, nosync) end) return end
@@ -364,6 +380,49 @@ function _M:saveModuleProfile(name, data, nosync, nowrite)
 	if not nosync and not game.__mod_info.profile_defs[name].no_sync then self:setConfigs(module, name, data) end
 end
 
+--- Loads the incremental log data
+function _M:incrLoadProfile(mod_def)
+	if not mod_def or not mod_def.short_name then return end
+	local pop = self:mountProfile(true)
+	local file = "/current-profile/modules/"..mod_def.short_name.."/incr.log"
+	if fs.exists(file) then
+		local f, err = loadfile(file)
+		if not f and err then
+			print("Error loading incr log", file, err)
+		else
+			self:loadData(f, self.data_log)
+		end
+	end
+	self:umountProfile(true, pop)
+end
+
+--- Saves a incr profile data
+function _M:incrDataProfile(name, data)
+	if module == "boot" then return end
+	core.game.resetLocale()
+	if not game or not game.__mod_info.profile_defs then return end
+	if not game.__mod_info.profile_defs[name].incr_only then print("[PROFILE] data in non-incr only mode but called with incrDataProfile", name) return end
+
+	-- Delay when we are currently saving
+	if savefile_pipe and savefile_pipe.saving then savefile_pipe:pushGeneric("incrDataProfile", function() self:incrDataProfile(name, data) end) return end
+
+	local module = self.mod_name
+
+	-- Check for readability
+	local dataenv = self.data_log.log
+	dataenv[#dataenv+1] = {module=game.__mod_info.short_name, kind=name, data=data}
+
+	local pop = self:mountProfile(true, module)
+	local f = fs.open("/modules/"..module.."/incr.log", "w")
+	if f then
+		f:write(serialize(self.data_log))
+		f:close()
+	end
+	self:umountProfile(true, pop)
+
+	self:syncIncrData()
+end
+
 function _M:checkFirstRun()
 	local result = self.generic.firstrun
 	if not result then
@@ -373,14 +432,16 @@ function _M:checkFirstRun()
 end
 
 function _M:performlogin(login, pass)
+	pass = sha1(pass)
+
 	self.login=login
 	self.pass=pass
 	print("[ONLINE PROFILE] attempting log in ", self.login)
 	self.auth_tried = nil
 	self:tryAuth()
 	self:waitFirstAuth()
-	if (profile.auth) then
-		self:saveGenericProfile("online", {login=login, pass=pass})
+	if profile.auth then
+		self:saveGenericProfile("online", {login=login, pass=pass, v2=true})
 		self:getConfigs("generic")
 		self:syncOnline("generic")
 	end
@@ -425,6 +486,9 @@ function _M:popEvent(specific)
 end
 
 function _M:waitEvent(name, cb, wait_max)
+	-- Dont try as it would fail and we'd fait for nothing
+	if config.settings.disable_all_connectivity then return end
+
 	-- Wait anwser, this blocks thegame but cant really be avoided :/
 	local stop = false
 	local first = true
@@ -457,6 +521,9 @@ function _M:noMoreAuthWait()
 end
 
 function _M:waitFirstAuth(timeout)
+	-- Dont try as it would fail and we'd fait for nothing
+	if config.settings.disable_all_connectivity then return end
+
 	if self.no_more_wait_auth then return end
 	if self.auth_tried and self.auth_tried >= 1 then return end
 	if not self.waiting_auth then return end
@@ -483,6 +550,12 @@ function _M:waitFirstAuth(timeout)
 	end
 end
 
+function _M:onAuth(fct)
+	if self.auth then fct() return end
+	self.on_auth_cb = self.on_auth_cb or {}
+	self.on_auth_cb[#self.on_auth_cb+1] = fct
+end
+
 function _M:eventAuth(e)
 	self.waiting_auth = false
 	self.connected = true
@@ -491,6 +564,8 @@ function _M:eventAuth(e)
 		self.auth = e.ok:unserialize()
 		print("[PROFILE] Main thread got authed", self.auth.name)
 		self:getConfigs("generic", function(e) self:syncOnline(e.module) end)
+		for _, fct in ipairs(self.on_auth_cb or {}) do fct() end
+		self.on_auth_cb = nil
 	else
 		self.auth_last_error = e.reason or "unknown"
 	end
@@ -501,6 +576,16 @@ function _M:eventGetNews(e)
 		self.evt_cbs.GetNews(e.news:unserialize())
 		self.evt_cbs.GetNews = nil
 	end
+end
+
+function _M:eventIncrLogConsume(e)
+	local module = type(game) == "table" and game.__mod_info.short_name
+	if not module then return end
+	print("[PROFILE] Server accepted our incr log, deleting")
+	local pop = self:mountProfile(true, module)
+	fs.delete("/modules/"..module.."/incr.log")
+	self:umountProfile(true, pop)
+	self.data_log.log = {}
 end
 
 function _M:eventGetConfigs(e)
@@ -522,6 +607,13 @@ function _M:eventGetConfigs(e)
 end
 
 function _M:eventPushCode(e)
+	if not config.settings.allow_online_events then
+		if e.return_uuid then
+			core.profile.pushOrder(string.format("o='CodeReturn' uuid=%q data=%q", e.return_uuid, table.serialize{error='user disabled events, refusing to load code'}))
+		end
+		return
+	end
+
 	local f, err = loadstring(e.code)
 	if not f then
 		if e.return_uuid then
@@ -542,11 +634,13 @@ end
 
 function _M:eventConnected(e)
 	if game and type(game) == "table" and game.log then game.log("#YELLOW#Connection to online server established.") end
+	print("[PlayerProfile] eventConnected")
 	self.connected = true
 end
 
 function _M:eventDisconnected(e)
 	if game and type(game) == "table" and game.log and self.connected then game.log("#YELLOW#Connection to online server lost, trying to reconnect.") end
+	print("[PlayerProfile] eventDisconnected")
 	self.connected = false
 end
 
@@ -577,6 +671,9 @@ function _M:getNews(callback, steam)
 end
 
 function _M:tryAuth()
+	-- Dont try as it would fail and we'd fait for nothing
+	if config.settings.disable_all_connectivity then return end
+
 	print("[ONLINE PROFILE] auth")
 	self.auth_last_error = nil
 	if self.steam_token then
@@ -607,14 +704,14 @@ function _M:getConfigs(module, cb, mod_def)
 	if not self.auth then return end
 	self.evt_cbs.GetConfigs = cb
 	if module == "generic" then
-		for k, _ in pairs(generic_profile_defs) do
-			if not _.no_sync then
+		for k, def in pairs(generic_profile_defs) do
+			if not def.no_sync then
 				core.profile.pushOrder(table.serialize{o="GetConfigs", module=module, kind=k})
 			end
 		end
 	else
-		for k, _ in pairs((mod_def or game.__mod_info).profile_defs or {}) do
-			if not _.no_sync then
+		for k, def in pairs((mod_def or game.__mod_info).profile_defs or {}) do
+			if not def.no_sync and not def.incr_only then
 				core.profile.pushOrder(table.serialize{o="GetConfigs", module=module, kind=k})
 			end
 		end
@@ -623,6 +720,15 @@ end
 
 function _M:setConfigsBatch(v)
 	core.profile.pushOrder(table.serialize{o="SetConfigsBatch", v=v and true or false})
+end
+
+function _M:syncIncrData()
+	self:waitFirstAuth()
+	if not self.auth then return end
+	local module = game and game.__mod_info.short_name
+	if not module then return end
+	
+	core.profile.pushOrder(table.serialize{o="SendIncrLog", data=zlib.compress(table.serialize(self.data_log.log))})
 end
 
 function _M:setConfigs(module, name, data)
@@ -660,7 +766,7 @@ function _M:syncOnline(module, mod_def)
 		end
 	else
 		for k, def in pairs((mod_def or game.__mod_info).profile_defs or {}) do
-			if not def.no_sync and def.export and sync[k] then
+			if not def.no_sync and not def.incr_only and def.export and sync[k] then
 				local f = def.export
 				local ret = {}
 				setfenv(f, setmetatable({add=function(d) ret[#ret+1] = d end}, {__index=_G}))
@@ -938,7 +1044,8 @@ function _M:isDonator(s)
 end
 
 function _M:allowDLC(dlc)
-	if core.steam then if core.steam.checkDLC(dlc[2]) then return true end end
-	if self.auth and self.auth.dlcs and self.auth.dlcs[dlc[1]] then return true end
-	return false
+	-- if core.steam then if core.steam.checkDLC(dlc[2]) then return true end end
+	-- if self.auth and self.auth.dlcs and self.auth.dlcs[dlc[1]] then return true end
+	-- return false
+	return true
 end

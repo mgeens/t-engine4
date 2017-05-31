@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -306,7 +306,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		-- affinity healing, we store it to apply it after damage is resolved
 		local affinity_heal = 0
 		if target.damage_affinity then
-			affinity_heal = math.max(0, dam * ((target.damage_affinity.all or 0) + (target.damage_affinity[type] or 0)) / 100)
+			affinity_heal = math.max(0, dam * target:combatGetAffinity(type) / 100)
 		end
 
 		-- reduce by resistance to entity type (Demon, Undead, etc)
@@ -577,6 +577,8 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 
 			if src.__projecting_for then
+				-- Disable friendly fire for procs since players can't control when they happen or where they hit
+				src.nullify_all_friendlyfire = 1
 				if src.talent_on_spell and next(src.talent_on_spell) and t.is_spell and not src.turn_procs.spell_talent then
 					for id, d in pairs(src.talent_on_spell) do
 						if rng.percent(d.chance) and t.id ~= d.talent then
@@ -609,6 +611,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 						end
 					end
 				end
+				src.nullify_all_friendlyfire = nil
 
 				if not target.dead and (t.is_spell or t.is_mind) and not src.turn_procs.meteoric_crash and src.knowTalent and src:knowTalent(src.T_METEORIC_CRASH) then
 					src.turn_procs.meteoric_crash = true
@@ -695,8 +698,13 @@ newDamageType{
 	death_message = {"cosmeticed"},
 }
 
+-- The base elemental damage types are:
+-- PHYSICAL, FIRE, COLD, ARCANE, LIGHTNING, ACID, NATURE, BLIGHT, LIGHT, DARKNESS, MIND, TEMPORAL
+
+-- Need a provision to allow for compound DamageTypes to work with damDesc, combatGetResist, combatGetDamageIncrease, combatGetResistPen, combatGetAffinity, etc.
+
 newDamageType{
-	name = "physical", type = "PHYSICAL",
+	name = "physical", type = "PHYSICAL", text_color = "#WHITE#",
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
@@ -869,7 +877,7 @@ newDamageType{
 -- Mind damage
 -- Most uses of this have their damage effected by mental save and do not trigger cross tiers, ie, melee items
 newDamageType{
-	name = "mind", type = "MIND", text_color = "#YELLOW#",
+	name = "mind", type = "MIND", text_color = "#ORANGE#",
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
@@ -1782,7 +1790,7 @@ newDamageType{
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
-		if _G.type(dam) == "number" then dam = {dam=dam, dur=3, fail=50*dam.power/(dam.power+50)} end
+		if _G.type(dam) == "number" then dam = {dam=dam, dur=3, fail=50*dam/(dam+50)} end
 		DamageType:get(DamageType.NATURE).projector(src, x, y, DamageType.NATURE, dam.dam / dam.dur, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and target:canBe("poison") then
@@ -1822,7 +1830,7 @@ newDamageType{
 	end,
 }
 
--- Physical damage + bleeding % of it
+-- Physical damage + bleeding (50% of base over 5 turns)
 newDamageType{
 	name = "physical bleed", type = "PHYSICALBLEED",
 	projector = function(src, x, y, type, dam, state)
@@ -2344,7 +2352,7 @@ newDamageType{
 
 ------------------------------------------------------------------------------------
 
--- gBlind
+-- Blind
 newDamageType{
 	name = "blinding", type = "RANDOM_BLIND",
 	projector = function(src, x, y, type, dam, state)
@@ -2430,7 +2438,6 @@ newDamageType{
 		local realdam = DamageType:get(DamageType.BLIGHT).projector(src, x, y, DamageType.BLIGHT, dam.dam, state)
 		if target and realdam > 0 and not src:attr("dead") then
 			src:heal(realdam * dam.healfactor, target)
-			src:logCombat(target, "#Source# drains life from #Target#!")
 		end
 		return realdam
 	end,
@@ -3434,7 +3441,7 @@ newDamageType{
 			if target:hasEffect(target.EFF_DISTORTION) then
 				-- Explosive?
 				if dam.explosion then
-					src:project({type="ball", target.x, target.y, radius=dam.radius, friendlyfire=dam.friendlyfire}, target.x, target.y, engine.DamageType.DISTORTION, {dam=src:mindCrit(dam.explosion), power=dam.distort or 0})
+					src:project({type="ball", target.x, target.y, radius=dam.radius, friendlyfire=dam.friendlyfire}, target.x, target.y, engine.DamageType.DISTORTION, {dam=dam.explosion, power=dam.distort or 0})
 					game.level.map:particleEmitter(target.x, target.y, dam.radius, "generic_blast", {radius=dam.radius, tx=target.x, ty=target.y, rm=255, rM=255, gm=180, gM=255, bm=180, bM=255, am=35, aM=90})
 					dam.explosion_done = true
 				end
@@ -3775,9 +3782,9 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and target:attr("worm") then
-			target:heal(dam, src)
+			target:heal(dam / 3, src)
 			return -dam
-		elseif target then
+		elseif target and not target.carrion_worm then  -- Carrion worms are immune but not healed by the damage, this spams the log so we just don't hit them instead
 			DamageType:get(DamageType.BLIGHT).projector(src, x, y, DamageType.BLIGHT, dam)
 			return dam
 		end
@@ -3806,7 +3813,6 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
-			game:delayedLogDamage(src, target, 0, ("%s<%d%%%% blight chance>#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", dam), false)
 			if rng.percent(dam) then
 			local check = src:combatSpellpower()
 			if not src:checkHit(check, target:combatSpellResist()) then return end
@@ -4053,6 +4059,21 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			target:setEffect(target.EFF_SHADOW_SMOKE, 5, {sight=dam, apply_power=src:combatAttack()})
+		end
+	end,
+}
+
+newDamageType{
+	name = "frozen earth", type = "ITEM_FROST_TREADS",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		local target = game.level.map(x, y, Map.ACTOR)
+		if target and src:reactionToward(target) < 0  then
+			target:setEffect(target.EFF_SLIPPERY_GROUND, 2, { fail=20}, true)
+		end
+		if target and target == src then
+			target:setEffect(target.EFF_FROZEN_GROUND, 2, { }, true)
 		end
 	end,
 }

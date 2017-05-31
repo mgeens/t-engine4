@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -83,11 +83,10 @@ newTalent{
 	random_ego = "attack",
 	mana = 30,
 	cooldown = 18,
-	tactical = { ATTACK = { FIRE = 1 }, DISABLE = { stun = 3 }, CURE = function(self, t, target)
-		if self:attr("burning_wake") and self:attr("cleansing_flame") then
-			return 1
-		end
-	end },
+	tactical = { ATTACK = { FIRE = {stun = 1} }, DISABLE = { stun = 2 },
+		CURE = function(self, t, target)
+			if self:attr("burning_wake") and self:attr("cleansing_flame") then return 1	end
+		end },
 	range = 0,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8, 0.5, 0, 0, true)) end,
 	requires_target = true,

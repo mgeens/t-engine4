@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -63,6 +63,20 @@ end
 function table.concatNice(t, sep, endsep)
 	if not endsep or #t == 1 then return table.concat(t, sep) end
 	return table.concat(t, sep, 1, #t - 1)..endsep..t[#t]
+end
+
+---Convert a table (non-recursively) to a table of strings for each key/value pair
+-- @param src <table> = source table
+-- @param fmt <string, optional, default "[%s]=%s"> = format to use for each key-value pair
+-- @return <table> table containing a string for each key in the source table
+table.to_strings = function(src, fmt)
+	if type(src) ~= "table" then return {tostring(src)} end
+	local tt = {}
+	fmt = fmt or "[%s]=%s"
+	for label, val in pairs(src) do
+		tt[#tt+1] = (fmt):format(label, tostring(val))
+	end
+	return tt
 end
 
 function ripairs(t)
@@ -158,7 +172,7 @@ end
 
 --- Returns a clone of a table
 -- @param tbl The original table to be cloned
--- @param deep Boolean to determine if recursive cloning occurs
+-- @param deep Boolean allow recursive cloning (unless .__ATOMIC or .__CLASSNAME is defined)
 -- @param k_skip A table containing key values set to true if you want to skip them.
 -- @return The cloned table.
 function table.clone(tbl, deep, k_skip)
@@ -284,6 +298,38 @@ function table.values(t)
 	return tt
 end
 
+--- Check if 2 tables are equivalent
+-- tables are equivalent if they are identical or contain the same values assigned to the same keys
+-- search stops after the first difference is found
+-- @param t1, t2 tables to compare
+-- @param recurse [type=boolean or table] set to recursively check non-identical sub-tables for equivalence
+--		if recurse is a table, the keys pointing to the difference will be stored in it in order
+--		differing values: table.get(t1, unpack(recurse)), table.get(t2, unpack(recurse))
+-- @return[1] [type=boolean] true if the tables are equivalent
+-- @return[2] nil (if tables are equivalent)
+-- @return[2], first key found holding different value (if recurse == true)
+-- @return[2], recurse (if recurse is a table)
+function table.equivalence(t1, t2, recurse)
+	local save_keys = type(recurse) == "table"
+	if t1 ~= t2 then
+		if not (t1 and t2) then return false end
+		for k1, v1 in pairs(t1) do
+			if t2[k1] ~= v1 and not (recurse and type(v1) == "table" and type(t2[k1]) == "table" and table.equivalence(t2[k1], v1, recurse)) then
+				if save_keys then table.insert(recurse, 1, k1) return false, recurse else return false, k1 end
+			end
+		end
+		for k2, v2 in pairs(t2) do
+			if t1[k2] ~= v2 and not (recurse and type(v2) == "table" and type(t1[k2]) == "table" and table.equivalence(t1[k2], v2, recurse)) then
+				if save_keys then table.insert(recurse, 1, k2) return false, recurse else return false, k2 end
+			end
+		end
+	end
+	return true
+end
+
+--- Check (non-recursively) if 2 indexed tables contain all of the same values
+-- @param t1, t2 tables to compare
+-- @return true if all values in t1 are also in t2 and visa versa
 function table.extract_field(t, field, iterator)
 	iterator = iterator or pairs
 	local tt = {}
@@ -324,6 +370,17 @@ function table.removeFromList(t, ...)
 	for _, v in ipairs{...} do
 		for i = #t, 1, -1 do if t[i] == v then table.remove(t, i) end end
 	end
+end
+
+function table.pairsRemove(t, check)
+	local todel = {}
+	for k, v in pairs(t) do
+		if check(k, v) then todel[#todel+1] = k end
+	end
+	for _, k in ipairs(todel) do
+		t[k] = nil
+	end
+	return #todel
 end
 
 function table.check(t, fct, do_recurse, path)
@@ -398,6 +455,29 @@ function table.mapv(f, source)
 		result[k] = f(v)
 	end
 	return result
+end
+
+-- Make a new list with each k, v = k, f(v) in the original.
+function table.maplist(f, source)
+	local result = {}
+	for i, v in ipairs(source) do
+		local v2 = f(i, v)
+		if v2 then result[#result+1] = v2 end
+	end
+	return result
+end
+
+-- Make a new list with each k, v = k, f(v) in the original.
+function table.splitlist(f, source)
+	local results = {}
+	for i, v in ipairs(source) do
+		local id, v2 = f(i, v)
+		if id and v2 then
+			results[id] = results[id] or {}
+			table.insert(results[id], v2)
+		end
+	end
+	return results
 end
 
 -- Find the keys that are only in left, only in right, and are common
@@ -814,6 +894,95 @@ function string.splitLines(str, max_width, font)
 	return lines
 end
 
+--- create a textual abbreviation for a function
+--	@param fct the function
+--	@param fmt output format for filepath, line number, first line of code
+--		(default: "\"<function( defined: %s, line %s): %s>\"" )
+--	@return string using the format provided
+function string.fromFunction(fct, fmt)
+	local info = debug.getinfo(fct, "S")
+	local fpath = string.gsub(info.source,"@","")
+	local firstline = ""
+	fmt = fmt or "\"<function( defined: %s, line %s): %s>\""
+	if not fs.exists(fpath) then
+		fpath = "no file path"
+		firstline = info.short_src
+	else
+		local f = fs.open(fpath, "r")
+		local line_num = 0
+		while true do -- could continue with body here
+			firstline = f:readLine()
+			if firstline then
+				line_num = line_num + 1
+				if line_num == info.linedefined then break end
+			end
+		end
+	end
+	return (fmt):format(fpath, info.linedefined, tostring(firstline))
+end
+
+--- Create a textual representation of a value
+-- similar to tostring, but includes special handling of tables and functions
+--	surrounds non-numbers/booleans/nils/functions with ""
+-- @param v: the value
+-- @param recurse: the recursion level for string.fromTable, set < 0 for basic tostring
+-- @param offset, prefix, suffix: inputs to string.fromTable for converting tables
+function string.fromValue(v, recurse, offset, prefix, suffix)
+	recurse, offset, prefix, suffix = recurse or 0, offset or ", ", prefix or "{", suffix or "}"
+	local vt, vs = type(v)
+	if vt == "table" then
+		if recurse < 0 then vs = tostring(v)
+		elseif v.__ATOMIC or v.__CLASSNAME then -- create entity/atomic label
+			local abv = {}
+			if v.__CLASSNAME then abv[#abv+1] = "__CLASSNAME="..tostring(v.__CLASSNAME) end
+			if v.__ATOMIC then abv[#abv+1] = "ATOMIC" end
+			vs = ("%s\"%s%s%s\"%s"):format(prefix, v, v.__CLASSNAME and ", __CLASSNAME="..tostring(v.__CLASSNAME) or "", v.__ATOMIC and ", ATOMIC" or "", suffix)
+		elseif recurse > 0 then -- get recursive string
+			vs = string.fromTable(v, recurse - 1, offset, prefix, suffix)
+		else vs = prefix.."\""..tostring(v).."\""..suffix
+		end
+	elseif vt == "function" then
+		vs = recurse >= 0 and string.fromFunction(v) or tostring(v)
+	elseif not (vt == "number" or vt == "boolean" or vt == "nil") then
+		vs = "\""..tostring(v).."\""
+	end
+	return vs or tostring(v)
+end
+
+--- Create a textual representation of a table
+--	This is like reverse-interpreting back to lua code, compatible for strings, numbers, and tables
+--	@param src: source table
+--	@param recurse: recursion level for subtables (default 0)
+--	@param offset: string to insert between table fields (default: ", ")
+--	@param prefix: prefix for the table and subtables (default: "{")
+--	@param suffix: suffix for the table and subtables (default: "}")
+--	@param sort: optional sort function(a, b) to sort results (by key, set == true for ascending order)
+--  @param key_recurse the recursion level for keys that are tables (default 0)
+--	@return[1] single line text representation of src
+--		non-string table.keys are surrounded by "[", "]"
+--	@return[2] indexed table containing strings for each key/value pair in src (@recursion level 0)
+--		recursed subtables are converted and embedded
+--		subtables containing .__ATOMIC or .__CLASSNAME are never converted, but are noted
+--		functions are converted to embedded strings using string.fromFunction
+function string.fromTable(src, recurse, offset, prefix, suffix, sort, key_recurse)
+	if type(src) ~= "table" then print("string.fromTable has no table:", src) return tostring(src) end
+	local tt = {}
+	recurse, offset, prefix, suffix = recurse or 0, offset or ", ", prefix or "{", suffix or "}"
+	for k, v in pairs(src) do
+		local kt, vt = type(k), type(v)
+		local ks, vs
+		if kt ~= "string" then
+			ks = "["..string.fromValue(k, key_recurse, offset, prefix, suffix).."]"
+		end
+		vs = string.fromValue(v, recurse, offset, prefix, suffix)
+		tt[#tt+1] = ("%s=%s"):format(ks or tostring(k), vs or tostring(v))
+	end
+	if sort == true then sort = function(a, b) return a < b end end
+	if sort then table.sort(tt, sort) end
+	-- could sort here if desired
+	return prefix..table.concat(tt, offset)..suffix, tt
+end
+
 -- Split a string by the given character(s)
 function string.split(str, char, keep_separator)
 	char = lpeg.P(char)
@@ -863,8 +1032,11 @@ end
 function __get_uid_surface(uid, w, h)
 	uid = tonumber(uid)
 	local e = uid and __uids[uid]
-	if e and game.level then
-		return e:getEntityFinalSurface(game.level.map.tiles, w, h)
+	local tiles
+	if game.level then tiles = game.level.map.tiles
+	else tiles = require("engine.Map").tiles end
+	if e and tiles then
+		return e:getEntityFinalSurface(tiles, w, h)
 	end
 	return nil
 end
@@ -872,7 +1044,7 @@ end
 function __get_uid_entity(uid)
 	uid = tonumber(uid)
 	local e = uid and __uids[uid]
-	if e and game.level then
+	if e then
 		return e
 	end
 	return nil
@@ -940,7 +1112,10 @@ getmetatable(tmps).__index.size = function(font, str)
 				local uid = v[2]
 				local e = __uids[uid]
 				if e then
-					local surf = e:getEntityFinalSurface(game.level.map.tiles, font:lineSkip(), font:lineSkip())
+					local tiles
+					if game.level then tiles = game.level.map.tiles
+					else tiles = require("engine.Map").tiles end
+					local surf = e:getEntityFinalSurface(tiles, font:lineSkip(), font:lineSkip())
 					if surf then
 						local w, h = surf:getSize()
 						mw = mw + w
@@ -973,6 +1148,7 @@ end
 function fs.iterate(path, filter)
 	local list = fs.list(path)
 	if filter then
+		if type(filter) == "string" then local fstr = filter filter = function(f) f:find(fstr) return  end end
 		for i = #list, 1, -1 do if not filter(list[i]) then
 			table.remove(list, i)
 		end end
@@ -1000,7 +1176,7 @@ function fs.getRealPath(path)
 end
 
 function fs.readAll(file)
-	local f = fs:open(file, "r")
+	local f = fs.open(file, "r")
 	if not f then return nil, "file not found" end
 	local data = f:read(10485760)
 	f:close()

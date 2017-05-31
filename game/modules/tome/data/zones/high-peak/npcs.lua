@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ newEntity{
 	resists = { all = 40, },
 
 	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, HEAD=1, FEET=1 },
+	resolvers.auto_equip_filters("Archmage", true),
 	resolvers.equip{
 		{type="weapon", subtype="staff", defined="STAFF_ABSORPTION_AWAKENED", autoreq=true},
 		{type="armor", subtype="cloth", forbid_power_source={antimagic=true}, force_drop=true, tome_drops="boss", autoreq=true},
@@ -92,6 +93,7 @@ newEntity{
 
 	resolvers.talents{
 		[Talents.T_STAFF_MASTERY]={base=5, every=8},
+		[Talents.T_ARMOUR_TRAINING]=1,
 		[Talents.T_STONE_SKIN]={base=7, every=6},
 		[Talents.T_QUICKEN_SPELLS]={base=7, every=6},
 		[Talents.T_SPELLCRAFT]={base=7, every=6},
@@ -118,7 +120,7 @@ newEntity{
 	resolvers.sustains_at_birth(),
 
 	autolevel = "caster",
-	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", },
+	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", sense_radius=25, ai_target="target_simple_or_player_radius" },
 	ai_tactic = resolvers.tactic"ranged",
 	resolvers.inscriptions(6, {"healing infusion", "regeneration infusion", "shielding rune", "invisibility rune", "movement infusion", "wild infusion"}),
 
@@ -141,7 +143,7 @@ newEntity{
 	max_life = 1000, life_rating = 42, fixed_rating = true,
 	max_mana = 10000,
 	mana_regen = 10,
-	vim_regen = 50,
+	vim_regen = 20,
 	rank = 5,
 	size_category = 3,
 	stats = { str=40, dex=60, cun=60, mag=30, con=40 },
@@ -159,6 +161,10 @@ newEntity{
 	resists = { all = 45, },
 
 	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, FEET=1, HEAD=1, HANDS=1 },
+	resolvers.auto_equip_filters("Reaver"),
+	resolvers.auto_equip_filters{
+		BODY = {type="armor", special=function(e) return e.subtype=="heavy" or e.subtype=="massive" end},
+	},
 	resolvers.equip{
 		{type="weapon", subtype="longsword", force_drop=true,  forbid_power_source={antimagic=true}, tome_drops="boss", autoreq=true},
 		{type="weapon", subtype="waraxe", force_drop=true, forbid_power_source={antimagic=true}, tome_drops="boss", autoreq=true},
@@ -204,7 +210,7 @@ newEntity{
 	resolvers.sustains_at_birth(),
 
 	autolevel = "warriormage",
-	ai = "tactical", ai_state = { talent_in=2, ai_move="move_astar", },
+	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", sense_radius=25, ai_target="target_simple_or_player_radius" },
 	ai_tactic = resolvers.tactic"melee",
 	resolvers.inscriptions(6, {"healing infusion", "regeneration infusion", "shielding rune", "heroism infusion", "movement infusion", "wild infusion"}),
 
@@ -242,6 +248,7 @@ newEntity{ define_as = "FALLEN_SUN_PALADIN_AERYN",
 	no_auto_resists = true,
 
 	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, HEAD=1, FEET=1 },
+	resolvers.auto_equip_filters("Sun Paladin"),
 	resolvers.drops{chance=100, nb=3, {tome_drops="boss"} },
 
 	resolvers.equip{
@@ -283,6 +290,7 @@ newEntity{ define_as = "FALLEN_SUN_PALADIN_AERYN",
 		[Talents.T_SPECTRAL_SHIELD]=1,
 		[Talents.T_IRRESISTIBLE_SUN]=1,
 	},
+	auto_classes={{class="Sun Paladin", start_level=57, level_rate=100}},
 	resolvers.sustains_at_birth(),
 }
 
@@ -316,6 +324,7 @@ newEntity{ define_as = "HIGH_SUN_PALADIN_AERYN",
 	resolvers.inscriptions(4, {}),
 
 	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, HEAD=1, FEET=1 },
+	resolvers.auto_equip_filters("Sun Paladin"),
 	resolvers.drops{chance=100, nb=3, {tome_drops="boss"} },
 
 	resolvers.equip{

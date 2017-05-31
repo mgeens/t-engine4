@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ uberTalent{
 	is_spell = true,
 	requires_target = true,
 	range = 10,
-	tactical = { BUFF = 2 },
+	tactical = { DEFEND = 2, BUFF = 2 },
 	action = function(self, t)
 		self:setEffect(self.EFF_TEMPORAL_FORM, 10, {})
 		return true

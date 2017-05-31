@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -74,7 +74,6 @@ newBirthDescriptor{
 		["cunning/poisons"]={true, 0.3, "rogue_poisons"},
 	},
 	talents = {
-		[ActorTalents.T_SHOOT] = 1,
 		[ActorTalents.T_STEALTH] = 1,
 		[ActorTalents.T_DUAL_WEAPON_MASTERY] = 1,
 		[ActorTalents.T_LETHALITY] = 1,
@@ -83,16 +82,15 @@ newBirthDescriptor{
 		[ActorTalents.T_WEAPON_COMBAT] = 1,
 	},
 	copy = {
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", subtype="dagger"},
+			OFFHAND = {type="weapon", subtype="dagger"},
+			BODY = {type="armor", special=function(e) return e.subtype=="light" or e.subtype=="cloth" or e.subtype=="mummy" end},
+		},
 		equipment = resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000}
-		},
-		resolvers.inventorybirth{ id=true, inven="QS_MAINHAND",
-			{type="weapon", subtype="sling", name="rough leather sling", autoreq=true, ego_chance=-1000},
-		},
-		resolvers.inventorybirth{ id=true, inven="QS_QUIVER",
-			{type="ammo", subtype="shot", name="pouch of iron shots", autoreq=true, ego_chance=-1000},
 		},
 	},
 }
@@ -147,6 +145,11 @@ newBirthDescriptor{
 	},
 	copy = {
 		resolvers.inscription("RUNE:_MANASURGE", {cooldown=25, dur=10, mana=620}),
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", subtype="dagger"},
+			OFFHAND = {type="weapon", subtype="dagger"},
+			BODY = {type="armor", special=function(e) return e.subtype=="light" or e.subtype=="cloth" or e.subtype=="mummy" end},
+		},
 		equipment = resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
@@ -197,6 +200,10 @@ newBirthDescriptor{
 		[ActorTalents.T_ARMOUR_TRAINING] = 1,
 	},
 	copy = {
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", subtype="dagger"},
+			OFFHAND = {type="weapon", subtype="dagger"}
+		},
 		equipment = resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
 			{type="weapon", subtype="dagger", name="iron dagger", autoreq=true, ego_chance=-1000},
@@ -205,6 +212,11 @@ newBirthDescriptor{
 		},
 	},
 }
+
+local shield_special = function(e) -- allows any object with shield combat
+	local combat = e.shield_normal_combat and e.combat or e.special_combat
+	return combat and combat.block
+end
 
 newBirthDescriptor{
 	type = "subclass",
@@ -238,7 +250,7 @@ newBirthDescriptor{
 		["cunning/scoundrel"]={false, 0.1},
 	},
 	unlockable_talents_types = {
-		["cunning/poisons"]={false, 0.2, "rogue_poisons"},
+		["cunning/poisons"]={false, 0.3, "rogue_poisons"},
 	},
 	talents = {
 		[ActorTalents.T_DISENGAGE] = 1,
@@ -249,11 +261,21 @@ newBirthDescriptor{
 		[ActorTalents.T_WEAPON_COMBAT] = 1,
 	},
 	copy = {
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", subtype="sling"},
+			OFFHAND = {special=shield_special},
+			BODY = {type="armor", special=function(e) return e.subtype=="light" or e.subtype=="cloth" or e.subtype=="mummy" end},
+			QUIVER={properties={"archery_ammo"}, special=function(e, filter) -- must match the MAINHAND weapon, if any
+				local mh = filter._equipping_entity and filter._equipping_entity:getInven(filter._equipping_entity.INVEN_MAINHAND)
+				mh = mh and mh[1]
+				if not mh or mh.archery == e.archery_ammo then return true end
+			end}
+		},
 		resolvers.equipbirth{
 			id=true,
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true,ego_chance=-1000},
 			{type="weapon", subtype="sling", name="rough leather sling", autoreq=true, ego_chance=-1000},
-			{type="armor", subtype="shield", name="iron shield", autoreq=false, ego_chance=-1000, ego_chance=-1000},
+			{type="armor", subtype="shield", name="iron shield", autoreq=true, ego_chance=-1000},
 			{type="ammo", subtype="shot", name="pouch of iron shots", autoreq=true, ego_chance=-1000},
 		},
 		resolvers.generic(function(e)

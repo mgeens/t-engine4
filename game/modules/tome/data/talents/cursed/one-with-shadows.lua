@@ -1,5 +1,5 @@
 -- ToME - Tales of Middle-Earth
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -119,7 +119,6 @@ newTalent{
 	cooldown = 10,
 	points = 5,
 	cooldown = 50,
-	sustain_hate = 40,
 	getPower = function(self, t) return 10 + self:combatTalentMindDamage(t, 0, 300) end,
 	onDie = function(self, t, value, src)
 		local shadow = self:callTalent(self.T_SHADOW_EMPATHY, "getRandomShadow")

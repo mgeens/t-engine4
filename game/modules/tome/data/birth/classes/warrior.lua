@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -63,8 +63,6 @@ newBirthDescriptor{
 	power_source = {technique=true},
 	stats = { str=5, con=3, dex=1, },
 	talents_types = {
-		["technique/archery-training"]={false, 0.1},
-		["technique/shield-defense"]={false, -0.1},
 		["technique/2hweapon-assault"]={true, 0.3},
 		["technique/strength-of-the-berserker"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0.3},
@@ -81,9 +79,21 @@ newBirthDescriptor{
 		[ActorTalents.T_WARSHOUT_BERSERKER] = 1,
 		[ActorTalents.T_STUNNING_BLOW_ASSAULT] = 1,
 		[ActorTalents.T_WEAPON_COMBAT] = 1,
+		[ActorTalents.T_WEAPONS_MASTERY] = 1,
 		[ActorTalents.T_ARMOUR_TRAINING] = 1,
 	},
 	copy = {
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", properties={"twohanded"}},
+			OFFHAND = {special=function(e, filter) -- only allow if there is already a weapon in MAINHAND
+				local who = filter._equipping_entity
+				if who then
+					local mh = who:getInven(who.INVEN_MAINHAND) mh = mh and mh[1]
+					if mh and (not mh.slot_forbid or not who:slotForbidCheck(e, who.INVEN_MAINHAND)) then return true end
+				end
+				return false
+			end},
+		},
 		resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="greatsword", name="iron greatsword", autoreq=true, ego_chance=-1000, ego_chance=-1000},
 			{type="armor", subtype="heavy", name="iron mail armour", autoreq=true, ego_chance=-1000, ego_chance=-1000},
@@ -93,6 +103,11 @@ newBirthDescriptor{
 		life_rating = 3,
 	},
 }
+
+local shield_special = function(e) -- allows any object with shield combat
+	local combat = e.shield_normal_combat and e.combat or e.special_combat
+	return combat and combat.block
+end
 
 newBirthDescriptor{
 	type = "subclass",
@@ -115,10 +130,8 @@ newBirthDescriptor{
 	power_source = {technique=true},
 	stats = { str=5, con=2, dex=2, },
 	talents_types = {
-		["technique/archery-training"]={false, 0.1},
 		["technique/shield-offense"]={true, 0.3},
 		["technique/shield-defense"]={true, 0.3},
-		["technique/2hweapon-offense"]={false, -0.1},
 		["technique/combat-techniques-active"]={true, 0.3},
 		["technique/combat-techniques-passive"]={true, 0.3},
 		["technique/combat-training"]={true, 0.3},
@@ -137,6 +150,24 @@ newBirthDescriptor{
 		[ActorTalents.T_WEAPONS_MASTERY] = 1,
 	},
 	copy = {
+		resolvers.auto_equip_filters{
+			MAINHAND = {type="weapon", special=function(e, filter) -- allow any weapon that doesn't forbid OFFHAND
+				if e.slot_forbid == "OFFHAND" then
+					local who = filter._equipping_entity
+					return who and not who:slotForbidCheck(e, who.INVEN_MAINHAND)
+				end
+				return true
+			end},
+			OFFHAND = {special=shield_special},
+			BODY = {type="armor", special=function(e, filter)
+				if e.subtype=="heavy" or e.subtype=="massive" then return true end
+				local who = filter._equipping_entity
+				if who then
+					local body = who:getInven(who.INVEN_BODY)
+					return not (body and body[1])
+				end
+			end},
+		},
 		resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="longsword", name="iron longsword", autoreq=true, ego_chance=-1000, ego_chance=-1000},
 			{type="armor", subtype="shield", name="iron shield", autoreq=true, ego_chance=-1000, ego_chance=-1000},
@@ -161,6 +192,9 @@ newBirthDescriptor{
 		"#LIGHT_BLUE# * +0 Magic, +0 Willpower, +2 Cunning",
 		"#GOLD#Life per level:#LIGHT_BLUE# +0",
 	},
+	unlockable_talents_types = {
+		["cunning/poisons"]={false, 0.0, "rogue_poisons"},
+	},
 	power_source = {technique=true, technique_ranged=true},
 	stats = { dex=5, str=2, cun=2, },
 	talents_types = {
@@ -170,7 +204,7 @@ newBirthDescriptor{
 		["technique/reflexes"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0},
 		["technique/combat-techniques-passive"]={true, 0},
-		["technique/munitions"]={false, 0.3},
+		--["technique/munitions"]={false, 0.3},  Disabled pending major revision
 		["technique/sniper"]={false, 0.3},
 		["technique/agility"]={false, 0.3},
 		["technique/combat-training"]={true, 0.3},
@@ -188,6 +222,21 @@ newBirthDescriptor{
 	},
 	copy = {
 		max_life = 110,
+		resolvers.auto_equip_filters{MAINHAND = {type="weapon", properties={"archery"}},
+			OFFHAND = {special=function(e, filter) -- only allow if there is a 1H weapon in MAINHAND
+				local who = filter._equipping_entity
+				if who then
+					local mh = who:getInven(who.INVEN_MAINHAND) mh = mh and mh[1]
+					if mh and (not mh.slot_forbid or not who:slotForbidCheck(e, who.INVEN_MAINHAND)) then return true end
+				end
+				return false
+			end},
+			QUIVER={properties={"archery_ammo"}, special=function(e, filter) -- must match the MAINHAND weapon, if any
+				local mh = filter._equipping_entity and filter._equipping_entity:getInven(filter._equipping_entity.INVEN_MAINHAND)
+				mh = mh and mh[1]
+				if not mh or mh.archery == e.archery_ammo then return true end
+			end}
+		},
 		resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="longbow", name="elm longbow", autoreq=true, ego_chance=-1000},
 			{type="ammo", subtype="arrow", name="quiver of elm arrows", autoreq=true, ego_chance=-1000},
@@ -317,7 +366,9 @@ newBirthDescriptor{
 		[ActorTalents.T_UNARMED_MASTERY] = 1, -- early game is absolutely stupid without this
 	},
 	copy = {
-		no_npc_weapon_equip = true, -- avoids randbosses equipping weapons from their inventory
+		resolvers.auto_equip_filters{-- will not try to equip weapons
+			MAINHAND = {type="none"}, OFFHAND = {type="none"}
+		},
 		resolvers.equipbirth{ id=true,
 			{type="armor", subtype="hands", name="iron gauntlets", autoreq=true, ego_chance=-1000, ego_chance=-1000},
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000, ego_chance=-1000},
@@ -330,6 +381,4 @@ newBirthDescriptor{
 		life_rating = 2,
 	},
 }
-
-
 

@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -66,20 +66,22 @@ function _M:init(t)
 	self:initBody()
 end
 
---- generate inventories according to the body definition table
+--- Generate inventories according to the body definition table
+--	This creates new inventories or updates existing ones
 --	@param self.body = {SLOT_ID = max, ...}
 --	@param max = number of slots if number or table of properties (max = , stack_limit = , ..) merged into definition
 function _M:initBody()
 	if self.body then
-		local def
+		local long_name, def
 		for inven, max in pairs(self.body) do
-			def = self.inven_def[self["INVEN_"..inven]]
-			assert(def, "inventory slot undefined")
-			self.inven[self["INVEN_"..inven]] = {worn=def.is_worn, id=self["INVEN_"..inven], name=inven, stack_limit = def.stack_limit}
+			long_name = "INVEN_"..inven
+			def = self.inven_def[self[long_name]]
+			assert(def, "inventory slot undefined: "..inven)
+			self.inven[self[long_name]] = table.merge(self.inven[self[long_name]] or {}, {worn=def.is_worn, id=self[long_name], name=inven, short_name=def.short_name, stack_limit = def.stack_limit})
 			if type(max) == "table" then
-				table.merge(self.inven[self["INVEN_"..inven]], max, true)
+				table.merge(self.inven[self[long_name]], max, true)
 			else
-				self.inven[self["INVEN_"..inven]].max = max
+				self.inven[self[long_name]].max = max
 			end
 		end
 		self.body = nil
@@ -97,7 +99,7 @@ function _M:getInven(id)
 	end
 end
 
---- Returns the content of an inventory as a table
+--- Returns the inventory definition
 function _M:getInvenDef(id)
 	if type(id) == "number" then
 		return self.inven_def[id]
@@ -664,6 +666,23 @@ function _M:findInAllInventories(name, getname)
 	end
 end
 
+--- Finds an object by name in all the actor's worn (or not) inventories
+-- @param worn true to search in worn inventories, false in non worn ones
+-- @param name the name to look for
+-- @param getname the parameters to pass to getName(), if nil the default is {no_count=true, force_id=true}
+-- @return[1] nil if not found
+-- @return[2] object
+-- @return[2] position
+-- @return[2] inven_id
+function _M:findInAllWornInventories(worn, name, getname)
+	for inven_id, inven in pairs(self.inven) do
+		if (worn and inven.worn) or (not worn and not inven.worn) then
+			local o, item = self:findInInventory(inven, name, getname)
+			if o and item then return o, item, inven_id end
+		end
+	end
+end
+
 --- Finds an object by property in an inventory
 -- @param inven the inventory to look into
 -- @param prop the property to look for
@@ -697,6 +716,23 @@ function _M:findInAllInventoriesBy(prop, value)
 	end
 end
 
+--- Finds an object by property in all the actor's worn (or not) inventories
+-- @param worn true to search in worn inventories, false in non worn ones
+-- @param prop the property to look for
+-- @param value the value to look for, can be a function
+-- @return[1] nil if not found
+-- @return[2] object
+-- @return[2] position
+-- @return[2] inven_id
+function _M:findInAllWornInventoriesBy(worn, prop, value)
+	for inven_id, inven in pairs(self.inven) do
+		if (worn and inven.worn) or (not worn and not inven.worn) then
+			local o, item = self:findInInventoryBy(inven, prop, value)
+			if o and item then return o, item, inven_id end
+		end
+	end
+end
+
 --- Finds an object by reference in an inventory
 -- @param inven the inventory to look into
 -- @param so the object(reference) to look for
@@ -722,6 +758,22 @@ function _M:findInAllInventoriesByObject(so)
 	end
 end
 
+--- Finds an object by reference in all the actor's worn (or not) inventories
+-- @param worn true to search in worn inventories, false in non worn ones
+-- @param so the object(reference) to look for
+-- @return[1] nil if not found
+-- @return[2] object
+-- @return[2] position
+-- @return[2] inven_id
+function _M:findInAllWornInventoriesByObject(worn, so)
+	for inven_id, inven in pairs(self.inven) do
+		if (worn and inven.worn) or (not worn and not inven.worn) then
+			local o, item = self:findInInventoryByObject(inven, so)
+			if o and item then return o, item, inven_id end
+		end
+	end
+end
+
 --- Applies fct over all items
 -- @param inven the inventory to look into
 -- @func fct the function to be called. It will receive three parameters: inven, item, object
@@ -736,6 +788,17 @@ end
 function _M:inventoryApplyAll(fct)
 	for inven_id, inven in pairs(self.inven) do
 		self:inventoryApply(inven, fct)
+	end
+end
+
+--- Applies fct over all items in all  worn (or not) inventories
+-- @param worn true to search in worn inventories, false in non worn ones
+-- @func fct the function to be called. It will receive three parameters: inven, item, object
+function _M:wornInventoryApplyAll(worn, fct)
+	for inven_id, inven in pairs(self.inven) do
+		if (worn and inven.worn) or (not worn and not inven.worn) then
+			self:inventoryApply(inven, fct)
+		end
 	end
 end
 

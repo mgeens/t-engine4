@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -853,15 +853,14 @@ newEffect{
 	end,
 }
 
--- artifact wild infusion
 newEffect{
 	name = "PRIMAL_ATTUNEMENT", image = "talents/infusion__wild.png",
 	desc = "Primal Attunement",
-	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%%."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%% and reducing a random debuff duration by %d%%."):format(eff.power, eff.reduce) end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
-	parameters = { power=20 },
+	parameters = { power=20, reduce = 3 },
 	on_gain = function(self, err) return "#Target# attunes to the wild.", "+Primal" end,
 	on_lose = function(self, err) return "#Target# is no longer one with nature.", "-Primal" end,
 	activate = function(self, eff)
@@ -869,6 +868,14 @@ newEffect{
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("damage_affinity", eff.pid)
+	end,
+	on_timeout = function(self, eff)
+		local effs = self:effectsFilter({status = "detrimental", ignore_crosstier = true}, 1)
+		local eff2 = self:hasEffect(effs[1])
+		if eff2 then 
+			eff2.dur = eff2.dur - eff.reduce
+			if eff2.dur <= 0 then self:removeEffect(eff2) end
+		end
 	end,
 }
 
@@ -923,19 +930,14 @@ newEffect{
 	name = "HEROISM", image = "talents/infusion__heroism.png",
 	desc = "Heroism",
 	long_desc = function(self, eff)
-		local xs = eff.die_at > 0 and (" and keeps you from dying even if your life drops to %+d"):format(-eff.die_at) or ""
-		return ("Increases your three highest stats by %d%s."):format(eff.power, xs) 
+		local xs = eff.die_at > 0 and ("Keeps you from dying even if your life drops to %+d"):format(-eff.die_at) or ""
+		return xs
 	end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
-	parameters = { power=1, die_at = 0 },
+	parameters = { die_at = 0 },
 	activate = function(self, eff)
-		local l = { {Stats.STAT_STR, self:getStat("str")}, {Stats.STAT_DEX, self:getStat("dex")}, {Stats.STAT_CON, self:getStat("con")}, {Stats.STAT_MAG, self:getStat("mag")}, {Stats.STAT_WIL, self:getStat("wil")}, {Stats.STAT_CUN, self:getStat("cun")}, }
-		table.sort(l, function(a,b) return a[2] > b[2] end)
-		local inc = {}
-		for i = 1, 3 do inc[l[i][1]] = eff.power end
-		self:effectTemporaryValue(eff, "inc_stats", inc)
 		self:effectTemporaryValue(eff, "die_at", -eff.die_at)
 	end,
 }
@@ -1122,11 +1124,12 @@ newEffect{
 newEffect{
 	name = "WILD_SPEED", image = "talents/infusion__movement.png",
 	desc = "Wild Speed",
-	long_desc = function(self, eff) return ("Moving at extreme speed (%d%% faster).  Any action other than movement will cancel it."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Moving at extreme speed (%d%% faster) and gains 100%% stun, daze and pinning immunity. Any action other than movement will cancel it.")
+		:format(eff.power) end,
 	type = "physical",
 	subtype = { nature=true, speed=true },
 	status = "beneficial",
-	parameters = {power=1000},
+	parameters = {power=100, no_talents=1},
 	on_gain = function(self, err) return "#Target# is moving at extreme speed!", "+Wild Speed" end,
 	on_lose = function(self, err) return "#Target# slows down.", "-Wild Speed" end,
 	get_fractional_percent = function(self, eff)
@@ -1139,12 +1142,20 @@ newEffect{
 		eff.possible_end_turns = 10 * (eff.dur+1)
 		eff.tmpid = self:addTemporaryValue("wild_speed", 1)
 		eff.moveid = self:addTemporaryValue("movement_speed", eff.power/100)
-		if self.ai_state then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=1}) end -- Make AI not use talents while using it
+
+		-- should change priorities rather than forbid all talents
+		if self.ai_state and eff.no_talents ~= 0 then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=eff.no_talents}) end -- Makes the AI not use talents while active
+		eff.stun = self:addTemporaryValue("stun_immune", 1)
+		eff.daze = self:addTemporaryValue("daze_immune", 1)
+		eff.pin = self:addTemporaryValue("pin_immune", 1)
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("wild_speed", eff.tmpid)
 		if eff.aiid then self:removeTemporaryValue("ai_state", eff.aiid) end
 		self:removeTemporaryValue("movement_speed", eff.moveid)
+		self:removeTemporaryValue("stun_immune", eff.stun)
+		self:removeTemporaryValue("daze_immune", eff.daze)
+		self:removeTemporaryValue("pin_immune", eff.pin)
 	end,
 }
 
@@ -1181,6 +1192,7 @@ newEffect{
 		eff.possible_end_turns = (eff.dur+1)*game.energy_to_act/game.energy_per_tick
 		eff.tmpid = self:addTemporaryValue("wild_speed", 1)
 		eff.moveid = self:addTemporaryValue("movement_speed", eff.power/100)
+-- should change priorities rather than forbid all talents
 		if self.ai_state then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=1}) end -- Make AI not use talents while using it
 	end,
 	deactivate = function(self, eff)
@@ -1210,6 +1222,7 @@ newEffect{
 		eff.possible_end_turns = 10 * (eff.dur+1)
 		eff.tmpid = self:addTemporaryValue("step_up", 1)
 		eff.moveid = self:addTemporaryValue("movement_speed", eff.power/100)
+-- should change priorities rather than forbid all talents
 		if self.ai_state then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=1}) end -- Make AI not use talents while using it
 	end,
 	deactivate = function(self, eff)
@@ -1245,6 +1258,7 @@ newEffect{
 		eff.capresistsid = self:addTemporaryValue("resists_cap", {
 			[DamageType.LIGHTNING]=100,
 		})
+-- should change priorities rather than forbid all talents
 		if self.ai_state then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=1}) end -- Make AI not use talents while using it
 		eff.particle = self:addParticles(Particles.new("bolt_lightning", 1))
 	end,
@@ -1325,6 +1339,7 @@ newEffect{
 		eff.src = self
 	end,
 	deactivate = function(self, eff)
+		self:removeTemporaryValue("additional_melee_chance", eff.extra_blow_chance) -- backwards compatibility
 	end,
 }
 
@@ -2872,6 +2887,7 @@ newEffect {
 
 		-- AI won't use talents while active.
 		if self.ai_state then
+-- should change priorities rather than forbid all talents
 			self:effectTemporaryValue(eff, "ai_state", {no_talents=1})
 		end
 	end,
@@ -3727,6 +3743,7 @@ newEffect{
 		eff.possible_end_turns = 10 * (eff.dur+1)
 		eff.tmpid = self:addTemporaryValue("wild_speed", 1)
 		eff.moveid = self:addTemporaryValue("movement_speed", eff.speed/100)
+-- should change priorities rather than forbid all talents
 		if self.ai_state then eff.aiid = self:addTemporaryValue("ai_state", {no_talents=1}) end -- Make AI not use talents while using it
 		eff.stun = self:addTemporaryValue("stun_immune", 1)
 		eff.daze = self:addTemporaryValue("daze_immune", 1)
@@ -3946,11 +3963,11 @@ newEffect{
 newEffect{
 	name = "SHADOW_SMOKE", image = "talents/shadow_shot.png",
 	desc = "Shadow Smoke",
-	long_desc = function(self, eff) return ("The target is wrapped in disorientating smoke, confusing them and reducing vision range by %d."):format(eff.sight) end,
+	long_desc = function(self, eff) return ("The target is wrapped in disorientating smoke, reducing vision range by %d."):format(eff.sight) end,
 	type = "physical",
-	subtype = { sense=true, confusion=true },
+	subtype = { blind=true },
 	status = "detrimental",
-	parameters = { sight=5, power=30 },
+	parameters = { sight=5 },
 	on_gain = function(self, err) return "#Target# is surrounded by a thick smoke.", "+Shadow Smoke" end,
 	on_lose = function(self, err) return "The smoke around #target# dissipate.", "-Shadow Smoke" end,
 	charges = function(self, eff) return -eff.sight end,
@@ -3958,11 +3975,7 @@ newEffect{
 		if self:canBe("blind") then
 			if self.sight - eff.sight < 1 then eff.sight = self.sight - 1 end
 			eff.tmpid = self:addTemporaryValue("sight", -eff.sight)
-	--		self:setTarget(nil) -- Loose target!
 			self:doFOV()
-		end
-		if self:canBe("confusion") then
-			eff.cid = self:addTemporaryValue("confused", eff.power)
 		end
 		if core.shader.active() then
 			self:effectParticles(eff, {type="shader_shield", args={size_factor=1.5, img="shadow_shot_debuff_tentacles"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=2000, noup=0.0}})
@@ -3972,9 +3985,6 @@ newEffect{
 		if eff.tmpid then 
 			self:removeTemporaryValue("sight", eff.tmpid)
 			self:doFOV()
-		end
-		if eff.cid then
-			self:removeTemporaryValue("confused", eff.cid)
 		end
 	end,
 }
@@ -4066,5 +4076,18 @@ newEffect{
 		else
 			self:removeEffect(eff.effect_id)
 		end
+	end,
+}
+
+newEffect{
+	name = "SWIFT_SHOT", image = "talents/skirmisher_swift_shot.png",
+	desc = "Swift Shot",
+	long_desc = function(self, eff) return ("Increases attack speed by %d%%."):format(eff.speed) end,
+	type = "physical",
+	subtype = { tactic=true },
+	status = "beneficial",
+	parameters = {speed=0.1},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed)
 	end,
 }

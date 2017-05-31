@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ Each swing drips pustulant fluid before it, and each droplet writhes and wriggle
 	resolvers.equip{
 		{type="weapon", subtype="waraxe", ego_chance = 100, autoreq=true},
 		{type="weapon", subtype="waraxe", ego_chance = 100, autoreq=true},
-		{type="armor", subtype="robe", ego_chance = 100, autoreq=true}
+		{type="armor", subtype="cloth", ego_chance = 100, autoreq=true}
 	},
 
 	talent_cd_reduction = {[Talents.T_BLINDSIDE]=4},
@@ -527,6 +527,10 @@ newEntity{ base = "BASE_NPC_HORROR",
 	life_regen = 0.25,
 	combat_armor = 12, combat_def = 24,
 
+	rnd_boss_init = function(self, data)
+		self.combat_physspeed = math.max(1, self.combat_physspeed - 2)  -- A bit more sanity when randbossed
+	end,
+
 	ai = "tactical", ai_state = { ai_move="move_complex", talent_in=2, ally_compassion=0 },
 
 	on_melee_hit = {[DamageType.PHYSICALBLEED]=resolvers.mbonus(14, 2)},
@@ -700,10 +704,11 @@ With each slow breath it takes reality distorts around it.  Blue twirls into red
 
 		[Talents.T_LUCID_DREAMER]={base=4, every=12, max=8},
 		[Talents.T_DREAM_WALK]={base=4, every=12, max=8},
-	--	[Talents.T_SLUMBER]={base=4, every=6, max=8},
+		[Talents.T_SLUMBER]={base=4, every=6, max=8},
 		[Talents.T_SLEEP]={base=4, every=6, max=8},
-	--	[Talents.T_RESTLESS_NIGHT]={base=4, every=6, max=8},
-		[Talents.T_DREAMSCAPE]={base=4, every=5, max=10},
+		[Talents.T_RESTLESS_NIGHT]={base=4, every=6, max=8},
+		[Talents.T_SANDMAN]={base=4, every=6, max=8},
+		--[Talents.T_DREAMSCAPE]={base=4, every=5, max=10},
 		
 		-- Summon Dream Seeds while awake
 		[Talents.T_SUMMON]=1,
@@ -723,6 +728,14 @@ With each slow breath it takes reality distorts around it.  Blue twirls into red
 			e.sleep_particle = e:addParticles(engine.Particles.new("generic_shield", 1, {r=0.6, g=1, b=0.6, a=1}))
 		end
 	end),
+
+	custom_tooltip = function(self)
+		if self.dreamer_sleep_state then
+			return tstring{{"color", "LIGHT_BLUE"}, "It looks asleep and dreamy."}
+		else
+			return tstring{{"color", "LIGHT_RED"}, "It looks awake, beware!"}
+		end
+	end,
 
 	-- Spawn Dream Seeds
 	on_act = function(self)
@@ -752,12 +765,13 @@ With each slow breath it takes reality distorts around it.  Blue twirls into red
 				game.logSeen(self, "#LIGHT_BLUE#A dream seed escapes %s's sleeping mind.", self.name:capitalize())
 			end
 		-- Script the AI to encourage opening with dream scape
+		--[[  Disabled temporarily due to unknown bugs with Dreamscape
 		elseif self.ai_target.actor and self.ai_target.actor.game_ender and not game.zone.is_dream_scape then
 			if not self:isTalentCoolingDown(self.T_SLEEP) then
 				self:forceUseTalent(self.T_SLEEP, {})
 			elseif not self:isTalentCoolingDown(self.T_DREAMSCAPE) and self.ai_target.actor:attr("sleep") then
 				self:forceUseTalent(self.T_DREAMSCAPE, {})
-			end
+			end]]
 		end
 	end,
 	on_acquire_target = function(self, who)
@@ -1131,7 +1145,7 @@ newEntity{ base="BASE_NPC_HORROR", define_as = "ANIMATED_BLADE",
 
 	negative_status_effect_immune = 1,
 	body = { INVEN = 10, MAINHAND=1 },
-	
+	no_drops = true,
 	resolvers.equip{
 		{type="weapon", subtype="longsword", ego_chance = 100, autoreq=true},
 	},

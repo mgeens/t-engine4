@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ level.data.on_enter_list.sludgenest = function()
 	g:initGlow()
 	game.zone:addEntity(game.level, g, "terrain", spot.x, spot.y)
 	print("[WORLDMAP] sludgenest at", spot.x, spot.y)
-	require("engine.ui.Dialog"):simpleLongPopup("Lush forest", "Suddently it comes back to you. You remember long ago somebody told you about a strange lush forest in the cold icy wastes of the northland.", 400)
+	require("engine.ui.Dialog"):simpleLongPopup("Lush forest", "Suddenly it comes back to you. You remember long ago somebody told you about a strange lush forest in the cold icy wastes of the northland.", 400)
 end
 
 return true

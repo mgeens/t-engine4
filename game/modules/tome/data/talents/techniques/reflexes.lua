@@ -136,6 +136,7 @@ newTalent{
 	-- called by _M:attackTarget in mod.class.interface.Combat.lua
 	proc = function(self, t, target)
 		if not rng.percent(t.getChance(self,t)) then return end
+		if target.turn_procs.intuitive_shots == true then return true end  -- If we've proc'd once confirm the deflect but skip the counterattack
 		local old = self.energy.value
 		local weapon, ammo = self:hasArcheryWeapon()
 		if not weapon then return end
@@ -174,7 +175,7 @@ newTalent{
 	requires_target = true,
 	no_npc_use = true,
 	fixed_cooldown = true, -- there's probably some sort of unexpected interaction that would let you chain this infinitely with cooldown reducers
-	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 4.5)) end, --Limit < 100%
+	getTalentCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3.5)) end, --Limit < 100%
 	getCooldown = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3.5)) end, --Limit < 100%
 	on_pre_use = function(self, t, silent) return archerPreUse(self, t, silent) end,
 	archery_onhit = function(self, t, target, x, y)

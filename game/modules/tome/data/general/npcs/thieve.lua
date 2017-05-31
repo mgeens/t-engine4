@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- last updated: 9:25 AM 2/5/2010
-
 local Talents = require("engine.interface.ActorTalents")
 
 newEntity{
@@ -28,6 +26,7 @@ newEntity{
 
 	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1 },
 	resolvers.drops{chance=20, nb=1, {} },
+	resolvers.auto_equip_filters("Rogue"),
 	resolvers.equip{
 		{type="weapon", subtype="dagger", autoreq=true},
 		{type="weapon", subtype="dagger", autoreq=true},
@@ -56,6 +55,7 @@ newEntity{
 		[Talents.T_KNIFE_MASTERY]={base=0, every=6, max=6},
 		[Talents.T_WEAPON_COMBAT]={base=0, every=6, max=6},
 	},
+
 	power_source = {technique=true},
 }
 

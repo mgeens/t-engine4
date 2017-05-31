@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -38,10 +38,15 @@ newTalent{
 		if self:attr("never_move") then return false end
 		return true
 	end,
+	on_pre_use_ai = function(self, t)
+		local target = self.ai_target.actor
+		if target and core.fov.distance(self.x, self.y, target.x, target.y) > 1 then return true end
+		return false
+	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
-		local x, y, target = self:getTarget(tg)
-		if not self:canProject(tg, x, y) then return nil end
+		local x, y, target = self:getTargetLimited(tg)
+		if not target then game.logPlayer(self, "You can only rush to a creature.") return nil end
 		local block_actor = function(_, bx, by) return game.level.map:checkEntity(bx, by, Map.TERRAIN, "block_move", self) end
 		local linestep = self:lineFOV(x, y, block_actor)
 
@@ -150,6 +155,11 @@ newTalent{
 	no_energy = true,
 	require = techs_strdex_req4,
 	tactical = { BUFF = 2, CLOSEIN = 2, ESCAPE = 2 },
+	on_pre_use_ai = function(self, t) -- don't use out of combat
+		local target = self.ai_target.actor
+		if target and core.fov.distance(self.x, self.y, target.x, target.y) <= 10 and self:hasLOS(target.x, target.y, "block_move") then return true end
+		return false
+	end,
 	getSpeed = function(self, t) return self:combatTalentScale(t, 0.14, 0.45, 0.75) end,
 	action = function(self, t)
 		self:setEffect(self.EFF_SPEED, 5, {power=t.getSpeed(self, t)})

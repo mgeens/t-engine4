@@ -1,5 +1,5 @@
 -- ToME - Tales of Middle-Earth
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -337,7 +337,7 @@ newEntity{ base = "BASE_LONGBOW",
 	special_desc = function(self) return "Automatically fires lightning bolts at nearby enemies, with a chance to inflict Daze." end,
 	combat = {
 		range=10,
-		physspeed = 0.7,
+		physspeed = 0.9,
 	},
 	wielder = {
 		combat_spellpower=20,

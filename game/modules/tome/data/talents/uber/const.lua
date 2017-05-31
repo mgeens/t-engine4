@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ uberTalent{
 	mode = "sustained",
 	cooldown = 8,
 	sustain_stamina = 10,
-	tactical = { CLOSEIN = 2, ESCAPE = 2 },
+	tactical = { CLOSEIN = 0.5, ESCAPE = 0.5, STAMINA = -0.5, SPECIAL = -0.5}, -- values small for instant use
 	no_energy = true,
 	require = { special={desc="Know at least 20 levels of stamina-using talents", fct=function(self) return knowRessource(self, "stamina", 20) end} },
 	activate = function(self, t)

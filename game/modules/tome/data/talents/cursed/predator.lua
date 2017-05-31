@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -47,6 +47,12 @@ newTalent{
 	end,
 	getHateBonus = function(self, t) return self:combatTalentScale(t, 3, 10, "log")	end,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
+	on_pre_use_ai = function(self, t, silent, fake)
+		local aitarget = self.ai_target.actor
+		if not aitarget then return end
+		local eff = self:hasEffect(self.EFF_PREDATOR)
+		return not (eff and eff.type == aitarget.type and eff.subtype == aitarget.subtype)
+	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)

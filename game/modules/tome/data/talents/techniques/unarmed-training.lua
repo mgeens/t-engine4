@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -59,14 +59,14 @@ newTalent{
 	points = 5,
 	require = { stat = { cun=function(level) return 12 + level * 6 end }, },
 	mode = "passive",
-	getDamage = function(self, t) return self:getTalentLevel(t) * 10 end,
-	getPercentInc = function(self, t) return math.sqrt(self:getTalentLevel(t) / 5) / 2 end,
+	getDamage = function(self, t) return 0 end,
+	getPercentInc = function(self, t) return math.sqrt(self:getTalentLevel(t) / 5) / 1.5 end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local inc = t.getPercentInc(self, t)
-		return ([[Increases Physical Power by %d, and increases all unarmed damage by %d%% (including grapples and kicks).
+		return ([[Increases all unarmed damage by %d%% (including grapples and kicks).
 		Note that brawlers naturally gain 0.5 Physical Power per character level while unarmed (current brawler physical power bonus: %0.1f) and attack 20%% faster while unarmed.]]):
-		format(damage, 100*inc, self.level * 0.5)
+		format(100*inc, self.level * 0.5)
 	end,
 }
 
@@ -76,7 +76,6 @@ newTalent{
 	require = techs_cun_req2,
 	mode = "passive",
 	points = 5,
-	tactical = { BUFF = 2 },
 	getStr = function(self, t) return math.ceil(self:combatTalentScale(t, 1.5, 7.5, 0.75) + self:combatTalentStatDamage(t, "cun", 2, 10)) end,
 	getCon = function(self, t) return math.ceil(self:combatTalentScale(t, 1.5, 7.5, 0.75) + self:combatTalentStatDamage(t, "dex", 5, 25)) end,
 	passives = function(self, t, tmptable)

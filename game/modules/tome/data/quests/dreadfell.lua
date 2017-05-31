@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -32,6 +32,5 @@ end
 on_status_change = function(self, who, status, sub)
 	if self:isCompleted() then
 		who:setQuestStatus(self.id, engine.Quest.DONE)
-		game.state:storesRestock()
 	end
 end

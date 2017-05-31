@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -63,6 +63,16 @@ newEntity{ base = "BASE_NPC_YAECH", define_as = "MURGOL",
 
 	autolevel = "wildcaster",
 	ai = "tactical", ai_state = { talent_in=2, },
+	
+	resolvers.auto_equip_filters("Mindslayer"),	
+	auto_classes={{class="Mindslayer", start_level=12, level_rate=75}},
+
+	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
+	on_added_to_level = function(self)
+		if self.level <= 16 then
+			self.ai_tactic.escape = 0
+		end
+	end,
 
 	on_die = function(self, who)
 		game.player:setQuestStatus("start-yeek", engine.Quest.COMPLETED, "murgol")
@@ -188,6 +198,16 @@ newEntity{ base="BASE_NPC_NAGA", define_as = "NASHVA",
 	autolevel = "warriormage",
 	ai = "tactical", ai_state = { talent_in=2, ai_move="move_astar", },
 	ai_tactic = resolvers.tactic"melee",
+
+	resolvers.auto_equip_filters("Mindslayer"),
+	auto_classes={{class="Mindslayer", start_level=12, level_rate=75}},
+	
+	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
+	on_added_to_level = function(self)
+		if self.level <= 16 then
+			self.ai_tactic.escape = 0
+		end
+	end,
 
 	on_die = function(self, who)
 		game.player:setQuestStatus("start-yeek", engine.Quest.COMPLETED, "murgol")

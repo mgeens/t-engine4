@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -129,19 +129,29 @@ newTalent{
 		local eff = self:hasEffect(self.EFF_THROWING_KNIVES)
 		if eff and eff.stacks > 0 then return true end
 	end,
-	callbackOnActBase = function(self, t)
-		if self.resting or not self.player and not table.get(self, "ai_target","actor") then -- bit kludgy, npc's don't rest
-			local reload = self:callTalent(self.T_THROWING_KNIVES, "getReload")
-			local max = self:callTalent(self.T_THROWING_KNIVES, "getNb")
-			self:setEffect(self.EFF_THROWING_KNIVES, 1, {stacks=reload, max_stacks=max })
-		end
-	end,
 	getBaseDamage = function(self, t) return self:combatTalentLimit(t, 72, 9, 35) end, -- Scale as dagger damage by material tier (~voratun dagger @ TL 6.5), limit base damage < voratun greatmaul
 	getBaseApr = function(self, t) return self:combatTalentScale(t, 2, 10) end,
 	getReload = function(self, t) return 2 end,
 	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 6, 9.5, 0.25)) end,
 	getBaseCrit = function(self, t) return self:combatTalentScale(t, 2, 5) end,
 	getKnives = function(self, t) return knives(self) end, -- To prevent upvalue issues
+	callbackOnWait = function(self, t)
+		local reload, max = t.getReload(self, t), t.getNb(self, t)
+		self:setEffect(self.EFF_THROWING_KNIVES, 1, {stacks=reload, max_stacks=max })
+	end,
+	callbackOnRest = function(self, t)
+		local eff = self:hasEffect(self.EFF_THROWING_KNIVES)
+		if not eff or (eff and eff.stacks < eff.max_stacks) then return true end
+	end,
+	callbackOnMove = function(self, t, moved, force, ox, oy)
+		if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) then
+			if self.turn_procs.tkreload then return end
+			local reload = math.ceil(self:callTalent(self.T_THROWING_KNIVES, "getReload")/2)
+			local max = self:callTalent(self.T_THROWING_KNIVES, "getNb")
+			self:setEffect(self.EFF_THROWING_KNIVES, 1, {stacks=reload, max_stacks=max })
+			self.turn_procs.tkreload = true
+		end
+	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
@@ -152,15 +162,6 @@ newTalent{
 		proj.name = "Throwing Knife"
 
 		return true
-	end,
-	callbackOnMove = function(self, t, moved, force, ox, oy)
-		if moved and not force and ox and oy and (ox ~= self.x or oy ~= self.y) then
-			if self.turn_procs.tkreload then return end
-			local reload = math.ceil(self:callTalent(self.T_THROWING_KNIVES, "getReload")/2)
-			local max = self:callTalent(self.T_THROWING_KNIVES, "getNb")
-			self:setEffect(self.EFF_THROWING_KNIVES, 1, {stacks=reload, max_stacks=max })
-			self.turn_procs.tkreload = true
-		end
 	end,
 	knivesInfo = function(self, t)
 		local combat = knives(self)
@@ -220,13 +221,13 @@ newTalent{
 	tactical = { ATTACKAREA = { PHYSICAL = 2}},
 	speed = "throwing",
 	proj_speed = 10,
-	getDamage = function (self, t) return self:combatTalentLimit(t, 1, 0.6, 0.75) end,
-	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDamage = function (self, t) return self:combatTalentLimit(t, 1, 0.3, 0.75) end,
+	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 8, 20)) end,
 	range = 0,
 	cooldown = 10,
 	stamina = 30,
-	radius = function(self, t) return math.floor(self:combatTalentLimit(t, 10, 4.2, 7)) end,
-	target = function(self, t) return {type="cone", range=0, stop_block = true, friendlyfire=false, radius=t.radius(self, t), display_line_step=false} end,
+	radius = function(self, t) return 5 end,
+	target = function(self, t) return {type="cone", cone_angle = 75, range=0, stop_block = true, friendlyfire=false, radius=t.radius(self, t), display_line_step=false} end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
@@ -249,7 +250,7 @@ newTalent{
 
 		local tgt_cnt = #tgts
 		if tgt_cnt > 0 then
-			local tgt_max = math.min(3, math.ceil(count/tgt_cnt))
+			local tgt_max = math.min(5, math.ceil(count/tgt_cnt))
 			while count > 0 and #tgts > 0 do
 				local tgt, id = rng.table(tgts)
 				if tgt then
@@ -268,7 +269,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[You keep a special stash of %d throwing knives in your bandolier, which you can throw all at once at enemies within a radius %d cone, for %d%% damage each.
-		Each target can be hit up to 3 times, if the number of knives exceeds the number of enemies.  Creatures block knives from hitting targets behind them.]]):
+		Each target can be hit up to 5 times, if the number of knives exceeds the number of enemies.  Creatures block knives from hitting targets behind them.]]):
 		format(t.getNb(self,t), self:getTalentRadius(t), t.getDamage(self, t)*100)
 	end,
 }

@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ newTalent{
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3)) end,
 	direct_hit = true,
 	requires_target = true,
-	tactical = { ATTACK = { COLD = 2 } },
+	tactical = { ATTACKAREA = { COLD = 2 } },
 	is_melee = true,
 	on_learn = function(self, t)
 		self.combat_physresist = self.combat_physresist + 4
@@ -63,7 +63,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[You call upon the mighty claw of a cold drake and rake a wave of freezing cold in front of you, doing %d%% weapon damage as Ice damage in a cone of %d. Ice damage gives a chance of freezing the target.
+		return ([[You call upon the mighty claw of a cold drake and rake a wave of freezing cold in front of you, doing %d%% weapon damage as Ice damage in a cone of radius %d. Ice damage gives a chance of freezing the target.
 		Every level in Ice Claw additionally raises your Physical, Mental and Spell Saves by 4.
 		Each point in cold drake talents also increases your cold resistance by 1%%.]]):format(100 * t.damagemult(self, t), self:getTalentRadius(t))
 	end,
@@ -78,7 +78,7 @@ newTalent{
 	cooldown = 10,
 	sustain_equilibrium = 10,
 	range = 10,
-	tactical = { ATTACK = { COLD = 1 }, DEFEND = 2 },
+	tactical = { ATTACK = 0.5, DEFEND = 2 }, -- doesn't check resistance of the target
 	on_learn = function(self, t) self.resists[DamageType.COLD] = (self.resists[DamageType.COLD] or 0) + 1 end,
 	on_unlearn = function(self, t) self.resists[DamageType.COLD] = (self.resists[DamageType.COLD] or 0) - 1 end,
 	getArmor = function(self, t) return self:combatTalentMindDamage(t, 5, 25) end,
@@ -115,7 +115,7 @@ newTalent{
 	equilibrium = 10,
 	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 10, 30, 15)) end,
 	range = 10,
-	tactical = { DISABLE = 2 },
+	tactical = { ATTACKAREA = {COLD = 0.5}, DISABLE = 2 },
 	requires_target = true,
 	target = function(self, t)
 		local halflength = math.floor(t.getLength(self,t)/2)
@@ -134,10 +134,10 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		local ice_damage = self:mindCrit(t.getIceDamage(self, t))
-		local ice_radius = t.getIceRadius(self, t)
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
 		if game.level.map:checkEntity(x, y, Map.TERRAIN, "block_move") then return nil end
+		local ice_damage = self:mindCrit(t.getIceDamage(self, t))
+		local ice_radius = t.getIceRadius(self, t)
 
 		self:project(tg, x, y, function(px, py, tg, self)
 			local oe = game.level.map(px, py, Map.TERRAIN)

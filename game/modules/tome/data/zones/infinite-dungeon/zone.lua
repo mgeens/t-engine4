@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ return {
 	no_worldport = true,
 	infinite_dungeon = true,
 	events_by_level = true,
+	special_level_faction = "enemies",
 	ambient_music = function() return rng.table{
 		"Battle Against Time.ogg",
 		"Breaking the siege.ogg",
@@ -330,7 +331,7 @@ return {
 		end
 		
 		-- Everything hates you in the infinite dungeon!
-		for uid, e in pairs(level.entities) do e.faction = e.hard_faction or "enemies" end
+		for uid, e in pairs(level.entities) do e.faction = e.hard_faction or zone.special_level_faction or "enemies" end
 		
 		-- Some lore
 		if level.level == 1 or level.level == 10 or level.level == 20 or level.level == 30 or level.level == 40 then

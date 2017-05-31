@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -17,6 +17,27 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+--- get a list of diseases on a target
+local getTargetDiseases = function(self, target)
+	if not target then return end
+	local diseases = self.turn_procs.target_diseases and self.turn_procs.target_diseases[target.uid]
+	if diseases then return diseases end
+
+	local num, dur = 0, 0
+	diseases = {}
+	for eff_id, p in pairs(target.tmp) do
+		local e = target.tempeffect_def[eff_id]
+		if e.subtype.disease then
+			num, dur = num + 1, dur + p.dur
+			diseases[#diseases+1] = {id=eff_id, params=p}
+		end
+	end
+	diseases.num, diseases.dur = num, dur
+	self.turn_procs.target_diseases = self.turn_procs.target_diseases or {}
+	self.turn_procs.target_diseases[target.uid] = diseases
+	return diseases
+end
+
 newTalent{
 	name = "Virulent Disease",
 	type = {"corruption/plague", 1},
@@ -25,12 +46,13 @@ newTalent{
 	vim = 8,
 	cooldown = 3,
 	random_ego = "attack",
-	tactical = { ATTACK = {BLIGHT = 2} },
+	tactical = { ATTACK = {BLIGHT = {disease=2}} },
 	requires_target = true,
 	no_energy = true,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	range = function(self, t) return 5 end, -- Instant cast should not do thousands of damage at long range.  This is still too powerful, though
 	action = function(self, t)
-		local tg = {type="bolt", range=self:getTalentRange(t)}
+		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 
@@ -79,51 +101,53 @@ newTalent{
 	cooldown = 9,
 	range = 8,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1.5, 3.5)) end,
-	tactical = { ATTACKAREA = function(self, t, target)
-		-- Count the number of diseases on the target
-		local val = 0
-		for eff_id, p in pairs(target.tmp) do
-			local e = target.tempeffect_def[eff_id]
-			if e.subtype.disease then
-				val = val + 1
-			end
+	getTargetDiseases = getTargetDiseases,
+	tactical = function(self, t, aitarget)
+		local diseases = t.getTargetDiseases(self, aitarget)
+		local tacs
+		if diseases then
+			tacs = {attackarea = {
+				BLIGHT = function(self, t, target)
+					if target == aitarget then -- blight damage only
+						return {diseases.num}
+					else -- blight damage with chance to disease
+						return {diseases.num, disease=diseases.num}
+					end
+				end
+				},
+				__wt_cache_turns = 1
+			}
 		end
-		return val
-	end },
+		return tacs
+	end,
 	requires_target = true,
 	target = function(self, t)
 		-- Target trying to combine the bolt and the ball disease spread
-		return {type="ballbolt", radius=self:getTalentRadius(t), range=self:getTalentRange(t)}
+		return {type="ballbolt", radius=self:getTalentRadius(t), range=self:getTalentRange(t), friendlyfire=false, selffire=false, talent=t}
 	end,
 	action = function(self, t)
-		local tg = {type="bolt", range=self:getTalentRange(t)}
+		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 
 		local dam = self:spellCrit(self:combatTalentSpellDamage(t, 15, 85))
-		local diseases = {}
-
+		local diseases
+		
 		-- Try to rot !
 		local source = nil
-		self:project(tg, x, y, function(px, py)
+		self:project(tg, x, y, function(px, py) -- bolt hits the first target in line
 			local target = game.level.map(px, py, engine.Map.ACTOR)
 			if not target then return end
 
-			for eff_id, p in pairs(target.tmp) do
-				local e = target.tempeffect_def[eff_id]
-				if e.subtype.disease then
-					diseases[#diseases+1] = {id=eff_id, params=p}
-				end
-			end
-
-			if #diseases > 0 then
+			diseases = t.getTargetDiseases(self, target)
+			if diseases and #diseases > 0 then
 				DamageType:get(DamageType.BLIGHT).projector(self, px, py, DamageType.BLIGHT, dam * #diseases)
 				game.level.map:particleEmitter(px, py, 1, "slime")
 			end
 			source = target
 		end)
 
-		if #diseases > 0 then
+		if diseases and #diseases > 0 then -- burst in a radius
 			self:project({type="ball", radius=self:getTalentRadius(t), range=self:getTalentRange(t)}, x, y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target or target == source or target == self or (self:reactionToward(target) >= 0) then return end
@@ -132,6 +156,7 @@ newTalent{
 					local parameters = table.clone(disease.params, true)
 					parameters.src = self
 					parameters.apply_power = self:combatSpellpower()
+					parameters.__tmpvals = nil
 					target:setEffect(disease.id, 6, parameters)
 				end
 			end)
@@ -157,22 +182,25 @@ newTalent{
 	vim = 20,
 	cooldown = 15,
 	range = 8,
+	getTargetDiseases = getTargetDiseases,
 	tactical = { DISABLE = function(self, t, target)
-		-- Make sure the target has a disease
-		for eff_id, p in pairs(target.tmp) do
-			local e = target.tempeffect_def[eff_id]
-			if e.subtype.disease then
-				return 2
+			local diseases = t.getTargetDiseases(self, target)
+			if diseases and diseases.num > 0 then return {stun=0.1} end  -- We want the disable to be a small part of this calculation, partially to emphasize delaying its use
+		end,
+		ATTACKAREA = function(self, t, target)
+			local diseases = t.getTargetDiseases(self, target)
+			if diseases and diseases.num > 0 then -- low weight since the damage is unchanged (just accelerated)
+				return {BLIGHT=self:combatLimit(diseases.dur/diseases.num - 1, 3, 0, 0, 1, 5)}
 			end
-		end
-	end },
+		end,
+		__wt_cache_turns = 1 },
 	direct_hit = true,
 	requires_target = true,
 	getDamage = function(self, t) return (100 + self:combatTalentSpellDamage(t, 0, 50)) / 100 end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
 	getRadius = function(self, t) return math.floor(self:combatTalentScale(t, 2.3, 3.7)) end,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), radius=t.getRadius(self, t)}
+		return {type="ball", range=self:getTalentRange(t), radius=t.getRadius(self, t), friendlyfire=false, talent=t}
 	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -184,24 +212,21 @@ newTalent{
 			local target = game.level.map(px, py, engine.Map.ACTOR)
 			if not target then return end
 
-			-- List all diseases
-			local diseases = {}
-			for eff_id, p in pairs(target.tmp) do
-				local e = target.tempeffect_def[eff_id]
-				if e.subtype.disease then
-					diseases[#diseases+1] = {id=eff_id, params=p}
-				end
-			end
-			-- Make them EXPLODE !!!
-			for i, d in ipairs(diseases) do
-				target:removeEffect(d.id)
-				DamageType:get(DamageType.BLIGHT).projector(self, px, py, DamageType.BLIGHT, d.params.dam * d.params.dur * t.getDamage(self, t))
-			end
+			-- get all diseases on the target
+			local diseases = t.getTargetDiseases(self, target)			
 
-			if #diseases > 0 and target:canBe("stun") then
-				target:setEffect(target.EFF_STUNNED, t.getDuration(self, t), {apply_power=self:combatSpellpower()})
-			elseif #diseases > 0 then
-				game.logSeen(target, "%s resists the stun!", target.name:capitalize())
+			if diseases and #diseases > 0 then -- Ravage diseased targets!
+				game.logSeen(target, "Diseases #DARK_GREEN#BURN THROUGH#LAST# %s!", target.name:capitalize())
+				for i, d in ipairs(diseases) do
+					target:removeEffect(d.id)
+					DamageType:get(DamageType.BLIGHT).projector(self, px, py, DamageType.BLIGHT, d.params.dam * d.params.dur * t.getDamage(self, t))
+				end
+
+				if target:canBe("stun") then
+					target:setEffect(target.EFF_STUNNED, t.getDuration(self, t), {apply_power=self:combatSpellpower()})
+				else
+					game.logSeen(target, "%s resists the stun!", target.name:capitalize())
+				end
 			end
 		end)
 		game.level.map:particleEmitter(x, y, t.getRadius(self, t), "circle", {oversize=0.7, a=200, limit_life=8, appear=8, speed=-2, img="blight_circle", radius=t.getRadius(self, t)})
@@ -228,6 +253,7 @@ newTalent{
 	range = 8,
 	radius = 2,
 	tactical = { ATTACK = {BLIGHT = 2} },
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	requires_target = true,
 	healloss = function(self,t) return self:combatTalentLimit(t, 150, 44, 80) end, -- Limit < 150%
 	disfact = function(self,t) return self:combatTalentLimit(t, 100, 36, 60) end, -- Limit < 100%
@@ -254,6 +280,7 @@ newTalent{
 
 			local disease = rng.table(diseases)
 			local params = table.clone(disease.params, true)
+			params.__tmpvals = nil
 			params.src = self
 			if target:canBe("disease") then
 				target:setEffect(disease.id, 6, params)
@@ -264,7 +291,7 @@ newTalent{
 		end)
 	end,
 	action = function(self, t)
-		local tg = {type="bolt", range=self:getTalentRange(t)}
+		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 

@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ newEntity{
 	moddable_tile = resolvers.moddable_tile("sling"),
 	encumber = 4,
 	rarity = 7,
-	combat = { talented = "sling", accuracy_effect = "mace", sound = "actions/sling", sound_miss = "actions/sling", },
+	combat = { talented = "sling", accuracy_effect = "mace", physspeed=1, sound = "actions/sling", sound_miss = "actions/sling", },
 	archery_kind = "sling",
 	archery = "sling",
 	require = { talent = { Talents.T_SHOOT }, },
@@ -45,7 +45,6 @@ newEntity{ base = "BASE_SLING",
 	material_level = 1,
 	combat = {
 		range = 6,
-		physspeed = 0.8,
 	},
 }
 
@@ -57,7 +56,6 @@ newEntity{ base = "BASE_SLING",
 	material_level = 2,
 	combat = {
 		range = 7,
-		physspeed = 0.8,
 	},
 }
 
@@ -69,7 +67,6 @@ newEntity{ base = "BASE_SLING",
 	material_level = 3,
 	combat = {
 		range = 8,
-		physspeed = 0.8,
 	},
 }
 
@@ -81,7 +78,6 @@ newEntity{ base = "BASE_SLING",
 	material_level = 4,
 	combat = {
 		range = 9,
-		physspeed = 0.8,
 	},
 }
 
@@ -93,7 +89,6 @@ newEntity{ base = "BASE_SLING",
 	material_level = 5,
 	combat = {
 		range = 10,
-		physspeed = 0.8,
 	},
 }
 

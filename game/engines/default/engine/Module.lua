@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -475,7 +475,7 @@ function _M:addonMD5(add, base)
 	print("[MODULE LOADER] addon ", add.short_name, " MD5", fmd5, "computed in ", core.game.getTime() - t, vbase)
 
 	if __module_extra_info.compute_md5_only then
-		local f = io.open(__module_extra_info.compute_md5_only, "a")
+		local f = fs.open(__module_extra_info.compute_md5_only, "a")
 		f:write(("%s : addon[%s] md5\n"):format(fmd5, add.version_name))
 		f:close()
 	end
@@ -982,7 +982,7 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 			print("[MODULE LOADER] module MD5", module_md5, "computed in ", core.game.getTime() - t)
 
 			if __module_extra_info.compute_md5_only then
-				local f = io.open(__module_extra_info.compute_md5_only, "w")
+				local f = fs.open(__module_extra_info.compute_md5_only, "w")
 				f:write(("%s : module[%s] md5\n"):format(module_md5, mod.version_string))
 				f:close()
 			end
@@ -1016,7 +1016,9 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 	profile:addStatFields(unpack(mod.profile_stats_fields or {}))
 	profile:setConfigsBatch(true)
 	profile:loadModuleProfile(mod.short_name, mod)
+	profile:incrLoadProfile(mod)
 	profile:currentCharacter(mod.full_version_string, "game did not tell us")
+
 
 	UIBase:clearCache()
 
@@ -1068,28 +1070,30 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 	-- Add user chat if needed
 	if mod.allow_userchat and _G.game.key then
 		profile.chat:setupOnGame()
-		if not config.settings.chat or not config.settings.chat.channels or not config.settings.chat.channels[mod.short_name] then
-			if type(mod.allow_userchat) == "table" then
-				for _, chan in ipairs(mod.allow_userchat) do
-					profile.chat:join(chan)
+		profile:onAuth(function()
+			if not config.settings.chat or not config.settings.chat.channels or not config.settings.chat.channels[mod.short_name] then
+				if type(mod.allow_userchat) == "table" then
+					for _, chan in ipairs(mod.allow_userchat) do
+						profile.chat:join(chan)
+					end
+					if mod.allow_userchat[1] then profile.chat:selectChannel(mod.allow_userchat[1]) end
+				else
+					profile.chat:join(mod.short_name)
+					profile.chat:join(mod.short_name.."-spoiler")
+					profile.chat:join("global")
+					profile.chat:selectChannel(mod.short_name)
 				end
-				if mod.allow_userchat[1] then profile.chat:selectChannel(mod.allow_userchat[1]) end
+				print("Joining default channels")
 			else
-				profile.chat:join(mod.short_name)
-				profile.chat:join(mod.short_name.."-spoiler")
-				profile.chat:join("global")
-				profile.chat:selectChannel(mod.short_name)
+				local def = false
+				for c, _ in pairs(config.settings.chat.channels[mod.short_name]) do
+					profile.chat:join(c)
+					if c == mod.short_name then def = true end
+				end
+				if def then profile.chat:selectChannel(mod.short_name) else profile.chat:selectChannel( (next(config.settings.chat.channels[mod.short_name])) ) end
+				print("Joining selected channels")
 			end
-			print("Joining default channels")
-		else
-			local def = false
-			for c, _ in pairs(config.settings.chat.channels[mod.short_name]) do
-				profile.chat:join(c)
-				if c == mod.short_name then def = true end
-			end
-			if def then profile.chat:selectChannel(mod.short_name) else profile.chat:selectChannel( (next(config.settings.chat.channels[mod.short_name])) ) end
-			print("Joining selected channels")
-		end
+		end)
 	end
 
 	-- Disable the profile if ungood

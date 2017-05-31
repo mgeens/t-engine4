@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@ newTalent{
 	sustain_equilibrium = 18,
 	cooldown = 10,
 	tactical = { BUFF = 4 },
-	getPowermult = function(self,t,level) return 1.076 + 0.324*(level or self:getTalentLevel(t))^.5 end, --I5
-	getStatmult = function(self,t,level) return 1.076 + 0.324*(level or self:getTalentLevel(t))^.5 end, --I5
-	getAPRmult = function(self,t,level) return 0.65 + 0.51*(level or self:getTalentLevel(t))^.5 end, -- I5
-	getDamage = function(self, t) return self:getTalentLevel(t) * 10 end,
-	getPercentInc = function(self, t) return math.sqrt(self:getTalentLevel(t) / 5) / 2 end,
+	getPowermult = function(self,t,level) return 1.076 + 0.324*(level or self:getTalentLevel(t))^.5 end,
+	getStatmult = function(self,t,level) return 1.076 + 0.324*(level or self:getTalentLevel(t))^.5 end,
+	getAPRmult = function(self,t,level) return 0.65 + 0.51*(level or self:getTalentLevel(t))^.5 end,
+	getDamage = function(self, t) return 0 end,
+	getPercentInc = function(self, t) return math.sqrt(self:getTalentLevel(t) / 5) / 1.5 end,
 	activate = function(self, t)
 		local r = {
 			tmpid = self:addTemporaryValue("psiblades_active", self:getTalentLevel(t)),
@@ -66,8 +66,8 @@ newTalent{
 		local inc = t.getPercentInc(self, t)
 		return ([[Channel your mental power through your wielded mindstars, generating psionic blades.
 		Mindstar psiblades have their damage modifiers (how much damage they gain from stats) multiplied by %0.2f, their armour penetration by %0.2f and mindpower, willpower and cunning by %0.2f.
-		Also increases Physical Power by %d and increases weapon damage by %d%% when using mindstars.]]):
-		format(t.getStatmult(self, t), t.getAPRmult(self, t), t.getPowermult(self, t), damage, 100 * inc) --I5
+		Also increases weapon damage by %d%% when using mindstars.]]):
+		format(t.getStatmult(self, t), t.getAPRmult(self, t), t.getPowermult(self, t), 100 * inc) --I5
 	end,
 }
 
@@ -107,7 +107,12 @@ newTalent{
 	points = 5,
 	equilibrium = 20,
 	cooldown = 25,
-	tactical = { ATTACK = 2, DEFEND=3 },
+	tactical = {
+		ATTACK = {PHYSICAL = function(self, t, target) return self:reactionToward(target) < 0 and {cut=2} or 0 end
+		}, -- add for each foe affected
+		DEFEND = {special = function(self, t, target) return self:reactionToward(target) >= 0 and 3 or 0 end} -- add for each ally affected
+	},
+	target = {type="ball", radius=3, friendlyblock=false}, -- used by the AI to determine actors affected
 	getDamage = function(self, t) return 5 + self:combatTalentMindDamage(t, 5, 35) * get_mindstar_power_mult(self) end,
 	getChance = function(self, t) return util.bound(10 + self:combatTalentMindDamage(t, 3, 25), 10, 40) * get_mindstar_power_mult(self, 90) end,
 	on_pre_use = function(self, t, silent) if not self:hasPsiblades(true, true) then if not silent then game.logPlayer(self, "You require two psiblades in your hands to use this talent.") end return false end return true end,

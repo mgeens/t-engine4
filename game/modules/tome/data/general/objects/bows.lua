@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ newEntity{
 	moddable_tile = resolvers.moddable_tile("bow"),
 	encumber = 4,
 	rarity = 7,
-	combat = { talented = "bow", accuracy_effect = "axe", sound = "actions/arrow", sound_miss = "actions/arrow",},
+	combat = { talented = "bow", accuracy_effect = "axe", physspeed=1, sound = "actions/arrow", sound_miss = "actions/arrow",},
 	require = { talent = { Talents.T_SHOOT }, },
 	archery_kind = "bow",
 	archery = "bow",
@@ -47,7 +47,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 1,
 	combat = {
 		range = 6,
-		physspeed = 0.8,
 	},
 }
 
@@ -59,7 +58,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 2,
 	combat = {
 		range = 7,
-		physspeed = 0.8,
 	},
 }
 
@@ -71,7 +69,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 3,
 	combat = {
 		range = 8,
-		physspeed = 0.8,
 	},
 }
 
@@ -83,7 +80,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 4,
 	combat = {
 		range = 9,
-		physspeed = 0.8,
 	},
 }
 
@@ -95,7 +91,6 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 5,
 	combat = {
 		range = 10,
-		physspeed = 0.8,
 	},
 }
 
