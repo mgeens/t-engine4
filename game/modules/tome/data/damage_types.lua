@@ -1736,7 +1736,7 @@ newDamageType{
 		local realdam = DamageType:get(DamageType.NATURE).projector(src, x, y, DamageType.NATURE, dam / 6, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and target:canBe("poison") then
-			target:setEffect(target.EFF_POISONED, 5, {src=src, power=dam / 6, apply_power=power or (src.combatAttack and src:combatAttack()) or 0})
+			target:setEffect(target.EFF_POISONED, 5, {src=src, power=dam / 6})
 		end
 		return realdam
 	end,
@@ -1769,7 +1769,6 @@ newDamageType{
 }
 
 -- Spydric poison: prevents movement
--- Very special, does not have a power check
 newDamageType{
 	name = "spydric poison", type = "SPYDRIC_POISON",
 	projector = function(src, x, y, type, dam, state)
