@@ -541,7 +541,7 @@ newTalent{
 	tactical = { DISABLE = { confusion = 3 } },
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
-	getConfusion = function(self, t) return math.floor(self:combatTalentScale(t, 15, 50)) end,
+	getConfusion = function(self, t) return self:combatTalentLimit(t, 50, 15, 45) end, -- Confusion hard cap is 50%
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
