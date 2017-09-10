@@ -542,10 +542,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		if not target.dead and dam > 0 and src.knowTalent and src:knowTalent(src.T_ENDLESS_WOES) then
-			src:triggerTalent(src.T_ENDLESS_WOES, nil, target, type, dam)
-		end
-
 		-- damage affinity healing
 		if not target.dead and affinity_heal > 0 then
 			target:heal(affinity_heal, src)
@@ -635,15 +631,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 					src.turn_procs.unstoppable_nature = true
 				end
 			end
-		end
-
-		-- Use state, because we don't care if it was shrugged off.
-		if state.crit_power > 1 and not state.crit_elemental_surge then
-			if src.knowTalent and src:knowTalent(src.T_ELEMENTAL_SURGE) then
-				src:triggerTalent(src.T_ELEMENTAL_SURGE, nil, target, type, dam)
-			end
-
-			state.crit_elemental_surge = true
 		end
 
 		if src.turn_procs and not src.turn_procs.dazing_damage and src.hasEffect and src:hasEffect(src.EFF_DAZING_DAMAGE) then

@@ -2571,19 +2571,6 @@ newEffect{
 }
 
 newEffect{
-	name = "ELEMENTAL_SURGE_NATURE", image = "talents/elemental_surge.png",
-	desc = "Elemental Surge: Nature",
-	long_desc = function(self, eff) return ("Immune to physical effects.") end,
-	type = "physical",
-	subtype = { status=true },
-	status = "beneficial",
-	parameters = { },
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "spell_negative_status_effect_immune", 1)
-	end,
-}
-
-newEffect{
 	name = "STEAMROLLER", image = "talents/steamroller.png",
 	desc = "Steamroller",
 	long_desc = function(self, eff) return ("Resets Rush cooldown if killed.") end,

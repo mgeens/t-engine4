@@ -611,12 +611,45 @@ function _M:actBase()
 	self:checkStillInCombat()
 end
 
+function _M:hasProc(proc)
+	if not self.turn_procs then return end
+	if self.turn_procs[proc] then 
+		return self.turn_procs[proc] 
+	elseif self.turn_procs.multi then 
+		return self.turn_procs.multi[proc] 
+	end
+end
+
+function _M:setProc(name, val, turns)
+	turns = turns or 1
+	val = val or true
+	local proc = {val = val, turns = turns}
+	if turns > 1 then
+		table.set(self, "turn_procs", "multi", name, proc)
+	else 
+		self.turn_procs[name] = proc
+	end
+end
+
 -- General entry point for Actors to act, called by NPC:act or Player:act
 function _M:act()
 	if not engine.Actor.act(self) then return end
 
 	self.changed = true
+
+	-- Store procs with more than 1 turn remaining and re-add them after we clear turn_procs
+	local temp = {}
+	if self.turn_procs.multi then
+		for proc, val in pairs(self.turn_procs.multi) do
+			if proc then
+				self.turn_procs.multi[proc].turns = self.turn_procs.multi[proc].turns - 1
+				if self.turn_procs.multi[proc].turns > 0 then temp[proc] = val end
+			end
+		end
+	end
+
 	self.turn_procs = {}
+	if temp then self.turn_procs.multi = temp end
 
 	-- Break some sustains if certain resources are too low
 	-- Note: force_talent_ignore_ressources has no effect here

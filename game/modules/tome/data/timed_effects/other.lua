@@ -26,6 +26,74 @@ local Level = require "engine.Level"
 local Combat = require "mod.class.interface.Combat"
 
 newEffect{
+	name = "ELEMENTAL_SURGE_ARCANE", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Arcane",
+	long_desc = function(self, eff) return ("Spell and mind speed increased by 30%") end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_spellspeed", 0.3)
+		self:effectTemporaryValue(eff, "combat_mindspeed", 0.3)
+	end,
+}
+
+-- Elemental Surge effects here to avoid interaction with duration increases since so many can be up at once
+newEffect{
+	name = "ELEMENTAL_SURGE_FIRE", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Fire",
+	long_desc = function(self, eff) return ("All damage increased by %d%%"):format(eff.damage) end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = {damage = 30 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff,"inc_damage", {all = eff.damage})
+	end,
+}
+
+newEffect{
+	name = "ELEMENTAL_SURGE_COLD", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Cold",
+	long_desc = function(self, eff) return ("Armor increased by %d, deals %d ice damage when hit in melee."):format(eff.armor, eff.dam) end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = {armor=0, dam=100 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_armor", eff.armor)
+		self:effectTemporaryValue(eff, "on_melee_hit", {[DamageType.ICE]=eff.dam})
+	end,
+}
+
+newEffect{
+	name = "ELEMENTAL_SURGE_LIGHTNING", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Lightning",
+	long_desc = function(self, eff) return ("Movement speed increased by %d%%."):format(eff.move) end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = { move = 50},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "movement_speed", eff.move/100)
+	end,
+}
+
+newEffect{
+	name = "ELEMENTAL_SURGE_LIGHT", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Light",
+	long_desc = function(self, eff) return ("All talent cooldowns reduced by %d%%."):format(eff.cooldown) end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = {cooldown = 20 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "talent_cd_reduction", {allpct = eff.cooldown / 100})
+	end,
+}
+
+newEffect{
 	name = "FLASH_SHIELD", image = "talents/flash_of_the_blade.png",
 	desc = "Protected by the Sun",
 	long_desc = function(self, eff) return "The Sun has granted a brief immunity to all damage." end,

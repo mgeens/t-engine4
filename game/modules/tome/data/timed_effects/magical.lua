@@ -2081,6 +2081,77 @@ newEffect{
 	end,
 }
 
+-- Endless Woes prodigy effects
+newEffect{
+	name = "WOEFUL_DISEASE", image = "talents/weakness_disease.png",
+	desc = "Woeful Disease",
+	long_desc = function(self, eff) return ("The target is infected by a disease, reducing its strength, constitution, dexterity by %d and doing %0.2f blight damage per turn."):
+		format(eff.str, eff.con, eff.dex, eff.dam) end,
+	type = "magical",
+	subtype = {disease=true, blight=true},
+	status = "detrimental",
+	parameters = {str = 1, con = 1, dex = 1, dam = 0},
+	on_gain = function(self, err) return "#Target# is afflicted by a woeful disease!" end,
+	on_lose = function(self, err) return "#Target# is free from the woeful disease." end,
+	-- Damage each turn
+	on_timeout = function(self, eff)
+		if self:attr("purify_disease") then self:heal(eff.dam, eff.src)
+		else if eff.dam > 0 then DamageType:get(DamageType.BLIGHT).projector(eff.src, self.x, self.y, DamageType.BLIGHT, eff.dam, {from_disease=true})
+		end end
+	end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_stats", {
+			[Stats.STAT_STR] = math.floor(eff.str),
+			[Stats.STAT_CON] = math.floor(eff.con),
+			[Stats.STAT_DEX] = math.floor(eff.dex),
+		})
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "WOEFUL_DARKNESS", image = "effects/bane_blinded.png",
+	desc = "Woeful Darkness",
+	long_desc = function(self, eff) return ("The target is weakened and lost, all damage it does is reduced by %d%%."):format(eff.reduce) end,
+	type = "magical",
+	subtype = { darkness=true,},
+	status = "detrimental",
+	parameters = {power=10, reduce=5},
+	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Woeful Darkness" end,
+	on_lose = function(self, err) return "#Target# looks more determined.", "-Woeful Darkness" end,
+	on_timeout = function(self, eff)
+
+	end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("numbed", eff.reduce)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("numbed", eff.tmpid)
+	end,
+}
+
+newEffect{
+	name = "WOEFUL_CORROSION", image = "talents/acidic_skin.png",
+	desc = "Woeful Corrosion",
+	long_desc = function(self, eff) return ("The target has been splashed with acid, taking %0.2f acid damage per turn."):format(eff.dam) end,
+	type = "magical",
+	subtype = { acid=true,},
+	status = "detrimental",
+	parameters = {dam = 0},
+	on_gain = function(self, err) return "#Target# is covered in acid!" end,
+	on_lose = function(self, err) return "#Target# is free from the acid." end,
+	-- Damage each turn
+	on_timeout = function(self, eff)
+		DamageType:get(DamageType.ACID).projector(eff.src, self.x, self.y, DamageType.ACID, eff.dam)
+	end,
+	activate = function(self, eff)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+
 newEffect{
 	name = "EPIDEMIC", image = "talents/epidemic.png",
 	desc = "Epidemic",
@@ -2511,47 +2582,6 @@ newEffect{
 }
 
 newEffect{
-	name = "ELEMENTAL_SURGE_ARCANE", image = "talents/elemental_surge.png",
-	desc = "Elemental Surge: Arcane",
-	long_desc = function(self, eff) return ("Spellcasting speed increased by 20%") end,
-	type = "magical",
-	subtype = { arcane=true },
-	status = "beneficial",
-	parameters = { },
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "combat_spellspeed", 0.2)
-	end,
-}
-
-newEffect{
-	name = "ELEMENTAL_SURGE_COLD", image = "talents/elemental_surge.png",
-	desc = "Elemental Surge: Cold",
-	long_desc = function(self, eff) return ("Icy Skin: Physical damage reduced by 30%%, armor increased by %d, and deals %d ice damage when hit in melee."):format(eff.armor, eff.dam) end,
-	type = "magical",
-	subtype = { arcane=true },
-	status = "beneficial",
-	parameters = {physresist=30, armor=0, dam=100 },
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "resists", {[DamageType.PHYSICAL]=eff.physresist})
-		self:effectTemporaryValue(eff, "combat_armor", eff.armor)
-		self:effectTemporaryValue(eff, "on_melee_hit", {[DamageType.ICE]=eff.dam})
-	end,
-}
-
-newEffect{
-	name = "ELEMENTAL_SURGE_LIGHTNING", image = "talents/elemental_surge.png",
-	desc = "Elemental Surge: Lightning",
-	long_desc = function(self, eff) return ("When hit you turn into pure lightning and reappear near where you where, ignoring the blow.") end,
-	type = "magical",
-	subtype = { arcane=true },
-	status = "beneficial",
-	parameters = { },
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "phase_shift", 1)
-	end,
-}
-
-newEffect{
 	name = "VULNERABILITY_POISON", image = "talents/vulnerability_poison.png",
 	desc = "Vulnerability Poison",
 	long_desc = function(self, eff)
@@ -2615,6 +2645,7 @@ newEffect{
 
 					if self:reactionToward(target) < 0 then
 						local dam = eff.dam * (1 + (5 - core.fov.distance(self.x, self.y, target.x, target.y)) / 8)
+						target:setEffect(target.EFF_WEIGHT_OF_THE_SUN, 2, {reduce = 30})  -- Quickly wears off when outside of AoE
 						DamageType:get(DamageType.FIRE).projector(self, target.x, target.y, DamageType.FIRE, dam/3)
 						DamageType:get(DamageType.LIGHT).projector(self, target.x, target.y, DamageType.LIGHT, dam/3)
 						DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam/3)
@@ -2622,6 +2653,21 @@ newEffect{
 				end
 			end
 		end)
+	end,
+}
+
+newEffect{
+	name = "WEIGHT_OF_THE_SUN", image = "talents/irresistible_sun.png",
+	desc = "Weight of the Sun",
+	long_desc = function(self, eff) return ("The target is struggling against immense gravity, all damage it does is reduced by %d%%."):format(eff.reduce) end,
+	type = "magical",
+	subtype = { sun=true,},
+	status = "detrimental",
+	parameters = {reduce=5},
+	on_gain = function(self, err) return "#Target# can barely stand!", "+Weight of the Sun" end,
+	on_lose = function(self, err) return "#Target# can move freely once more.", "-Weight of the Sun" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "numbed", eff.reduce)
 	end,
 }
 
