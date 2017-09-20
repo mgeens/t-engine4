@@ -59,6 +59,68 @@ newEffect{
 	end,
 }
 
+newEffect{
+	name = "ITEM_CHARM_PIERCING", image = "talents/intricate_tools.png",
+	desc = "Charm:  Piercing",
+	long_desc = function(self, eff) return ("All damage penetration increased by %d%%."):format(eff.penetration) end,
+	type = "other",
+	subtype = { },
+	status = "beneficial",
+	parameters = { penetration=10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "resists_pen", {all = eff.penetration})
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "ITEM_CHARM_SAVIOR", image = "talents/intricate_tools.png",
+	desc = "Charm:  Saves",
+	long_desc = function(self, eff) return ("All saves increased by %d."):format(eff.save) end,
+	type = "other",
+	subtype = { },
+	status = "beneficial",
+	parameters = { save=10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_physresist", eff.save)
+		self:effectTemporaryValue(eff, "combat_spellresist", eff.save)
+		self:effectTemporaryValue(eff, "combat_mentalresist", eff.save)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "ITEM_CHARM_EVASIVE", image = "talents/intricate_tools.png",
+	desc = "Charm:  Evasion",
+	long_desc = function(self, eff) return ("%d%% chance to avoid weapon attacks"):format(eff.chance) end,
+	type = "other",
+	subtype = { },
+	status = "beneficial",
+	parameters = { chance=10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "evasion", eff.chance)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "ITEM_CHARM_INNERVATING", image = "talents/intricate_tools.png",
+	desc = "Charm:  Innervating",
+	long_desc = function(self, eff) return ("Fatigue reduced by %d%%."):format(eff.fatigue) end,
+	type = "other",
+	subtype = { },
+	status = "beneficial",
+	parameters = { fatigue=10, },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "fatigue", -eff.fatigue)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
 -- Design:  Temporary immobility in exchange for a large stat buff.
 newEffect{
 	name = "TREE_OF_LIFE", image = "shockbolt/object/artifact/tree_of_life.png",

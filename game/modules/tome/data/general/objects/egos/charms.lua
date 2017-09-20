@@ -75,8 +75,7 @@ newEntity{
 newEntity{
 	name = "overpowered ", prefix=true,
 	keywords = {['overpower']=true},
-	level_range = {30, 50},
-	greater_ego = 1,
+	level_range = {1, 50},
 	rarity = 16,
 	cost = 5,
 	_modify_charm = modify_charm,
@@ -94,4 +93,107 @@ newEntity{
 			end
 		end)
 	end),
+}
+
+newEntity{
+	name = "focusing ", prefix=true,
+	keywords = {focusing=true},
+	level_range = {1, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 12,
+	cost = 5,
+	focusing_amt = resolvers.mbonus_material(2, 1),
+	charm_on_use = {
+		{100, function(self, who) return ("reduce %d talent cooldowns by 2"):format(self.focusing_amt, self.focusing_reduction) end, function(self, who)
+			who:talentCooldownFilter(nil, self.focusing_amt, 2, true)
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
+}
+
+newEntity{
+	name = "evasive ", prefix=true,
+	keywords = {evasive=true},
+	level_range = {1, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 12,
+	cost = 5,
+	evasive_chance = resolvers.mbonus_material(30, 10),
+	charm_on_use = {
+		{100, function(self, who) return ("gain a %d%% chance to evade weapon attacks for 2 turns"):format(self.evasive_chance) end, function(self, who)
+			who:setEffect(who.EFF_ITEM_CHARM_EVASIVE, 2, {chance = self.evasive_chance})
+		end},
+	},
+	use_power = {tactical = {DEFEND = 0.2}}
+}
+
+newEntity{
+	name = "soothing ", prefix=true,
+	keywords = {soothing=true},
+	level_range = {1, 50},
+	rarity = 12,
+	cost = 5,
+	--greater_ego = 1,
+	soothing_heal = resolvers.mbonus_material(80, 30),
+	charm_on_use = {
+		{100, function(self, who) return ("heal for %d"):format(self.soothing_heal) end, function(self, who)
+			who:attr("allow_on_heal", 1)
+			who:heal(who:mindCrit(self.soothing_heal), who)
+			who:attr("allow_on_heal", -1)		
+		end},
+	},
+	use_power = {tactical = {HEAL = 0.2}}
+}
+
+newEntity{
+	name = "piercing ", prefix=true,
+	keywords = {piercing=true},
+	level_range = {1, 50},
+	rarity = 12,
+	greater_ego = 1,
+	unique_ego = 1,
+	cost = 5,
+	piercing_penetration = resolvers.mbonus_material(30, 10),
+	charm_on_use = {
+		{100, function(self, who) return ("increase all damage penetration by %d%% for 2 turns"):format(self.piercing_penetration) end, function(self, who)
+			who:setEffect(who.EFF_ITEM_CHARM_PIERCING, 2, {penetration = self.piercing_penetration})
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
+}
+
+newEntity{
+	name = "savior's ", prefix=true,
+	keywords = {savior=true},
+	level_range = {1, 50},
+	rarity = 12,
+	greater_ego = 1,
+	unique_ego = 1,
+	cost = 5,
+	savior_saves = resolvers.mbonus_material(30, 10),
+	charm_on_use = {
+		{100, function(self, who) return ("increase all saves by %d for 2 turns"):format(self.savior_saves) end, function(self, who)
+			who:setEffect(who.EFF_ITEM_CHARM_SAVIOR, 2, {save = self.savior_saves})
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
+}
+
+newEntity{
+	name = "innervating ", prefix=true,
+	keywords = {innervating=true},
+	level_range = {1, 50},
+	rarity = 18,
+	cost = 5,
+	greater_ego = 1,
+	unique_ego = 1,
+	innervating_fatigue = resolvers.mbonus_material(30, 10),
+	charm_on_use = {
+		{100, function(self, who) return ("reduce fatigue by %d%% for 2 turns"):format(self.innervating_fatigue) end, function(self, who)
+			who:setEffect(who.EFF_ITEM_CHARM_INNERVATING, 2, {fatigue = self.innervating_fatigue})
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
 }
