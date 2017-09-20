@@ -48,9 +48,10 @@ newEntity{
 					local cleansed = 0
 					local heal = self.use_power.heal(self, who)
 
-					cleansed = cleansed + target:removeEffectsFilter({subtype="wound", status="detrimental"}, 1)
-					cleansed = cleansed + target:removeEffectsFilter({subtype="poison", status="detrimental"}, 1)
-					cleansed = cleansed + target:removeEffectsFilter({subtype="disease", status="detrimental"}, 1)
+					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.poison end, 1)
+					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.cut end, 1)
+					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.disease end, 1)
+
 					target:attr("allow_on_heal", 1)
 					target:heal(heal + (heal / 2 * cleansed), who)
 					target:attr("allow_on_heal", -1)
