@@ -2041,9 +2041,9 @@ function _M:getUseDesc(use_actor)
 			ret = tstring{{"color","YELLOW"}, ("It can be used to %s, with %d charges out of %d."):format(desc, math.floor(self.power / usepower(self.use_power.power)), math.floor(self.max_power / usepower(self.use_power.power))), {"color","LAST"}}
 		elseif self.talent_cooldown then
 			local t_name = self.talent_cooldown == "T_GLOBAL_CD" and "all charms" or "Talent "..use_actor:getTalentDisplayName(use_actor:getTalentFromId(self.talent_cooldown))
-			ret = tstring{{"color","YELLOW"}, ("It can be used to %s, putting %s on cooldown for %d turns."):format(desc:format(self:getCharmPower(use_actor)), t_name, usepower(self.use_power.power)), {"color","LAST"}}
+			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\nActivation puts %s on cooldown for %d turns."):format(desc:format(self:getCharmPower(use_actor)), t_name, usepower(self.use_power.power)), {"color","LAST"}}
 		else
-			ret = tstring{{"color","YELLOW"}, ("It can be used to %s, costing %d power out of %d/%d."):format(desc, usepower(self.use_power.power), self.power, self.max_power), {"color","LAST"}}
+			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\nActivation costs %d power out of %d/%d."):format(desc, usepower(self.use_power.power), self.power, self.max_power), {"color","LAST"}}
 		end
 	elseif self.use_simple then
 		ret = tstring{{"color","YELLOW"}, ("It can be used to %s."):format(util.getval(self.use_simple.name, self, use_actor)), {"color","LAST"}}
@@ -2063,7 +2063,13 @@ function _M:getUseDesc(use_actor)
 	if self.charm_on_use then
 		ret:add(true, "When used:", true)
 		for i, d in ipairs(self.charm_on_use) do
-			ret:add(tostring(d[1]), "% chance to ", d[2](self, use_actor), ".", true)
+			-- Clean up the description if our chance to proc is 100%
+			local percent = d[1]
+			if percent < 100 then
+				ret:add({"color","ORCHID"}, "* ", tostring(d[1]), "% chance to ", d[2](self, use_actor), ".", true, {"color","LAST"})
+			else
+				ret:add({"color","ORCHID"}, "* ", d[2](self, use_actor):capitalize(), ".", true, {"color","LAST"})
+			end
 		end
 	end
 
