@@ -2187,6 +2187,21 @@ newEffect{
 }
 
 newEffect{
+	name = "BLOOD_GRASP", image = "talents/blood_grasp.png",
+	desc = "Sanguine Infusion",
+	long_desc = function(self, eff) return ("Max life increased by %d."):format(eff.life) end,
+	type = "magical",
+	subtype = {corruption=true},
+	status = "beneficial",
+	parameters = {life = 0},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "max_life", eff.life)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
 	name = "ARCANE_SUPREMACY", image = "talents/arcane_supremacy.png",
 	desc = "Arcane Supremacy",
 	long_desc = function(self, eff) return ("The target's spellpower and spell save has been increased by %d"):	format(eff.power) end,

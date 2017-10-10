@@ -47,49 +47,7 @@ newTalent{
 	end,
 }
 
---[[
-newTalent{
-	name = "Blood Sacrifice",
-	type = {"corruption/sanguisuge", 2},
-	require = corrs_req2,
-	points = 5,
-	vim = 0,
-	cooldown = 30,
-	range = 10,
-	tactical = { VIM = 1 },
-	action = function(self, t)
-		local amount = self.life * 0.5
-		if self.life <= amount + 1 then
-			game.logPlayer(self, "Doing this would kill you.")
-			return
-		end
-
-		local seen = false
-		-- Check for visible monsters, only see LOS actors, so telepathy wont prevent resting
-		core.fov.calc_circle(self.x, self.y, game.level.map.w, game.level.map.h, 20, function(_, x, y) return game.level.map:opaque(x, y) end, function(_, x, y)
-			local actor = game.level.map(x, y, game.level.map.ACTOR)
-			if actor and self:reactionToward(actor) < 0 and self:canSee(actor) and game.level.map.seens(x, y) then
-				seen = {x=x,y=y,actor=actor}
-			end
-		end, nil)
-		if not seen then
-			game.logPlayer(self, "There are no foes in sight.")
-			return
-		end
-
-		self:incVim(30 + self:combatTalentSpellDamage(t, 5, 150))
-		self:takeHit(amount, self)
-		game:playSoundNear(self, "talents/spell_generic2")
-		return true
-	end,
-	info = function(self, t)
-		return ([=[Sacrifices 50%% of your current life to restore %d vim.
-		This only works if there is at least one foe in sight.
-		The effect will increase with your Magic stat.]=]):
-		format(30 + self:combatTalentSpellDamage(t, 5, 150))
-	end,
-}
-]]
+-- Finish me pls
 newTalent{
 	name = "Bloodcasting",
 	type = {"corruption/sanguisuge", 2},

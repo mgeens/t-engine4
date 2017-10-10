@@ -28,7 +28,7 @@ newTalent{
 		if self.turn_procs.blood_splash_on_crit then return end
 		self.turn_procs.blood_splash_on_crit = true
 
-		self:heal(t.heal(self, t), self)
+		self:heal(self:spellCrit(t.heal(self, t)), self)
 		if core.shader.active(4) then
 			self:addParticles(Particles.new("shader_shield_temp", 1, {toback=true , size_factor=1.5, y=-0.3, img="healgreen", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, circleDescendSpeed=3.5}))
 			self:addParticles(Particles.new("shader_shield_temp", 1, {toback=false, size_factor=1.5, y=-0.3, img="healgreen", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, circleDescendSpeed=3.5}))
@@ -38,7 +38,7 @@ newTalent{
 		if self.turn_procs.blood_splash_on_kill then return end
 		self.turn_procs.blood_splash_on_kill = true
 
-		self:heal(t.heal(self, t), self)
+		self:heal(self:spellCrit(t.heal(self, t)), self)
 		if core.shader.active(4) then
 			self:addParticles(Particles.new("shader_shield_temp", 1, {toback=true , size_factor=1.5, y=-0.3, img="healgreen", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, circleDescendSpeed=3.5}))
 			self:addParticles(Particles.new("shader_shield_temp", 1, {toback=false, size_factor=1.5, y=-0.3, img="healgreen", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, circleDescendSpeed=3.5}))
@@ -160,7 +160,7 @@ newTalent{
 	vim = 18,
 	direct_hit = true,
 	requires_target = true,
-	range = 1,
+	range = 4,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 2, 4, "log")) end,
 	getDam = function(self, t) return self:combatTalentLimit(t, 2, 10, 5) end, --Limit < 10% life/effect

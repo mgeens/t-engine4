@@ -61,7 +61,7 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRadius(t), range=self:getTalentRange(t), talent=t}
 	end,
-	getRemoveCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
+	getRemoveCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,  -- Oh for the love of god no, fix me
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
@@ -111,7 +111,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Project a corrupted blast of power that deals %0.2f blight damage and removes up to %d magical or physical effect(s) from any creatures caught in the radius 3 ball.
+		return ([[Project a corrupted blast of power that deals %0.2f blight damage and removes up to %d magical or physical sustains or effect(s) from any creatures caught in the radius 3 ball.
 		For each effect, the creature has a chance to resist based on its spell save.
 		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.BLIGHT, self:combatTalentSpellDamage(t, 28, 120)), t.getRemoveCount(self, t))
 	end,

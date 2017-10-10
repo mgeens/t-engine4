@@ -56,6 +56,7 @@ newTalent{
 	end,
 }
 
+-- Finish me pls
 newTalent{
 	name = "Blood Grasp",
 	type = {"corruption/blood", 2},
@@ -74,12 +75,25 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:projectile(tg, x, y, DamageType.DRAINLIFE, {dam=self:spellCrit(self:combatTalentSpellDamage(t, 10, 290)), healfactor=0.5}, {type="blood"})
+		local dt = function(px, py)
+			local target = game.level.map(px, py, engine.Map.ACTOR)
+			if not target then return end
+
+			local damage = DamageType:get(DamageType.BLIGHT).projector(self, target.x, target.y, DamageType.BLIGHT, self:combatTalentSpellDamage(t, 10, 190))
+			local heal = damage / 2
+			self:setEffect(self.EFF_BLOOD_GRASP, 5, {life = heal} )
+			self:heal(heal, self)
+			--local _ _, _, _, x, y = self:canProject(tg, x, y)
+			--{dam=self:spellCrit(self:combatTalentSpellDamage(t, 10, 290)), healfactor=0.5}
+		--	game.level.map:particleEmitter(self.x, self.y, 10, "bone_spear", {tx=target.x - self.x, ty=target.y - self.y})
+		end
+		self:projectile(tg, x, y, dt, nil, {type="blood"})
 		game:playSoundNear(self, "talents/slime")
 		return true
 	end,
 	info = function(self, t)
-		return ([[Project a bolt of corrupted blood, doing %0.2f blight damage and healing you for half the damage done.
+		return ([[Project a bolt of corrupted blood, doing %0.2f blight damage and healing you for half the damage dealt.
+			Half the damage dealt will be gained as maximum life for 5 turns.
 		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.BLIGHT, self:combatTalentSpellDamage(t, 10, 290)))
 	end,
 }

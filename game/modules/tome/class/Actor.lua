@@ -2390,14 +2390,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	if value > 0 and self:isTalentActive(self.T_BONE_SHIELD) then
-		local t = self:getTalentFromId(self.T_BONE_SHIELD)
-		if t.absorb(self, t, self:isTalentActive(self.T_BONE_SHIELD)) then
-			game:delayedLogDamage(src, self, 0, ("#SLATE#(%d to bones)#LAST#"):format(value), false)
-			value = 0
-		end
-	end
-
 	if value <=0 then return 0 end
 	if self.knowTalent and (self:knowTalent(self.T_SEETHE) or self:knowTalent(self.T_GRIM_RESOLVE)) then
 		if not self:hasEffect(self.EFF_CURSED_FORM) then
