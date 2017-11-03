@@ -99,8 +99,8 @@ carrionworm = function(self, target, duration, x, y)
 	m.unused_talents_types = 0
 	m.no_inventory_access = true
 	m.no_points_on_levelup = true
+	m.carrion_worm = true  -- This keeps the on_death effect from spamming the damage log with 0s
 	m.save_hotkeys = true
-	m.ai_state = m.ai_state or {}
 	m.ai_state.tactic_leash = 100
 	-- Try to use stored AI talents to preserve tweaking over multiple summons
 	m.ai_talents = self.stored_ai_talents and self.stored_ai_talents[m.name] or {}

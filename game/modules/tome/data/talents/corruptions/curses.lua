@@ -22,7 +22,7 @@ newTalent{
 	type = {"corruption/curses", 1},
 	require = corrs_req1,
 	points = 5,
-	cooldown = 20,
+	cooldown = 15,
 	vim = 20,
 	range = 10,
 	tactical = { DISABLE = 2 },
@@ -103,8 +103,8 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Curses your target, stopping any natural healing and dealing %0.2f darkness damage each turn for 10 turns.
-		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.DARKNESS, self:combatTalentSpellDamage(t, 10, 70)))
+		return ([[Curses your target, stopping any natural healing and dealing %0.2f darkness damage over 10 turns.
+		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.DARKNESS, self:combatTalentSpellDamage(t, 10, 70)*10))
 	end,
 }
 

@@ -126,7 +126,7 @@ newTalent{
 	points = 5,
 	cooldown = 15,
 	vim = 16,
-	range = 5,
+	range = 10,
 	tactical = { DISABLE = 2 },
 	direct_hit = true,
 	requires_target = true,
@@ -139,7 +139,7 @@ newTalent{
 		self:project(tg, x, y, function(tx, ty)
 			local target = game.level.map(tx, ty, Map.ACTOR)
 			if not target or target == self then return end
-			target:setEffect(target.EFF_HEALING_INVERSION, 5, {apply_power=self:combatSpellpower(), power=t.getPower(self, t)})
+			target:setEffect(target.EFF_HEALING_INVERSION, 5, {src=self, apply_power=self:combatSpellpower(), power=t.getPower(self, t)})
 		end)
 		game:playSoundNear(self, "talents/slime")
 		return true
@@ -188,13 +188,16 @@ newTalent{
 					local p = self.tmp[eff_id]
 					local e = self.tempeffect_def[eff_id]
 					local effectParam = self:copyEffect(eff_id)
-					effectParam.src = self
+					effectParam.__tmpparticles = nil
+					if effectParam then
+						effectParam.src = self
 
-					target:setEffect(eff_id, p.dur, effectParam)
-					self:removeEffect(eff_id)
-					local dead, val = self:takeHit(dam, self, {source_talent=t})
-					target:heal(val, self)
-					game:delayedLogMessage(self, target, "vile_transplant"..e.desc, ("#CRIMSON##Source# transfers an effect (%s) to #Target#!"):format(e.desc))
+						target:setEffect(eff_id, p.dur, effectParam)
+						self:removeEffect(eff_id)
+						local dead, val = self:takeHit(dam, self, {source_talent=t})
+						target:heal(val, self)
+						game:delayedLogMessage(self, target, "vile_transplant"..e.desc, ("#CRIMSON##Source# transfers an effect (%s) to #Target#!"):format(e.desc))
+					end
 				end
 				nb = nb - 1
 			end

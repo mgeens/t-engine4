@@ -2022,7 +2022,11 @@ function _M:tooltip(x, y, seen_by)
 			if e.type == "physical" then
 				effphysical:add(true, "- ", {"color", "LIGHT_RED"}, desceffect(e, p, dur), {"color", "WHITE"} )
 			elseif e.type == "magical" then
-				effmagical:add(true, "- ", {"color", "DARK_ORCHID"}, desceffect(e, p, dur), {"color", "WHITE"} )
+				if e.subtype and e.subtype.disease then
+					effmagical:add(true, "- ", {"color", "DARK_GREEN"}, desceffect(e, p, dur), {"color", "WHITE"} )
+				else
+					effmagical:add(true, "- ", {"color", "DARK_ORCHID"}, desceffect(e, p, dur), {"color", "WHITE"} )
+				end
 			elseif e.type == "mental" then
 				effmental:add(true, "- ", {"color", "YELLOW"}, desceffect(e, p, dur), {"color", "WHITE"} )
 			elseif e.type == "other" then
@@ -2579,7 +2583,7 @@ function _M:onTakeHit(value, src, death_note)
 	end
 
 	-- Bloodlust!
-	if value > 0 and src and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
+	if value > 0 and src and not (src == self) and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
 		src:setEffect(src.EFF_BLOODLUST, 1, {})
 	end
 
@@ -2718,7 +2722,7 @@ function _M:onTakeHit(value, src, death_note)
 		local vt = self:getTalentFromId(self.T_LEECH)
 		self:incVim(vt.getVim(self, vt))
 		self:heal(vt.getHeal(self, vt), src)
-		if self.player then src:logCombat(src, "#AQUAMARINE#You leech a part of #Target#'s vim.") end
+		--if self.player then src:logCombat(src, "#AQUAMARINE#You leech a part of #Target#'s vim.") end
 	end
 
 	-- Invisible on hit
@@ -5204,9 +5208,10 @@ end
 local previous_incVim = _M.incVim
 function _M:incVim(v)
 	if v < 0 and self:attr("bloodcasting") then
+		local mult = self:attr("bloodcasting") / 100
 		local cost = math.abs(v)
 		if self.vim - cost < 0 then
-			local damage = cost - (self.vim or 0)
+			local damage = (cost - (self.vim or 0)) * mult
 			self:incVim(-self.vim or 0)
 			self.life = self.life - damage
 		else
@@ -5221,7 +5226,7 @@ end
 local previous_getVim = _M.getVim
 function _M:getVim()
 	if self:attr("bloodcasting") and self.on_preuse_checking_resources then
-		return self.life
+		return math.max(self.vim, self.life)
 	else
 		return previous_getVim(self)
 	end
@@ -5879,7 +5884,7 @@ function _M:postUseTalent(ab, ret, silent)
 			if #tgts > 0 then
 				self.turn_procs.corrupted_strength = true
 				DamageType:projectingFor(self, {project_type={talent=self:getTalentFromId(self.T_CORRUPTED_STRENGTH)}})
-				self:attackTarget(rng.table(tgts), DamageType.BLIGHT, self:combatTalentWeaponDamage(self.T_CORRUPTED_STRENGTH, 0.5, 1.1), true)
+				self:attackTarget(rng.table(tgts), DamageType.BLIGHT, self:combatTalentWeaponDamage(self.T_CORRUPTED_STRENGTH, 0.2, 0.7), true)
 				DamageType:projectingFor(self, nil)
 			end
 		end

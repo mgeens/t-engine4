@@ -843,6 +843,9 @@ newDamageType{
 		if src and src.knowTalent and realdam > 0 and target and src:knowTalent(src.T_PESTILENT_BLIGHT) then
 			src:callTalent(src.T_PESTILENT_BLIGHT, "do_rot", target, realdam)
 		end
+		if src and src.knowTalent and realdam > 0 and target and src:knowTalent(src.T_VIRULENT_DISEASE) and (not state or not state.from_disease) then
+			src:callTalent(src.T_VIRULENT_DISEASE, "do_disease", target, realdam)
+		end
 		return realdam
 	end,
 	death_message = {"diseased", "poxed", "infected", "plagued", "debilitated by noxious blight before falling", "fouled", "tainted"},

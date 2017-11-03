@@ -253,16 +253,18 @@ newEffect{
 newEffect{
 	name = "VIMSENSE", image = "talents/vimsense.png",
 	desc = "Vimsense",
-	long_desc = function(self, eff) return ("Reduces blight resistance by %d%%."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Reduces blight resistance by %d%% and all saves by %d."):format(eff.power, eff.saves) end,
 	type = "magical",
 	subtype = { blight=true },
 	status = "detrimental",
-	parameters = { power=10 },
+	parameters = { power=10, saves=0 },
 	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("resists", {[DamageType.BLIGHT]=-eff.power})
+		self:effectTemporaryValue(eff, "resists", {[DamageType.BLIGHT]=-eff.power})
+		self:effectTemporaryValue(eff, "combat_mindresist",  -eff.saves)
+		self:effectTemporaryValue(eff, "combat_spellresist", -eff.saves)
+		self:effectTemporaryValue(eff, "combat_physresist", -eff.saves)
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("resists", eff.tmpid)
 	end,
 }
 
@@ -973,12 +975,30 @@ newEffect{
 }
 
 newEffect{
+	name = "CORRUPTING_STRIKE", image = "talents/dark_surprise.png",
+	desc = "Corrupting Strike",
+	long_desc = function(self, eff) return ("The targets natural essence in corrupted reducing disease resistance by 100%%."):format() end,
+	type = "magical",
+	subtype = {blight=true},
+	status = "detrimental",
+	parameters = {},
+	on_gain = function(self, err) return "#Target# is completely vulnerable to disease!" end,
+	on_lose = function(self, err) return "#Target# no longer vulnerable to disease." end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "disease_immune", -1)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
 	name = "BLOODLUST", image = "talents/bloodlust.png",
 	desc = "Bloodlust",
 	long_desc = function(self, eff) return ("The target is in a magical frenzy, improving spellpower by %d."):format(eff.power) end,
 	type = "magical",
 	subtype = { frenzy=true },
 	status = "beneficial",
+	charges = function(self, eff) return math.floor(eff.power) end,
 	parameters = { power=1 },
 	on_timeout = function(self, eff)
 		if eff.refresh_turn + 10 < game.turn then -- Decay only if it's not refreshed
@@ -3105,10 +3125,9 @@ newEffect{
 		if raw_value > 0 and not eff.projecting then -- avoid feedback; it's bad to lose out on dmg but it's worse to break the game
 			eff.projecting = true
 			local dam = raw_value * eff.power / 100
-			local psrc = eff.src or src or self
-			psrc.__project_source = eff
-			DamageType:get(DamageType.BLIGHT).projector(psrc, self.x, self.y, DamageType.BLIGHT, dam)
-			psrc.__project_source = nil
+			eff.src.__project_source = eff
+			DamageType:get(DamageType.BLIGHT).projector(eff.src, self.x, self.y, DamageType.BLIGHT, dam)
+			eff.src.__project_source = nil
 			eff.projecting = false
 		end
 		return {value=0}

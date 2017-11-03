@@ -21,31 +21,11 @@ newTalent{
 	name = "Willful Tormenter",
 	type = {"corruption/torment", 1},
 	require = corrs_req1,
-	mode = "sustained",
+	mode = "passive",
 	points = 5,
-	cooldown = 20,
-	tactical = { BUFF = 2 },
-	VimBonus = function(self, t) return self:combatTalentScale(t, 20, 75, 0.75) end,
-	activate = function(self, t)
-		game:playSoundNear(self, "talents/flame")
-		return {
-			vim = self:addTemporaryValue("max_vim", t.VimBonus(self, t)),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("max_vim", p.vim)
-
-		while self:getMaxVim() < 0 do
-			local l = {}
-			for tid, _ in pairs(self.sustain_talents) do
-				local t = self:getTalentFromId(tid)
-				if t.sustain_vim then l[#l+1] = tid end
-			end
-			if #l == 0 then break end
-			self:forceUseTalent(rng.table(l), {ignore_energy=true, no_equilibrium_fail=true, no_paradox_fail=true})
-		end
-
-		return true
+	VimBonus = function(self, t) return self:combatTalentScale(t, 20, 95, 0.75) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "max_vim", t.VimBonus(self, t))
 	end,
 	info = function(self, t)
 		return ([[You set your mind toward a single goal: the destruction of all your foes.
@@ -153,7 +133,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local l, c = t.getPower(self, t)
-		return ([[When you are dealt a blow that reduces your life by at least %d%%, you have a %d%% chance to reduce the remaining cooldown of all your spells by 1.
+		return ([[When you are dealt a blow that reduces your life by at least %d%%, you have a %d%% chance to reduce the remaining cooldown of all your talents by 1.
 		The chance will increase with your Spellpower.]]):
 		format(l, c)
 	end,

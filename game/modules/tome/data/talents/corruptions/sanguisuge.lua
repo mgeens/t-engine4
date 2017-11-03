@@ -32,10 +32,10 @@ newTalent{
 	requires_target = true,
 	range = function(self, t) return math.floor(self:combatTalentScale(t, 5, 9)) end,
 	action = function(self, t)
-		local tg = {type="bolt", range=self:getTalentRange(t), talent=t, display={particle="bolt_slime"}}
+		local tg = {type="hit", range=self:getTalentRange(t), talent=t, display={particle="bolt_slime"}}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:projectile(tg, x, y, DamageType.DRAIN_VIM, self:spellCrit(self:combatTalentSpellDamage(t, 25, 200)), {type="slime"})
+		self:project(tg, x, y, DamageType.DRAIN_VIM, self:spellCrit(self:combatTalentSpellDamage(t, 25, 200)), {type="slime"})
 		game:playSoundNear(self, "talents/slime")
 		return true
 	end,
@@ -47,26 +47,21 @@ newTalent{
 	end,
 }
 
--- Finish me pls
 newTalent{
 	name = "Bloodcasting",
 	type = {"corruption/sanguisuge", 2},
 	require = corrs_req2,
 	points = 5,
-	vim = 0,
-	cooldown = 18,
-	no_energy = true,
-	range = 10,
+	mode = "passive",
 	no_npc_use = true,
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 18, 3, 7)) end, --Limit duration < 18
-	action = function(self, t)
-		self:setEffect(self.EFF_BLOODCASTING, t.getDuration(self,t), {})
-		game:playSoundNear(self, "talents/spell_generic2")
-		return true
+	getLifeCost = function(self, t) return math.floor(self:combatTalentScale(t, 250, 100)) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "bloodcasting", t.getLifeCost(self, t))
 	end,
 	info = function(self, t)
-		return ([[For %d turns, your corruption spells will consume health instead of vim if their cost is higher than your vim.]]):
-		format(t.getDuration(self,t))
+		return ([[Your corruption spells will consume health instead of vim if their cost is higher than your vim.
+			The health cost is equal to %d%% of the vim cost.]]):
+		format(t.getLifeCost(self,t))
 	end,
 }
 
@@ -79,6 +74,7 @@ newTalent{
 	sustain_vim = 5,
 	cooldown = 30,
 	range = 10,
+	no_energy = true,
 	tactical = { BUFF = 2 },
 	VimOnDeath = function(self, t) return self:combatTalentScale(t, 6, 16) end,
 	activate = function(self, t)

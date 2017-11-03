@@ -23,9 +23,8 @@ newTalent{
 	require = corrs_req1,
 	points = 5,
 	vim = 13,
-	cooldown = 8,
+	cooldown = 10,
 	range = 10,
-	random_ego = "attack",
 	tactical = { ATTACK = {PHYSICAL = 2} },
 	direct_hit = true,
 	requires_target = true,
@@ -44,10 +43,11 @@ newTalent{
 		self:project(tg, x, y, function(tx, ty)
 			local target = game.level.map(tx, ty, Map.ACTOR)
 			if not target then return end
-			local damage = dam * (1 + t.getBonus(self, t) * #self:effectsFilter({status="detrimental", type="magical"}, 10))
-
+			local effs = #target:effectsFilter({status="detrimental", type="magical"})
+			local damage = dam * (1 + t.getBonus(self, t) * effs)
+			game.log(tostring(damage)..", "..tostring(dam)..", "..tostring(effs))
 			DamageType:get(DamageType.PHYSICAL).projector(self, tx, ty, DamageType.PHYSICAL, damage)
-			end, dam)
+			end)
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, tg.range, "bone_spear", {tx=x - self.x, ty=y - self.y})
 		game:playSoundNear(self, "talents/arcane")
@@ -60,13 +60,12 @@ newTalent{
 	end,
 }
 
--- Finish me pls
 newTalent{
 	name = "Bone Grab",
 	type = {"corruption/bone", 2},
 	require = corrs_req2,
 	points = 5,
-	vim = 28,
+	vim = 15,
 	cooldown = 15,
 	range = function(self, t) return math.floor(self:combatTalentLimit(t, 10, 4, 9)) end,
 	tactical = { DISABLE = 1, CLOSEIN = 3 },
@@ -79,32 +78,55 @@ newTalent{
 		if not x or not y then return nil end
 
 		local dam = self:spellCrit(t.getDamage(self, t))
-
 		self:project(tg, x, y, function(px, py)
 			local target = game.level.map(px, py, engine.Map.ACTOR)
 			if not target then return end
 
-			target:pull(self.x, self.y, tg.range)
-
-			DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam)
-			if target:canBe("pin") then
-				target:setEffect(target.EFF_BONE_GRAB, t.getDuration(self, t), {apply_power=self:combatSpellpower()})
+			if core.fov.distance(self.x, self.y, target.x, target.y) > 1 then
+				target:pull(self.x, self.y, tg.range)
+				DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam)
+				if target:canBe("pin") then
+					target:setEffect(target.EFF_BONE_GRAB, t.getDuration(self, t), {apply_power=self:combatSpellpower()})
+				else
+					game.logSeen(target, "%s resists the bone!", target.name:capitalize())
+				end
 			else
-				game.logSeen(target, "%s resists the bone!", target.name:capitalize())
+				local tg = {type="cone", cone_angle=25, range=0, radius=8, friendlyfire=false}
+				
+				local grids = {}
+				self:project(tg, x, y, function(px, py)
+					if core.fov.distance(target.x, target.y, px, py) > 2 then grids[#grids+1] = {px, py} end
+				end)
+
+				DamageType:get(DamageType.PHYSICAL).projector(self, target.x, target.y, DamageType.PHYSICAL, dam)
+				if target:canBe("pin") then
+					target:setEffect(target.EFF_BONE_GRAB, t.getDuration(self, t), {apply_power=self:combatSpellpower()})
+				else
+					game.logSeen(target, "%s resists the bone!", target.name:capitalize())
+				end
+
+				local hit = self:checkHit(self:combatSpellpower(), target:combatSpellResist() + (target:attr("continuum_destabilization") or 0))
+				if not target:canBe("teleport") or not hit then
+					game.logSeen(target, "%s resists being teleported by Bone Grab!", target.name:capitalize())
+					return true
+				end
+				local spot = rng.table(grids)
+				if not spot then return end
+				target:teleportRandom(spot[1], spot[2], 0)
 			end
 		end)
-		game:playSoundNear(self, "talents/arcane")
-
+			game:playSoundNear(self, "talents/arcane")
 		return true
 	end,
 	info = function(self, t)
-		return ([[Grab a target and teleport it to your side or if adjacent to a random location away from you, pinning it there with a bone rising from the ground for %d turns.
+		return ([[Grab a target and teleport it to your side or if adjacent to a random location at least 3 spaces away from you, pinning it there with a bone rising from the ground for %d turns.
 		The bone will also deal %0.2f physical damage.
 		The damage will increase with your Spellpower.]]):
 		format(t.getDuration(self, t), damDesc(self, DamageType.PHYSICAL, t.getDamage(self, t)))
 	end,
 }
 
+-- Fix breaking Movement
 newTalent{
 	name = "Bone Spike",
 	type = {"corruption/bone", 3},
@@ -112,12 +134,13 @@ newTalent{
 	image = "talents/bone_nova.png",
 	points = 5,
 	mode = "passive",
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 20, 90) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 60) end,
 	radius = 10,
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRadius(t), selffire=false, friendlyfire=false, talent=t}
 	end,
 	callbackOnTalentPost = function(self, t, ab, ret, silent)
+		if ab.no_energy then return end
 		if self.turn_procs.bone_spike then return end
 		self.turn_procs.bone_spike = true
 		game:onTickEnd(function()
@@ -127,20 +150,21 @@ newTalent{
 			self:project(tg, self.x, self.y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target then return end
-				local nb = #self:effectsFilter({status="detrimental", type="magical"})
+				local nb = #target:effectsFilter({status="detrimental", type="magical"})
 				if nb and nb < 3 then return end
 				self:project({type="beam", range=10, selffire=false, friendlyfire=false, talent=t}, target.x, target.y, DamageType.PHYSICAL, dam)
 				local _ _, _, _, x, y = self:canProject(tg, x, y)
-				game.level.map:particleEmitter(self.x, self.y, 10, "bone_spear", {tx=target.x - self.x, ty=target.y - self.y})
+				game.level.map:particleEmitter(self.x, self.y, 10, "bone_spear", {speed=0.2, tx=target.x - self.x, ty=target.y - self.y})
 			end)
 		end)
 	end,
 	info = function(self, t)
-		return ([[At the end of any turn you used a talent you launch a spear of bone at all enemies afflicted by 3 or more magical detrimental effects dealing %d to all enemies it passes through.
+		return ([[Whenever you use a non-instant talent you launch a spear of bone at all enemies afflicted by 3 or more magical detrimental effects dealing %d to all enemies it passes through.
 		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.PHYSICAL, t.getDamage(self, t)) )
 	end,
 }
 
+-- Fix on clone bug
 newTalent{
 	name = "Bone Shield",
 	type = {"corruption/bone", 4},
@@ -151,9 +175,9 @@ newTalent{
 	sustain_vim = 50,
 	tactical = { DEFEND = 4 },
 	direct_hit = true,
-	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
-	getThreshold = function(self, t) return math.floor(self:combatStatScale(self:combatSpellpower(), 10, 120)) end,
-	getRegen = function(self, t) return math.max(math.floor(30 / t.getNb(self, t)), 3) end,
+	getRegen = function(self, t) return self:combatTalentLimit(t, 3, 20, 3.5) end,
+	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 1, 4.5)) end,
+	getThreshold = function(self, t) return math.floor(self:combatSpellpower()) end,
 	iconOverlay = function(self, t, p)
 		local p = self.sustain_talents[t.id]
 		if not p or not p.nb then return "" end
@@ -165,6 +189,7 @@ newTalent{
 		if not p or p.nb < nb then return true end
 	end,
 	callbackOnActBase = function(self, t)
+		if not self:isTalentActive(t.id) then return end
 		local p = self.sustain_talents[t.id]
 		p.next_regen = (p.next_regen or 1) - 1
 		if p.next_regen <= 0 then
@@ -185,7 +210,8 @@ newTalent{
 		end
 	end,
 	callbackOnHit = function(self, t, cb, src, dt)
-		local p = self.sustain_talents[t.id]
+		local p = self:isTalentActive(t.id)
+		if not p then return end
 		if not p.nb or p.nb <= 0 then return end
 		if not cb.value or cb.value < t.getThreshold(self, t) then return end
 		p.nb = p.nb - 1
@@ -208,6 +234,7 @@ newTalent{
 
 		local adv_gfx = core.shader.allow("adv") and true or false
 		local ps = {}
+		game.log("Bone Shield clone activate "..tostring(util.bound(nb, 0, 10)) or ".shader value is nil")
 		if adv_gfx then
 			ps[1] = self:addParticles(Particles.new("shader_ring_rotating", 1, {toback=true, a=0.5, rotation=0, radius=1.5, img="bone_shield"}, {type="boneshield"}))
 			ps[1]._shader.shad:resetClean()
@@ -221,6 +248,7 @@ newTalent{
 		return {
 			adv_gfx = adv_gfx,
 			particles = ps,
+			clone_test = 1,
 			nb = nb,
 			next_regen = t.getRegen(self, t),
 		}
