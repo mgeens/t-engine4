@@ -4349,11 +4349,26 @@ function _M:onWear(o, inven_id, bypass_set, silent)
 							object_inven, conditions[1], conditions[2])
 					end
 				else
-					object, index, object_inven_id =
-						self:findInAllInventoriesBy(conditions[1], conditions[2])
+					-- Can't use Actor:findInAllInventories() here;
+					-- if a matching item is worn but there's also a
+					-- matching item in the pack,
+					-- findInAllInventories() may return the one that
+					-- is in the pack instead of the worn one
+					--
+					-- So manually search only the worn inventories
+					-- instead
+					for inven_id, inven in pairs(self.inven) do
+						if self:getInven(inven_id).worn then
+							object, index = self:findInInventoryBy(inven, conditions[1], conditions[2])
+							if object then
+								object_inven_id = inven_id
+								break
+							end
+						end
+					end
 				end
 				-- If we're wearing it, add it to the list.
-				if object and self:getInven(object_inven_id).worn and
+				if object and
 					(not object.set_complete or not object.set_complete[set_id])
 				then
 					table.insert(set_objects, {
