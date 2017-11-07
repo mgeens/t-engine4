@@ -4503,19 +4503,30 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 				if type(broken) == "table" then broken = broken[set_id] end
 				if broken then broken(d.object, self, d.inven_id, set_objects) end
 				if d.object._special_set then
-					for k, id in pairs(d.object._special_set) do
-						d.object:removeTemporaryValue(k, id)
+					if d.object._special_set[set_id] then
+						for k, id in pairs(d.object._special_set[set_id]) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set[set_id] = nil
+						-- Remove if empty.
+						if not next(d.object._special_set) then
+							d.object._special_set = nil
+						end
+					else -- Object only has one set (old behaviour)
+						for k, id in pairs(d.object._special_set) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set = nil
 					end
-					d.object._special_set = nil
 				end
 				if d.object ~= o then self:onWear(d.object, d.inven_id, true) end
 				self:useObjectDisable(d.object)
 				self:useObjectEnable(d.object)
 				d.object.set_complete[set_id] = nil
 				-- Remove if empty.
-				local empty = true
-				for k, v in pairs(d.object.set_complete) do empty = false break end
-				if empty then d.object.set_complete = nil end
+				if not next(d.object.set_complete) then
+					d.object.set_complete = nil
+				end
 			end
 		end
 	end
