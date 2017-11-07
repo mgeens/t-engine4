@@ -324,6 +324,7 @@ newEntity{
 	name = " of gales", suffix=true, instant_resolve=true,
 	keywords = {gales=true},
 	level_range = {30, 50},
+	greater_ego = 1,
 	rarity = 40,
 	cost = 40,
 	wielder = {
