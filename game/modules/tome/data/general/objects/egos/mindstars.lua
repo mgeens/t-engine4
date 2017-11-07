@@ -551,41 +551,6 @@ newEntity{
 		resonating = set_broken,},
 }
 
-newEntity{
-	power_source = {psionic=true},
-	name = "parasitic ", prefix=true, instant_resolve=true,
-	keywords = {parasitic=true},
-	level_range = {30, 50},
-	greater_ego = 1,
-	rarity = 35,
-	cost = 40,
-	wielder = {
-		hate_on_crit = resolvers.mbonus_material(5, 1),
-		max_hate = resolvers.mbonus_material(20, 5),
-		life_leech_chance = resolvers.mbonus_material(20, 5),
-		life_leech_value = resolvers.mbonus_material(20, 5),
-	},
-	ms_set_resonating = true,
-	set_list = {
-		multiple = true,
-		resonating = {{"ms_set_psionic", true, inven_id = other_hand,},},},
-	set_desc = {
-		parasitic = "This parasitic mindstar will draw strength from other psionic mindstars.",
-	},
-	on_set_complete = {
-		multiple = true,
-		resonating = function(self, who, inven_id, set_objects)
-			for _, d in ipairs(set_objects) do
-				if d.object ~= self then
-					return d.object.on_set_complete.resonating(self, who, inven_id, set_objects)
-				end
-			end
-		end,},
-	on_set_broken = {
-		multiple = true,
-		resonating = set_broken,},
-}
-
 set_complete = function(self, who, inven_id, set_objects)
 	if inven_id == "MAINHAND" then
 		game.logPlayer(who, "#GREEN#Your mindstars resonate with Nature's purity.")
