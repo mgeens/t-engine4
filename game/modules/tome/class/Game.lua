@@ -1943,6 +1943,9 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+do return end
 			self:changeLevel(1, "cults+maggot")
 do return end
 			local m = game.zone:makeEntity(game.level, "actor", {name="elven mage"}, nil, true)
