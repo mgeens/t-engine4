@@ -34,6 +34,7 @@ function _M:init(mode)
 
 	self:generateList()
 
+	self.c_waiter = Textzone.new{auto_width=1, auto_height=1, text="#YELLOW#-- connecting to server... --"}
 	self.c_list = ListColumns.new{width=self.iw, height=self.ih, item_height=132, hide_columns=true, scrollbar=true, sortable=true, columns={
 		{name="", width=100, display_prop="", direct_draw=function(item, x, y)
 			item.img:toScreen(nil, x+2, y+2, 128, 128)
@@ -43,9 +44,11 @@ function _M:init(mode)
 
 
 	self:loadUI{
+		{vcenter=0, hcenter=0, ui=self.c_waiter},
 		{left=0, top=0, ui=self.c_list},
 	}
 	self:setupUI(false, false)
+	self:toggleDisplay(self.c_list, false)
 
 	self.key:addBinds{
 		ACCEPT = "EXIT",
@@ -57,16 +60,23 @@ function _M:init(mode)
 end
 
 function _M:generateList()
-	local list = {}
-	for file in fs.iterate("/data/microtxn/", "%.lua$") do
-		local f, err = loadfile("/data/microtxn/"..file)
-		setfenv(f, {mode=self.mode})
-		local ok, res = pcall(f)
-		if ok and res then
+	self.list = {}
+
+	profile:registerTemporaryEventHandler("MicroTxnListPurchasables", function(e)
+		if not e.data then return end
+		e.data = e.data:unserialize()
+		local list = {}
+		for _, res in ipairs(e.data.list) do
 			res.img = Entity.new{image=res.image}
 			res.txt = Textzone.new{width=self.iw - 10 - 132, auto_height=true, text=("%s\n#SLATE##{italic}#%s#{normal}#"):format(res.name, res.desc)}
 			list[#list+1] = res
 		end
-	end
-	self.list = list
+		self.list = list
+		self.c_list:setList(list)
+		self:toggleDisplay(self.c_list, true)
+		self:toggleDisplay(self.c_waiter, false)
+		self:setFocus(self.c_list)
+		game.log("===balance: %s", tostring(e.data.balance))
+	end)
+	core.profile.pushOrder(string.format("o='MicroTxn' suborder='list_purchasables' module=%q", game.__mod_info.short_name))
 end

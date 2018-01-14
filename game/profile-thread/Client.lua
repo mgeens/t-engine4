@@ -23,7 +23,7 @@ local UserChat = require "profile-thread.UserChat"
 
 module(..., package.seeall, class.make)
 
-local debug = false
+local debug = true
 
 local metaport = 2240
 local profilehost = "profiles.te4.org"
@@ -744,6 +744,25 @@ function _M:orderAddonAuthoring(o)
 		end
 	end
 end
+
+function _M:orderMicroTxn(o)
+	if o.suborder == "list_purchasables" then
+		self:command("MTXN LIST_PURCHASABLE", o.module)
+		if self:read("200") then
+			local _, _, size = self.last_line:find("^([0-9]+)")
+			size = tonumber(size)
+			local body = {}
+			if size and size > 1 then
+				body = self:receive(size)
+				if body then body = zlib.decompress(body) end
+			end
+
+			cprofile.pushEvent(("e='MicroTxnListPurchasables' data=%q"):format(body))
+			return
+		end
+	end
+end
+
 --------------------------------------------------------------------
 -- Pushes comming from the push socket
 --------------------------------------------------------------------

@@ -22,7 +22,7 @@ return {
 	name = "Lost Land of Poosh (server-wide)",
 	image = "/data/gfx/achievements/land_poosh.png",
 	desc = [[The Bearscape is a level 15+ zone that spawns on the worldmap.
-Poosh has gone missing! But what is push? Who stole it? And most importantly, what deliciously terrible deaths will it give your character?
+Poosh has gone missing! But what is poosh? Who stole it? And most importantly, what deliciously terrible deaths will it give your character?
 Will you survive and claim your rewards? Or will you die forever lost in a lost land?
 #GREEN#Server-wide:#LAST# This event will trigger for your character and every other player currently playing.]],
 
