@@ -66,12 +66,12 @@ newEntity{ define_as = "SHADE",
 	resolvers.drops{chance=100, nb=3, {tome_drops="boss"} },
 
 	resolvers.talents{
-		[Talents.T_MANATHRUST]=4, [Talents.T_FREEZE]=4, [Talents.T_TIDAL_WAVE]=2,
+		[Talents.T_MANATHRUST]=3, [Talents.T_FREEZE]=3, [Talents.T_TIDAL_WAVE]=2,
 		[Talents.T_WEAPONS_MASTERY]=2,
 	},
 	resolvers.inscriptions(1, {"shielding rune", "phase door rune"}),
 	resolvers.inscriptions(1, {"manasurge rune"}),
-	inc_damage = {all=-20},
+	inc_damage = {all=-40},
 
 	autolevel = "warriormage",
 	auto_classes={{class="Archmage", start_level=12, level_rate=75}},
