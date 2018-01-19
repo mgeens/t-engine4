@@ -192,6 +192,9 @@ newBirthDescriptor{
 		"#LIGHT_BLUE# * +0 Magic, +0 Willpower, +2 Cunning",
 		"#GOLD#Life per level:#LIGHT_BLUE# +0",
 	},
+	unlockable_talents_types = {
+		["cunning/poisons"]={false, 0.0, "rogue_poisons"},
+	},
 	power_source = {technique=true, technique_ranged=true},
 	stats = { dex=5, str=2, cun=2, },
 	talents_types = {
@@ -201,7 +204,7 @@ newBirthDescriptor{
 		["technique/reflexes"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0},
 		["technique/combat-techniques-passive"]={true, 0},
-		["technique/munitions"]={false, 0.3},
+		--["technique/munitions"]={false, 0.3},  Disabled pending major revision
 		["technique/sniper"]={false, 0.3},
 		["technique/agility"]={false, 0.3},
 		["technique/combat-training"]={true, 0.3},
