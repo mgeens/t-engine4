@@ -63,8 +63,6 @@ newBirthDescriptor{
 	power_source = {technique=true},
 	stats = { str=5, con=3, dex=1, },
 	talents_types = {
-		["technique/archery-training"]={false, 0.1},
-		["technique/shield-defense"]={false, -0.1},
 		["technique/2hweapon-assault"]={true, 0.3},
 		["technique/strength-of-the-berserker"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0.3},
@@ -132,10 +130,8 @@ newBirthDescriptor{
 	power_source = {technique=true},
 	stats = { str=5, con=2, dex=2, },
 	talents_types = {
-		["technique/archery-training"]={false, 0.1},
 		["technique/shield-offense"]={true, 0.3},
 		["technique/shield-defense"]={true, 0.3},
-		["technique/2hweapon-offense"]={false, -0.1},
 		["technique/combat-techniques-active"]={true, 0.3},
 		["technique/combat-techniques-passive"]={true, 0.3},
 		["technique/combat-training"]={true, 0.3},
