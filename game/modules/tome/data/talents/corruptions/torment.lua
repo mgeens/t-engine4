@@ -104,6 +104,9 @@ newTalent{
 	end,
 }
 
+--friendlyfire
+-- Note:  Normally you would use die_at instead of temporary maximum life for an effect like Sanguine Infusion and not have to special case it like this
+--		  Unfortunately, part of the goal of SI is to encourage healing and synergize well with Bone Shield, so were stuck with ugliness		  
 newTalent{
 	name = "Blood Vengeance",
 	type = {"corruption/torment", 4},
@@ -115,25 +118,39 @@ newTalent{
 	sustain_vim = 22,
 	tactical = { BUFF = 2 },
 	activate = function(self, t)
-		local l, c = t.getPower(self, t)
+		local ret = {}
 		game:playSoundNear(self, "talents/flame")
-		local ret = {
-			l = self:addTemporaryValue("reduce_spell_cooldown_on_hit", l),
-			c = self:addTemporaryValue("reduce_spell_cooldown_on_hit_chance", c),
-		}
 		if core.shader.active(4) then
 			self:effectParticles(ret, {type="shader_ring_rotating", args={rotation=0, radius=1.1, img="blood_vengeance_lightningshield"}, shader={type="lightningshield"}})
 		end
 		return ret
 	end,
 	deactivate = function(self, t, p)
-		self:removeTemporaryValue("reduce_spell_cooldown_on_hit", p.l)
-		self:removeTemporaryValue("reduce_spell_cooldown_on_hit_chance", p.c)
 		return true
+	end,
+	callbackPriorities={callbackOnHit = -1},  -- Before Bone Shield but after Rot
+	callbackOnHit = function(self, t, cb)
+		local eff = self:hasEffect(self.EFF_BLOOD_GRASP)
+		local life = self.max_life + (eff and eff.life or 0)
+		local l, c = t.getPower(self, t)
+		if cb.value >= self.max_life * l  / 100 then
+		
+		local alt = {}
+		for tid, cd in pairs(self.talents_cd) do
+			if rng.percent(c) then alt[tid] = true end
+		end
+		for tid, cd in pairs(alt) do
+			self:alterTalentCoolingdown(tid, -1)
+		end
+		game.logSeen(self, "#RED#The powerful blow energizes %s reducing their cooldowns!#LAST#", self.name)
+		end
+		return cb.value
+
 	end,
 	info = function(self, t)
 		local l, c = t.getPower(self, t)
 		return ([[When you are dealt a blow that reduces your life by at least %d%%, you have a %d%% chance to reduce the remaining cooldown of all your talents by 1.
+		Temporary life from Sanguine Infusion will not count against the damage threshold.
 		The chance will increase with your Spellpower.]]):
 		format(l, c)
 	end,

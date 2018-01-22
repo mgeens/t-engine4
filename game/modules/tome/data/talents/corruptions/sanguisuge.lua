@@ -30,7 +30,7 @@ newTalent{
 		VIM = {BLIGHT = function(self, t, target) return 2*target:getRankVimAdjust()^.5 end}
 	},
 	requires_target = true,
-	range = function(self, t) return math.floor(self:combatTalentScale(t, 5, 9)) end,
+	range = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 6, 10))) end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t, display={particle="bolt_slime"}}
 		local x, y = self:getTarget(tg)
@@ -47,6 +47,7 @@ newTalent{
 	end,
 }
 
+-- Sustain?
 newTalent{
 	name = "Bloodcasting",
 	type = {"corruption/sanguisuge", 2},

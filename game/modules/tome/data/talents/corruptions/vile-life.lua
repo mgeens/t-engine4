@@ -75,11 +75,17 @@ newTalent{
 		if type == DamageType.FIRE then
 			src:setEffect(src.EFF_BURNING, 5, {src=self, apply_power=self:combatSpellpower(), power=t.getFire(self, t) / 5})
 		elseif type == DamageType.COLD then
-			src:setEffect(src.EFF_FROZEN, 3, {apply_power=self:combatSpellpower(), hp=t.getCold(self, t)})
+			if src:canBe("stun") then
+				src:setEffect(src.EFF_FROZEN, 3, {apply_power=self:combatSpellpower(), hp=t.getCold(self, t)})
+			end
 		elseif type == DamageType.ACID then
-			src:setEffect(src.EFF_BLINDED, t.getAcid(self, t), {apply_power=self:combatSpellpower()})
+			if src:canBe("blind") then
+				src:setEffect(src.EFF_BLINDED, t.getAcid(self, t), {apply_power=self:combatSpellpower()})
+			end
 		elseif type == DamageType.LIGHTNING then
-			src:setEffect(src.EFF_DAZED, t.getLightning(self, t), {apply_power=self:combatSpellpower()})
+			if src:canBe("stun") then
+				src:setEffect(src.EFF_DAZED, t.getLightning(self, t), {apply_power=self:combatSpellpower()})
+			end
 		elseif type == DamageType.NATURE then
 			src:setEffect(src.EFF_SLOW, 4, {apply_power=self:combatSpellpower(), power=t.getNature(self, t) / 100})
 		end

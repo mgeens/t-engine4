@@ -2209,15 +2209,24 @@ newEffect{
 newEffect{
 	name = "BLOOD_GRASP", image = "talents/blood_grasp.png",
 	desc = "Sanguine Infusion",
-	long_desc = function(self, eff) return ("Max life increased by %d."):format(eff.life) end,
+	long_desc = function(self, eff) return ("Maximum life increased by %d."):format(eff.life) end,
 	type = "magical",
 	subtype = {corruption=true},
 	status = "beneficial",
 	parameters = {life = 0},
+	on_merge = function(self, old_eff, new_eff)
+		self:removeTemporaryValue("max_life", old_eff.tmpid)
+
+		old_eff.life = math.max(old_eff.life, new_eff.life)
+		old_eff.tmpid = self:addTemporaryValue("max_life", old_eff.life)
+		old_eff.dur = new_eff.dur
+		return old_eff
+	end,
 	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "max_life", eff.life)
+		eff.tmpid = self:addTemporaryValue("max_life", eff.life)
 	end,
 	deactivate = function(self, eff)
+		self:removeTemporaryValue("max_life", eff.tmpid)
 	end,
 }
 

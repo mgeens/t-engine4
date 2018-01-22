@@ -45,9 +45,8 @@ newTalent{
 			if not target then return end
 			local effs = #target:effectsFilter({status="detrimental", type="magical"})
 			local damage = dam * (1 + t.getBonus(self, t) * effs)
-			game.log(tostring(damage)..", "..tostring(dam)..", "..tostring(effs))
 			DamageType:get(DamageType.PHYSICAL).projector(self, tx, ty, DamageType.PHYSICAL, damage)
-			end)
+		end)
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, tg.range, "bone_spear", {tx=x - self.x, ty=y - self.y})
 		game:playSoundNear(self, "talents/arcane")
@@ -126,7 +125,6 @@ newTalent{
 	end,
 }
 
--- Fix breaking Movement
 newTalent{
 	name = "Bone Spike",
 	type = {"corruption/bone", 3},
@@ -145,13 +143,20 @@ newTalent{
 		self.turn_procs.bone_spike = true
 		game:onTickEnd(function()
 			local tg = self:getTalentTarget(t)
-			local dam = self:spellCrit(t.getDamage(self, t))
-
+			local dam = t.getDamage(self, t)
+			local did_crit = false
 			self:project(tg, self.x, self.y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target then return end
 				local nb = #target:effectsFilter({status="detrimental", type="magical"})
 				if nb and nb < 3 then return end
+
+				-- Make sure crit is only calculated once, but do it here so we don't trigger a crit if there are no targets
+				if did_crit == false then
+					dam = self:spellCrit(dam)
+					did_crit = true
+				end
+
 				self:project({type="beam", range=10, selffire=false, friendlyfire=false, talent=t}, target.x, target.y, DamageType.PHYSICAL, dam)
 				local _ _, _, _, x, y = self:canProject(tg, x, y)
 				game.level.map:particleEmitter(self.x, self.y, 10, "bone_spear", {speed=0.2, tx=target.x - self.x, ty=target.y - self.y})
@@ -159,12 +164,11 @@ newTalent{
 		end)
 	end,
 	info = function(self, t)
-		return ([[Whenever you use a non-instant talent you launch a spear of bone at all enemies afflicted by 3 or more magical detrimental effects dealing %d to all enemies it passes through.
+		return ([[Whenever you use a non-instant talent you launch a spear of bone at all enemies afflicted by 3 or more magical detrimental effects dealing %d physical damage to all enemies it passes through.
 		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.PHYSICAL, t.getDamage(self, t)) )
 	end,
 }
 
--- Fix on clone bug
 newTalent{
 	name = "Bone Shield",
 	type = {"corruption/bone", 4},
@@ -175,8 +179,8 @@ newTalent{
 	sustain_vim = 50,
 	tactical = { DEFEND = 4 },
 	direct_hit = true,
-	getRegen = function(self, t) return self:combatTalentLimit(t, 3, 20, 3.5) end,
-	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 1, 4.5)) end,
+	getRegen = function(self, t) return self:combatTalentLimit(t, 3, 20, 3.3) end,
+	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3.5)) end,
 	getThreshold = function(self, t) return math.floor(self:combatSpellpower()) end,
 	iconOverlay = function(self, t, p)
 		local p = self.sustain_talents[t.id]
@@ -199,6 +203,7 @@ newTalent{
 				p.nb = p.nb + 1
 				if p.adv_gfx then
 					if p.particles[1] and p.particles[1]._shader and p.particles[1]._shader.shad then
+						if not p.particles[1].shader then p.particles[1] = self:addParticles(Particles.new("shader_ring_rotating", 1, {toback=true, a=0.5, rotation=0, radius=1.5, img="bone_shield"}, {type="boneshield"})) end
 						p.particles[1]._shader.shad:resetClean()
 						p.particles[1]._shader:setResetUniform("chargesCount", util.bound(p.nb, 0, 10))
 						p.particles[1].shader.chargesCount = util.bound(p.nb, 0, 10)
@@ -217,6 +222,8 @@ newTalent{
 		p.nb = p.nb - 1
 		if p.adv_gfx then
 			if p.particles[1] and p.particles[1]._shader and p.particles[1]._shader.shad then
+				-- Clones don't copy this so we need to recreate it sometimes
+				if not p.particles[1].shader then p.particles[1] = self:addParticles(Particles.new("shader_ring_rotating", 1, {toback=true, a=0.5, rotation=0, radius=1.5, img="bone_shield"}, {type="boneshield"})) end
 				p.particles[1]._shader.shad:resetClean()
 				p.particles[1]._shader:setResetUniform("chargesCount", util.bound(p.nb, 0, 10))
 				p.particles[1].shader.chargesCount = util.bound(p.nb, 0, 10)
@@ -234,7 +241,6 @@ newTalent{
 
 		local adv_gfx = core.shader.allow("adv") and true or false
 		local ps = {}
-		game.log("Bone Shield clone activate "..tostring(util.bound(nb, 0, 10)) or ".shader value is nil")
 		if adv_gfx then
 			ps[1] = self:addParticles(Particles.new("shader_ring_rotating", 1, {toback=true, a=0.5, rotation=0, radius=1.5, img="bone_shield"}, {type="boneshield"}))
 			ps[1]._shader.shad:resetClean()
