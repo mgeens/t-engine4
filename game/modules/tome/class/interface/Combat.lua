@@ -2347,6 +2347,20 @@ function _M:hasAxeWeapon()
 	return weapon
 end
 
+--- Check if the actor has a 1H in mainhand
+function _M:hasMHWeapon()
+	if self:attr("disarmed") then
+		return nil, "disarmed"
+	end
+
+	if not self:getInven("MAINHAND") then return end
+	local weapon = self:getInven("MAINHAND")[1]
+	if not weapon or not weapon.combat then
+		return nil
+	end
+	return weapon
+end
+
 --- Check if the actor has a weapon
 function _M:hasWeaponType(type)
 	if self:attr("disarmed") then
