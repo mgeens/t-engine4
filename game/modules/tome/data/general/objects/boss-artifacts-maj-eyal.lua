@@ -678,13 +678,12 @@ newEntity{ base = "BASE_WARAXE",
 	cost = 450,
 	material_level = 4,
 	combat = {
-		dam = 55,
+		dam = 40,
 		apr = 15,
 		physcrit = 10,
 		dammod = {str=1},
 		damrange = 1.2,
 		burst_on_hit={[DamageType.BLIGHT] = 25},
-		lifesteal=5, --You can counter the life regen by fighting, muhuhahah
 		talent_on_hit = {
 				[Talents.T_CURSE_OF_VULNERABILITY] = {level=3, chance=10},
 				[Talents.T_CURSE_OF_DEATH] = {level=3, chance=10},
