@@ -257,7 +257,7 @@ newBirthDescriptor{
 		["cunning/scoundrel"]={false, 0.1},
 	},
 	unlockable_talents_types = {
-		["cunning/poisons"]={false, 0.2, "rogue_poisons"},
+		["cunning/poisons"]={false, 0.3, "rogue_poisons"},
 	},
 	talents = {
 		[ActorTalents.T_DISENGAGE] = 1,
