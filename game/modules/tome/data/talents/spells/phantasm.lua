@@ -108,7 +108,7 @@ newTalent{
 	sustain_mana = 20,
 	cooldown = 10,
 	tactical = { BUFF = 2 },
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 20, 120) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 80) end,
 	activate = function(self, t)
 		game:playSoundNear(self, "talents/heal")
 		return {
