@@ -982,7 +982,12 @@ function _M:restCheck()
 
 	-- Resting improves regen
 	for act, def in pairs(game.party.members) do if game.level:hasEntity(act) and not act.dead then
-		local perc = math.min(self.resting.cnt / 10, 8)
+		-- Drastically improve regen while resting as this is one of the most common areas lag causes frustration
+		-- To avoid interactions with life regen buffs and minimize any other non-QOL impacts we wait 15 turns before doing any enhancement
+		local perc = 0
+		if self.resting.cnt >= 15 then
+			perc = math.min(self.resting.cnt, 16)
+		end
 		local old_shield = act.arcane_shield
 		act.arcane_shield = nil
 		act:heal(act.life_regen * perc)
