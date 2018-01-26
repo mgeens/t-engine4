@@ -623,7 +623,7 @@ newEffect{
 			eff.constitutionGainId = self:addTemporaryValue("inc_stats", { [Stats.STAT_CON] = eff.constitutionGain })
 		end
 		if eff.lifeRegenGain and eff.lifeRegenGain > 0 then
-			eff.lifeRegenGainId = self:addTemporaryValue("life_regen", eff.lifeRegenGain)
+			eff.lifeRegenGainId = self:addTemporaryValue("life_regen", eff.lifeRegenGain / 2)
 		end
 
 		-- power
