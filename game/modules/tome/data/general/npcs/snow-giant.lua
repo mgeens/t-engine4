@@ -45,7 +45,6 @@ newEntity{
 
 	no_breath = 1,
 	confusion_immune = 1,
-	poison_immune = 1,
 	ingredient_on_death = "SNOW_GIANT_KIDNEY",
 }
 
