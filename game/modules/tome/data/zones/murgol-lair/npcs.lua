@@ -112,7 +112,7 @@ newEntity{ base = "BASE_NPC_NAGA", define_as = "NAGA_TIDEWARDEN",
 		{type="weapon", subtype="trident", autoreq=true, force_drop=true, special_rarity="trident_rarity"},
 	},
 	resolvers.talents{
-		[Talents.T_EXOTIC_WEAPONS_MASTERY]={base=1, every=8, max=6},
+		[Talents.T_EXOTIC_WEAPONS_MASTERY]={base=0, every=8, max=6},
 		[Talents.T_SPIT_POISON]={base=1, every=10, max=5},
 	},
 }
@@ -181,7 +181,7 @@ newEntity{ base="BASE_NPC_NAGA", define_as = "NASHVA",
 		[Talents.T_SPIT_POISON]={base=2, every=10, max=5},
 		[Talents.T_CHARGE_LEECH]={base=2, every=10, max=5},
 		[Talents.T_DISTORTION_BOLT]={base=2, every=10, max=5},
-		[Talents.T_EXOTIC_WEAPONS_MASTERY]={base=1, every=8, max=6},
+		[Talents.T_EXOTIC_WEAPONS_MASTERY]={base=0, every=8, max=6},
 	},
 	resolvers.inscriptions(1, {"movement infusion"}),
 
