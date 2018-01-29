@@ -28,10 +28,9 @@ uberTalent{
 		self:attr("unharmed_attack_on_hit", -1)
 		self:attr("show_gloves_combat", -1)
 	end,
-	getProcs = function(self, t) return math.floor(self:getDex() / 30) end,
 	info = function(self, t)
-		return ([[Each time that you make a melee attack you have a 30%% chance to execute an additional unarmed strike.  This can occur once per turn for every 30 Dexterity (currently %d) you have.]])
-		:format(t.getProcs(self, t))
+		return ([[Each time that you make a melee attack you have a 30%% chance to execute an additional unarmed strike.]])
+		:format()
 	end,
 }
 

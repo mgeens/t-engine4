@@ -686,9 +686,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 		self.__global_accuracy_damage_bonus = self.__global_accuracy_damage_bonus / self.__attacktargetwith_recursing_procs_reduce
 	end
 
-	if self:attr("unharmed_attack_on_hit") and not (self.turn_procs.flexible_combat and (self.turn_procs.flexible_combat >= self:callTalent(self.T_FLEXIBLE_COMBAT, "getProcs")) ) then
-		self.turn_procs.flexible_combat = self.turn_procs.flexible_combat or 0
-		self.turn_procs.flexible_combat = self.turn_procs.flexible_combat + 1
+	if self:attr("unharmed_attack_on_hit") then
 		local v = self:attr("unharmed_attack_on_hit")
 		self:attr("unharmed_attack_on_hit", -v)
 		if rng.percent(30) then self:attackTarget(target, nil, 1, true, true) end
