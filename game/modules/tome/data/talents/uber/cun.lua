@@ -255,9 +255,9 @@ uberTalent{
 			dam = math.max(100, self:getCun()),
 		}
 	end,
-	getLight = function(self, t) return 20 end,
+	getLight = function(self, t) return 30 end,
 	getLightning = function(self, t) return self:combatStatScale("cun", 10, 70, 0.75) end,
-	getFire = function(self, t) return 20 end,
+	getFire = function(self, t) return 30 end,
 	getThreshold = function(self, t) return 8*self.level end,
 	callbackOnRest = function(self, t) self.elemental_surge = nil end, -- No storing damage out of combat
 	callbackOnRun = function(self, t) self.elemental_surge = nil end,
@@ -320,7 +320,7 @@ uberTalent{
 		#LIGHT_RED#Fire:#LAST#		Increases all damage dealt by %d%% for 3 turns.
 		#1133F3#Cold:#LAST#		Turn your skin into ice for 3 turns increasing armor by %d and dealing %d ice damage to attackers.
 		#ROYAL_BLUE#Lightning:#LAST#	Increases your movement speed by %d%% for 3 turns.
-		#YELLOW#Light:#LAST#		Reduce all cooldowns by 20%% for 3 turns.
+		#YELLOW#Light:#LAST#		Reduce all cooldowns by 30%% for 3 turns.
 		#LIGHT_GREEN#Nature:#LAST#		Cleanses 1 magical debuff.
 
 		Each cooldown is independent.
