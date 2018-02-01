@@ -482,7 +482,6 @@ If you have 50% penetration against a creature with 50% resistance it will have 
 ]]
 TOOLTIP_FLAT_RESIST = [[#GOLD#Flat resistances#LAST#
 Reduces each hit of a certain damage type (or all) by this amount.
-This has disminishing returns, every tier of 40 it takes one more point to increase by 1. The value showed here is the one after computation of disminishing returns.
 ]]
 
 -------------------------------------------------------------

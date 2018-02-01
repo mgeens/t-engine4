@@ -2213,7 +2213,7 @@ end
 function _M:combatGetFlatResist(type)
 	if not self.flat_damage_armor then return 0 end
 	local dec = (self.flat_damage_armor.all or 0) + (self.flat_damage_armor[type] or 0)
-	return self:rescaleCombatStats(dec, 40)
+	return dec
 end
 
 --- Returns the resistance
