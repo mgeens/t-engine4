@@ -1596,7 +1596,7 @@ function _M:teleportRandom(x, y, dist, min_dist)
 		
 		-- after moving
 		if self:attr("defense_on_teleport") or self:attr("resist_all_on_teleport") or self:attr("effect_reduction_on_teleport") then
-			self:setEffect(self.EFF_OUT_OF_PHASE, 5, {defense=self:attr("defense_on_teleport") or 0, resists=self:attr("resist_all_on_teleport") or 0, effect_reduction=self:attr("effect_reduction_on_teleport") or 0})
+			self:setEffect(self.EFF_OUT_OF_PHASE, 5, {})
 		end
 	end
 	
