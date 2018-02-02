@@ -475,7 +475,7 @@ end
 -- Used to make escorts, adjust to game difficulty settings, etc.
 -- Triggered after the entity is resolved
 function _M:addedToLevel(level, x, y)
-	if not self:attr("difficulty_boosted") and not game.party:hasMember(self) then
+	if not self:attr("difficulty_boosted") and not game.party:hasMember(self) and not (self.summoner or self.summoned) then
 		-- make adjustments for game difficulty to talent levels, max life, add classes to bosses
 		local talent_mult, life_mult, nb_classes = 1, 1, 0
 		if game.difficulty == game.DIFFICULTY_NIGHTMARE then
