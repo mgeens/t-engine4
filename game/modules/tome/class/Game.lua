@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -1968,7 +1968,7 @@ function _M:setupCommands()
 			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
 			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
 do return end
-			self:changeLevel(1, "cults+maggot")
+			self:changeLevel(1, "cults+godfeaster")
 do return end
 			local m = game.zone:makeEntity(game.level, "actor", {name="elven mage"}, nil, true)
 			local x, y = util.findFreeGrid(game.player.x, game.player.y, 20, true, {[Map.ACTOR]=true})

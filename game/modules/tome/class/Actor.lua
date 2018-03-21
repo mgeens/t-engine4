@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -696,7 +696,7 @@ function _M:act()
 	if not game.zone.wilderness and not self:attr("confused") and not self:attr("terrified") then self:automaticTalents() end
 
 	-- Compute bonuses based on actors in FOV
-	if self:knowTalent(self.T_MILITANT_MIND) and not self:hasEffect(self.EFF_MILITANT_MIND) then
+	if self:knowTalent(self.T_MILITANT_MIND) then
 		local nb_foes = 0
 		local act
 		for i = 1, #self.fov.actors_dist do
@@ -705,7 +705,7 @@ function _M:act()
 		end
 		if nb_foes > 1 then
 			nb_foes = math.min(nb_foes, 5)
-			self:setEffect(self.EFF_MILITANT_MIND, 4, {power=self:getTalentLevel(self.T_MILITANT_MIND) * nb_foes * 1.5})
+			self:setEffect(self.EFF_MILITANT_MIND, 4, {power=self:getTalentLevel(self.T_MILITANT_MIND) * nb_foes * 2})
 		end
 	end
 
@@ -3101,12 +3101,7 @@ function _M:die(src, death_note)
 		local rsrc = src:resolveSource()
 		local p = rsrc:isTalentActive(src.T_NECROTIC_AURA)
 		if self.x and self.y and src.x and src.y and core.fov.distance(self.x, self.y, rsrc.x, rsrc.y) <= rsrc.necrotic_aura_radius then
-			rsrc:incSoul(1)
-			if rsrc:attr("extra_soul_chance") and rng.percent(rsrc:attr("extra_soul_chance")) then
-				rsrc:incSoul(1)
-				game.logPlayer(rsrc, "%s rips more animus from its victim. (+1 more soul)", rsrc.name:capitalize())
-			end
-			rsrc.changed = true
+			rsrc:callTalent(rsrc.T_NECROTIC_AURA, "absorbSoul", self)
 		end
 	end
 
@@ -7272,13 +7267,13 @@ function _M:checkStillInCombat()
 end
 
 function _M:updateInCombatStatus()
-	if config.settings.cheat then
-		if self.in_combat then
-			game.log("#CRIMSON#--- %s IN COMBAT since %d turns", self.name, (game.turn - self.in_combat) / 10)
-		else
-			game.log("#YELLOW#--- %s OUT OF COMBAT", self.name)
-		end
-	end
+	-- if config.settings.cheat then
+	-- 	if self.in_combat then
+	-- 		game.log("#CRIMSON#--- %s IN COMBAT since %d turns", self.name, (game.turn - self.in_combat) / 10)
+	-- 	else
+	-- 		game.log("#YELLOW#--- %s OUT OF COMBAT", self.name)
+	-- 	end
+	-- end
 
 	if self.in_combat then
 		self:fireTalentCheck("callbackOnCombat", true)

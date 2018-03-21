@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -487,10 +487,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 	
 	if target:isTalentActive(target.T_INTUITIVE_SHOTS) then
 		local chance = target:callTalent(target.T_INTUITIVE_SHOTS, "getChance")
-		self.turn_procs.intuitive_shots = self.turn_procs.intuitive_shots or target:callTalent(target.T_INTUITIVE_SHOTS, "proc", self)
-		if self.turn_procs.intuitive_shots == true then
-			repelled = true
-		end
+		repelled = target:callTalent(target.T_INTUITIVE_SHOTS, "proc", self)
 	end
 
 	-- Dwarves stoneskin

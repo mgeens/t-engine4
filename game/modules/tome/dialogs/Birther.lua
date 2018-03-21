@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -225,7 +225,7 @@ function _M:checkNew(fct)
 			if type(tt) == "function" then tt = tt(self) end
 			for t, v in pairs(tt) do
 				local ttdef = self.actor:getTalentTypeFrom(t)
-				if ttdef.is_spell then is_magic = true break end
+				if ttdef and ttdef.is_spell then is_magic = true break end
 			end
 		end
 	end

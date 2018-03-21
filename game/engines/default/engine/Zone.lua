@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -811,6 +811,7 @@ function _M:load(dynamic)
 		data = dynamic
 		ret = false
 		for k, e in pairs(data) do self[k] = e end
+		self:onLoadZoneFile(false)
 		self:triggerHook{"Zone:create", dynamic=dynamic}
 		if self.on_loaded then self:on_loaded() end
 	else

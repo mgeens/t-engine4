@@ -1,5 +1,5 @@
 -- TE4 - T-Engine 4
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -391,6 +391,15 @@ local _current_hook_dir = nil
 
 function _M:setCurrentHookDir(dir)
 	_current_hook_dir = dir
+end
+
+function _M:loadHooksFile(file)
+	assert(_current_hook_dir, "loadHooksFile can only be used in hooks/load.lua")	
+
+	local f, err = loadfile(_current_hook_dir.."/"..file)
+	if not f and err then error(err) end
+	setfenv(f, setmetatable({}, {__index = _G}))
+	f()
 end
 
 function _M:bindHook(hook, fct)
