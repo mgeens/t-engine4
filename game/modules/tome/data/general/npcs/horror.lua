@@ -527,6 +527,10 @@ newEntity{ base = "BASE_NPC_HORROR",
 	life_regen = 0.25,
 	combat_armor = 12, combat_def = 24,
 
+	rnd_boss_init = function(self, data)
+		self.combat_physspeed = math.max(1, self.combat_physspeed - 2)  -- A bit more sanity when randbossed
+	end,
+
 	ai = "tactical", ai_state = { ai_move="move_complex", talent_in=2, ally_compassion=0 },
 
 	on_melee_hit = {[DamageType.PHYSICALBLEED]=resolvers.mbonus(14, 2)},
