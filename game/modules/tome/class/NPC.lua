@@ -505,14 +505,14 @@ function _M:addedToLevel(level, x, y)
 			-- Note: talent levels from added classes are not adjusted for difficulty directly
 			-- This means that the NPC's innate talents are generally higher level, preserving its "character"
 			-- Fixedboss random classes start at level 14 to avoid breaking early game balance
-			if self.unique and not self.randboss and not self.no_difficulty_random_class then
+			if self.rank >= 3.5 and not self.randboss and not self.no_difficulty_random_class then
 				if self.auto_classes then
 					for _, class in pairs(self.auto_classes) do
 						class.level_rate = class.level_rate * class_mult
 					end
 				else
 					local data = {auto_sustain=true, forbid_equip=false, start_level = 14, nb_classes=1, level_rate = class_mult*100, update_body=true, spend_points=true, autolevel="random_boss"}
-					game.state:applyRandomClass2(self, data, true)
+					game.state:applyRandomClassNew(self, data, true)
 				end
 
 				self[#self+1] = resolvers.talented_ai_tactic("instant") -- regenerate AI TACTICS with the new class(es)

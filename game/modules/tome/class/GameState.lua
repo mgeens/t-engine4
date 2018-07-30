@@ -2222,9 +2222,9 @@ function _M:applyRandomClass(b, data, instant)
 	end
 end
 
---- Creates a random Boss (or elite) actor
+--- Creates a random Boss (or elite) actor (pre-NPC autolevel method)
 --	@param base = base actor to add classes/talents to
---	calls _M:applyRandomClass2(b, data, instant) to add classes, talents, and equipment based on class descriptors
+--	calls _M:applyRandomClass(b, data, instant) to add classes, talents, and equipment based on class descriptors
 --		handles data.nb_classes, data.force_classes, data.class_filter, ...
 --	optional parameters:
 --	@param data.init = function(data, b) to run before generation
@@ -2426,7 +2426,7 @@ end
 --	@field data.loot_quality = drop table to use for equipment <"boss">
 --	@field data.drop_equipment set true to force dropping of equipment <nil>
 --	@param instant set true to force instant learning of talents and generating golem <nil>
-function _M:applyRandomClass2(b, data, instant)
+function _M:applyRandomClassNew(b, data, instant)
 	if not data.level then data.level = b.level end -- use the level specified if needed
 
 	------------------------------------------------------------
@@ -2571,7 +2571,7 @@ end
 
 --- Creates a random Boss (or elite) actor
 --	@param base = base actor to add classes/talents to
---	calls _M:applyRandomClass(b, data, instant) to add classes, talents, and equipment based on class descriptors
+--	calls _M:applyRandomClassNew(b, data, instant) to add classes, talents, and equipment based on class descriptors
 --		handles data.nb_classes, data.force_classes, data.class_filter, ...
 --	optional parameters:
 --	@field data.init = function(data, b) to run before generation
@@ -2587,7 +2587,7 @@ end
 --	@field data.on_die set true to run base.rng_boss_on_die and base.rng_boss_on_die_custom on death <nil>
 --	@field data.name_scheme <randart_name_rules.default>
 --	@field data.post = function(b, data) to run last to finish generation
-function _M:createRandomBoss2(base, data)
+function _M:createRandomBossNew(base, data)
 	local b = base:clone()
 	data = data or {level=1}
 	if data.init then data.init(data, b) end
@@ -2685,7 +2685,7 @@ function _M:createRandomBoss2(base, data)
 	-- Apply talents from classes
 	------------------------------------------------------------
 	-- apply classes (instant to level up stats/talents before equipment is resolved)
-	self:applyRandomClass2(b, data, true)
+	self:applyRandomClassNew(b, data, true)
 	
 	b.rnd_boss_on_added_to_level = b.on_added_to_level
 	b._rndboss_resources_boost = data.resources_boost or 3
