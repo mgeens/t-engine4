@@ -182,7 +182,7 @@ function _M:onEnterLevel(zone, level)
 
 	-- Clear existing player created effects on the map
 	for i, eff in ipairs(level.map.effects) do
-		if eff.src and eff.src.player then
+		if (eff.src and (eff.src.player or (eff.src.summoner and eff.src:resolveSource().player))) then
 			eff.duration = 0
 			eff.grids = {}
 			print("[onEnterLevel] Cancelling player created effect ", tostring(eff.name))
