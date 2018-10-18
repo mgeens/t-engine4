@@ -1491,9 +1491,9 @@ local standard_rnd_boss_adjust = function(b)
 	if b.level <= 30 then
 		-- Damage reduction is applied in all cases, acknowledging the frontloaded strength of randbosses and the potential for players to lack tools early
 		b.inc_damage = b.inc_damage or {}
-		local change =  math.max(0, 70 * (30 - b.level + 1) / 30)
-		b.inc_damage.all = (b.inc_damage.all or 0) - change
-
+		local change =  (70 * (30 - b.level + 1) / 30) + 20
+		b.inc_damage.all = math.max(-80, (b.inc_damage.all or 0) - change)
+		
 		-- Things prone to binary outcomes (0 damage, 0 hit rate, ...) like armor and defense are only reduced if they exceed a cap per level regardless of source
 		-- This lets us not worry about stuff like Shield Wall+lucky equipment creating early threats that some builds cannot hurt
 		-- Note that while these seem strict they are *not* saying these values are unreasonable early for anything, they're saying they're unreasonable for randbosses specifically
