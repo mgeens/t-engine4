@@ -77,6 +77,15 @@ newEntity{ define_as = "SHADE",
 	auto_classes={{class="Archmage", start_level=12, level_rate=75}},
 	ai = "tactical", ai_state = { talent_in=3, ai_move="move_astar", },
 
+	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
+	-- In this case safe_range being set while talent_in is above 1 still results in a lot of kiting, so we lower that too
+	on_added_to_level = function(self)
+		if self.level <= 16 then
+			self.ai_tactic.safe_range = 1
+			self.ai_tactic.escape = 0
+		end
+	end,
+
 	on_die = function(self, who)
 		game.state:activateBackupGuardian("KOR_FURY", 3, 35, ".. yes I tell you! The old ruins of Kor'Pul are still haunted!")
 		game.player:resolveSource():setQuestStatus("start-allied", engine.Quest.COMPLETED, "kor-pul")
@@ -118,6 +127,14 @@ newEntity{ base = "BASE_NPC_THIEF", define_as = "THE_POSSESSED",
 	auto_classes={{class="Arcane Blade", start_level=12, level_rate=75}},
 	ai = "tactical", ai_state = { talent_in=2, ai_move="move_astar", },
 
+	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
+	on_added_to_level = function(self)
+		if self.level <= 16 then
+			self.ai_tactic.safe_range = 1
+			self.ai_tactic.escape = 0
+		end
+	end,
+	
 	on_die = function(self, who)
 		game.state:activateBackupGuardian("KOR_FURY", 3, 35, ".. yes I tell you! The old ruins of Kor'Pul are still haunted!")
 		game.player:resolveSource():setQuestStatus("start-allied", engine.Quest.COMPLETED, "kor-pul")
