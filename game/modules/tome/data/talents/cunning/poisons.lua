@@ -208,7 +208,7 @@ newTalent{
 		end
 		-- Note: New effects functions are called in order: merge, on_gain, activate
 		if to_spread > 0 then
-			local tg = {type="ball", range = 10, radius=t.getRadius(self, t), selffire = false, friendlyfire = false, talent=t, stop_block=true}
+			local tg = {type="ball", range = 10, radius=t.getRadius(self, t), selffire = false, friendlyfire = false, talent=t}
 			target.dead = false -- for combat log purposes
 			game.logSeen(target, "#GREEN#Poison bursts out of %s's corpse!", target.name:capitalize())
 			game.level.map:particleEmitter(target.x, target.y, tg.radius, "slime")

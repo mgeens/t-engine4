@@ -24,7 +24,7 @@ local function getShieldStrength(self, t)
 end
 
 local function getEfficiency(self, t)
-	return self:combatTalentLimit(t, 100, 20, 55)/100 -- Limit to <100%
+	return 0.4
 end
 
 local function maxPsiAbsorb(self, t) -- Max psi/turn to prevent runaway psi gains (solipsist randbosses)

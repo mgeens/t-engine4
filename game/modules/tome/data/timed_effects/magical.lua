@@ -164,9 +164,6 @@ newEffect{
 			[DamageType.LIGHTNING]=50,}
 			)
 	end,
-	on_timeout = function(self, eff)
-		if eff.dur > 7 then eff.dur = 7 end -- instakilling players is dumb and this is still lethal at 7s
-	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stoned", eff.tmpid)
 		self:removeTemporaryValue("poison_immune", eff.poison)
@@ -2276,23 +2273,26 @@ newEffect{
 newEffect{
 	name = "OUT_OF_PHASE", image = "talents/phase_door.png",
 	desc = "Out of Phase",
-	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%."):
-	format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
+	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%.\nThese effects cap at 60%%."):format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
 	type = "magical",
 	subtype = { teleport=true },
 	status = "beneficial",
-	parameters = { power=10 },
+	parameters = { defense=0, resists=0, effect_reduction=0 },
 	on_gain = function(self, err) return "#Target# is out of phase.", "+Phased" end,
 	on_lose = function(self, err) return "#Target# is no longer out of phase.", "-Phased" end,
 	activate = function(self, eff)
+		eff.defense = math.min(60, eff.defense + (self:attr("defense_on_teleport") or 0))
+		eff.resists = math.min(60, eff.resists + (self:attr("resist_all_on_teleport") or 0))
+		eff.effect_reduction = math.min(60, eff.effect_reduction + (self:attr("effect_reduction_on_teleport") or 0))
+
 		eff.defid = self:addTemporaryValue("combat_def", eff.defense)
 		eff.resid= self:addTemporaryValue("resists", {all=eff.resists})
 		eff.durid = self:addTemporaryValue("reduce_detrimental_status_effects_time", eff.effect_reduction)
 		eff.particle = self:addParticles(Particles.new("phantasm_shield", 1))
 	end,
 	on_merge = function(self, old_eff, new_eff)
-		old_eff.defense = math.min(50, math.max(old_eff.defense, new_eff.defense)) or 0
-		old_eff.resists = math.min(40, math.max(old_eff.resists, new_eff.resists)) or 0
+		old_eff.defense = math.min(60, math.max(old_eff.defense, new_eff.defense)) or 0
+		old_eff.resists = math.min(60, math.max(old_eff.resists, new_eff.resists)) or 0
 		old_eff.effect_reduction = math.min(60, math.max(old_eff.effect_reduction, new_eff.effect_reduction)) or 0
 
 		self:removeTemporaryValue("combat_def", old_eff.defid)

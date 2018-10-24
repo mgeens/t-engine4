@@ -2213,7 +2213,7 @@ end
 function _M:combatGetFlatResist(type)
 	if not self.flat_damage_armor then return 0 end
 	local dec = (self.flat_damage_armor.all or 0) + (self.flat_damage_armor[type] or 0)
-	return self:rescaleCombatStats(dec, 40)
+	return dec
 end
 
 --- Returns the resistance
@@ -2342,6 +2342,20 @@ function _M:hasAxeWeapon()
 	if not self:getInven("MAINHAND") then return end
 	local weapon = self:getInven("MAINHAND")[1]
 	if not weapon or (weapon.subtype ~= "battleaxe" and weapon.subtype ~= "waraxe") then
+		return nil
+	end
+	return weapon
+end
+
+--- Check if the actor has a 1H in mainhand
+function _M:hasMHWeapon()
+	if self:attr("disarmed") then
+		return nil, "disarmed"
+	end
+
+	if not self:getInven("MAINHAND") then return end
+	local weapon = self:getInven("MAINHAND")[1]
+	if not weapon or not weapon.combat then
 		return nil
 	end
 	return weapon

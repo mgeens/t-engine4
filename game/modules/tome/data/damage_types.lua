@@ -577,6 +577,8 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 
 			if src.__projecting_for then
+				-- Disable friendly fire for procs since players can't control when they happen or where they hit
+				src.nullify_all_friendlyfire = 1
 				if src.talent_on_spell and next(src.talent_on_spell) and t.is_spell and not src.turn_procs.spell_talent then
 					for id, d in pairs(src.talent_on_spell) do
 						if rng.percent(d.chance) and t.id ~= d.talent then
@@ -609,6 +611,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 						end
 					end
 				end
+				src.nullify_all_friendlyfire = nil
 
 				if not target.dead and (t.is_spell or t.is_mind) and not src.turn_procs.meteoric_crash and src.knowTalent and src:knowTalent(src.T_METEORIC_CRASH) then
 					src.turn_procs.meteoric_crash = true
@@ -874,7 +877,7 @@ newDamageType{
 -- Mind damage
 -- Most uses of this have their damage effected by mental save and do not trigger cross tiers, ie, melee items
 newDamageType{
-	name = "mind", type = "MIND", text_color = "#YELLOW#",
+	name = "mind", type = "MIND", text_color = "#ORANGE#",
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)

@@ -31,8 +31,8 @@ local reward_types = {
 			[Talents.T_EXOTIC_WEAPONS_MASTERY] = 1,
 		},
 		stats = {
-			[Stats.STAT_STR] = 2,
-			[Stats.STAT_CON] = 1,
+			[Stats.STAT_STR] = 5,
+			[Stats.STAT_CON] = 5,
 		},
 	},
 	divination = {
@@ -45,8 +45,8 @@ local reward_types = {
 			[Talents.T_VISION] = 1,
 		},
 		stats = {
-			[Stats.STAT_MAG] = 2,
-			[Stats.STAT_WIL] = 1,
+			[Stats.STAT_MAG] = 5,
+			[Stats.STAT_WIL] = 5,
 		},
 		antimagic = {
 			types = {
@@ -58,8 +58,8 @@ local reward_types = {
 				[Talents.T_EARTH_S_EYES] = 1,
 			},
 			stats = {
-				[Stats.STAT_CUN] = 1,
-				[Stats.STAT_WIL] = 2,
+				[Stats.STAT_CUN] = 5,
+				[Stats.STAT_WIL] = 5,
 			},
 		},
 	},
@@ -74,8 +74,8 @@ local reward_types = {
 			[Talents.T_STONE_TOUCH] = 1,
 		},
 		stats = {
-			[Stats.STAT_MAG] = 2,
-			[Stats.STAT_DEX] = 1,
+			[Stats.STAT_MAG] = 5,
+			[Stats.STAT_DEX] = 5,
 		},
 		antimagic = {
 			types = {
@@ -87,8 +87,8 @@ local reward_types = {
 			},
 			saves = { spell = 4 },
 			stats = {
-				[Stats.STAT_WIL] = 1,
-				[Stats.STAT_DEX] = 2,
+				[Stats.STAT_WIL] = 5,
+				[Stats.STAT_DEX] = 5,
 			},
 		},
 	},
@@ -102,8 +102,8 @@ local reward_types = {
 			[Talents.T_TRACK] = 1,
 		},
 		stats = {
-			[Stats.STAT_DEX] = 2,
-			[Stats.STAT_CUN] = 1,
+			[Stats.STAT_DEX] = 5,
+			[Stats.STAT_CUN] = 5,
 		},
 	},
 	sun_paladin = {
@@ -115,8 +115,8 @@ local reward_types = {
 			[Talents.T_CHANT_OF_FORTRESS] = 1,
 		},
 		stats = {
-			[Stats.STAT_STR] = 2,
-			[Stats.STAT_MAG] = 1,
+			[Stats.STAT_STR] = 5,
+			[Stats.STAT_MAG] = 5,
 		},
 		antimagic = {
 --			types = {
@@ -128,22 +128,22 @@ local reward_types = {
 			},
 			saves = { spell = 4, phys = 4 },
 			stats = {
-				[Stats.STAT_CUN] = 1,
-				[Stats.STAT_WIL] = 2,
+				[Stats.STAT_CUN] = 5,
+				[Stats.STAT_WIL] = 5,
 			},
 		},
 	},
 	anorithil = {
 		types = {
-			["celestial/light"] = 0.8,
+			--["celestial/light"] = 0.8,
 		},
 		talents = {
 			[Talents.T_BATHE_IN_LIGHT] = 1,
 			[Talents.T_HEALING_LIGHT] = 1,
 		},
 		stats = {
-			[Stats.STAT_CUN] = 2,
-			[Stats.STAT_MAG] = 1,
+			[Stats.STAT_CUN] = 5,
+			[Stats.STAT_MAG] = 5,
 		},
 		antimagic = {
 			types = {
@@ -155,8 +155,8 @@ local reward_types = {
 			},
 			saves = { spell = 4, mental = 4 },
 			stats = {
-				[Stats.STAT_CUN] = 1,
-				[Stats.STAT_WIL] = 2,
+				[Stats.STAT_CUN] = 5,
+				[Stats.STAT_WIL] = 5,
 			},
 		},
 	},
@@ -169,8 +169,8 @@ local reward_types = {
 			[Talents.T_FORESIGHT] = 1,
 		},										
 		stats = {
-			[Stats.STAT_MAG] = 2,
-			[Stats.STAT_WIL] = 1,
+			[Stats.STAT_MAG] = 5,
+			[Stats.STAT_WIL] = 5,
 		},
 		antimagic = {
 			types = {
@@ -182,8 +182,8 @@ local reward_types = {
 			},
 			saves = { spell = 4 },
 			stats = {
-				[Stats.STAT_WIL] = 1,
-				[Stats.STAT_CUN] = 2,
+				[Stats.STAT_WIL] = 5,
+				[Stats.STAT_CUN] = 5,
 			},
 		},
 	},
@@ -195,12 +195,12 @@ local reward_types = {
 			[Talents.T_MIND_SEAR] = 1,
 		},
 		stats = {
-			[Stats.STAT_STR] = 2,
-			[Stats.STAT_DEX] = 2,
-			[Stats.STAT_MAG] = 2,
-			[Stats.STAT_WIL] = 2,
-			[Stats.STAT_CUN] = 2,
-			[Stats.STAT_CON] = 2,
+			[Stats.STAT_STR] = 5,
+			[Stats.STAT_DEX] = 5,
+			[Stats.STAT_MAG] = 5,
+			[Stats.STAT_WIL] = 5,
+			[Stats.STAT_CUN] = 5,
+			[Stats.STAT_CON] = 5,
 		},
 	},
 }
