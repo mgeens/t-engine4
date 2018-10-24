@@ -133,13 +133,14 @@ local reward_types = {
 			},
 		},
 	},
-	anorithil = {
+	defiler = {
 		types = {
-			--["celestial/light"] = 0.8,
+			["corruption/curses"] = 0.8,
 		},
 		talents = {
-			[Talents.T_BATHE_IN_LIGHT] = 1,
-			[Talents.T_HEALING_LIGHT] = 1,
+			[Talents.T_CURSE_OF_DEFENSELESSNESS] = 1,
+			[Talents.T_CURSE_OF_IMPOTENCE] = 1,
+			[Talents.T_CURSE_OF_DEATH] = 1,
 		},
 		stats = {
 			[Stats.STAT_CUN] = 5,
