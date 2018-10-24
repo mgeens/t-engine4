@@ -5563,14 +5563,27 @@ end
 -- @param ab the talent (not the id, the table)
 function _M:logTalentMessage(ab)
 	if ab.message ~= false and not util.getval(ab.no_message, self, ab) then
+	local color = "#ORCHID#"  -- Default
 		if ab.message then
-			game.logSeen(self, "%s", self:useTalentMessage(ab))
+			-- Should this not be colored?
+			if ab.is_mind then color = "#YELLOW#"
+			elseif ab.is_melee then color = "#RED#"
+			elseif ab.is_inscription then color = "#GREEN#"
+			end
+			game.logSeen(self, color.."#{bold}#%s#{normal}##LAST#", self:useTalentMessage(ab))
 		elseif ab.mode == "sustained" then
-			game.logSeen(self, "%s %s %s.", self.name:capitalize(), self:isTalentActive(ab.id) and "deactivates" or "activates", ab.name)
+			game.logSeen(self, "%s %s #{bold}##ORANGE#%s#LAST#.", self.name:capitalize(), self:isTalentActive(ab.id) and "deactivates" or "activates", ab.name)
 		elseif ab.is_spell then
-			game.logSeen(self, "%s casts %s.", self.name:capitalize(), ab.name)
+			if ab.is_inscription then color = "#GREEN#"
+			else color = "#PURPLE#"
+			end
+			game.logSeen(self, "%s casts #{bold}#"..color.."%s.#{normal}##LAST#", self.name:capitalize(), ab.name)
 		else
-			game.logSeen(self, "%s uses %s.", self.name:capitalize(), ab.name)
+			if ab.is_mind then color = "#YELLOW#"
+			elseif ab.is_melee then color = "#RED#"
+			elseif ab.is_inscription then color = "#GREEN#"
+			end
+			game.logSeen(self, "%s uses #{bold}#"..color.."%s.#{normal}##LAST#", self.name:capitalize(), ab.name)
 		end
 	end
 end
