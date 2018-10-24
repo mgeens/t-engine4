@@ -1204,6 +1204,8 @@ function _M:changeLevelReal(lev, zone, params)
 			if newx and newy then blocking_actor:move(newx, newy, true)
 			else blocking_actor:teleportRandom(x, y, 10) end
 		end
+		self.player:move(x, y, true)
+		self.player.last_wilderness = self.zone.short_name
 	-- Place the player on the level
 	else
 		local x, y = nil, nil
