@@ -22,7 +22,7 @@ void main(void)
 	// Center Pixel
 	vec4 sample = vec4(0.0,0.0,0.0,0.0);
 	//float factor = ((float(blursize)*2.0)+1.0);
-	float factor = (float(blursize)+1)*(float(blursize)+1);	factor = factor*factor;
+	float factor = (float(blursize)+1.0)*(float(blursize)+1.0);	factor = factor*factor;
 	factor = factor*factor;
 
 	if (noisy < 0.25)
