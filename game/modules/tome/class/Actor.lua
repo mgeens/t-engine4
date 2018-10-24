@@ -1315,7 +1315,7 @@ function _M:move(x, y, force)
 
 		-- Confused ?
 		if not force and self:attr("confused") then
-			if rng.percent(self:attr("confused")) then
+			if rng.percent(util.bound(self:attr("confused"), 0, 50)) then
 				x, y = self.x + rng.range(-1, 1), self.y + rng.range(-1, 1)
 			end
 		end
@@ -5497,7 +5497,7 @@ function _M:preUseTalent(ab, silent, fake)
 	if not ab.never_fail then
 		-- Confused ? lose a turn!
 		if self:attr("confused") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
-			if rng.percent(self:attr("confused")) then
+			if rng.percent(util.bound(self:attr("confused"), 0, 50)) then
 				if not silent then game.logSeen(self, "%s is confused and fails to use %s.", self.name:capitalize(), ab.name) end
 				self:useEnergy()
 				return false
