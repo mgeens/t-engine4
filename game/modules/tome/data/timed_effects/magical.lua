@@ -164,9 +164,6 @@ newEffect{
 			[DamageType.LIGHTNING]=50,}
 			)
 	end,
-	on_timeout = function(self, eff)
-		if eff.dur > 7 then eff.dur = 7 end -- instakilling players is dumb and this is still lethal at 7s
-	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("stoned", eff.tmpid)
 		self:removeTemporaryValue("poison_immune", eff.poison)
