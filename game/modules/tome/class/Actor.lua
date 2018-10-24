@@ -5821,6 +5821,8 @@ function _M:getTalentSpeedType(t)
 		return "weapon"
 	elseif t.is_mind then
 		return "mind"
+	elseif t.is_melee then
+		return "weapon"
 	else
 		return "standard"
 	end
