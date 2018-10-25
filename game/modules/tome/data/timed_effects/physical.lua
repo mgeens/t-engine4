@@ -124,6 +124,7 @@ newEffect{
 	name = "CUT", image = "effects/cut.png",
 	desc = "Bleeding",
 	long_desc = function(self, eff) return ("Huge cut that bleeds, doing %0.2f physical damage per turn."):format(eff.power) end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,
 	type = "physical",
 	subtype = { wound=true, cut=true, bleed=true },
 	status = "detrimental",
@@ -221,6 +222,7 @@ newEffect{
 	name = "POISONED", image = "effects/poisoned.png",
 	desc = "Poison",
 	long_desc = function(self, eff) return ("The target is poisoned, taking %0.2f nature damage per turn."):format(eff.power) end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,
 	type = "physical",
 	subtype = { poison=true, nature=true }, no_ct_effect = true,
 	status = "detrimental",
@@ -421,6 +423,7 @@ newEffect{
 	name = "BURNING", image = "talents/flame.png",
 	desc = "Burning",
 	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn."):format(eff.power) end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,
 	type = "physical",
 	subtype = { fire=true },
 	status = "detrimental",
@@ -444,7 +447,8 @@ newEffect{
 newEffect{
 	name = "BURNING_SHOCK", image = "talents/flameshock.png",
 	desc = "Burning Shock",
-	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 50%%, putting 4 random talents on cooldown and reducing movement speed by 50%%.  While stunned talents cooldown twice as slow."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is on fire, taking %0.2f fire damage per turn, reducing damage by 70%%, putting 4 random talents on cooldown and reducing movement speed by 50%%. While flameshocked talents do not cooldown."):format(eff.power) end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,
 	type = "physical",
 	subtype = { fire=true, stun=true },
 	status = "detrimental",
@@ -620,7 +624,8 @@ newEffect{
 newEffect{
 	name = "SLOW", image = "talents/slow.png",
 	desc = "Slow",
-	long_desc = function(self, eff) return ("Reduces global action speed by %d%%."):format(eff.power * 100) end,
+	long_desc = function(self, eff) return ("Reduces global action speed by %d%%."):format(math.floor(eff.power * 100)) end,
+	charges = function(self, eff) return (math.floor(eff.power * 100)) end,
 	type = "physical",
 	subtype = { slow=true },
 	status = "detrimental",
@@ -3214,6 +3219,7 @@ newEffect{
 		local leeching = eff.leeching > 0 and (" The source of this effect receives healing equal to %d%% of the damage it deals to the target."):format(eff.leeching) or ""
 		return ("The target is poisoned, taking %0.2f nature damage per turn.%s%s%s%s%s"):format(eff.power, insidious, numbing, crippling, volatile, leeching) 
 	end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,
 	type = "physical",
 	subtype = { poison=true, nature=true }, no_ct_effect = true,
 	status = "detrimental",
