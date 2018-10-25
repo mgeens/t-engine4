@@ -23,7 +23,7 @@ newTalent{
 	require = corrs_req1,
 	points = 5,
 	vim = 0,
-	cooldown = 9,
+	cooldown = 5,
 	reflectable = true,
 	proj_speed = 15,
 	tactical = { ATTACK = {BLIGHT = 1.75},
@@ -32,7 +32,7 @@ newTalent{
 	requires_target = true,
 	range = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 6, 10))) end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t, display={particle="bolt_slime"}}
+		local tg = {type="bolt", friendlyblock=false, range=self:getTalentRange(t), talent=t, display={particle="bolt_slime"}}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		self:project(tg, x, y, DamageType.DRAIN_VIM, self:spellCrit(self:combatTalentSpellDamage(t, 25, 200)), {type="slime"})
