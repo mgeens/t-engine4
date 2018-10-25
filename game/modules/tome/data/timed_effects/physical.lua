@@ -1569,30 +1569,24 @@ newEffect{
 newEffect{
 	name = "Recovery",
 	desc = "Recovery",
-	long_desc = function(self, eff) return ("The target is recovering %d life each turn."):format(eff.power + eff.pct * self.max_life) end,
+	long_desc = function(self, eff) return ("The target has %d increased life regeneration."):format(eff.regen) end,
 	type = "physical",
 	subtype = { heal=true },
 	status = "beneficial",
-	parameters = { power=10, pct = 0.01 },
+	parameters = { regen=10 },
 	on_gain = function(self, err) return "#Target# is recovering from the damage!", "+Recovery" end,
 	on_lose = function(self, err) return "#Target# has finished recovering.", "-Recovery" end,
 	activate = function(self, eff)
-		--eff.regenid = self:addTemporaryValue("life_regen", eff.regen)
-		--eff.healid = self:addTemporaryValue("healing_factor", eff.heal_mod / 100)
+		eff.regenid = self:addTemporaryValue("life_regen", eff.regen)
 		if core.shader.active(4) then
 			eff.particle1 = self:addParticles(Particles.new("shader_shield", 1, {toback=true,  size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=2.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
 			eff.particle2 = self:addParticles(Particles.new("shader_shield", 1, {toback=false, size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=1.0, beamColor1={0xff/255, 0x22/255, 0x22/255, 1}, beamColor2={0xff/255, 0x60/255, 0x60/255, 1}, circleColor={0,0,0,0}, beamsCount=8}))
 		end
 	end,
-	on_timeout = function(self, eff)
-		local heal = (eff.power or 0) + self.max_life * eff.pct
-		self:heal(heal, src)
-	end,
 	deactivate = function(self, eff)
 		self:removeParticles(eff.particle1)
 		self:removeParticles(eff.particle2)
-		--self:removeTemporaryValue("life_regen", eff.regenid)
-		--self:removeTemporaryValue("healing_factor", eff.healid)
+		self:removeTemporaryValue("life_regen", eff.regenid)
 	end,
 }
 
