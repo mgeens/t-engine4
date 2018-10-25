@@ -3216,7 +3216,7 @@ newEffect{
 		local insidious = eff.insidious > 0 and (" Healing received is reduced by %d%%."):format(eff.insidious) or ""
 		local numbing = eff.numbing > 0 and (" Damage dealt is reduced by %d%%."):format(eff.numbing) or ""
 		local crippling = eff.crippling > 0 and (" %d%% chance to fail talents."):format(eff.crippling) or ""
-		local volatile = eff.volatile > 0 and (" Poison damage also hits adjacent targets."):format() or ""
+		local volatile = eff.volatile > 0 and (" Poison damage also hits adjacent targets for 50%%."):format() or ""
 		local leeching = eff.leeching > 0 and (" The source of this effect receives healing equal to %d%% of the damage it deals to the target."):format(eff.leeching) or ""
 		return ("The target is poisoned, taking %0.2f nature damage per turn.%s%s%s%s%s"):format(eff.power, insidious, numbing, crippling, volatile, leeching) 
 	end,
@@ -3235,7 +3235,7 @@ newEffect{
 			local dam = DamageType:get(DamageType.NATURE).projector(eff.src, self.x, self.y, DamageType.NATURE, eff.power)
 			if eff.volatile > 0 then
 				local tg = {type="ball", radius=1, friendlyfire=false, x=self.x, y=self.y, act_exclude={[self.uid]=true}}
-				eff.src:project(tg, self.x, self.y, DamageType.NATURE, eff.power)
+				eff.src:project(tg, self.x, self.y, DamageType.NATURE, eff.power / 2)
 			end
 			if dam > 0 and eff.leeching > 0 then
 				local src = eff.src.resolveSource and eff.src:resolveSource()

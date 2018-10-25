@@ -159,6 +159,8 @@ newTalent{
 					end
 				end
 			end
+		else
+			game.logSeen(target, "%s resists the vile poison!", target.name:capitalize())
 		end
 	end,
 	callbackOnMeleeAttack = function(self, t, target, hitted, crit, weapon, damtype, mult, dam)
@@ -552,7 +554,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-	return ([[Enhances your Deadly Poison with a volatile agent, causing the poison to deal %d%% increased damage to the victim and damage all of your enemies adjacent to it.]]):
+	return ([[Enhances your Deadly Poison with a volatile agent, causing the poison to deal %d%% increased damage to the victim and damage all of your enemies adjacent to it for 50%%.]]):
 	format(t.getEffect(self, t))
 	end,
 }
