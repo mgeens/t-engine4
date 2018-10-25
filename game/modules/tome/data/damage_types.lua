@@ -843,6 +843,9 @@ newDamageType{
 		if src and src.knowTalent and realdam > 0 and target and src:knowTalent(src.T_PESTILENT_BLIGHT) then
 			src:callTalent(src.T_PESTILENT_BLIGHT, "do_rot", target, realdam)
 		end
+		if src and src.knowTalent and realdam > 0 and target and src:knowTalent(src.T_VIRULENT_DISEASE) and (not state or not state.from_disease) then
+			src:callTalent(src.T_VIRULENT_DISEASE, "do_disease", target, realdam)
+		end
 		return realdam
 	end,
 	death_message = {"diseased", "poxed", "infected", "plagued", "debilitated by noxious blight before falling", "fouled", "tainted"},
@@ -2443,6 +2446,22 @@ newDamageType{
 	end,
 }
 
+-- Used by Blood Grasp, heal+temporary max life based on damage
+newDamageType{
+	name = "sanguine blight", type = "SANGUINE", text_color = "#DARK_GREEN#",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		if _G.type(dam) == "number" then dam = {dam=dam} end
+		local target = game.level.map(x, y, Map.ACTOR) -- Get the target first to make sure we heal even on kill
+		local dealt = DamageType:get(DamageType.BLIGHT).projector(src, x, y, DamageType.BLIGHT, dam.dam, state)
+		if dealt > 0 then 
+			src:setEffect(src.EFF_BLOOD_GRASP, 7, {life = dealt * 0.5} )
+			src:heal(dealt * 0.2, src)
+		end
+		return dealt
+	end,
+}
 -- Drain Vim
 newDamageType{
 	name = "vim draining blight", type = "DRAIN_VIM", text_color = "#DARK_GREEN#",
