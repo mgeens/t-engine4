@@ -2232,7 +2232,7 @@ newEffect{
 newEffect{
 	name = "BRAINLOCKED",
 	desc = "Brainlocked",
-	long_desc = function(self, eff) return ("Renders a random talent unavailable. No talents will cool down until the effect has worn off."):format() end,
+	long_desc = function(self, eff) return ("Renders a random talent unavailable. Talent cooldown is halved until the effect has worn off."):format() end,
 	type = "mental",
 	subtype = { ["cross tier"]=true },
 	status = "detrimental",
@@ -2240,11 +2240,11 @@ newEffect{
 	on_gain = function(self, err) return nil, "+Brainlocked" end,
 	on_lose = function(self, err) return nil, "-Brainlocked" end,
 	activate = function(self, eff)
-		eff.tcdid = self:addTemporaryValue("no_talents_cooldown", 1)
+		eff.tcdid = self:addTemporaryValue("half_talents_cooldown", 1)
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
 			local t = self:getTalentFromId(tid)
-			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate then tids[#tids+1] = t end
+			if t and not self.talents_cd[tid] and t.mode == "activated" and not t.innate and not t.no_energy then tids[#tids+1] = t end
 		end
 		for i = 1, 1 do
 			local t = rng.tableRemove(tids)
@@ -2253,7 +2253,7 @@ newEffect{
 		end
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("no_talents_cooldown", eff.tcdid)
+		self:removeTemporaryValue("half_talents_cooldown", eff.tcdid)
 	end,
 }
 
