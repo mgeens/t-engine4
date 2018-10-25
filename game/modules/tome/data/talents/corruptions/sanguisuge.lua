@@ -110,15 +110,17 @@ newTalent{
 	cooldown = 20,
 	range = 10,
 	no_energy = true,
-	tactical = { BUFF = 2 },
-	getMult = function(self,t) return self:combatTalentScale(t, 8, 16) end,
+	tactical = { HEAL = 2 },
+	getMult = function(self,t) return self:combatTalentSpellDamage(t, 4, 30) end,
 	action = function(self, t)
-		self:setEffect(self.EFF_LIFE_TAP, 7, {power=t.getMult(self,t)})
+		self:setEffect(self.EFF_LIFE_TAP, 2, {power=t.getMult(self,t)})
 		game:playSoundNear(self, "talents/spell_generic2")
 		return true
 	end,
 	info = function(self, t)
-		return ([[Tap your life force to provide a furious boost, increasing all damage you deal by %0.1f%% for 7 turns.]]):
+		return ([[Feed on the pain you cause your foes.
+			For 2 turns you gain %d%% lifesteal on all damage dealt.
+			The lifesteal will increase with your Spellpower.]]):
 		format(t.getMult(self,t))
 	end,
 }

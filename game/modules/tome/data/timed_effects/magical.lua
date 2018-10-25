@@ -581,18 +581,24 @@ newEffect{
 newEffect{
 	name = "LIFE_TAP", image = "talents/life_tap.png",
 	desc = "Life Tap",
-	long_desc = function(self, eff) return ("The target taps its blood's hidden power, increasing all damage done by %d%%."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target taps its blood's hidden power, healing for %d%% of all damage they deal."):format(eff.power) end,
 	type = "magical",
 	subtype = { blight=true },
 	status = "beneficial",
-	parameters = { power=10 },
-	on_gain = function(self, err) return "#Target# is overloaded with power.", "+Life Tap" end,
-	on_lose = function(self, err) return "#Target# seems less dangerous.", "-Life Tap" end,
+	parameters = { power=0 },
+	on_gain = function(self, err) return "#Target# looks healthier as he deals damage.", "+Life Tap" end,
+	on_lose = function(self, err) return "#Target# stops leeching life.", "-Life Tap" end,
 	activate = function(self, eff)
-		eff.pid = self:addTemporaryValue("inc_damage", {all=eff.power})
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("inc_damage", eff.pid)
+	end,
+	callbackOnDealDamage = function(self, eff, value, target, dead, death_node)
+		-- Lifesteal done here to avoid stacking in bad ways with other LS effects
+		if value <= 0 or not target then return end
+			local leech = math.min(value, target.life) * eff.power / 100
+			if leech > 0 then
+				self:heal(leech, self)
+			end
 	end,
 }
 
