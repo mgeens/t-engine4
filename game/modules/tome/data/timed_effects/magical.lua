@@ -2906,19 +2906,6 @@ newEffect{
 }
 
 newEffect{
-	name = "PATH_OF_THE_SUN", image = "talents/path_of_the_sun.png",
-	desc = "Path of the Sun",
-	long_desc = function(self, eff) return ("The target is able to instantly travel alongside Sun Paths."):format() end,
-	type = "magical",
-	subtype = { sun=true, },
-	status = "beneficial",
-	parameters = {},
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "walk_sun_path", 1)
-	end
-}
-
-newEffect{
 	name = "SUNCLOAK", image = "talents/suncloak.png",
 	desc = "Suncloak",
 	long_desc = function(self, eff) return ("The target is protected by the sun, increasing their spell casting speed by %d%%, reducing spell cooldowns by %d%%, and preventing damage over %d%% of your maximum life from a single hit."):

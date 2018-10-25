@@ -143,6 +143,19 @@ newEffect{
 }
 
 newEffect{
+	name = "PATH_OF_THE_SUN", image = "talents/path_of_the_sun.png",
+	desc = "Path of the Sun",
+	long_desc = function(self, eff) return ("The target is able to instantly travel alongside Sun Paths."):format() end,
+	type = "other",
+	subtype = { sun=true, },
+	status = "beneficial",
+	parameters = {},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "walk_sun_path", 1)
+	end
+}
+
+newEffect{
 	name = "TIME_PRISON", image = "talents/time_prison.png",
 	desc = "Time Prison",
 	long_desc = function(self, eff) return "The target is removed from the normal time stream, unable to act but unable to take any damage. Time does not pass for this creature." end,
