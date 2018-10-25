@@ -164,7 +164,7 @@ newTalent{
 
 					local dur = math.max(6, parameters.dur)
 					if target:canBe("disease") then
-						target:setEffect(disease.id, 6, parameters)
+						target:setEffect(disease.id, dur, parameters)
 					else
 						game.logSeen(target, "%s resists the disease!", target.name:capitalize())
 					end
