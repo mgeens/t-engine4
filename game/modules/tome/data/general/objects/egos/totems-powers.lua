@@ -24,57 +24,42 @@ Totems
 *thorny skin
 ]]
 
+-- gfx
 newEntity{
-	name = " of cure ailments", addon=true, instant_resolve=true,
-	keywords = {ailments=true},
+	name = " of healing", addon=true, instant_resolve=true,
+	keywords = {healing=true},
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=30, max=300, floor=true},
+	charm_power_def = {add=50, max=500, floor=true},
 	resolvers.charm(
 		function(self, who) 
 			local heal = self.use_power.heal(self, who)
-			return ("remove 1 poison, disease, and wound from the target then heal them for %d + %d per effect cleansed"):
-				format(heal, heal / 2) end,
+			return ("heals yourself and all friendly characters within 10 spaces for %d"):
+				format(heal) end,
 		20,
 		function(self, who)
 			local tg = self.use_power.target(self, who)
-			local x, y = who:getTarget(tg)
-			if not x or not y then return nil end
+			local heal = who:mindCrit(self.use_power.heal(self, who))
 			game.logSeen(who, "%s activates %s %s!", who.name:capitalize(), who:his_her(), self:getName{no_add_name = true, do_color = true})
-			who:project(tg, x, y, function(px, py)
+			who:project(tg, who.x, who.y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target then return end
-					local cleansed = 0
-					local heal = self.use_power.heal(self, who)
-
-					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.poison end, 1)
-					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.cut end, 1)
-					cleansed = cleansed + target:removeEffectsFilter(function(e) return e.subtype.disease end, 1)
-
-					target:attr("allow_on_heal", 1)
-					target:heal(heal + (heal / 2 * cleansed), who)
-					target:attr("allow_on_heal", -1)
-					game:playSoundNear(who, "talents/heal")
+				if target:reactionToward(who) < 0 then return end
+				target:attr("allow_on_heal", 1)
+				target:heal(heal, who)
+				target:attr("allow_on_heal", -1)
+				game:playSoundNear(who, "talents/heal")
+			end) 
 			return {id=true, used=true}
-		end) end,
+		end,
 	"T_GLOBAL_CD",
-	{range = function(self, who) return 10 end,
+	{
+	radius = function(self, who) return 10 end,
 	heal = function(self, who) return self:getCharmPower(who) end,
-	target = function(self, who) return {default_target=who, type="hit", nowarning=true, range=self.use_power.range(self, who), first_target="friend"} end,
-	tactical = {CURE = function(who, t, aitarget) -- count number of effects that can be removed
-			local nb = 0
-			for eff_id, p in pairs(who.tmp) do
-				local e = who.tempeffect_def[eff_id]
-				if e.status == "detrimental" and (e.subtype.poison or e.subtype.disease) then
-					nb = nb + 1
-				end
-			end
-			return nb
-			end,
-			__wt_cache_turns = 0
-			},
-	}),
+	target = function(self, who) return {type="ball", nowarning=true, radius=self.use_power.radius(self, who)} end,
+	tactical = {HEAL = 1},
+	})
 }
 
 newEntity{
@@ -83,12 +68,12 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=25, max=600, floor=true},
+	charm_power_def = {add=15, max=800, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("instantly sting an enemy dealing %d nature damage over 7 turns and reducing their healing by 50%%%%"):format(dam, 50)
 		end,
-		10,
+		12,
 		function(self, who)
 			local tg = self.use_power.target(self, who)
 			local x, y = who:getTarget(tg)
@@ -136,9 +121,9 @@ newEntity{
 	charm_power_def = {add=45, max=500, floor=true},
 	resolvers.charm(function(self, who)
 		local stats = self.use_power.tentacleStats(self, who)
-		local str = ("(Tentacle Bonus Stats)\nLife:  %d\nBase Damage:  %d\nArmor:  %d\nAll Resist:  %d"):format(stats.max_life, stats.combat.dam, stats.combat_armor, stats.resists.all)
-		return	("summon a resilient tentacle up to %d spaces away.  Each turn the tentacle will strike a random enemy in range 3 dealing physical damage and attempting to pin them.\n\n%s"):
-			format(5, str) 
+		local str = ("(Tentacle Stats)\nLife:  %d\nBase Damage:  %d\nArmor:  %d\nAll Resist:  %d"):format(stats.max_life, stats.combat.dam, stats.combat_armor, stats.resists.all)
+		return	("summon a resilient tentacle up to %d spaces away for %d turns.  Each turn the tentacle will strike a random enemy in range 3 dealing physical damage and attempting to pin them.\n\n%s"):
+			format(5, stats.summon_time, str) 
 		end,
 		 20, 
 		 function(self, who)
@@ -201,7 +186,7 @@ newEntity{
 				end,
 				faction = who.faction,
 				summoner = who, summoner_gain_exp=true,
-				summon_time=10,
+				summon_time = 0,
 			}
 
 			m:resolve()
@@ -212,7 +197,6 @@ newEntity{
 				control=false,
 				type="summon",
 				title="Summon",
-				orders = {target=true, leash=true, anchor=true, talents=true},
 			})
 
 			local stats = self.use_power.tentacleStats(self, who)
@@ -233,7 +217,8 @@ newEntity{
 		combat = {dam = resolvers.mbonus_material(100, 0)},
 		max_life = resolvers.mbonus_material(400, 0),
 		combat_armor = resolvers.mbonus_material(50, 0),
-		resists = {all = resolvers.mbonus_material(50, 0)}
+		resists = {all = resolvers.mbonus_material(50, 0)},
+		summon_time = resolvers.mbonus_material(10, 3),
 	},
 	tentacleStats = function(self, who)
 		local stats = {

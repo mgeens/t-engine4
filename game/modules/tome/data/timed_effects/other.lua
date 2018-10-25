@@ -75,6 +75,21 @@ newEffect{
 }
 
 newEffect{
+	name = "ITEM_CHARM_POWERFUL", image = "talents/intricate_tools.png",
+	desc = "Charm:  Damage",
+	long_desc = function(self, eff) return ("All damage increased by %d%%."):format(eff.damage) end,
+	type = "other",
+	subtype = { },
+	status = "beneficial",
+	parameters = { damage=10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_damage", {all = eff.damage})
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
 	name = "ITEM_CHARM_SAVIOR", image = "talents/intricate_tools.png",
 	desc = "Charm:  Saves",
 	long_desc = function(self, eff) return ("All saves increased by %d."):format(eff.save) end,

@@ -61,7 +61,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 10,
 
-	charm_power_def = {add=25, max=400, floor=true},
+	charm_power_def = {add=10, max=400, floor=true},
 	resolvers.charm(function(self, who)
 		local dam = who:damDesc(engine.DamageType.LIGHTNING, self.use_power.damage(self, who))
 		local radius = self.use_power.radius
@@ -88,11 +88,11 @@ newEntity{
 	"T_GLOBAL_CD",
 	{
 	range = 8,
-	radius = 3,
+	radius = 4,
 	requires_target = true,
 	no_npc_use = function(self, who) return self:restrictAIUseObject(who) end, -- don't let dumb ai hurt friends
 	target = function(self, who) return {type="ball", range=self.use_power.range, radius=self.use_power.radius} end,
-	tactical = {ATTACKAREA = {FIRE = 2}},
+	tactical = {ATTACKAREA = {LIGHTNING = 2}},
 	damage = function(self, who) return self:getCharmPower(who) end
 	}),
 }
@@ -112,7 +112,7 @@ newEntity{
 		}
 	end),
 
-	charm_power_def = {add=50, max=700, floor=true},
+	charm_power_def = {add=30, max=800, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("fire a magical bolt dealing %d %s damage"):format(dam, self.elem[3] )
@@ -136,4 +136,41 @@ newEntity{
 		damage = function(self, who) return self:getCharmPower(who) end,
 		tactical = {ATTACK = 1}}
 	),
+}
+
+-- gfx
+newEntity{
+	name = " of shielding", addon=true, instant_resolve=true,
+	keywords = {shielding=true},
+	level_range = {1, 50},
+	rarity = 8,
+
+	charm_power_def = {add=50, max=500, floor=true},
+	resolvers.charm(
+		function(self, who) 
+			local shield = self.use_power.shield(self, who)
+			return ("create a shield absorbing up to %d damage on yourself and all friendly characters within 10 spaces for %d turns"):
+				format(shield, 4) end,
+		20,
+		function(self, who)
+			local tg = self.use_power.target(self, who)
+			local shield = who:spellCrit(self.use_power.shield(self, who))
+			game.logSeen(who, "%s activates %s %s!", who.name:capitalize(), who:his_her(), self:getName{no_add_name = true, do_color = true})
+			who:project(tg, who.x, who.y, function(px, py)
+				local target = game.level.map(px, py, engine.Map.ACTOR)
+				if not target then return end
+				if target:reactionToward(who) < 0 then return end
+				target:setEffect(target.EFF_DAMAGE_SHIELD, 4, {power=shield})
+
+				--game:playSoundNear(who, "talents/heal")
+			end) 
+			return {id=true, used=true}
+		end,
+	"T_GLOBAL_CD",
+	{
+	radius = function(self, who) return 10 end,
+	shield = function(self, who) return self:getCharmPower(who) end,
+	target = function(self, who) return {type="ball", nowarning=true, radius=self.use_power.radius(self, who)} end,
+	tactical = {HEAL = 1},
+	})
 }

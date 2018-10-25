@@ -2377,6 +2377,11 @@ newEffect{
 				[DamageType.DARKNESS] = eff.power,
 				})
 			eff.what = "lightning, blight, mind, darkness"
+		elseif eff.kind == "all" then
+			eff.sid = self:addTemporaryValue("flat_damage_armor", {
+				all = eff.power,
+				})
+			eff.what = "all"
 		end
 	end,
 	deactivate = function(self, eff)

@@ -113,6 +113,32 @@ newEntity{
 }
 
 newEntity{
+	name = "extending ", prefix=true,
+	keywords = {extending=true},
+	level_range = {1, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 12,
+	cost = 5,
+	extending_amt = resolvers.mbonus_material(2, 1),
+	extending_dur = resolvers.mbonus_material(1.5, 1),
+
+	charm_on_use = {
+		{100, function(self, who) return ("increase the duration of %d beneficial effects by %d"):format(self.extending_amt, self.extending_dur) end, function(self, who)
+			local effs = self:effectsFilter(function(eff)
+				if eff.status == "beneficial" and eff.type ~= "other" then return true end
+			end)
+			if #effs <= 0 then return end
+			for i = 1, math.floor(self.extending_amt) do
+				local eff = rng.tableRemove(effs)
+				eff.dur = eff.dur + math.floor(self.extending_amt)
+			end
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
+}
+
+newEntity{
 	name = "evasive ", prefix=true,
 	keywords = {evasive=true},
 	level_range = {1, 50},
@@ -148,6 +174,22 @@ newEntity{
 }
 
 newEntity{
+	name = "cleansing ", prefix=true,
+	keywords = {cleansing=true},
+	level_range = {1, 50},
+	rarity = 12,
+	cost = 5,
+	greater_ego = 1,
+	cleansing_amount = resolvers.mbonus_material(3, 1),
+	charm_on_use = {
+		{100, function(self, who) return ("cleanse %d total effects of type disease, wound, or poison"):format(self.cleansing_amount) end, function(self, who)
+			who:removeEffectsFilter(function(e) return e.subtype.poison or e.subtype.wound or e.subtype.disease end, self.cleansing_amount)	
+		end},
+	},
+	use_power = {tactical = {CURE = 0.2}}
+}
+
+newEntity{
 	name = "piercing ", prefix=true,
 	keywords = {piercing=true},
 	level_range = {1, 50},
@@ -165,11 +207,29 @@ newEntity{
 }
 
 newEntity{
+	name = "powerful ", prefix=true,
+	keywords = {piercing=true},
+	level_range = {1, 50},
+	rarity = 12,
+	greater_ego = 1,
+	unique_ego = 1,
+	cost = 5,
+	powerful_damage = resolvers.mbonus_material(30, 10),
+	charm_on_use = {
+		{100, function(self, who) return ("increase all damage by %d%% for 2 turns"):format(self.powerful_damage) end, function(self, who)
+			who:setEffect(who.EFF_ITEM_CHARM_POWERFUL, 2, {damage = self.powerful_damage})
+		end},
+	},
+	use_power = {tactical = {BUFF = 0.2}}
+}
+
+--[[
+newEntity{
 	name = "savior's ", prefix=true,
 	keywords = {savior=true},
 	level_range = {1, 50},
 	rarity = 12,
-	greater_ego = 1,
+	--greater_ego = 1,
 	unique_ego = 1,
 	cost = 5,
 	savior_saves = resolvers.mbonus_material(30, 10),
@@ -179,7 +239,7 @@ newEntity{
 		end},
 	},
 	use_power = {tactical = {BUFF = 0.2}}
-}
+}]]
 
 newEntity{
 	name = "innervating ", prefix=true,
@@ -187,9 +247,8 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 18,
 	cost = 5,
-	greater_ego = 1,
 	unique_ego = 1,
-	innervating_fatigue = resolvers.mbonus_material(30, 10),
+	innervating_fatigue = resolvers.mbonus_material(40, 20),
 	charm_on_use = {
 		{100, function(self, who) return ("reduce fatigue by %d%% for 2 turns"):format(self.innervating_fatigue) end, function(self, who)
 			who:setEffect(who.EFF_ITEM_CHARM_INNERVATING, 2, {fatigue = self.innervating_fatigue})

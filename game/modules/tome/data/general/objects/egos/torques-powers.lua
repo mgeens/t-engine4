@@ -88,7 +88,7 @@ newEntity{
 	keywords = {galeforce=true},
 	level_range = {1, 50},
 	rarity = 10,
-	charm_power_def = {add=45, max=400, floor=true},
+	charm_power_def = {add=15, max=800, floor=true},
 	resolvers.charm(
 		function(self, who)
 			local dam = who:damDesc(engine.DamageType.Mind, self.use_power.damage(self, who))
@@ -113,6 +113,7 @@ newEntity{
 					target:knockback(who.x, who.y, kb)		
 				end
 			end, dam)
+			return {id=true, used=true}
 		end,
 		"T_GLOBAL_CD",
 		{
@@ -130,7 +131,7 @@ newEntity{
 	keywords = {mindblast=true},
 	level_range = {1, 50},
 	rarity = 10,
-	charm_power_def = {add=45, max=600, floor=true},
+	charm_power_def = {add=25, max=600, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("blast the opponent's mind dealing %d mind damage and silencing them for 4 turns"):format(dam )

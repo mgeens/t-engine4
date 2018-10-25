@@ -2041,9 +2041,9 @@ function _M:getUseDesc(use_actor)
 			ret = tstring{{"color","YELLOW"}, ("It can be used to %s, with %d charges out of %d."):format(desc, math.floor(self.power / usepower(self.use_power.power)), math.floor(self.max_power / usepower(self.use_power.power))), {"color","LAST"}}
 		elseif self.talent_cooldown then
 			local t_name = self.talent_cooldown == "T_GLOBAL_CD" and "all charms" or "Talent "..use_actor:getTalentDisplayName(use_actor:getTalentFromId(self.talent_cooldown))
-			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\nActivation puts %s on cooldown for %d turns."):format(desc:format(self:getCharmPower(use_actor)), t_name, usepower(self.use_power.power)), {"color","LAST"}}
+			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\n\nActivation puts %s on cooldown for %d turns."):format(desc:format(self:getCharmPower(use_actor)), t_name, usepower(self.use_power.power)), {"color","LAST"}}
 		else
-			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\nActivation costs %d power out of %d/%d."):format(desc, usepower(self.use_power.power), self.power, self.max_power), {"color","LAST"}}
+			ret = tstring{{"color","YELLOW"}, ("It can be used to %s\n\nActivation costs %d power out of %d/%d."):format(desc, usepower(self.use_power.power), self.power, self.max_power), {"color","LAST"}}
 		end
 	elseif self.use_simple then
 		ret = tstring{{"color","YELLOW"}, ("It can be used to %s."):format(util.getval(self.use_simple.name, self, use_actor)), {"color","LAST"}}
