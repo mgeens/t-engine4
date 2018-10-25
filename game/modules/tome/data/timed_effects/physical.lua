@@ -1488,6 +1488,25 @@ newEffect{
 }
 
 newEffect{
+	name = "EXPOSE_WEAKNESS", image = "talents/expose_weakness.png",
+	desc = "Expose Weakness",
+	long_desc = function(self, eff) return ("The target is focused on penetrating defenses, increasing armor penetration by %d, accuracy by %d, and all damage penetration by %d%%."):format(eff.apr, eff.accuracy, eff.penetration) end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { accuracy=0, apr=0, penetration=0 },
+	on_gain = function(self, err) return "#Target# is focusing on penetrating defenses.", "+Expose Weakness" end,
+	on_lose = function(self, err) return "#Target# is no longer focused on penetrating defenses.", "-Expose Weakness" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_apr", eff.apr)
+		self:effectTemporaryValue(eff, "combat_atk", eff.accuracy)
+		self:effectTemporaryValue(eff, "resists_pen", {all=eff.penetration})
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
 	name = "COMBO", image = "talents/combo_string.png",
 	desc = "Combo",
 	display_desc = function(self, eff) return eff.cur_power.." Combo" end,
