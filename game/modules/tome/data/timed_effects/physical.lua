@@ -632,6 +632,13 @@ newEffect{
 	parameters = { power=0.1 },
 	on_gain = function(self, err) return "#Target# slows down.", "+Slow" end,
 	on_lose = function(self, err) return "#Target# speeds up.", "-Slow" end,
+	on_merge = function(self, old_eff, new_eff)
+		if new_eff.power > old_eff.power then
+			old_eff.power = new_eff.power
+			old_eff.dur = new_eff.dur
+		end 
+		return old_eff
+	end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("global_speed_add", -eff.power)
 	end,
