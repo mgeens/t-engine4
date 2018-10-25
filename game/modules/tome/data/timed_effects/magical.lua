@@ -524,7 +524,6 @@ newEffect{
 		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dam)
 	end,
 	activate = function(self, eff)
-		eff.power = math.floor(math.max(eff.power - (self:attr("confusion_immune") or 0) * 100, 10))
 		eff.power = util.bound(eff.power, 0, 50)
 		eff.tmpid = self:addTemporaryValue("confused", eff.power)
 		if eff.power <= 0 then eff.dur = 0 end
@@ -2953,19 +2952,6 @@ newEffect{
 	on_lose = function(self, err) return "#Target#'s solar fury subsides.", "-Sun's Vengeance" end,
 	activate = function(self, eff)
 		self:effectTemporaryValue(eff, "amplify_sun_beam", 25)
-	end
-}
-
-newEffect{
-	name = "PATH_OF_THE_SUN", image = "talents/path_of_the_sun.png",
-	desc = "Path of the Sun",
-	long_desc = function(self, eff) return ("The target is able to instantly travel alongside Sun Paths."):format() end,
-	type = "magical",
-	subtype = { sun=true, },
-	status = "beneficial",
-	parameters = {},
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "walk_sun_path", 1)
 	end
 }
 

@@ -98,6 +98,7 @@ newEffect{
 	name = "INFUSION_COOLDOWN", image = "effects/infusion_cooldown.png",
 	desc = "Infusion Saturation",
 	long_desc = function(self, eff) return ("The more you use infusions, the longer they will take to recharge (+%d cooldowns)."):format(eff.power) end,
+	charges = function(self, eff) return eff.power end,
 	type = "other",
 	subtype = { infusion=true },
 	status = "detrimental",
@@ -114,6 +115,7 @@ newEffect{
 	name = "RUNE_COOLDOWN", image = "effects/rune_cooldown.png",
 	desc = "Runic Saturation",
 	long_desc = function(self, eff) return ("The more you use runes, the longer they will take to recharge (+%d cooldowns)."):format(eff.power) end,
+	charges = function(self, eff) return eff.power end,
 	type = "other",
 	subtype = { rune=true },
 	status = "detrimental",
@@ -140,6 +142,19 @@ newEffect{
 		old_eff.power = old_eff.power + new_eff.power
 		return old_eff
 	end,
+}
+
+newEffect{
+	name = "PATH_OF_THE_SUN", image = "talents/path_of_the_sun.png",
+	desc = "Path of the Sun",
+	long_desc = function(self, eff) return ("The target is able to instantly travel alongside Sun Paths."):format() end,
+	type = "other",
+	subtype = { sun=true, },
+	status = "beneficial",
+	parameters = {},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "walk_sun_path", 1)
+	end
 }
 
 newEffect{

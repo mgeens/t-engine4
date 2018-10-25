@@ -603,7 +603,10 @@ function _M:actBase()
 	end
 
 	-- Cooldown talents after effects, because some of them involve breaking sustains.
-	if not self:attr("no_talents_cooldown") then self:cooldownTalents() end
+
+	if not self:attr("no_talents_cooldown") then
+		if self:attr("half_talents_cooldown") then self:cooldownTalents(0.5) else self:cooldownTalents(1) end
+	end
 
 	self:checkStillInCombat()
 end
@@ -1409,7 +1412,7 @@ function _M:move(x, y, force)
 	end
 
 	-- Break channels
-	if moved then
+	if not force and moved and ox and oy and (ox ~= self.x or oy ~= self.y) then
 		self:breakPsionicChannel()
 		self:breakSpacetimeTuning()
 	end

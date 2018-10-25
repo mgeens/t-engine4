@@ -997,12 +997,13 @@ function _M:getTalentDisplayName(t)
 	return t.display_name
 end
 
---- Cooldown all talents by one
+--- Cooldown all talents
 -- This should be called in your actors "act()" method
-function _M:cooldownTalents()
+-- @param turns the number of turns to cooldown the talents
+function _M:cooldownTalents(turns)
 	for tid, c in pairs(self.talents_cd) do
 		self.changed = true
-		self.talents_cd[tid] = self.talents_cd[tid] - 1
+		self.talents_cd[tid] = self.talents_cd[tid] - (turns or 1)
 		if self.talents_cd[tid] <= 0 then
 			self.talents_cd[tid] = nil
 			if self.onTalentCooledDown then self:onTalentCooledDown(tid) end

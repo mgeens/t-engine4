@@ -148,7 +148,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		end
 
 		if src:attr("stunned") then
-			dam = dam * 0.4
+			dam = dam * 0.5
 			print("[PROJECTOR] stunned dam", dam)
 		end
 		if src:attr("invisible_damage_penalty") then
@@ -1739,7 +1739,7 @@ newDamageType{
 		local realdam = DamageType:get(DamageType.NATURE).projector(src, x, y, DamageType.NATURE, dam / 6, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and target:canBe("poison") then
-			target:setEffect(target.EFF_POISONED, 5, {src=src, power=dam / 6, apply_power=power or (src.combatAttack and src:combatAttack()) or 0})
+			target:setEffect(target.EFF_POISONED, 5, {src=src, power=dam / 6})
 		end
 		return realdam
 	end,
@@ -1772,7 +1772,6 @@ newDamageType{
 }
 
 -- Spydric poison: prevents movement
--- Very special, does not have a power check
 newDamageType{
 	name = "spydric poison", type = "SPYDRIC_POISON",
 	projector = function(src, x, y, type, dam, state)
@@ -1945,7 +1944,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			if target:canBe("confusion") then
-				target:setEffect(target.EFF_CONFUSED, dam.dur, {power=dam.dam, apply_power=(dam.power_check or src.combatSpellpower)(src)})
+				target:setEffect(target.EFF_CONFUSED, dam.dur, {power=dam.dam or 30, apply_power=(dam.power_check or src.combatSpellpower)(src)})
 			else
 				game.logSeen(target, "%s resists!", target.name:capitalize())
 			end
@@ -1963,7 +1962,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and rng.percent(dam.dam) then
 			if target:canBe("confusion") then
-				target:setEffect(target.EFF_CONFUSED, 4, {power=75, apply_power=(dam.power_check or src.combatSpellpower)(src), no_ct_effect=true})
+				target:setEffect(target.EFF_CONFUSED, 4, {power=dam.power or 30, apply_power=(dam.power_check or src.combatSpellpower)(src), no_ct_effect=true})
 			else
 				game.logSeen(target, "%s resists!", target.name:capitalize())
 			end
@@ -1981,7 +1980,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and rng.percent(dam.dam) then
 			if target:canBe("confusion") then
-				target:setEffect(target.EFF_CONFUSED, 4, {power=75, apply_power=src:combatPhysicalpower(), no_ct_effect=true})
+				target:setEffect(target.EFF_CONFUSED, 4, {power=dam.power or 30, apply_power=src:combatPhysicalpower(), no_ct_effect=true})
 			else
 				game.logSeen(target, "%s resists!", target.name:capitalize())
 			end
@@ -2890,7 +2889,7 @@ newDamageType{
 		if target and src:reactionToward(target) < 0 then
 			DamageType:get(DamageType.NATURE).projector(src, x, y, DamageType.NATURE, dam.dam, state)
 			if target:canBe("confusion") and rng.percent(dam.chance) then
-				target:setEffect(target.EFF_CONFUSED, 2, {apply_power=src:combatMindpower(), power=dam.power}, true)
+				target:setEffect(target.EFF_CONFUSED, 2, {apply_power=src:combatMindpower(), power=dam.power or 30}, true)
 			else
 				game.logSeen(target, "%s resists the confusion!", target.name:capitalize())
 			end
@@ -3104,7 +3103,7 @@ newDamageType{
 				end
 			elseif chance == 4 then
 				if target:canBe("confusion") then
-					target:setEffect(target.EFF_CONFUSED, 3, {power=50, apply_power=src:combatSpellpower()})
+					target:setEffect(target.EFF_CONFUSED, 3, {power=dam.power or 30, apply_power=src:combatSpellpower()})
 				else
 					game.logSeen(target, "%s resists the confusion!", target.name:capitalize())
 				end
@@ -3747,7 +3746,7 @@ newDamageType{
 			end
 		elseif eff == 4 then
 			if target:canBe("confusion") then
-				target:setEffect(target.EFF_CONFUSED, dur, {power=50, apply_power=power})
+				target:setEffect(target.EFF_CONFUSED, dur, {power=dam.power or 30, apply_power=power})
 			else
 				game.logSeen(target, "%s resists the confusion!", target.name:capitalize())
 			end
@@ -3904,7 +3903,7 @@ newDamageType{
 			if effect == 1 then
 				-- confusion
 				if target:canBe("confusion") and not target:hasEffect(target.EFF_CONFUSED) then
-					target:setEffect(target.EFF_CONFUSED, dam.dur, {power=50})
+					target:setEffect(target.EFF_CONFUSED, dam.dur, {power=dam.power or 30})
 					game.level.map:particleEmitter(target.x, target.y, 1, "circle", {base_rot=0, oversize=0.7, a=130, limit_life=8, appear=8, speed=0, img="curse_gfx_04", radius=0})					
 				end
 			elseif effect == 2 then
