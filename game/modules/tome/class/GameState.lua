@@ -1655,11 +1655,13 @@ function _M:egoFilter(zone, level, type, etype, e, ego_filter, egos_list, picked
 	local arcane_check = false
 	local nature_check = false
 	local am_check = false
+	local unique_check = false
 	for i = 1, #egos_list do
 		local e = egos_list[i]
 		if e.power_source and e.power_source.arcane then arcane_check = true end
 		if e.power_source and e.power_source.nature then nature_check = true end
 		if e.power_source and e.power_source.antimagic then am_check = true end
+		if e.unique_ego then unique_check = true end
 	end
 
 	local fcts = {}
@@ -1673,6 +1675,19 @@ function _M:egoFilter(zone, level, type, etype, e, ego_filter, egos_list, picked
 	end
 	if am_check then
 		fcts[#fcts+1] = function(ego) return not ego.power_source or not ego.power_source.arcane end
+	end
+
+	if unique_check then
+		fcts[#fcts+1] = function(ego) 
+			local check = false
+			-- Use keywords as a proxy for name, a bit simpler than going through Object.ego_list
+			for k,v in pairs(ego.keywords) do
+				if e.keywords and e.keywords[k] then 
+					check = true
+				end
+			end
+			return not check
+		end
 	end
 
 	if #fcts > 0 then
