@@ -1679,14 +1679,11 @@ function _M:egoFilter(zone, level, type, etype, e, ego_filter, egos_list, picked
 
 	if unique_check then
 		fcts[#fcts+1] = function(ego) 
-			local check = false
 			-- Use keywords as a proxy for name, a bit simpler than going through Object.ego_list
 			for k,v in pairs(ego.keywords) do
-				if e.keywords and e.keywords[k] then 
-					check = true
-				end
+				if e.keywords and e.keywords[k] then return false end
 			end
-			return not check
+			return true
 		end
 	end
 
