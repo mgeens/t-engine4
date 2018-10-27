@@ -533,7 +533,6 @@ newEntity{ base = "BASE_NPC_HORROR",
 
 	ai = "tactical", ai_state = { ai_move="move_complex", talent_in=2, ally_compassion=0 },
 
-	on_melee_hit = {[DamageType.PHYSICALBLEED]=resolvers.mbonus(14, 2)},
 	combat = { dam=resolvers.levelup(resolvers.rngavg(16,22), 1, 1.5), atk=resolvers.levelup(18, 1, 1), apr=4, dammod={wil=0.25, cun=0.1}, damtype=engine.DamageType.PHYSICALBLEED, },
 	combat_physspeed = 4, --Crazy fast attack rate
 
@@ -1088,7 +1087,6 @@ newEntity{ base = "BASE_NPC_HORROR",
 	
 	ai = "tactical", ai_state = { ai_move="move_complex", talent_in=2, ally_compassion=0 },
 		
-	on_melee_hit = {[DamageType.PHYSICALBLEED]=resolvers.mbonus(12, 5)},
 	melee_project = {[DamageType.PHYSICALBLEED]=resolvers.mbonus(32, 5)},
 	combat = { dam=resolvers.levelup(resolvers.rngavg(20,28), 1, 1.5), physspeed = 0.25,atk=resolvers.levelup(24, 1.2, 1.2), apr=4, dammod={wil=0.3, cun=0.15}, damtype=engine.DamageType.PHYSICALBLEED, },
 	--combat_physspeed = 4, --Crazy fast attack rate
