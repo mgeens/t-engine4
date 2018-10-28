@@ -2233,7 +2233,7 @@ newEffect{ -- Note: This effect is cancelled by EFF_DISARMED
 newEffect{
 	name = "BLOCKING", image = "talents/block.png",
 	desc = "Blocking",
-	long_desc = function(self, eff) return ("Absorbs %d damage from the next blockable attack."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken."):format(eff.power) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
@@ -2255,6 +2255,7 @@ newEffect{
 		if not b then return dam end
 		if not self:knowTalent(self.T_ETERNAL_GUARD) then eff.dur = 0 end
 		local amt = util.bound(dam - eff.power, 0, dam)
+		if eff.bonus_block_pct and eff.bonus_block_pct[type] then amt = amt * eff.bonus_block_pct[type] end
 		local blocked = dam - amt
 		local shield1, combat1, shield2, combat2 = self:hasShield()
 		if shield1 and shield1.on_block and shield1.on_block.fct then shield1.on_block.fct(shield1, self, src, type, dam, eff) end
@@ -2295,6 +2296,38 @@ newEffect{
 		self:removeTemporaryValue("combat_def", eff.def)
 		self:removeTemporaryValue("combat_def_ct", eff.ctdef)
 		if eff.properties.sp then self:removeTemporaryValue("combat_spellresist", eff.spell) end
+	end,
+}
+
+newEffect{
+	name = "COUNTERSTRIKE", image = "effects/counterstrike.png",
+	desc = "Counterstrike",
+	long_desc = function(self, eff) return "Vulnerable to deadly counterstrikes. Next melee attack will inflict double damage." end,
+	type = "physical",
+	subtype = { tactic=true },
+	status = "detrimental",
+	parameters = { nb=1 },
+	on_gain = function(self, eff) return nil, "+Counter" end,
+	on_lose = function(self, eff) return nil, "-Counter" end,
+	onStrike = function(self, eff, dam, src)
+		eff.nb = eff.nb - 1
+		if eff.nb <= 0 then self:removeEffect(self.EFF_COUNTERSTRIKE) end
+
+		if self.x and src.x and core.fov.distance(self.x, self.y, src.x, src.y) >= 5 then
+			game:setAllowedBuild("rogue_skirmisher", true)
+		end
+
+		return dam * 2
+	end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("counterstrike", 1)
+		eff.def = self:addTemporaryValue("combat_def", -eff.power)
+		eff.crit = self:addTemporaryValue("combat_crit_vulnerable", eff.crit_inc or 0)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("counterstrike", eff.tmpid)
+		self:removeTemporaryValue("combat_def", eff.def)
+		self:removeTemporaryValue("combat_crit_vulnerable", eff.crit)
 	end,
 }
 
@@ -2396,38 +2429,6 @@ newEffect{
 		if eff.throws <= 0 or eff.chance <= 0 then eff.dur = 0 end
 	end,
 	deactivate = function(self, eff)
-	end,
-}
-
-newEffect{
-	name = "COUNTERSTRIKE", image = "effects/counterstrike.png",
-	desc = "Counterstrike",
-	long_desc = function(self, eff) return "Vulnerable to deadly counterstrikes. Next melee attack will inflict double damage." end,
-	type = "physical",
-	subtype = { tactic=true },
-	status = "detrimental",
-	parameters = { nb=1 },
-	on_gain = function(self, eff) return nil, "+Counter" end,
-	on_lose = function(self, eff) return nil, "-Counter" end,
-	onStrike = function(self, eff, dam, src)
-		eff.nb = eff.nb - 1
-		if eff.nb <= 0 then self:removeEffect(self.EFF_COUNTERSTRIKE) end
-
-		if self.x and src.x and core.fov.distance(self.x, self.y, src.x, src.y) >= 5 then
-			game:setAllowedBuild("rogue_skirmisher", true)
-		end
-
-		return dam * 2
-	end,
-	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("counterstrike", 1)
-		eff.def = self:addTemporaryValue("combat_def", -eff.power)
-		eff.crit = self:addTemporaryValue("combat_crit_vulnerable", eff.crit_inc or 0)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("counterstrike", eff.tmpid)
-		self:removeTemporaryValue("combat_def", eff.def)
-		self:removeTemporaryValue("combat_crit_vulnerable", eff.crit)
 	end,
 }
 

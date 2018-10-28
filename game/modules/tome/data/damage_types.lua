@@ -180,20 +180,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		-- Block talent from shields
-		if dam > 0 and target:attr("block") then
-			local e = target.tempeffect_def[target.EFF_BLOCKING]
-			lastdam = dam
-			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
-			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
-			lastdam = dam
-			dam = t.doForgeShield(type, dam, t, target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-
 		-- Increases damage
 		local mind_linked = false
 		local inc = 0
@@ -383,6 +369,20 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		end
 		if dam ~= lastdam then
 			game:delayedLogDamage(src, target, 0, ("%s(%d to psi shield)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false)
+		end
+
+		-- Block talent from shields
+		if dam > 0 and target:attr("block") then
+			local e = target.tempeffect_def[target.EFF_BLOCKING]
+			lastdam = dam
+			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
+		end
+		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
+			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
+			lastdam = dam
+			dam = t.doForgeShield(type, dam, t, target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
 		end
 
 		--Vim based defence
