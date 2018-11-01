@@ -4801,7 +4801,15 @@ function _M:searchAllInventories(o, fct)
 	end)
 	return inv, slot, attached
 end
-		
+
+local oldGetTalentTypeMastery = _M.getTalentTypeMastery
+function _M:getTalentTypeMastery(tt)
+	local mastery = oldGetTalentTypeMastery(self, tt)
+	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[tt.category] or 0
+	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
+	return mastery + bonus1 + bonus2
+end
+
 function _M:lastLearntTalentsMax(what)
 	if self:attr("infinite_respec") then return 99999 end
 	return what == "generic" and 3 or 4

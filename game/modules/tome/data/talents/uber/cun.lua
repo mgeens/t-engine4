@@ -425,25 +425,12 @@ uberTalent{
 	mode = "passive",
 	cant_steal = true,
 	info = function(self, t)
-		return ([[All talent types you know when you aquire this prodigy have their mastery increased by 0.3]])
+		return ([[Your talent masteries are increased by 0.3.]])
 		:format()
 	end,
-	on_learn = function(self, t)
-		for i, def in ipairs(engine.interface.ActorTalents.talents_types_def) do
-			if not def.hide and self:knowTalentType(def.type) then -- Do not increase mastery for NPC talents, inscriptions, prodigies, Cursed Sentry, etc
-				self:setTalentTypeMastery(def.type, self:getTalentTypeMastery(def.type) + 0.3)
-				self:updateTalentTypeMastery(def.type)
-			end
-		end
+	passives = function(self, t, tmptable)
+		self:talentTemporaryValue(tmptable, "talents_mastery_bonus", {all = 0.3})
 	end,
-	on_unlearn = function(self, t)
-		for i, def in ipairs(engine.interface.ActorTalents.talents_types_def) do
-			if not def.hide and self:knowTalentType(def.type) then
-				self:setTalentTypeMastery(def.type, self:getTalentTypeMastery(def.type) - 0.3)
-				self:updateTalentTypeMastery(def.type)
-			end
-		end
-	end
 }
 
 uberTalent{

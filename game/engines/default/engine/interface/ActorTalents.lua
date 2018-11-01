@@ -51,6 +51,7 @@ function _M:newTalentType(t)
 	assert(t.name, "no talent type name")
 	assert(t.type, "no talent type type")
 	t.description = t.description or ""
+	t.category = t.category or t.type:gsub("/.*", "")
 	t.points = t.points or 1
 	t.talents = {}
 	table.insert(self.talents_types_def, t)
@@ -95,7 +96,8 @@ end
 function _M:init(t)
 	self.talents = t.talents or {}
 	self.talents_types = t.talents_types or {}
-	self.talents_types_mastery = self.talents_types_mastery  or {}
+	self.talents_types_mastery = self.talents_types_mastery or {}
+	self.talents_mastery_bonus = self.talents_mastery_bonus or {}
 	self.talents_cd = self.talents_cd or {}
 	self.sustain_talents = self.sustain_talents or {}
 	self.talents_auto = self.talents_auto or {}
@@ -258,6 +260,8 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 						table.removeFromList(list, id)
 					end
 				end
+				--game.bignews:say(120, "#ORANGE#deactivated"):format()
+				if self.player then game.bignews:say(120, ("#ORANGE#%s deactivated"):format(ab and ab.name or "")) end
 			end
 			return ret
 		end)
@@ -831,7 +835,8 @@ function _M:getTalentLevel(id)
 	else
 		t = _M.talents_def[id]
 	end
-	return t and (self:getTalentLevelRaw(id)) * ((self.talents_types_mastery[t.type[1]] or 0) + 1) or 0
+	return t and (self:getTalentLevelRaw(id)) * (self:getTalentMastery(self:getTalentFromId(id)) or 0) or 0
+
 end
 
 --- Talent type level, sum of all raw levels of talents inside
