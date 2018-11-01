@@ -835,7 +835,7 @@ function _M:getTalentLevel(id)
 	else
 		t = _M.talents_def[id]
 	end
-	return t and (self:getTalentLevelRaw(id)) * (self:getTalentMastery(self:getTalentFromId(id)) or 0) or 0
+	return t and (self:getTalentLevelRaw(id)) * (self:getTalentMastery(t) or 0) or 0
 
 end
 
