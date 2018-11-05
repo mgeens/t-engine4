@@ -59,8 +59,7 @@ uberTalent{
 			lava_dam = self:spellCrit(lava_dam)
 		end
 		local meteor = function(src, x, y, dam)
-			game.level.map:particleEmitter(x, y, 10, "meteor", {x=x, y=y}).on_remove = function(self)
-				local x, y = self.args.x, self.args.y
+			game.level.map:particleEmitter(x, y, 10, "meteor", {x=x, y=y})
 				game.level.map:particleEmitter(x, y, 10, "fireflash", {radius=2})
 				game:playSoundNear(game.player, "talents/fireflash")
 
@@ -96,10 +95,11 @@ uberTalent{
 						self.temporary = self.temporary - 1
 						if self.temporary <= 0 then
 							game.level.map(self.x, self.y, engine.Map.TERRAIN, self.old_feat)
-							game.level:removeEntity(self)
+							game.level:removeEntity(self, true)
 							game.nicer_tiles:updateAround(game.level, self.x, self.y)
 						end
 					end
+					g:altered()
 					game.level:addEntity(g)
 				end
 
@@ -118,7 +118,6 @@ uberTalent{
 				if core.shader.allow("distort") then game.level.map:particleEmitter(x, y, 2, "shockwave", {radius=2}) end
 				game:getPlayer(true):attr("meteoric_crash", 1)
 			end
-		end
 
 		local dam = t.getDamage(self, t)
 		if self:combatMindCrit() > self:combatSpellCrit() then dam = self:mindCrit(dam)
