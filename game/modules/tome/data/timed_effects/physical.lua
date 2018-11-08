@@ -2233,7 +2233,7 @@ newEffect{ -- Note: This effect is cancelled by EFF_DISARMED
 newEffect{
 	name = "BLOCKING", image = "talents/block.png",
 	desc = "Blocking",
-	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken.  This effect is removed at the start of your next turn."):format(eff.power) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
@@ -2253,7 +2253,6 @@ newEffect{
 		local b = false
 		if eff.d_types[type] then b = true end
 		if not b then return dam end
-		if not self:knowTalent(self.T_ETERNAL_GUARD) then eff.dur = 0 end
 		local amt = util.bound(dam - eff.power, 0, dam)
 		if eff.bonus_block_pct and eff.bonus_block_pct[type] then amt = amt * eff.bonus_block_pct[type] end
 		local blocked = dam - amt
@@ -2266,9 +2265,10 @@ newEffect{
 		end
 		if eff.properties.ref and src.life then DamageType.defaultProjector(src, src.x, src.y, type, blocked, tmp, true) end
 		local full = false
-		if (self:knowTalent(self.T_RIPOSTE) or amt == 0) and src.life then
+		if (self:knowTalent(self.T_RIPOSTE) or amt == 0) and not eff.did_counterstrike and src.life then
 			full = true
-			src:setEffect(src.EFF_COUNTERSTRIKE, (1 + dur_inc) * math.max(1, (src.global_speed or 1)), {power=eff.power, no_ct_effect=true, src=self, crit_inc=crit_inc, nb=nb})
+			if not self:knowTalent(self.T_ETERNAL_GUARD) then eff.did_counterstrike = true end
+			src:setEffect(src.EFF_COUNTERSTRIKE, 2, {power=eff.power, no_ct_effect=true, src=self, crit_inc=crit_inc, nb=nb})
 			if eff.properties.sb then
 				if src:canBe("disarm") then
 					src:setEffect(src.EFF_DISARMED, 3, {apply_power=self:combatPhysicalpower()})
@@ -2284,6 +2284,9 @@ newEffect{
 		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
 
 		return amt
+	end,
+	callbackOnActBase = function(self, eff)
+		if not self:knowTalent(self.T_ETERNAL_GUARD) then self:removeEffect(self.EFF_BLOCKING) end
 	end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("block", eff.power)

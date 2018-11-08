@@ -98,14 +98,14 @@ uberTalent{
 		return self:combatStatScale("cun", 1, 20, 0.75), self:combatStatScale("cun", 5, 30, 0.75)
 	end,
 	getDarkness = function(self, t) return self:combatStatScale("cun", 1, 30, 0.75) end,
-	getAcid = function(self, t) return self:combatStatScale("cun", 10, 50, 0.75) end,
+	getAcid = function(self, t) return self:combatStatScale("cun", 10, 70, 0.75) end,
 	getTemporal = function(self, t) return self:combatStatScale("cun", 1, 40, 0.75) end,
 	getMind = function(self, t) return self:combatStatScale("cun", 1, 40, 0.75) end,
 	range = 10,
 	radius = 3,
 	dts = {TEMPORAL=true, BLIGHT=true, ACID=true, DARKNESS=true, MIND=true,},
-	getThreshold = function(self, t) return 8*self.level end,
-	getDamage = function(self, t) return self:combatStatScale("cun", 10, 150, 0.75) end,
+	getThreshold = function(self, t) return 20*self.level end,
+	getDamage = function(self, t) return self:combatStatScale("cun", 10, 350) end,
 	doProject = function(self, t, damtype, effect, part)
 		local tgts = {}
 		-- Find everything nearby and pick one at random
@@ -126,19 +126,21 @@ uberTalent{
 			local target = game.level.map(tx, ty, Map.ACTOR)
 			if not target or target == self then return end
 			if not effect.params then return end
-			--local p = table.clone(effect.params)
 			local eff = table.clone(effect, true)
 
-			if not effect.canbe or target:canBe(effect.canbe) then
+			if not effect.canbe or (effect.canbe and target:canBe(effect.canbe)) then
 				eff.params.apply_power = math.max(self:combatSpellpower(), self:combatMindpower())
 				target:setEffect(target[effect.id], 5, eff.params)
 			end
-			DamageType:get(damtype).projector(self, tx, ty, damtype, t.getDamage(self, t))
+
+			self:projectSource({}, target.x, target.y, damtype, t.getDamage(self, t), nil, t)
 		end)
 	end,
 	callbackOnRest = function(self, t) self.endless_woes = {} end, -- No storing damage out of combat
 	callbackOnRun = function(self, t) self.endless_woes = {} end,
 	callbackOnDealDamage = function(self, t, value, target, dead, death_note)
+		if not death_note then return end
+		if not death_note.damtype then return end
 		local damtype = death_note.damtype
 		if not t.dts[damtype] then return end
 		self.endless_woes = self.endless_woes or {}
@@ -192,7 +194,8 @@ uberTalent{
 		#LIGHT_STEEL_BLUE#Temporal:#LAST#  Slows global action speed by %d%% for 5 turns.
 		#YELLOW#Mind:#LAST#  Confuses (power %d%%) for 5 turns.
 
-		Each effect has an independent 12 player turn cooldown.
+		Each effect can only happen once per 12 player turns.  This does not count as a typical cooldown.
+
 		The damage and effect power increase with your Cunning, the threshold with your level, and the apply power is the highest of your mind or spell power.
 
 		%s]])
@@ -249,16 +252,42 @@ uberTalent{
 			(self.damage_log[DamageType.NATURE] and self.damage_log[DamageType.NATURE] >= 50000)
 		)
 	end} },
-	dts = {PHYSICAL=true, ARCANE=true, LIGHT=true, COLD=true, LIGHTNING=true, FIRE=true, NATURE=true,},	getCold = function(self, t)
+	dts = {PHYSICAL=true, ARCANE=true, LIGHT=true, COLD=true, LIGHTNING=true, FIRE=true, NATURE=true,},	
+	getCold = function(self, t)
 		return {
 			armor = self:combatStatScale("cun", 10, 30, 0.75),
 			dam = math.max(100, self:getCun()),
 		}
 	end,
-	getLight = function(self, t) return 30 end,
+	getLight = function(self, t) return 20 end,
 	getLightning = function(self, t) return self:combatStatScale("cun", 10, 70, 0.75) end,
 	getFire = function(self, t) return 30 end,
-	getThreshold = function(self, t) return 8*self.level end,
+	range = 10,
+	radius = 3,
+	getThreshold = function(self, t) return 20*self.level end,
+	getDamage = function(self, t) return self:combatStatScale("cun", 10, 250) end,
+	doProject = function(self, t, damtype, part)
+		local tgts = {}
+		-- Find everything nearby and pick one at random
+		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
+		for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
+			local a = game.level.map(x, y, Map.ACTOR)
+			if a and self:reactionToward(a) < 0 then
+				tgts[#tgts+1] = a
+			end
+		end end
+		local target = rng.table(tgts)
+		if not target then return end
+		
+		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, friendlyfire=false, talent=t}
+		game.level.map:particleEmitter(target.x, target.y, tg.radius, part, {radius=tg.radius})
+		self:projectSource(tg, target.x, target.y, damtype, t.getDamage(self, t), nil, t)
+		--self:projectSource(tg, target.x, target.y, function(tx, ty)
+		--	local target = game.level.map(tx, ty, Map.ACTOR)
+		--	if not target or target == self then return end
+		--	DamageType:get(damtype).projector(self, tx, ty, damtype, t.getDamage(self, t))
+		--end)
+	end,
 	callbackOnRest = function(self, t) self.elemental_surge = nil end, -- No storing damage out of combat
 	callbackOnRun = function(self, t) self.elemental_surge = nil end,
 	callbackOnDealDamage = function(self, t, value, target, dead, death_note)
@@ -271,32 +300,41 @@ uberTalent{
 			self.elemental_surge[damtype] = 0
 			if damtype == DamageType.PHYSICAL and not self:hasProc("elemental_surge_physical") then
 				self:setProc("elemental_surge_physical", true, 12)
-				game.logSeen(self, "%s surges with earthen! power!", self.name:capitalize()) 
+				game.logSeen(self, "%s surges with earthen power!", self.name:capitalize())
 				self:removeEffectsFilter({status="detrimental", type="physical", ignore_crosstier=true}, 1)
+				self:setEffect(self.EFF_ELEMENTAL_SURGE_PHYSICAL, 2, {})
+				t.doProject(self, t, damtype, "ball_earth")
 			elseif damtype == DamageType.ARCANE and not self:hasProc("elemental_surge_arcane") then
 				self:setProc("elemental_surge_arcane", true, 12)
 				game.logSeen(self, "%s surges with #PURPLE#arcane#LAST# power!", self.name:capitalize())
 				self:setEffect(self.EFF_ELEMENTAL_SURGE_ARCANE, 3, {})
+				t.doProject(self, t, damtype, "ball_arcane")
 			elseif damtype == DamageType.FIRE and not self:hasProc("elemental_surge_fire") then
 				self:setProc("elemental_surge_fire", true, 12)
-				self:setEffect(self.EFF_ELEMENTAL_SURGE_FIRE, 3, {damage = t.getFire(self, t)})
 				game.logSeen(self, "%s surges with #LIGHT_RED#fiery#LAST# power!", self.name:capitalize())
+				self:setEffect(self.EFF_ELEMENTAL_SURGE_FIRE, 3, {damage = t.getFire(self, t)})
+				t.doProject(self, t, damtype, "ball_fire")
 			elseif damtype == DamageType.COLD and not self:hasProc("elemental_surge_cold") then
 				self:setProc("elemental_surge_cold", true, 12)
 				game.logSeen(self, "%s surges with #1133F3#icy#LAST# power!", self.name:capitalize()) 
 				self:setEffect(self.EFF_ELEMENTAL_SURGE_COLD, 3, t.getCold(self, t) )
+				t.doProject(self, t, damtype, "ball_ice")
 			elseif damtype == DamageType.LIGHTNING and not self:hasProc("elemental_surge_lightning") then
 				self:setProc("elemental_surge_lightning", true, 12)
 				game.logSeen(self, "%s surges with #ROYAL_BLUE#lightning#LAST# power!", self.name:capitalize())
 				self:setEffect(self.EFF_ELEMENTAL_SURGE_LIGHTNING, 3, {move = t.getLightning(self, t)})
+				t.doProject(self, t, damtype, "ball_lightning")
 			elseif damtype == DamageType.LIGHT and not self:hasProc("elemental_surge_light") then
 				self:setProc("elemental_surge_light", true, 12)
 				game.logSeen(self, "%s surges with #YELLOW#light#LAST# power!", self.name:capitalize())
-				self:setEffect(self.EFF_ELEMENTAL_SURGE_LIGHT, 3, {cooldown = t.getLight(self, t)}) -- Cooldown reduction
+				self:setEffect(self.EFF_ELEMENTAL_SURGE_LIGHT, 3, {cooldown = t.getLight(self, t)})
+				t.doProject(self, t, damtype, "ball_light")				
 			elseif damtype == DamageType.NATURE and not self:hasProc("elemental_surge_nature") then
 				self:setProc("elemental_surge_nature", true, 12)
 				game.logSeen(self, "%s surges with #LIGHT_GREEN#natural#LAST# power!", self.name:capitalize())
 				self:removeEffectsFilter({status="detrimental", type="magical", ignore_crosstier=true}, 1)
+				self:setEffect(self.EFF_ELEMENTAL_SURGE_NATURE, 2, {})
+				t.doProject(self, t, damtype, "slime")
 			end
 		end
 	end,
@@ -312,22 +350,22 @@ uberTalent{
 			end
 		str = "(Cooldowns)".."\n"..table.concat(cooldowns, "\n")
 		end
-		return ([[Surround yourself with an elemental aura. Whenever you deal elemental damage you store it, unleashing a powerful effect when %d total damage (based on level) is reached.
-			The charge totals are cleared out of combat.
+		return ([[Surround yourself with an elemental aura that stores damage you deal.
+		Whenever you have stored %d damage of one type you unleash a powerful blast at a random enemy dealing %d damage of that type in radius %d and granting you one of the following effects:
 
-		Physical:		Cleanses 1 physical debuff.
-		#PURPLE#Arcane:#LAST#		Increases your non-physical combat speeds by 30%% for 3 turns.
+		Physical:		Cleanse 1 physical debuff and grant immunity to physical debuffs for 2 turns.
+		#PURPLE#Arcane:#LAST#		Increases your mind and spell action speeds by 30%% for 3 turns.
 		#LIGHT_RED#Fire:#LAST#		Increases all damage dealt by %d%% for 3 turns.
 		#1133F3#Cold:#LAST#		Turn your skin into ice for 3 turns increasing armor by %d and dealing %d ice damage to attackers.
 		#ROYAL_BLUE#Lightning:#LAST#	Increases your movement speed by %d%% for 3 turns.
-		#YELLOW#Light:#LAST#		Reduce all cooldowns by 30%% for 3 turns.
-		#LIGHT_GREEN#Nature:#LAST#		Cleanses 1 magical debuff.
+		#YELLOW#Light:#LAST#		Reduce all cooldowns by 20%% for 3 turns.
+		#LIGHT_GREEN#Nature:#LAST#		Cleanse 1 magical debuff and grant immunity to magical debuffs for 2 turns.
 
-		Each cooldown is independent.
-		Some effects scale with your Cunning stat.
+		Each effect can only happen once per 12 player turns.  This does not count as a typical cooldown.
 
+		The damage and some effect powers increase with your Cunning and the threshold with your level.
 		%s]])
-		:format(t.getThreshold(self, t), t.getFire(self, t), cold.armor, cold.dam, t.getLightning(self, t), str)
+		:format(t.getThreshold(self, t), t.getDamage(self, t), self:getTalentRadius(t), t.getFire(self, t), cold.armor, cold.dam, t.getLightning(self, t), str)
 	end,
 }
 
@@ -338,7 +376,7 @@ eye_of_the_tiger_data = {
 		reduce = 2,
 	},
 	spell = {
-		desc = "All spell criticals reduce the remaining cooldown of a random spell talent by 1.",
+		desc = "All spell criticals reduce the remaining cooldown of a random spell talent by 3.",
 		types = { "^spell/", "^corruption/", "^celestial/", "^chronomancy/" },
 		reduce = 1,
 	},
@@ -348,6 +386,7 @@ eye_of_the_tiger_data = {
 		reduce = 2,
 	},
 }
+
 uberTalent{
 	name = "Eye of the Tiger",
 	mode = "passive",
@@ -420,12 +459,13 @@ uberTalent{
 	end,
 }
 
+-- Re-used icon
 uberTalent{
-	name = "Adept",
+	name = "Adept", image = "talents/meditation.png",
 	mode = "passive",
 	cant_steal = true,
 	info = function(self, t)
-		return ([[Your talent masteries are increased by 0.3.]])
+		return ([[Your talent masteries are increased by 0.3.  Note that many talents will not benefit from this increase.]])
 		:format()
 	end,
 	passives = function(self, t, tmptable)

@@ -25,6 +25,39 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 local Combat = require "mod.class.interface.Combat"
 
+-- Elemental Surge effects here to avoid interaction with duration increases since so many can be up at once
+newEffect{
+	name = "ETHEREAL_FORM", image = "talents/displace_damage.png",
+	desc = "Ethereal Form",
+	long_desc = function(self, eff) return ("Ethereal Form bonuses reduced by %d%%"):format(eff.stacks * 5) end,
+	type = "other",
+	subtype = { },
+	status = "detrimental",
+	parameters = { stacks = 0},
+	charges = function(self, eff) return eff.stacks end,
+	updateEffect = function(self, eff)
+		eff.stacks = math.min(5, eff.stacks)
+		if eff.resists then self:removeTemporaryValue("resists", eff.resists) end
+		if eff.damage then self:removeTemporaryValue("resists_pen", eff.damage) end
+		eff.resists = self:addTemporaryValue("resists", {absolute = -(eff.stacks * 5)})
+		eff.damage = self:addTemporaryValue("resists_pen", {all = -(eff.stacks * 5)})
+	end,
+	on_merge = function(self, old_eff, new_eff, e)
+		old_eff.stacks = old_eff.stacks + 1
+		e.updateEffect(self, old_eff)
+		return old_eff
+	end,
+	activate = function(self, eff, e)
+		eff.stacks = 1
+		e.updateEffect(self, eff)
+	end,
+	deactivate = function(self, eff, e)
+		if eff.resists then self:removeTemporaryValue("resists", eff.resists) end
+		if eff.damage then self:removeTemporaryValue("resists_pen", eff.damage) end
+	end,
+
+}
+
 newEffect{
 	name = "ELEMENTAL_SURGE_ARCANE", image = "talents/elemental_surge.png",
 	desc = "Elemental Surge: Arcane",
@@ -39,7 +72,32 @@ newEffect{
 	end,
 }
 
--- Elemental Surge effects here to avoid interaction with duration increases since so many can be up at once
+newEffect{
+	name = "ELEMENTAL_SURGE_PHYSICAL", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Physical",
+	long_desc = function(self, eff) return ("Immune to detrimental physical effects") end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "physical_negative_status_effect_immune", 1)
+	end,
+}
+
+newEffect{
+	name = "ELEMENTAL_SURGE_NATURE", image = "talents/elemental_surge.png",
+	desc = "Elemental Surge: Nature",
+	long_desc = function(self, eff) return ("Immune to detrimental magical effects") end,
+	type = "other",
+	subtype = {elemental = true },
+	status = "beneficial",
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "spell_negative_status_effect_immune", 1)
+	end,
+}
+
 newEffect{
 	name = "ELEMENTAL_SURGE_FIRE", image = "talents/elemental_surge.png",
 	desc = "Elemental Surge: Fire",

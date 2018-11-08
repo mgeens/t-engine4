@@ -44,6 +44,12 @@ uberTalent{
 	getDamage = function(self, t) return math.max(50 + self:combatSpellpower() * 5, 50 + self:combatMindpower() * 5) end,
 	getLava = function(self, t) return math.max(self:combatSpellpower() + 30, self:combatMindpower() + 30) end,
 	require = { special={desc="Have witnessed a meteoric crash", fct=function(self) return game.state.birth.ignore_prodigies_special_reqs or self:attr("meteoric_crash") end} },
+	passives = function(self, t, tmptable)
+		self:talentTemporaryValue(tmptable, "auto_highest_inc_damage", {[DamageType.FIRE] = 0})
+		self:talentTemporaryValue(tmptable, "auto_highest_resists_pen", {[DamageType.FIRE] = 0})
+		self:talentTemporaryValue(tmptable, "inc_damage", {[DamageType.FIRE] = 0.00001})  -- 0 so that it shows up in the UI
+		self:talentTemporaryValue(tmptable, "resists_pen", {[DamageType.FIRE] = 0.00001})
+	end,	
 	trigger = function(self, t, target)
 		self:startTalentCooldown(t)
 		local terrains = t.terrains or mod.class.Grid:loadList("/data/general/grids/lava.lua")
@@ -131,8 +137,11 @@ uberTalent{
 		local dam = t.getDamage(self, t)/2
 		return ([[When casting damaging spells or mind attacks, the release of your willpower can call forth a meteor to crash down near your foes.
 		The meteor deals %0.2f fire and %0.2f physical damage in radius 2 and stuns enemies for 3 turns.
-		Lava is created in radius 3 around the impact dealing %0.2f fire damage per turn for 8 turns.
+		Lava is created in radius 3 around the impact dealing %0.2f fire damage per turn for 8 turns.  This will overwrite tiles that already have modified terrain.
 		You and your allies take no damage from either effect.
+
+		Additionally, your fire damage and penetration will now use your highest type if that value would be greater.
+		
 		The damage scales with your Spellpower or Mindpower.]])
 		:format(damDesc(self, DamageType.FIRE, dam), damDesc(self, DamageType.PHYSICAL, dam), damDesc(self, DamageType.FIRE, t.getLava(self, t)))
 	end,

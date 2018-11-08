@@ -216,7 +216,7 @@ newTalent{
 	name = "Block",
 	type = {"technique/objects", 1},
 	cooldown = function(self, t)
-		return 6
+		return 8
 	end,
 	speed = 'shield',
 	points = 1,
@@ -280,7 +280,7 @@ newTalent{
 	action = function(self, t)
 		local properties = t.getProperties(self, t)
 		local bt, bt_string = t.getBlockedTypes(self, t)
-		self:setEffect(self.EFF_BLOCKING, 1 + (self:knowTalent(self.T_ETERNAL_GUARD) and 1 or 0), {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties})
+		self:setEffect(self.EFF_BLOCKING, 2, {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties})
 		return true
 	end,
 	info = function(self, t)
@@ -298,7 +298,8 @@ newTalent{
 			br_text = " All blocked damage heals the wielder."
 		end
 		local bt, bt_string = t.getBlockedTypes(self, t)
-		return ([[Raise your shield into blocking position for one turn, reducing all non-Mind damage by %d. If you block all of an attack's damage, the attacker will be vulnerable to a deadly counterstrike (the next weapon attack will instead deal 200%% damage) for one turn.
+		return ([[Raise your shield into blocking position for 2 turns or until the start of your next turn, reducing all non-Mind damage by %d. If you block all of an attack's damage, the attacker will be vulnerable to a deadly counterstrike (the next weapon attack will instead deal 200%% damage) for one turn.
+			Counterstrike can normally only effect one enemy per block.
 			
 			If the shield has damage resistance to the blocked damage type the block value is increased by 50%%.
 			

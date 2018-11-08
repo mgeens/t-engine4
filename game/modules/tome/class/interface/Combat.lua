@@ -2231,9 +2231,21 @@ function _M:combatGetResist(type)
 end
 
 --- Returns the resistance penetration
-function _M:combatGetResistPen(type)
+function _M:combatGetResistPen(type, straight)
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
+	if straight then return pen end
+
+	if self.auto_highest_resists_pen and self.auto_highest_resists_pen[type] then
+		local highest = self.resists_pen.all or 0
+		for kind, v in pairs(self.resists_pen) do
+			if kind ~= "all" then
+				local inc = self:combatGetResistPen(kind, true)
+				highest = math.max(highest, inc)
+			end
+		end
+		return highest + self.auto_highest_resists_pen[type]
+	end
 	return pen
 end
 
