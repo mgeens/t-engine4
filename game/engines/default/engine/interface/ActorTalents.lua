@@ -260,8 +260,6 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 						table.removeFromList(list, id)
 					end
 				end
-				--game.bignews:say(120, "#ORANGE#deactivated"):format()
-				if self.player then game.bignews:say(120, ("#ORANGE#%s deactivated"):format(ab and ab.name or "")) end
 			end
 			return ret
 		end)
