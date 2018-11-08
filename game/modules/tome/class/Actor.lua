@@ -7739,3 +7739,11 @@ function _M:updateInCombatStatus()
 		self:fireTalentCheck("callbackOnCombat", false)
 	end
 end
+
+-- Projects with a specified source and preserves the old one
+function _M:projectSource(t, x, y, damtype, dam, particles, source)
+	local old_source = self.__project_source
+	self.__project_source = source
+	self:project(t, x, y, damtype, dam, particles)
+	self.__project_source = old_source
+end
