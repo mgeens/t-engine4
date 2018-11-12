@@ -7096,7 +7096,7 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 		end
 	end
 
-	if e.status == "detrimental" and self:knowTalent(self.T_RESILIENT_BONES) then
+	if e.status == "detrimental" and e.type ~= "other" and self:knowTalent(self.T_RESILIENT_BONES) then
 		p.dur = math.ceil(p.dur * (1 - self:callTalent(self.T_RESILIENT_BONES,"durresist")))
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("reduce_detrimental_status_effects_time") then
