@@ -1408,7 +1408,7 @@ end
 --- Gets the weapon speed
 function _M:combatSpeed(weapon, add)
 	weapon = weapon or self.combat or {}
-	return (weapon.physspeed or 1) / math.max(self.combat_physspeed + (add or 0), 0.1)
+	return (weapon.physspeed or 1) / math.max(self.combat_physspeed + (add or 0), 0.4)
 end
 
 --- Gets the crit rate
@@ -1852,17 +1852,17 @@ end
 
 --- Gets spellspeed
 function _M:combatSpellSpeed()
-	return 1 / math.max(self.combat_spellspeed, 0.1)
+	return 1 / math.max(self.combat_spellspeed, 0.4)
 end
 
 -- Gets mental speed
 function _M:combatMindSpeed()
-	return 1 / math.max(self.combat_mindspeed, 0.1)
+	return 1 / math.max(self.combat_mindspeed, 0.4)
 end
 
 --- Gets summon speed
 function _M:combatSummonSpeed()
-	return math.max(1 - ((self:attr("fast_summons") or 0) / 100), 0.1)
+	return math.max(1 - ((self:attr("fast_summons") or 0) / 100), 0.4)
 end
 
 --- Computes physical crit chance reduction
@@ -2300,7 +2300,7 @@ function _M:combatMovementSpeed(x, y)
 		local t = self:getTalentFromId(self.T_DARK_VISION)
 		movement_speed = movement_speed + t.getMovementSpeedChange(self, t)
 	end
-	movement_speed = math.max(movement_speed, 0.1)
+	movement_speed = math.max(movement_speed, 0.4)
 	return mult * (self.base_movement_speed or 1) / movement_speed
 end
 
