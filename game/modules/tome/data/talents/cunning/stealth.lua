@@ -89,7 +89,7 @@ newTalent{
 		local res = {
 			stealth = self:addTemporaryValue("stealth", t.getStealthPower(self, t)),
 			lite = self:addTemporaryValue("lite", -1000),
-			infra = self:addTemporaryValue("infravision", 1),
+			infra = self:addTemporaryValue("infravision", 3),  -- Losing wall visibility is already annoying, may as well let stealth have a vision advantage
 		}
 		self:resetCanSeeCacheOf()
 		if self.updateMainShader then self:updateMainShader() end
@@ -141,9 +141,11 @@ newTalent{
 		xs = rad_dark ~= radius and (" (range %d in an unlit grid)"):format(rad_dark) or ""
 		return ([[Enters stealth mode (power %d, based on Cunning), making you harder to detect.
 		If successful (re-checked each turn), enemies will not know exactly where you are, or may not notice you at all.
-		Stealth reduces your light radius to 0, and will not work with heavy or massive armours.
+		Stealth reduces your light radius to 0, increases your infravision by 3, and will not work with heavy or massive armours.
 		You cannot enter stealth if there are foes in sight within range %d%s.
-		Any non-instant, non-movement action will break stealth if not otherwise specified.]]):
+		Any non-instant, non-movement action will break stealth if not otherwise specified.
+
+		Note that enemies uncertain of your location will still make educated guesses at it, and if any enemy can see you most of their nearby allies will as well.]]):
 		format(stealthpower, radius, xs)
 	end,
 }
