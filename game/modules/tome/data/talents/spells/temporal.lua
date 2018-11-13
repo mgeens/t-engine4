@@ -121,7 +121,7 @@ newTalent{
 	points = 5,
 	mode = "sustained",
 	sustain_mana = 250,
-	cooldown = 30,
+	cooldown = 90,  -- Extremely powerful, make sure it can be dealt with relatively easily with dispel
 	tactical = { BUFF = 2 },
 	getHaste = function(self, t) return self:combatTalentScale(t, 0.09, 0.45, 0.75) end,
 	activate = function(self, t)
