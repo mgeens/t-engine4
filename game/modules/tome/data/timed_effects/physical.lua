@@ -1396,7 +1396,7 @@ newEffect{
 newEffect{
 	name = "GRAPPLED", image = "talents/grab.png",
 	desc = "Grappled",
-	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s"):format("Damage reduced by " .. math.ceil(eff.reduce), "Slowed by " .. eff.slow, "Damage per turn " .. math.ceil(eff.power) ) end,
+	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s#LAST#"):format("Physical power reduced by " .. math.ceil(eff.reduce), "Slowed by " .. math.floor(eff.slow * 100).."%", "Damage per turn " .. math.ceil(eff.power) ) end,
 	type = "physical",
 	subtype = { grapple=true, pin=true },
 	status = "detrimental",
@@ -1405,6 +1405,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is grappled!", "+Grappled" end,
 	on_lose = function(self, err) return "#Target# is free from the grapple.", "-Grappled" end,
 	activate = function(self, eff)
+		if self:attr("never_move") then self:effectTemporaryValue(eff, "never_move_before_grapple", 1) end  -- Flag for Hurricane Throw
 		self:effectTemporaryValue(eff, "never_move", 1)
 		self:effectTemporaryValue(eff, "combat_dam", -eff.reduce)
 		if (eff.silence > 0) then
