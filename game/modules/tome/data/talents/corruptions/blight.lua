@@ -52,7 +52,7 @@ newTalent{
 	type = {"corruption/blight", 2},
 	require = corrs_req2,
 	points = 5,
-	cooldown = 10,
+	cooldown = 20,
 	vim = 30,
 	range = 10,
 	radius = 3,
@@ -111,7 +111,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Project a corrupted blast of power that deals %0.2f blight damage and removes up to %d magical or physical sustains or effect(s) from any creatures caught in the radius 3 ball.
+		return ([[Project a corrupted blast of power that deals %0.2f blight damage and removes up to %d magical or physical effects or any type of sustain from any creatures caught in the radius 3 ball.
 		For each effect, the creature has a chance to resist based on its spell save.
 		The damage will increase with your Spellpower.]]):format(damDesc(self, DamageType.BLIGHT, self:combatTalentSpellDamage(t, 28, 120)), t.getRemoveCount(self, t))
 	end,
