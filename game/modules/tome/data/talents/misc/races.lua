@@ -440,7 +440,7 @@ newTalent{
 		return ([[Nature is with you; you can always feel the call of the woods.
 		Summons two elite Treants to your side for 8 turns.
 		The treants have a global resistance equal to your blight resistance, and can stun, knockback and taunt your foes.
-		Their power increases with your Willpower.]]):format()
+		Their power increases with your Willpower and Talent Level.]]):format()
 	end,
 }
 
@@ -997,7 +997,8 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Reach through the collective psionic gestalt of the yeeks, the Way, to call for immediate help.
-		Summons up to 3 yeek mindslayers to your side for 6 turns.]])
+		Summons up to 3 yeek mindslayers to your side for 6 turns.
+		Their power increases with your Willpower and Talent Level.]])
 	end,
 }
 
