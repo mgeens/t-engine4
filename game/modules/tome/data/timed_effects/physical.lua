@@ -1101,7 +1101,7 @@ newEffect{
 	status = "detrimental",
 	parameters = { sight=5 },
 	on_gain = function(self, err) return "#Target# is surrounded by a thick smoke.", "+Dim Vision" end,
-	on_lose = function(self, err) return "The smoke around #target# dissipate.", "-Dim Vision" end,
+	on_lose = function(self, err) return "The smoke around #target# dissipates.", "-Dim Vision" end,
 	charges = function(self, eff) return -eff.sight end,
 	activate = function(self, eff)
 		if self.sight - eff.sight < 1 then eff.sight = self.sight - 1 end
