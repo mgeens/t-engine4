@@ -183,7 +183,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[Acid errupts all around your target, dealing %0.1f acid damage.
+		return ([[Acid erupts all around your target, dealing %0.1f acid damage.
 		The acid attack is extremely distracting, and may remove up to %d physical or mental temporary effects or mental sustains (depending on the Spell Save of the target).
 		The damage and chance to remove effects will increase with your Spellpower.]]):format(damDesc(self, DamageType.ACID, damage), t.getRemoveCount(self, t))
 	end,
