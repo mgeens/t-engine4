@@ -67,7 +67,7 @@ newTalent{
 		local chance = t.getChance(self, t)
 		local dam = self.alchemy_golem and self.alchemy_golem:damDesc(engine.DamageType.ACID, t.getDamage(self, t)) or 0
 		return ([[While Acid Infusion is active, your bombs coat your golem in acid for %d turns when they hit it.
-		While coated, any melee hit agaist your golem has a %d%% chance to trigger a radius 4 cone of acid towards the attacker that does %0.1f Acid damage to all caught inside. (This can only happen once per turn.)
+		While coated, any melee hit against your golem has a %d%% chance to trigger a radius 4 cone of acid towards the attacker that does %0.1f Acid damage to all caught inside. (This can only happen once per turn.)
 		The effects increase with your talent level and with the Spellpower and damage modifiers of your golem.]]):
 		format(duration, chance, dam)
 	end,
