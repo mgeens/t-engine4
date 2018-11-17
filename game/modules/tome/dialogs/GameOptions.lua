@@ -629,7 +629,7 @@ This includes, but is not limited to:
 - Ingame game news: The main menu will stop showing you info about new updates to the game.
 
 Note that this setting only affects the game itself. If you use the game launcher, whose sole purpose is to make sure the game is up to date, it will still do so.
-If you do not want that, simply run the game directly: the #{bold}#only#{normal}# of the launcher is to update the game.
+If you do not want that, simply run the game directly: the #{bold}#only#{normal}# use of the launcher is to update the game.
 
 #{bold}##CRIMSON#This is an extremely restrictive setting. It is recommended you only activate it if you have no other choice as it will remove many fun and acclaimed features.
 A full exit and restart of the game is neccessary to apply this setting.#{normal}#]]}
