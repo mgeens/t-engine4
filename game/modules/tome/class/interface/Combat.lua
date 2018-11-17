@@ -732,13 +732,9 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	end end
 
 	-- Shadow cast
-	if hitted and not target.dead and self:knowTalent(self.T_SHADOW_COMBAT) and self:isTalentActive(self.T_SHADOW_COMBAT) and self:getMana() > 0 then
-		local dam = 2 + self:combatTalentSpellDamage(self.T_SHADOW_COMBAT, 2, 50)
-		local mana = 2
-		if self:getMana() > mana then
-			DamageType:get(DamageType.DARKNESS).projector(self, target.x, target.y, DamageType.DARKNESS, dam)
-			self:incMana(-mana)
-		end
+	if hitted and not target.dead and self:knowTalent(self.T_SHADOW_COMBAT) and self:isTalentActive(self.T_SHADOW_COMBAT) then
+		local dam = self:callTalent(self.T_SHADOW_COMBAT, "getDamage")
+		DamageType:get(DamageType.DARKNESS).projector(self, target.x, target.y, DamageType.DARKNESS, dam)
 	end
 
 	-- Ruin
@@ -1241,8 +1237,12 @@ function _M:combatDefenseBase(fake)
 			local t = self:getTalentFromId(self.T_SURGE)
 			add = add + t.getDefenseChange(self, t)
 		end
+		if self:knowTalent(self.T_UMBRAL_AGILITY) then
+			local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
+			add = add + t.getDefense(self, t)
+		end
 	end
-	local d = math.max(0, self.combat_def + (self:getDex() - 10) * 0.35 + (self:getLck() - 50) * 0.4)
+	local d = math.max(0, self.combat_def + (self:getDex() - 10) * 0.7 + (self:getLck() - 50) * 0.4)
 	local mult = 1
 	if light_armor then
 		if self:knowTalent(self.T_MOBILE_DEFENCE) then
@@ -1343,6 +1343,7 @@ function _M:combatAttackBase(weapon, ammo)
 	local atk = 4 + self.combat_atk + talent + (weapon.atk or 0) + (ammo and ammo.atk or 0) + (self:getLck() - 50) * 0.4
 
 	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then atk = atk + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
+	if self:knowTalent(self["T_UMBRAL_AGILITY"]) then atk = atk + self:callTalent(self["T_UMBRAL_AGILITY"], "getAccuracy") end
 
 	if self:attr("hit_penalty_2h") then atk = atk * (1 - math.max(0, 20 - (self.size_category - 4) * 5) / 100) end
 
@@ -2232,6 +2233,7 @@ end
 
 --- Returns the resistance penetration
 function _M:combatGetResistPen(type, straight)
+	local add = 0
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
 	if straight then return pen end
@@ -2246,6 +2248,7 @@ function _M:combatGetResistPen(type, straight)
 		end
 		return highest + self.auto_highest_resists_pen[type]
 	end
+
 	return pen
 end
 

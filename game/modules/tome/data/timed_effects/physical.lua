@@ -3353,10 +3353,11 @@ newEffect{
 	type = "physical",
 	subtype = { darkness=true, healing=true },
 	status = "beneficial",
-	parameters = { life=1, stamina=0.5, dr=0 },
+	parameters = { life=1, stamina=0.5, dr=0, shadowguard=0 },
 	activate = function(self, eff)
 		eff.lifeid = self:addTemporaryValue("life_regen", eff.life)
 		eff.staid = self:addTemporaryValue("stamina_regen", eff.stamina)
+		self:effectTemporaryValue(eff, "resists", {all = eff.shadowguard})
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("life_regen", eff.lifeid)

@@ -112,10 +112,11 @@ newTalent{
 		end
 
 		if self:knowTalent(self.T_SOOTHING_DARKNESS) then
+			local shadowguard = self:knowTalent(self.T_SHADOWGUARD) and 25 or 0
 			local life = self:callTalent(self.T_SOOTHING_DARKNESS, "getLife") * 5
 			local sta = self:callTalent(self.T_SOOTHING_DARKNESS, "getStamina")
 			local dur = self:callTalent(self.T_SOOTHING_DARKNESS, "getDuration")
-			self:setEffect(self.EFF_SOOTHING_DARKNESS, dur, {life=life, stamina=sta})
+			self:setEffect(self.EFF_SOOTHING_DARKNESS, dur, {life=life, stamina=sta, shadowguard = shadowguard})
 		end
 
 		local sd = self:hasEffect(self.EFF_SHADOW_DANCE)

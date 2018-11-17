@@ -4307,3 +4307,34 @@ newEffect{
 		self.faction = eff.olf_faction
 	end,
 }
+
+newEffect{
+	name = "SHADOWGUARD_IMMUNITY", image = "talents/shadowguard.png",
+	desc = "Shadowguard Immunity",
+	long_desc = function(self, eff) return "The target is immune to all detrimental effects." end,
+	type = "other",
+	subtype = { shadow=true },
+	status = "beneficial",
+	on_gain = function(self, err) return "#Target#'s fades into the shadows.", "+Shadowguard" end,
+	on_lose = function(self, err) return "#Target#'s can be afflicted again.", "-Shadowguard" end,
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "negative_status_effect_immune", 1)
+	end,
+}
+
+newEffect{
+	name = "SHADOWGUARD_BUFF", image = "talents/shadowguard.png",
+	desc = "Shadowguard",
+	long_desc = function(self, eff) return ("The target is enveloped in shadows gaining %d spellpower and defense."):format(eff.spellpower) end,
+	type = "magical",
+	subtype = { shadow=true },
+	status = "beneficial",
+	--on_gain = function(self, err) return "#Target#'s fades into the shadows.", "+Shadowguard" end,
+	on_lose = function(self, err) return "#Target#'s fully exits the shadows.", "-Shadowguard" end,
+	parameters = { spellpower=0},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_spellpower", eff.spellpower)
+		self:effectTemporaryValue(eff, "combat_def", eff.spellpower)
+	end,
+}
