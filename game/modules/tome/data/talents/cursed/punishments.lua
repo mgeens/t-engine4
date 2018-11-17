@@ -62,7 +62,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local spreadFactor = t.getSpreadFactor(self, t)
 		return ([[You unleash your hateful mind on any who dare approach you, inflicing %d mind damage. The attack will hit multiple targets, but each additional target will further reduce damage by %d%%.
-		25%% chance of cross tier effects. The damage increases with your Mindpower.]]):format(damDesc(self, DamageType.MIND, damage), (1 - spreadFactor) * 100)
+		25%% chance to brainlock. The damage increases with your Mindpower.]]):format(damDesc(self, DamageType.MIND, damage), (1 - spreadFactor) * 100)
 	end,
 }
 
@@ -135,7 +135,7 @@ newTalent{
 		local jumpChance = t.getJumpChance(self, t)
 		local hateGain = t.getHateGain(self, t)
 		return ([[Send a whisper filled with hate to spread throughout your foes. When the whisper is first heard, they will suffer %d mind damage and feed you %d hate. For the first %d turns, the whisper will travel from the original victim to a new one within a range of %0.1f. Every victim of the whisper has a %d%% chance of spreading it to another victim every turn.
-		25%% chance of cross tier effects. The damage increases with your Mindpower.]]):format(damDesc(self, DamageType.MIND, damage), hateGain, jumpCount, jumpRange, jumpChance)
+		25%% chance to brainlock. The damage increases with your Mindpower.]]):format(damDesc(self, DamageType.MIND, damage), hateGain, jumpCount, jumpRange, jumpChance)
 	end,
 }
 
@@ -298,7 +298,7 @@ newTalent{
 		local maxDamage = t.getDamage(self, t)
 		local minDamage = maxDamage / duration
 		return ([[Unleash agony upon your target. The pain will grow over the course of %d turns. The first turn will inflict %d damage, and slowly increase to %d on the last turn (%d total).
-		25%% chance of cross tier effects. The damage will increase with your Mindpower.]]):format(duration, damDesc(self, DamageType.MIND, minDamage), damDesc(self, DamageType.MIND, maxDamage), maxDamage * (duration + 1) / 2)
+		25%% chance of brainlock. The damage will increase with your Mindpower.]]):format(duration, damDesc(self, DamageType.MIND, minDamage), damDesc(self, DamageType.MIND, maxDamage), maxDamage * (duration + 1) / 2)
 	end,
 }
 
