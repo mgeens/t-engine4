@@ -349,8 +349,6 @@ on_grant = function(self, who)
 		end
 	end
 
-	for i, pp in ipairs(possible_types) do if pp.name == "lost sun paladin" then self.kind = pp end end
-
 	escorts_seen[self.kind.name] = (escorts_seen[self.kind.name] or 0) + 1
 
 	if self.kind.random == "player" then
