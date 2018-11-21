@@ -1899,7 +1899,7 @@ function _M:tooltip(x, y, seen_by)
 	if self.hide_level_tooltip then ts:add({"color", 0, 255, 255}, "Level: unknown", {"color", "WHITE"}, true)
 	else ts:add({"color", 0, 255, 255}, ("Level: %d"):format(self.level), {"color", "WHITE"}, true) end
 	if self:attr("invulnerable") then ts:add({"color", "PURPLE"}, "INVULNERABLE!", true) end
-	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%)"):format(self.life, self.life * 100 / self.max_life), {"color", "WHITE"})
+	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%) #GREEN#+%0.2f#LAST#"):format(self.life, self.life * 100 / self.max_life, self.life_regen * util.bound(self.healing_factor or 1)), {"color", "WHITE"})
 
 	if self:knowTalent(self.T_SOLIPSISM) then
 		local psi_percent = 100*self.psi/self.max_psi
