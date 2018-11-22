@@ -3349,7 +3349,7 @@ newEffect{
 newEffect{
 	name = "SOOTHING_DARKNESS", image = "talents/soothing_darkness.png",
 	desc = "Soothing Darkness",
-	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f and stamina regeneration by %0.1f."):format(eff.life, eff.stamina) end,
+	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f, stamina regeneration by %0.1f, and all damage resistance by %d%%."):format(eff.life, eff.stamina, eff.shadowguard) end,
 	type = "physical",
 	subtype = { darkness=true, healing=true },
 	status = "beneficial",

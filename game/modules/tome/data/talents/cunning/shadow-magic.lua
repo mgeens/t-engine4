@@ -23,8 +23,8 @@ newTalent{
 	mode = "sustained",
 	points = 5,
 	require = cuns_req1,
-	sustain_stamina = 20,
-	mana = 30,
+	sustain_stamina = 10,
+	mana = 50,
 	cooldown = 5,
 	tactical = { BUFF = 2 },
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 150) end,  -- This doesn't crit or generally scale easily so its safe to be aggressive
@@ -70,7 +70,8 @@ newTalent{
 	mode = "sustained",
 	points = 5,
 	cooldown = 5,
-	sustain_stamina = 40,
+	sustain_stamina = 10,
+	mana = 20,
 	require = cuns_req3,
 	range = 10,
 	tactical = { BUFF = 2 },
@@ -103,7 +104,7 @@ newTalent{
 	type = {"cunning/shadow-magic", 4},
 	points = 5,
 	cooldown = 6,
-	stamina = 30,
+	stamina = 20,
 	mana = 20,
 	require = cuns_req4,
 	tactical = { CLOSEIN = 2, DISABLE = { stun = 1 } },
@@ -114,7 +115,7 @@ newTalent{
 	is_teleport = true,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
 	getDuration = function(self, t) return math.min(5, 2 + math.ceil(self:getTalentLevel(t) / 2)) end,
-	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 1.2, 2.5) end,
+	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 0.8, 2) end,
 	action = function(self, t)
 		if self:attr("never_move") then game.logPlayer(self, "You cannot do that currently.") return end
 		

@@ -90,7 +90,7 @@ newTalent{
 	mode = "sustained",
 	points = 5,
 	cooldown = 30,
-	sustain_stamina = 50,
+	sustain_stamina = 30,
 	tactical = { BUFF = 2 },
 	drain_stamina = 4,
 	no_break_stealth = true,

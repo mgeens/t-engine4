@@ -44,7 +44,7 @@ newTalent{
 		local spellpower = t.getSpellpower(self, t)
 		local defence = t.getDefense(self, t)
 		return ([[Your Soothing Darkness talent effect now grants 25%% all damage resistance on exiting stealth.
-		When your life drops below 50%% you become immune to negative detrimental effects for %d turns and gain %d defence and %d spellpower for %d turns.]]):
+		When your life drops below 50%% you become immune to negative detrimental effects for %d turns and gain %d defense and %d spellpower for %d turns.]]):
 		format(duration2, defence, spellpower, duration)
 	end,
 }
@@ -63,7 +63,7 @@ newTalent{
 	requires_target = true,
 	no_break_stealth = true,
 	getDuration = function(self, t) return 3 end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 400) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 600) end,
 	speed = "combat",
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -77,8 +77,8 @@ newTalent{
 		if not sx then return end
 
 		-- Move first so we get the full benefit of Shadowstrike
-		target:move(x, y, true)
-		self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
+		target:move(sx, sy, true)
+		self:project(tg, target.x, target.y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
 
 		if target:canBe("silence") then
 			target:setEffect(target.EFF_SILENCED, t.getDuration(self, t), {apply_power=self:combatAttack()})
@@ -99,8 +99,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		return ([[You reach out with the shadows silencing and disarming your target for %d turns.
 		The shadows will deal %d darkness damage to the target and pull it to you.
-		The chance to apply debuffs improves with your Accuracy and the damage with your Spellpower.
-		This talent does not break stealth.]]):
+		The chance to apply debuffs improves with your Accuracy and the damage with your Spellpower.]]):
 		format(duration, damDesc(self, DamageType.DARKNESS, damage))
 	end,
 }
@@ -114,7 +113,7 @@ newTalent{
 	no_npc_use = true,  -- This is likely fine on NPCs but disabled for now since accuracy/defense stacking is sometimes problematic, enable when weapon stuff is less in flux
 	getAccuracy = function(self, t) return self:combatTalentSpellDamage(t, 15, 50) end,
 	getDefense = function(self, t) return self:combatTalentSpellDamage(t, 15, 50) end,
-	getPenetration = function(self, t) return self:combatTalentSpellDamage(t, 1, 70) end,
+	getPenetration = function(self, t) return self:combatTalentSpellDamage(t, 1, 40) end,
 	passives = function(self, t, p)
 		self:talentTemporaryValue(p, "resists_pen", {DARKNESS = 0})  -- Make sure its displayed since we don't modify Actor.resists_pen directly
 	end,
@@ -130,9 +129,10 @@ newTalent{
 	name = "Shadow Veil",
 	type = {"cunning/ambush", 4},
 	points = 5,
-	cooldown = 0,
-	--stamina = 30,
-	--mana = 60,
+	cooldown = 15,
+	stamina = 30,
+	mana = 60,
+	range = 7,
 	require = cuns_req_high4,
 	requires_target = true,
 	tactical = { ATTACK = {DARKNESS = 2}, DEFEND = 1 },
@@ -140,7 +140,6 @@ newTalent{
 		local acts = {}
 		local act
 
-		self:doFOV() -- update actors seen
 		for i = 1, #self.fov.actors_dist do
 			act = self.fov.actors_dist[i]
 			if act and self:reactionToward(act) < 0 and not act.dead and self:isNear(act.x, act.y, t.getBlinkRange(self, t)) then
@@ -186,9 +185,12 @@ newTalent{
 		local duration = t.getDuration(self, t)
 		local res = t.getDamageRes(self, t)
 		return ([[You veil yourself in shadows and let them control you.
-		While veiled, you become immune to status effects and gain %d%% all damage reduction. Immediately after activation and each turn for %d turns after you blink to a nearby foe (within range %d of the location of the first target hit), hitting it for %d%% darkness weapon damage.
+		Immediately after activation and each turn for %d turns, you blink to a nearby foe (within range %d of the location of the first target hit), hitting it for %d%% darkness weapon damage.
+		While veiled, you become immune to status effects and gain %d%% all resistance.
 		While this goes on, you cannot be stopped unless you are killed, and you cannot control your character.
-		The movement is not considered a teleport.]]):
-		format(res, duration, t.getBlinkRange(self, t) ,100 * damage)
+		If a target isn't found this effect ends.
+		The movement is not considered a teleport.
+		The resistance will increase with your Spellpower stat.]]):
+		format(duration, t.getBlinkRange(self, t) ,100 * damage, res)
 	end,
 }
