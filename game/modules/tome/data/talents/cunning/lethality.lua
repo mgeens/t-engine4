@@ -49,6 +49,7 @@ newTalent{
 	requires_target = true,
 	is_melee = true,
 	range = 1,
+	no_npc_use = true,  -- Part of the design of this talent is low cooldown/high cost so Rogue classes can get through defenses easily if they can afford it.. NPcs have too much stamina for this model to work
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 0.8, 1.1) end,
 	getAPR = function(self, t) return math.floor(self:combatTalentScale(t, 4, 10, 0.75)) end,
