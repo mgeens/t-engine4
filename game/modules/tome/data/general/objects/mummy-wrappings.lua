@@ -44,6 +44,7 @@ newEntity{ base = "BASE_MUMMY_WRAPPING",
 	cost = 1,
 	material_level = 4,
 	rarity = 20,
+	mummy_rarity = 3,
 	wielder = {
 		combat_def = 5,
 		combat_armor = 2,
