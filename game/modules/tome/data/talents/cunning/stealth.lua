@@ -146,7 +146,8 @@ newTalent{
 		You cannot enter stealth if there are foes in sight within range %d%s.
 		Any non-instant, non-movement action will break stealth if not otherwise specified.
 
-		Note that enemies uncertain of your location will still make educated guesses at it, and if any enemy can see you most of their nearby allies will as well.]]):
+		Enemies uncertain of your location will still make educated guesses at it.
+		While stealthed, enemies cannot share information about your location with each other and will be delayed in relaying that you exist at all.]]):
 		format(stealthpower, radius, xs)
 	end,
 }
@@ -206,23 +207,15 @@ newTalent{
 	getRadius = stealthRadius,
 	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 7, 2, 5)) end,
 	action = function(self, t)
+		self:setEffect(self.EFF_SHADOW_DANCE, t.getDuration(self,t), {src=self, rad=t.getRadius(self,t)}) 
 		if not self:isTalentActive(self.T_STEALTH) then
 			self:forceUseTalent(self.T_STEALTH, {ignore_energy=true, ignore_cd=true, no_talent_fail=true, silent=true})
-			for act, param in pairs(self.fov.actors) do
-				if act ~= self and act.ai_target and act.ai_target.actor == self then act:setTarget() end
-			end
-		end
-		self:alterTalentCoolingdown(self.T_STEALTH, -20)
-		self:setEffect(self.EFF_SHADOW_DANCE, t.getDuration(self,t), {src=self, rad=t.getRadius(self,t)}) 
-		
+		end	
 		return true
 	end,
 	info = function(self, t)
-		local radius, rad_dark = t.getRadius(self, t, true)
-		xs = rad_dark ~= radius and (" (range %d in an unlit grid)"):format(rad_dark) or ""
 		return ([[Your mastery of stealth allows you to vanish from sight at any time.
-		You automatically enter stealth mode, reset its cooldown, and cause it to not break from unstealthy actions for %d turns.  If you were not already stealthed, all enemies in a direct line of sight completely lose track of you.
-		When your Shadow Dance ends, you must make a stealth check against targets in radius %d%s or be revealed.]]):
-		format(t.getDuration(self, t), radius, xs)
+		You automatically enter stealth and cause it to not break from unstealthy actions for %d turns.]]):
+		format(t.getDuration(self, t))
 	end,
 }

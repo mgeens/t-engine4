@@ -3571,3 +3571,23 @@ newEffect{
 		end
 	end,
 }
+
+newEffect{
+	name = "STEALTH_SKEPTICAL", image = "talents/stealth.png",
+	desc = "Skeptical",
+	long_desc = function(self, eff) return "The target doesn't believe it's ally truly saw anything in the shadows." end,
+	type = "other",
+	subtype = { },
+	status = "neutral",
+	parameters = {target = {} },
+	activate = function(self, eff)
+	end,
+	on_merge = function(self, old_eff, new_eff)
+		--old_eff.dur = new_eff.dur
+		old_eff.target = new_eff.target
+		return old_eff
+	end,
+	deactivate = function(self, eff)
+		self:setTarget(eff.target.actor, {x=eff.target.x, y=eff.target.y})
+	end,
+}

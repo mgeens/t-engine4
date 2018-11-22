@@ -230,6 +230,7 @@ function _M:lineFOV(tx, ty, extra_block, block, sx, sy)
 	return core.fov.line(sx, sy, tx, ty, block)
 end
 
+-- NOTE:  Theres some evidence that this is one of the laggiest functions when a large number of NPCs are active because it causes an insane number of hasLOS calls
 --- Gather and share information about enemies from others
 --	applied each turn to every actor in LOS by self:computeFOV (or core.fov.calc_default_fov)
 -- @param who = actor acting (updating its FOV info), calling self:seen_by(who)
@@ -248,7 +249,7 @@ function _M:seen_by(who)
 	if not who.x or not self:hasLOS(who.x, who.y) then return end
 	-- Check if it's actually a being of cold machinery and not of blood and flesh
 	if not who.aiSeeTargetPos then return end
-	if self.ai_target.actor then
+	if self.ai_target.actor and not who_target:isTalentActive(who_target.T_STEALTH) then
 		-- Pass last seen coordinates
 		if self.ai_target.actor == who_target then
 			-- Adding some type-safety checks, but this isn't fixing the source of the errors
@@ -274,7 +275,7 @@ function _M:seen_by(who)
 		-- Don't believe allies if they think the target is too far away (based on distance to ally plus ally to hostile estimate (1.3 * sight range, usually))
 		local tx, ty = who:aiSeeTargetPos(who_target)
 		local distallyhostile = core.fov.distance(who.x, who.y, tx, ty) or 100
-		local range_factor = 1.2 + (tonumber(game.difficulty) or 1)/20 -- NPC's pass targets more freely at higher difficulties
+		local range_factor = 1.2
 		if distallyhostile + core.fov.distance(self.x, self.y, who.x, who.y) > math.min(10, math.max(self.sight, self.infravision or 0, self.heightened_senses or 0, self.sense_radius or 0))*range_factor then return end
 
 		-- Don't believe allies if they saw the target over 10 turns ago
@@ -282,6 +283,12 @@ function _M:seen_by(who)
 	end
 
 	print("[NPC:seen_by] Passing target", who_target.name, "from", who.uid, who.name, "to", self.uid, self.name)
+	
+	-- If we have no current target but the passed target is stealthed, delay aquiring for 3 turns but make sure they can't avoid aggro entirely
+	if who_target:isTalentActive(who_target.T_STEALTH) and not (self.ai_target and self.ai_target.actor) then
+		self:setEffect(self.EFF_STEALTH_SKEPTICAL, 3, {target = {actor=who_target, x=who_target.x, y=who_target.y}})
+		return
+	end
 	self:setTarget(who_target, who.ai_state.target_last_seen)
 end
 

@@ -3381,14 +3381,6 @@ newEffect{
 		end
 	end,
 	deactivate = function(self, eff)
-		if not eff.no_cancel_stealth and not rng.percent(self.hide_chance or 0) then
-			local detect = self:stealthDetection(eff.rad)
-			local netstealth = (self:callTalent(self.T_STEALTH, "getStealthPower") + (self:attr("inc_stealth") or 0))
-			if detect > 0 and self:checkHit(detect, netstealth) then
-				game.logPlayer(self, "You have been detected!")
-				self:forceUseTalent(self.T_STEALTH, {ignore_energy=true, ignore_cd=true, no_talent_fail=true, silent=false})
-			end
-		end
 	end,
 }
 

@@ -19,7 +19,7 @@
 
 -- Cunning talents
 newTalentType{ allow_random=true, type="cunning/stealth-base", name = "stealth", description = "Allows the user to enter stealth." }
-newTalentType{ allow_random=true, type="cunning/stealth", name = "stealth", description = "Allows the user to enter stealth." }
+newTalentType{ allow_random=true, type="cunning/stealth", name = "stealth", generic = true, description = "Allows the user to enter stealth." }
 newTalentType{ allow_random=true, type="cunning/trapping", name = "trapping", description = "The knowledge of trap laying and assorted trickeries." }
 newTalentType{ allow_random=true, type="cunning/traps", name = "traps", description = "Collection of known traps." }
 newTalentType{ allow_random=true, type="cunning/poisons", name = "poisons", description = "The knowledge of poisons and how to apply them to 'good' effects." }
