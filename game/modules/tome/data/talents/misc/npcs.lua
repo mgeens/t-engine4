@@ -3428,7 +3428,6 @@ newTalent{
 newTalent{
 	name = "Bone Nova",
 	type = {"corruption/other", 1},
-	require = corrs_req3,
 	points = 5,
 	vim = 25,
 	cooldown = 12,
