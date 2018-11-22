@@ -155,7 +155,7 @@ newTalent{
 				show_tooltip = true,
 				block_move = true,
 				block_sight = false,
-				temporary = 4 + self:getTalentLevel(t),
+				temporary = t.getDuration(self, t),
 				x = px, y = py,
 				canAct = false,
 				dam = ice_damage,
