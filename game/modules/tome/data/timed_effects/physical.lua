@@ -3385,7 +3385,7 @@ newEffect{
 }
 
 newEffect{
-	name = "SEDATED", image = "talents/dart_launcher_rt.png",
+	name = "SEDATED", image = "talents/dart_launcher.png",
 	desc = "Sedated",
 	long_desc = function(self, eff) return ("The target is in a deep sleep and unable to act.  Every %d damage it takes will reduce the duration of the effect by one turn."):format(eff.power) end,
 	type = "physical",
