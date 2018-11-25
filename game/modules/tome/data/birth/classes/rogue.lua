@@ -119,7 +119,7 @@ newBirthDescriptor{
 	stats = { dex=3, mag=3, cun=3, },
 	talents_types = {
 		["spell/phantasm"]={true, 0},
-		["spell/temporal"]={false, -0.4},
+		["spell/temporal"]={false, 0.0},
 		["spell/divination"]={false, 0},
 		["spell/conveyance"]={true, 0},
 		["technique/dualweapon-attack"]={true, 0.0},
