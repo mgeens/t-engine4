@@ -180,20 +180,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		-- Block talent from shields
-		if dam > 0 and target:attr("block") then
-			local e = target.tempeffect_def[target.EFF_BLOCKING]
-			lastdam = dam
-			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
-			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
-			lastdam = dam
-			dam = t.doForgeShield(type, dam, t, target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-
 		-- Increases damage
 		local mind_linked = false
 		local inc = 0
@@ -385,6 +371,20 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			game:delayedLogDamage(src, target, 0, ("%s(%d to psi shield)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false)
 		end
 
+		-- Block talent from shields
+		if dam > 0 and target:attr("block") then
+			local e = target.tempeffect_def[target.EFF_BLOCKING]
+			lastdam = dam
+			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
+		end
+		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
+			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
+			lastdam = dam
+			dam = t.doForgeShield(type, dam, t, target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
+		end
+
 		--Vim based defence
 		if target:attr("demonblood_def") and target.getVim then
 			local demon_block = math.min(dam*0.5,target.demonblood_def*(target:getVim() or 0))
@@ -542,10 +542,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		if not target.dead and dam > 0 and src.knowTalent and src:knowTalent(src.T_ENDLESS_WOES) then
-			src:triggerTalent(src.T_ENDLESS_WOES, nil, target, type, dam)
-		end
-
 		-- damage affinity healing
 		if not target.dead and affinity_heal > 0 then
 			target:heal(affinity_heal, src)
@@ -635,15 +631,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 					src.turn_procs.unstoppable_nature = true
 				end
 			end
-		end
-
-		-- Use state, because we don't care if it was shrugged off.
-		if state.crit_power > 1 and not state.crit_elemental_surge then
-			if src.knowTalent and src:knowTalent(src.T_ELEMENTAL_SURGE) then
-				src:triggerTalent(src.T_ELEMENTAL_SURGE, nil, target, type, dam)
-			end
-
-			state.crit_elemental_surge = true
 		end
 
 		if src.turn_procs and not src.turn_procs.dazing_damage and src.hasEffect and src:hasEffect(src.EFF_DAZING_DAMAGE) then

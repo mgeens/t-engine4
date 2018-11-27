@@ -611,12 +611,45 @@ function _M:actBase()
 	self:checkStillInCombat()
 end
 
+function _M:hasProc(proc)
+	if not self.turn_procs then return end
+	if self.turn_procs[proc] then 
+		return self.turn_procs[proc] 
+	elseif self.turn_procs.multi then 
+		return self.turn_procs.multi[proc] 
+	end
+end
+
+function _M:setProc(name, val, turns)
+	turns = turns or 1
+	val = val or true
+	local proc = {val = val, turns = turns}
+	if turns > 1 then
+		table.set(self, "turn_procs", "multi", name, proc)
+	else 
+		self.turn_procs[name] = proc
+	end
+end
+
 -- General entry point for Actors to act, called by NPC:act or Player:act
 function _M:act()
 	if not engine.Actor.act(self) then return end
 
 	self.changed = true
+
+	-- Store procs with more than 1 turn remaining and re-add them after we clear turn_procs
+	local temp = {}
+	if self.turn_procs.multi then
+		for proc, val in pairs(self.turn_procs.multi) do
+			if proc then
+				self.turn_procs.multi[proc].turns = self.turn_procs.multi[proc].turns - 1
+				if self.turn_procs.multi[proc].turns > 0 then temp[proc] = val end
+			end
+		end
+	end
+
 	self.turn_procs = {}
+	if temp then self.turn_procs.multi = temp end
 
 	-- Break some sustains if certain resources are too low
 	-- Note: force_talent_ignore_ressources has no effect here
@@ -4768,7 +4801,15 @@ function _M:searchAllInventories(o, fct)
 	end)
 	return inv, slot, attached
 end
-		
+
+local oldGetTalentTypeMastery = _M.getTalentTypeMastery
+function _M:getTalentTypeMastery(tt)
+	local mastery = oldGetTalentTypeMastery(self, tt)
+	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[tt.category] or 0
+	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
+	return mastery + bonus1 + bonus2
+end
+
 function _M:lastLearntTalentsMax(what)
 	if self:attr("infinite_respec") then return 99999 end
 	return what == "generic" and 3 or 4
@@ -7697,4 +7738,12 @@ function _M:updateInCombatStatus()
 	else
 		self:fireTalentCheck("callbackOnCombat", false)
 	end
+end
+
+-- Projects with a specified source and preserves the old one
+function _M:projectSource(t, x, y, damtype, dam, particles, source)
+	local old_source = self.__project_source
+	self.__project_source = source
+	self:project(t, x, y, damtype, dam, particles)
+	self.__project_source = old_source
 end
