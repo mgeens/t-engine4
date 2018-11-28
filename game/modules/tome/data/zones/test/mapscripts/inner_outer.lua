@@ -107,4 +107,6 @@ local maze = Maze.new():makeSimple(31, 31, '.', {'#','T'}, true)
 maze:printResult()
 print('---==============---')
 
+-- DGDGDGDG: make at least Tilemap handlers for BSP, roomer (single room), roomers and correctly handle up/down stairs
+
 return tm
