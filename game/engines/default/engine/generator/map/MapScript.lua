@@ -57,7 +57,9 @@ end
 function _M:custom(lev, old_lev)
 	local ret = nil
 	if self.data.mapscript then
-		local file = self:getFile(self.data.mapscript..".lua", "mapscripts")
+		local mapscript = self.data.mapscript
+		if type(mapscript) == "table" then mapscript = rng.table(mapscript) end
+		local file = self:getFile(mapscript..".lua", "mapscripts")
 		local f, err = loadfile(file)
 		if not f and err then error(err) end
 		package.loaded["engine.tilemaps.Tilemap"] = nil
@@ -65,6 +67,7 @@ function _M:custom(lev, old_lev)
 		package.loaded["engine.tilemaps.WaveFunctionCollapse"] = nil
 		package.loaded["engine.tilemaps.Noise"] = nil
 		package.loaded["engine.tilemaps.Heightmap"] = nil
+		package.loaded["engine.tilemaps.Maze"] = nil
 		setfenv(f, setmetatable(env or {
 			self = self,
 			zone = self.zone,
@@ -76,6 +79,7 @@ function _M:custom(lev, old_lev)
 			WaveFunctionCollapse = require "engine.tilemaps.WaveFunctionCollapse",
 			Noise = require "engine.tilemaps.Noise",
 			Heightmap = require "engine.tilemaps.Heightmap",
+			Maze = require "engine.tilemaps.Maze",
 		}, {__index=_G}))
 		ret = f()
 	elseif self.data.custom then
@@ -113,8 +117,8 @@ end
 function _M:addSpot(x, y, type, subtype, data)
 	data = data or {}
 	-- Tilemap uses 1 based indexes
-	data.x = x - 1
-	data.y = y - 1
+	data.x = math.floor(x) - 1
+	data.y = math.floor(y) - 1
 	data.type = type
 	data.subtype = subtype
 	self.spots[#self.spots+1] = data

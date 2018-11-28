@@ -37,14 +37,28 @@ function _M:init(noise_kind, hurst, lacunarity, zoom, octave)
 	-- self.data_w = self.data[1] and #self.data[1] or 0
 end
 
-function _M:make(w, h, chars)
+function _M:make(w, h, chars, normalize)
+	if normalize == nil then normalize = true end
+
 	self.data_w = w
 	self.data_h = h
 	self.data = self:makeData(w, h, ' ')
 
+	local tmp = {}
+	local min, max = 1, 0
 	for i = 1, w do for j = 1, h do
-		local v = math.floor((self.noise[self.noise_kind](self.noise, self.zoom * (i-1) / w, self.zoom * (j-1) / h, self.octave) / 2 + 0.5) * #chars)
-		-- print("----noise-----", i, j, '=>', v, '=>', chars[v+1])
+		local nv = self.noise[self.noise_kind](self.noise, self.zoom * (i-1) / w, self.zoom * (j-1) / h, self.octave) / 2 + 0.5
+		tmp[j] = tmp[j] or {}
+		tmp[j][i] = nv
+		if nv < min then min = nv end
+		if nv > max then max = nv end
+	end end
+
+	for i = 1, w do for j = 1, h do
+		local nv = tmp[j][i]
+		if normalize then nv = (nv - min) / (max - min) end
+		local v = math.floor(nv * (#chars - 1))
+		if v > #chars then os.crash() end
 		self.data[j][i] = chars[v+1]
 	end end
 	return self

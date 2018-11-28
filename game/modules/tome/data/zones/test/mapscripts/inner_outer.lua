@@ -69,12 +69,15 @@ tm:applyOnGroups(rooms, function(w, h, data, room, idx)
 	print("ROOM", idx, "::", rw, rh, "=>", rw * rh)
 	tm:fillGroup(room, '.')
 	if noroomforest and rw >= 8 and rh >= 8 then
-		local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(rw-2, rh-2, {' ', 'T', '=', '=', ';'})
+		local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(rw-2, rh-2, {' ', 'T', '=', '='})
 		pond:printResult()
 		tm:fillGroup(room, ';')
 		tm:merge(p1.x+1, p1.y+1, pond)
 		noroomforest = false
 	end
+
+	self:addSpot(p1.x + rw/2, p1.y + rh/2, "spawn-spot", "spawn-spot")
+
 	-- table.print()
 	for j = 1, #room.list do
 		local jn = room.list[j]
@@ -91,10 +94,17 @@ if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
 
 -- tm:printResult()
 
-
 print('---==============---')
-local noise = Noise.new():make(12, 12, {'T', 'T', '=', '=', '=', ';', ';'})
+local noise = Noise.new(nil, 0.5, 2, 3, 6):make(80, 50, {'T', 'T', '=', '=', '=', ';', ';'})
 noise:printResult()
+print('---==============---')
+print('---==============---')
+local pond = Heightmap.new(1.9, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(30, 30, {';', 'T', '=', '=', ';'})
+pond:printResult()
+print('---==============---')
+print('---==============---')
+local maze = Maze.new():makeSimple(31, 31, '.', {'#','T'}, true)
+maze:printResult()
 print('---==============---')
 
 return tm

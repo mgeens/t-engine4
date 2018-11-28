@@ -75,6 +75,67 @@ function _M:fillAll(fill_with, empty_char)
 	end
 end
 
+--- Flip the map
+function _M:flip(axis)
+	local ndata = self:makeData(self.data_w, self.data_h, '')
+	for y = 1, self.data_h do
+		for x = 1, self.data_w do
+			local nx, ny = x, y
+			if axis == "x" or axis == true then
+				x = self.data_w - (x - 1)
+			elseif axis == "y" or axis == false then
+				y = self.data_h - (y - 1)
+			end
+			ndata[ny][nx] = self.data[y][x]
+		end
+	end
+	self.data = ndata
+	return self
+end
+
+--- Rotate the map
+function _M:rotate(angle)
+	local function rotate_coords(i, j)
+		local ii, jj = i, j
+		if angle == 90 then ii, jj = j, self.data_w - i + 1
+		elseif angle == 180 then ii, jj = self.data_w - i + 1, self.data_h - j + 1
+		elseif angle == 270 then ii, jj = self.data_h - j + 1, i
+		end
+		return ii, jj
+	end
+
+	local ndata_w, ndata_h = self.data_w, self.data_h
+	if angle == 90 or angle == 270 then ndata_w, ndata_h = self.data_h, self.data_w end
+	local ndata = self:makeData(ndata_w, ndata_h, '')
+	for y = 1, self.data_h do
+		for x = 1, self.data_w do
+			local nx, ny = rotate_coords(x, y)
+			ndata[ny][nx] = self.data[y][x]
+		end
+	end
+	self.data = ndata
+	self.data_w = ndata_w
+	self.data_h = ndata_h
+	return self
+end
+
+--- Widen the map
+function _M:scale(sx, sy)
+	local ndata = self:makeData(self.data_w * sx, self.data_h * sy, '')
+	for y = 0, self.data_h - 1 do
+		for x = 0, self.data_w - 1 do
+			for nx = x * sx, x * sx + sx - 1 do
+				for ny = y * sy, y * sy + sy - 1 do
+					ndata[ny + 1][nx + 1] = self.data[y + 1][x + 1]
+				end
+			end
+		end
+	end
+	self.data = ndata
+	self.data_w, self.data_h = self.data_w * sx, self.data_h * sy
+	return self
+end
+
 --- Used internally to load a tilemap from a tmx file
 function _M:tmxLoad(file)
 	local f = fs.open(file, "r") local data = f:read(10485760) f:close()
@@ -433,11 +494,14 @@ function _M:groupOuterRectangle(group)
 end
 
 --- Carve out a simple linear path from coords until a tile is reached
-function _M:carveLinearPath(char, from, dir, stop_at)
-	local x, y = from.x, from.y
+function _M:carveLinearPath(char, from, dir, stop_at, dig_only_into)
+	local x, y = math.floor(from.x), math.floor(from.y)
 	local dx, dy = util.dirToCoord(dir)
+	if dig_only_into then dig_only_into = table.reverse(dig_only_into) end
 	while x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h and self.data[y][x] ~= stop_at do
-		self.data[y][x] = char
+		if not dig_only_into or dig_only_into[self.data[y][x]] then 
+			self.data[y][x] = char
+		end
 		x, y = x + dx, y + dy
 	end
 end

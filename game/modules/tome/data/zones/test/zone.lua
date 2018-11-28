@@ -24,7 +24,7 @@ return {
 	max_level = 4,
 	decay = {300, 800},
 	actor_adjust_level = function(zone, level, e) return zone.base_level + e:getRankLevelAdjust() + level.level-1 + rng.range(-1,2) end,
-	width = 80, height = 50,
+	width = 80, height = 80,
 	all_remembered = true,
 	all_lited = true,
 	no_level_connectivity = true,
@@ -101,8 +101,9 @@ return {
 --]]
 		},
 		actor = {
-			class = "mod.class.generator.actor.Random",
+			class = "engine.generator.actor.OnSpots",
 			nb_npc = {0, 0},
+			nb_spots = true, on_spot_chance = 90, spot_filters = {{type="spawn-spot"}},
 		},
 --[[
 		object = {

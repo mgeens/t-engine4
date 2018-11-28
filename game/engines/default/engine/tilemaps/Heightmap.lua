@@ -31,7 +31,8 @@ function _M:init(roughness, start)
 	for k, e in pairs(start) do start[k] = e * HMap.max end
 end
 
-function _M:make(w, h, chars)
+function _M:make(w, h, chars, normalize)
+	if normalize == nil then normalize = true end
 	self.data_w = w
 	self.data_h = h
 	self.data = self:makeData(w, h, ' ')
@@ -39,12 +40,24 @@ function _M:make(w, h, chars)
 	local hmap = HMap.new(w, h, self.roughness, self.start)
 	hmap:generate()
 
-	for j = 1, h do
-		for i = 1, w do
-			local c = util.bound((math.floor(hmap.hmap[i][j] / hmap.max * #chars) + 1), 1, #chars)
-			self.data[j][i] = chars[c]
-		end
-	end
+	local tmp = {}
+	local min, max = 1, 0
+	for j = 1, h do for i = 1, w do
+		local nv = hmap.hmap[i][j] / hmap.max
+
+		tmp[j] = tmp[j] or {}
+		tmp[j][i] = nv
+		if nv < min then min = nv end
+		if nv > max then max = nv end
+	end end
+
+	for j = 1, h do for i = 1, w do
+		local nv = tmp[j][i]
+		if normalize then nv = (nv - min) / (max - min) end
+
+		local c = util.bound(math.floor(nv * (#chars - 1)) + 1, 1, #chars)
+		self.data[j][i] = chars[c]
+	end end
 	
 	return self
 end
