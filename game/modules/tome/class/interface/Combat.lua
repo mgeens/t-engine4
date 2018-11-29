@@ -2093,13 +2093,19 @@ function _M:combatTalentMindDamage(t, base, max)
 end
 
 --- Gets damage based on talent
-function _M:combatTalentStatDamage(t, stat, base, max)
+-- stat == "str", "con", ....
+-- base = value to match when stat = 10 before diminishing returns
+-- max = value to match when stat = 100 before diminishing returns
+-- no_dr = set true to skip extra diminishing returns and force values to match at base = TL1, Stat10 max = TL5, Stat100
+function _M:combatTalentStatDamage(t, stat, base, max, no_dr)
 	-- Compute at "max"
 	local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
 	-- Compute real
 	local dam = (base + (self:getStat(stat))) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod
-	dam =  dam * (1 - math.log10(dam * 2) / 7)
-	dam = dam ^ (1 / 1.04)
+	if not no_dr then
+		dam =  dam * (1 - math.log10(dam * 2) / 7)
+		dam = dam ^ (1 / 1.04)
+	end
 	return self:rescaleDamage(dam)
 end
 
