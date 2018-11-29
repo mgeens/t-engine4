@@ -2104,8 +2104,8 @@ function _M:combatTalentStatDamage(t, stat, base, max, no_dr)
 	local dam = (base + (self:getStat(stat))) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod
 	if not no_dr then
 		dam =  dam * (1 - math.log10(dam * 2) / 7)
-		dam = dam ^ (1 / 1.04)
 	end
+	dam = dam ^ (1 / 1.04)
 	return self:rescaleDamage(dam)
 end
 
