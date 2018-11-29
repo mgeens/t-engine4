@@ -1913,23 +1913,30 @@ function _M:tooltip(x, y, seen_by)
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
 
+	local dt_order = function(a, b)
+		if a[1] == "all" then return true
+		elseif b[1] == "all" then return false
+		else return a[2] > b[2] end
+	end
+
 	local resists = tstring{}
 	local first = true
 	ts:add({"color", "ANTIQUE_WHITE"}, "Resists: ")
-	for t, v in pairs(self.resists) do
+	for t, _ in table.orderedPairs2(self.resists, dt_order) do
+		local v = self:combatGetResist(t)
 		if t == "all" or t == "absolute" then
-			if first then first = false else ts:add(", ") end
 			ts:add({"color", "LIGHT_BLUE"}, tostring(math.floor(v)) .. "%", " ", {"color", "LAST"}, t..", ")
 		elseif type(t) == "string" and math.abs(v) >= 20 then
-			local res = tostring ( math.floor(self:combatGetResist(t)) ) .. "%"
+			local res = tostring(math.floor(v)) .. "%"
 			if first then first = false else ts:add(", ") end
 			if v > 0 then
-				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			else
-				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			end
 		end
 	end
+
 	if self:attr("speed_resist") then
 		local res = 100 - (util.bound(self.global_speed * self.movement_speed, (100-(self.speed_resist_cap or 70))/100, 1)) * 100
 		if res > 0 then
