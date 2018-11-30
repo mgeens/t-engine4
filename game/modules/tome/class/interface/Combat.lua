@@ -2239,10 +2239,10 @@ end
 
 --- Returns the resistance penetration
 function _M:combatGetResistPen(type, straight)
-	local add = 0
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
 	if straight then return pen end
+	local add = 0
 
 	if self.auto_highest_resists_pen and self.auto_highest_resists_pen[type] then
 		local highest = self.resists_pen.all or 0
@@ -2255,7 +2255,12 @@ function _M:combatGetResistPen(type, straight)
 		return highest + self.auto_highest_resists_pen[type]
 	end
 
-	return pen
+	if self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
+		local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
+		add = add + t.getPenetration(self, t)
+	end
+
+	return pen + add
 end
 
 --- Returns the damage affinity
