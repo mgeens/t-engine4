@@ -420,7 +420,6 @@ function _M:useEnergy(val)
 		game.paused = false
 		self:fireTalentCheck("callbackOnActEnd")
 	end
---	print("USE ENERGY", self.name, self.uid, "::", self.energy.value, game.paused, "::", self.player)
 end
 
 function _M:tooltip(x, y, seen_by)
