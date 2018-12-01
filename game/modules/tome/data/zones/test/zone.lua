@@ -42,7 +42,8 @@ return {
 			['_'] = "FLOOR", ['O'] = "WALL", 
 			[';'] = "GRASS", ['T'] = "TREE",
 			['='] = "DEEP_WATER",
-			mapscript = "!inner_outer",
+			mapscript = "!testroom",
+			-- mapscript = "!inner_outer",
 --]]
 --[[
 			class = "engine.generator.map.Hexacle",

@@ -69,9 +69,9 @@ tm:applyOnGroups(rooms, function(w, h, data, room, idx)
 	print("ROOM", idx, "::", rw, rh, "=>", rw * rh)
 	tm:fillGroup(room, '.')
 	if noroomforest and rw >= 8 and rh >= 8 then
-		local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(rw-2, rh-2, {' ', 'T', '=', '='})
+		local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(rw-2, rh-2, {' ', ';', ';', 'T', '=', '='})
 		pond:printResult()
-		tm:fillGroup(room, ';')
+		-- tm:fillGroup(room, ';')
 		tm:merge(p1.x+1, p1.y+1, pond)
 		noroomforest = false
 	end
@@ -92,20 +92,25 @@ tm:fillAll()
 -- Elimitate the rest
 if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
 
--- tm:printResult()
+self.data.greater_vaults_list = {"32-chambers"}
+local proom = Rooms.new(self, "greater_vault"):generateRoom()
+tm:carveArea('#', tm:point(28, 1), tm:point(28+proom.data_w+4, 2+proom.data_h+4))
+tm:merge(30, 2, proom)
 
-print('---==============---')
-local noise = Noise.new(nil, 0.5, 2, 3, 6):make(80, 50, {'T', 'T', '=', '=', '=', ';', ';'})
-noise:printResult()
-print('---==============---')
-print('---==============---')
-local pond = Heightmap.new(1.9, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(30, 30, {';', 'T', '=', '=', ';'})
-pond:printResult()
-print('---==============---')
-print('---==============---')
-local maze = Maze.new():makeSimple(31, 31, '.', {'#','T'}, true)
-maze:printResult()
-print('---==============---')
+tm:printResult()
+
+-- print('---==============---')
+-- local noise = Noise.new(nil, 0.5, 2, 3, 6):make(80, 50, {'T', 'T', '=', '=', '=', ';', ';'})
+-- noise:printResult()
+-- print('---==============---')
+-- print('---==============---')
+-- local pond = Heightmap.new(1.9, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(30, 30, {';', 'T', '=', '=', ';'})
+-- pond:printResult()
+-- print('---==============---')
+-- print('---==============---')
+-- local maze = Maze.new():makeSimple(31, 31, '.', {'#','T'}, true)
+-- maze:printResult()
+-- print('---==============---')
 
 -- DGDGDGDG: make at least Tilemap handlers for BSP, roomer (single room), roomers and correctly handle up/down stairs
 

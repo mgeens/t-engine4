@@ -31,6 +31,9 @@ function _M:init(zone, map, level, data)
 	self.grid_list = zone.grid_list
 	self.spots = {}
 	self.mapsize = {self.map.w, self.map.h, w=self.map.w, h=self.map.h}
+	self.post_gen = {}
+	self.rooms_positions = {}
+	self.rooms_registers = {}
 
 	RoomsLoader.init(self, data)
 end
@@ -62,35 +65,26 @@ function _M:custom(lev, old_lev)
 		local file = self:getFile(mapscript..".lua", "mapscripts")
 		local f, err = loadfile(file)
 		if not f and err then error(err) end
-		package.loaded["engine.tilemaps.Tilemap"] = nil
-		package.loaded["engine.tilemaps.Static"] = nil
-		package.loaded["engine.tilemaps.WaveFunctionCollapse"] = nil
-		package.loaded["engine.tilemaps.Noise"] = nil
-		package.loaded["engine.tilemaps.Heightmap"] = nil
-		package.loaded["engine.tilemaps.Maze"] = nil
-		setfenv(f, setmetatable(env or {
+		local nenv = {
 			self = self,
 			zone = self.zone,
 			level = self.level,
 			lev = lev,
 			old_lev = old_lev,
-			Tilemap = require "engine.tilemaps.Tilemap",
-			Static = require "engine.tilemaps.Static",
-			WaveFunctionCollapse = require "engine.tilemaps.WaveFunctionCollapse",
-			Noise = require "engine.tilemaps.Noise",
-			Heightmap = require "engine.tilemaps.Heightmap",
-			Maze = require "engine.tilemaps.Maze",
-		}, {__index=_G}))
+		}
+		for f in fs.iterate("/engine/tilemaps/", function(f) return f:find("%.lua$") end) do
+			local n = f:sub(1, -5)
+			local nf = "engine.tilemaps."..n
+			package.loaded[nf] = nil
+			nenv[n] = require(nf)
+		end
+		setfenv(f, setmetatable(env or nenv, {__index=_G}))
 		ret = f()
 	elseif self.data.custom then
 		ret = self.data.custom(self, lev, old_lev)
 	end
 
 	if ret then
-		-- If we got a Tilemap instance (very likely) then ask it for the actual characters map
-		if ret.isClassName and ret:isClassName("engine.tilemaps.Tilemap") then
-			ret = ret:getResult(true)
-		end
 		return ret
 	elseif self.force_regen then
 		return nil
@@ -101,16 +95,39 @@ end
 
 function _M:generate(lev, old_lev)
 	print("Generating MapScript")
+	self.lev, self.old_lev = lev, old_lev
 	self.force_regen = false
 	local data = self:custom(lev, old_lev)
 	if self.force_regen then return self:generate(lev, old_lev) end
+
+	for id, room in pairs(self.rooms_registers) do
+		local pos = self.rooms_positions[id]
+		self:roomPlace(room, id, pos.x - 1, pos.y - 1)
+		data:applyArea(pos, pos + data:point(room.w - 1, room.h - 1), function(x, y, symb)
+			if self.map.room_map[x-1][y-1].can_open then
+				return symb
+			else
+				return "⛝" -- Carve out the interrior and all non openings with a special symbol to mark them as needing to NOT be overridden
+			end
+		end)
+	end
+	data:printResult()
+
+	data = data:getResult(true)
 	for i = 0, self.map.w - 1 do
 		for j = 0, self.map.h - 1 do
-			self.map(i, j, Map.TERRAIN, self:resolve(data[j+1][i+1] or '#'))
+			if data[j+1][i+1] ~= "⛝" then
+				self.map(i, j, Map.TERRAIN, self:resolve(data[j+1][i+1] or '#'))
+			end
 		end
 	end
 
-	return self:makeStairsSides(lev, old_lev, {4,6},self.spots)
+	for _, post in pairs(self.post_gen) do
+		post(self, lev, old_lev)
+	end
+
+	return 1, 1, 1, 1
+	-- return self:makeStairsSides(lev, old_lev, {4,6}, self.spots)
 	-- return self:makeStairsInside(lev, old_lev, self.spots)
 end
 
@@ -122,6 +139,10 @@ function _M:addSpot(x, y, type, subtype, data)
 	data.type = type
 	data.subtype = subtype
 	self.spots[#self.spots+1] = data
+end
+
+function _M:postGen(fct)
+	self.post_gen[#self.post_gen+1] = fct
 end
 
 --- Create the stairs inside the level

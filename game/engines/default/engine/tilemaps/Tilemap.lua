@@ -35,6 +35,10 @@ function _M:init(size, fill_with)
 	end
 end
 
+function _M:getSize()
+	return self.data_w, self.data_h
+end
+
 function _M:makeData(w, h, fill_with)
 	local data = {}
 	for y = 1, h do
@@ -497,13 +501,37 @@ end
 function _M:carveLinearPath(char, from, dir, stop_at, dig_only_into)
 	local x, y = math.floor(from.x), math.floor(from.y)
 	local dx, dy = util.dirToCoord(dir)
-	if dig_only_into then dig_only_into = table.reverse(dig_only_into) end
+	if type(dig_only_into) == "table" then dig_only_into = table.reverse(dig_only_into) end
 	while x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h and self.data[y][x] ~= stop_at do
-		if not dig_only_into or dig_only_into[self.data[y][x]] then 
+		if not dig_only_into or (type(dig_only_into) == "table" and dig_only_into[self.data[y][x]]) or (type(dig_only_into) == "function" and dig_only_into(x, y, self.data[y][x])) then 
 			self.data[y][x] = char
 		end
 		x, y = x + dx, y + dy
 	end
+end
+
+--- Carve out a simple rectangle
+function _M:carveArea(char, from, to, dig_only_into)
+	if type(dig_only_into) == "table" then dig_only_into = table.reverse(dig_only_into) end
+	for x = from.x, to.x do for y = from.y, to.y do
+		if x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h then
+			if not dig_only_into or (type(dig_only_into) == "table" and dig_only_into[self.data[y][x]]) or (type(dig_only_into) == "function" and dig_only_into(x, y, self.data[y][x])) then
+				self.data[y][x] = char
+			end
+		end
+	end end
+end
+
+--- Apply a function over an area
+function _M:applyArea(from, to, fct)
+	for x = from.x, to.x do for y = from.y, to.y do
+		if x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h then
+			local ret = fct(x, y, self.data[y][x])
+			if ret ~= nil then
+				self.data[y][x] = ret
+			end
+		end
+	end end
 end
 
 --- Get the results
@@ -530,7 +558,7 @@ function _M:printResult()
 	print("]]-----------")
 end
 
---- Merge and other Tilemap's data
+--- Merge an other Tilemap's data
 function _M:merge(x, y, tm, char_order, empty_char)
 	if not self.data or not tm.data then return end
 	-- if x is a table it's a point data so we shift parameters
@@ -561,4 +589,9 @@ function _M:merge(x, y, tm, char_order, empty_char)
 			end
 		end
 	end
+	tm:mergedAt(x, y)
+end
+
+--- Does nothing, meant to be superloaded
+function _M:mergedAt(x, y)
 end
