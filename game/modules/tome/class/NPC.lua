@@ -92,6 +92,8 @@ function _M:act()
 			self:waitTurn() -- This triggers "callbackOnWait" effects
 		 end
 		if config.settings.log_detail_ai > 2 then print("[NPC:act] turn", game.turn, "post act ENERGY for", self.uid, self.name) table.print(self.energy, "\t_energy_") end
+
+		self:fireTalentCheck("callbackOnActEnd")
 		if old_energy == self.energy.value then break end -- Prevent infinite loops
 	end
 end

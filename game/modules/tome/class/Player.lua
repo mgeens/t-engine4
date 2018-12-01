@@ -414,6 +414,15 @@ function _M:act()
 	end
 end
 
+function _M:useEnergy(val)
+	mod.class.Actor.useEnergy(self, val)
+	if self.player and self.energy.value < game.energy_to_act then
+		game.paused = false
+		self:fireTalentCheck("callbackOnActEnd")
+	end
+--	print("USE ENERGY", self.name, self.uid, "::", self.energy.value, game.paused, "::", self.player)
+end
+
 function _M:tooltip(x, y, seen_by)
 	local str = mod.class.Actor.tooltip(self, x, y, seen_by)
 	if not str then return end

@@ -467,9 +467,6 @@ function _M:useEnergy(val)
 	-- Curse of Shrouds: turn shroud of passing on or off
 	local eff = self:hasEffect(self.EFF_CURSE_OF_SHROUDS)
 	if eff then self.tempeffect_def[self.EFF_CURSE_OF_SHROUDS].doShroudOfPassing(self, eff) end
-
-	-- Do not fire those talents if this is not turn's end
-	if self:enoughEnergy() or game.zone.wilderness then return end
 end
 
 -- Called at the start of a turn before the actor chooses their action, energy is handled, etc
@@ -5638,6 +5635,7 @@ local sustainCallbackCheck = {
 	callbackOnHit = "talents_on_hit",
 	callbackOnAct = "talents_on_act",
 	callbackOnActBase = "talents_on_act_base",
+	callbackOnActEnd = "talents_on_act_end",
 	callbackOnMove = "talents_on_move",
 	callbackOnRest = "talents_on_rest",
 	callbackOnWait = "talents_on_wait",
