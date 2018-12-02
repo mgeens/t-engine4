@@ -19,6 +19,7 @@
 
 require "engine.class"
 local Map = require "engine.Map"
+local BaseGenerator = require "engine.Generator"
 local RoomsLoader = require "engine.generator.map.RoomsLoader"
 require "engine.Generator"
 
@@ -32,8 +33,8 @@ function _M:init(zone, map, level, data)
 	self.spots = {}
 	self.mapsize = {self.map.w, self.map.h, w=self.map.w, h=self.map.h}
 	self.post_gen = {}
-	self.rooms_positions = {}
-	self.rooms_registers = {}
+	self.maps_positions = {}
+	self.maps_registers = {}
 
 	RoomsLoader.init(self, data)
 end
@@ -106,23 +107,15 @@ function _M:generate(lev, old_lev)
 	local data = self:custom(lev, old_lev)
 	if self.force_regen then return self:generate(lev, old_lev) end
 
-	for id, room in pairs(self.rooms_registers) do
-		local pos = self.rooms_positions[id]
-		self:roomPlace(room, id, pos.x - 1, pos.y - 1)
-		data:applyArea(pos, pos + data:point(room.w - 1, room.h - 1), function(x, y, symb)
-			if self.map.room_map[x-1][y-1].can_open then
-				return symb
-			else
-				return "⛝" -- Carve out the interrior and all non openings with a special symbol to mark them as needing to NOT be overridden
-			end
-		end)
+	for id, map in pairs(self.maps_registers) do
+		local pos = self.maps_positions[id]
+		self.map:import(map, pos.x - 1, pos.y - 1)
 	end
-	data:printResult()
 
 	data = data:getResult(true)
 	for i = 0, self.map.w - 1 do
 		for j = 0, self.map.h - 1 do
-			if data[j+1][i+1] ~= "⛝" then
+			if data[j+1][i+1] ~= "⍓" then
 				self.map(i, j, Map.TERRAIN, self:resolve(data[j+1][i+1] or '#'))
 			end
 		end
@@ -149,6 +142,28 @@ end
 
 function _M:postGen(fct)
 	self.post_gen[#self.post_gen+1] = fct
+end
+
+function _M:makeTemporaryMap(map_w, map_h, fct)
+	local old_map = self.level.map
+	local old_game_level = game.level
+	game.level = self.level
+
+	local tmp_map = Map.new(map_w, map_h)
+	self.level.map = tmp_map
+	self.map = tmp_map
+	local new_data = table.clone(self.data, true)
+
+	-- Fake a generator call to init tmp_map.room_map
+	local ngen = BaseGenerator.new({}, tmp_map, {}, {})
+
+	fct(tmp_map, new_data)
+
+	game.level = old_game_level
+	self.map = old_map
+	self.level.map = old_map
+
+	return tmp_map
 end
 
 --- Create the stairs inside the level

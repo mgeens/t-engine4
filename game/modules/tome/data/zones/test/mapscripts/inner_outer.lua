@@ -92,11 +92,6 @@ tm:fillAll()
 -- Elimitate the rest
 if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
 
-self.data.greater_vaults_list = {"32-chambers"}
-local proom = Rooms.new(self, "greater_vault"):generateRoom()
-tm:carveArea('#', tm:point(28, 1), tm:point(28+proom.data_w+4, 2+proom.data_h+4))
-tm:merge(30, 2, proom)
-
 tm:printResult()
 
 -- print('---==============---')
