@@ -171,7 +171,7 @@ project "physfs"
 		files { "../src/physfs/platform/windows.c",  }
 	configuration "macosx"
 		files { "../src/physfs/platform/macosx.c", "../src/physfs/platform/posix.c",  }
-                includedirs { "/Library/Frameworks/SDL.framework/Headers" }
+                includedirs { "/Library/Frameworks/SDL2.framework/Headers" }
 
 if _OPTIONS.lua == "default" then
 	project "luadefault"
@@ -545,7 +545,7 @@ project "te4-wfc"
 	kind "StaticLib"
 	language "C++"
 	targetname "te4-wfc"
-	buildoptions { "-O3" }
+	buildoptions { "-O3", "-std=c++11" }
 
 	files { "../src/wfc/*.cpp", }
 
@@ -568,6 +568,9 @@ project "te4-web"
 	language "C++"
 	targetname "te4-web"
 
+	buildoptions { "-O3", "-std=c++11" }
+	links { "stdc++" }
+
 	if _OPTIONS.relpath=="32" then linkoptions{"-Wl,-rpath -Wl,\\\$\$ORIGIN "} end
 	if _OPTIONS.relpath=="64" then linkoptions{"-Wl,-rpath -Wl,\\\$\$ORIGIN "} end
 
@@ -575,8 +578,8 @@ project "te4-web"
 
 	configuration "macosx"
 		defines { 'SELFEXE_MACOSX' }
-		libdirs {"/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/xcodebuild/Release/", "/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/Release/"}
-		includedirs {"/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/include/", "/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/"}
+		libdirs {"/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/xcodebuild/Release/", "/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/Release/"}
+		includedirs {"/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/include/", "/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/"}
 		links { "cef", "cef_dll_wrapper" }
 
 	configuration "windows"
@@ -595,6 +598,9 @@ project "cef3spawn"
 	language "C++"
 	targetname "cef3spawn"
 
+	buildoptions { "-O3", "-std=c++11" }
+	links { "stdc++" }
+
 	includedirs {"../src/web-cef3/", }
 	files {
 		"../src/web-cef3/spawn.cpp",
@@ -602,8 +608,8 @@ project "cef3spawn"
 
 	configuration "macosx"
 		defines { 'SELFEXE_MACOSX' }
-		libdirs {"/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/xcodebuild/Release/", "/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/Release/"}
-		includedirs {"/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/include/", "/users/tomedev/downloads/cef_binary_3.1547.1597_macosx64/"}
+		libdirs {"/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/xcodebuild/Release/", "/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/Release/"}
+		includedirs {"/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/include/", "/Users/darkmac/libs/CEF/cef_binary_3.1547.1597_macosx64/"}
 		links { "cef", "cef_dll_wrapper" }
 
 	configuration "linux"
