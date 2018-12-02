@@ -235,6 +235,9 @@ newTalent{
 		}
 		return p
 	end,
+	callbackOnAct = function(self, eff)
+		if not self:knowTalent(self.T_ETERNAL_GUARD) and self:hasEffect(self.EFF_BLOCKING) and self:hasEffect(self.EFF_BLOCKING).from_block then self:removeEffect(self.EFF_BLOCKING) end
+	end,
 	getBlockValue = function(self, t) return self:combatShieldBlock() or 0 end,
 	getBlockedTypes = function(self, t)
 		local shield1, combat1, shield2, combat2 = self:hasShield()
@@ -264,7 +267,7 @@ newTalent{
 
 		local list = table.keys(bonuses)
 		local n = #list
-		if n < 1 then return bt, "(error 2)" end
+		if n < 1 then return bt, "None" end
 		local e_string = ""
 		if n == 1 then
 			e_string = DamageType.dam_def[next(bonuses)].name
@@ -280,7 +283,7 @@ newTalent{
 	action = function(self, t)
 		local properties = t.getProperties(self, t)
 		local bt, bt_string = t.getBlockedTypes(self, t)
-		self:setEffect(self.EFF_BLOCKING, 2, {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties})
+		self:setEffect(self.EFF_BLOCKING, 2, {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties, from_block=true})
 		return true
 	end,
 	info = function(self, t)

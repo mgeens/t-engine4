@@ -2234,7 +2234,7 @@ newEffect{ -- Note: This effect is cancelled by EFF_DISARMED
 newEffect{
 	name = "BLOCKING", image = "talents/block.png",
 	desc = "Blocking",
-	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken.  This effect is removed at the start of your next turn."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken."):format(eff.power) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
@@ -2280,14 +2280,11 @@ newEffect{
 			if eff.properties.on_cs then
 				eff.properties.on_cs(self, eff, dam, type, src)
 			end
-		end-- specify duration here to avoid stacking for high speed attackers
+		end
 
 		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
 
 		return amt
-	end,
-	callbackOnActBase = function(self, eff)
-		if not self:knowTalent(self.T_ETERNAL_GUARD) then self:removeEffect(self.EFF_BLOCKING) end
 	end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("block", eff.power)
