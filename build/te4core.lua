@@ -49,7 +49,8 @@ project "TEngine"
 	if _OPTIONS.relpath == "32" then defines{"TE4_RELPATH32"} end
 	if _OPTIONS.relpath == "64" then defines{"TE4_RELPATH64"} end
 
-	links { "m", "stdc++" }
+	links { "m" }
+	cppconfig()
 
 	if _OPTIONS.no_rwops_size then defines{"NO_RWOPS_SIZE"} end
 
@@ -545,7 +546,9 @@ project "te4-wfc"
 	kind "StaticLib"
 	language "C++"
 	targetname "te4-wfc"
-	buildoptions { "-O3", "-std=c++11" }
+	buildoptions { "-O3" }
+	buildoptions { "-std=c++11" }
+	cppconfig()
 
 	files { "../src/wfc/*.cpp", }
 
@@ -569,7 +572,7 @@ project "te4-web"
 	targetname "te4-web"
 
 	buildoptions { "-O3", "-std=c++11" }
-	links { "stdc++" }
+	cppconfig("web")
 
 	if _OPTIONS.relpath=="32" then linkoptions{"-Wl,-rpath -Wl,\\\$\$ORIGIN "} end
 	if _OPTIONS.relpath=="64" then linkoptions{"-Wl,-rpath -Wl,\\\$\$ORIGIN "} end
@@ -598,8 +601,9 @@ project "cef3spawn"
 	language "C++"
 	targetname "cef3spawn"
 
-	buildoptions { "-O3", "-std=c++11" }
-	links { "stdc++" }
+	buildoptions { "-O3" }
+	buildoptions { "-std=c++11" }
+	cppconfig("web")
 
 	includedirs {"../src/web-cef3/", }
 	files {
