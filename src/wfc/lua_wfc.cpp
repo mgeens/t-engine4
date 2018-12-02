@@ -93,7 +93,7 @@ static void generate_table_from_output(lua_State *L, WFCOverlapping *config) {
 static bool wfc_generate_overlapping(WFCOverlapping *config) {
 	OverlappingWFCOptions options = {config->periodic_in, config->periodic_out, config->output.height, config->output.width, config->symmetry, config->has_foundation, config->n};
 	OverlappingWFC<char> wfc(config->sample, options, gen_rand32());
-	nonstd::optional<Array2D<char>> success = wfc.run();
+	cl::optional<Array2D<char>> success = wfc.run();
 	if (success.has_value()) {
 		config->output.import(success.value());
 		return true;

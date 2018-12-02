@@ -11,7 +11,7 @@
 #include "propagator.hpp"
 
 using namespace std;
-using namespace nonstd;
+using namespace cl;
 
 /**
  * Class containing the generic WFC algorithm.

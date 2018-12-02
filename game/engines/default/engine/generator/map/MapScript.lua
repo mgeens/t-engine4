@@ -57,29 +57,35 @@ function _M:regenerate()
 	self.force_regen = true
 end
 
+function _M:loadFile(mapscript, lev, old_lev, args)
+	local file = self:getFile(mapscript..".lua", "mapscripts")
+	local f, err = loadfile(file)
+	if not f and err then error(err) end
+	local nenv = {
+		args = args,
+		self = self,
+		zone = self.zone,
+		level = self.level,
+		lev = lev,
+		old_lev = old_lev,
+		loadMapScript = function(name, args) return self:loadFile(name, lev, old_lev, args) end,
+	}
+	for f in fs.iterate("/engine/tilemaps/", function(f) return f:find("%.lua$") end) do
+		local n = f:sub(1, -5)
+		local nf = "engine.tilemaps."..n
+		package.loaded[nf] = nil
+		nenv[n] = require(nf)
+	end
+	setfenv(f, setmetatable(env or nenv, {__index=_G}))
+	return f()
+end
+
 function _M:custom(lev, old_lev)
 	local ret = nil
 	if self.data.mapscript then
 		local mapscript = self.data.mapscript
 		if type(mapscript) == "table" then mapscript = rng.table(mapscript) end
-		local file = self:getFile(mapscript..".lua", "mapscripts")
-		local f, err = loadfile(file)
-		if not f and err then error(err) end
-		local nenv = {
-			self = self,
-			zone = self.zone,
-			level = self.level,
-			lev = lev,
-			old_lev = old_lev,
-		}
-		for f in fs.iterate("/engine/tilemaps/", function(f) return f:find("%.lua$") end) do
-			local n = f:sub(1, -5)
-			local nf = "engine.tilemaps."..n
-			package.loaded[nf] = nil
-			nenv[n] = require(nf)
-		end
-		setfenv(f, setmetatable(env or nenv, {__index=_G}))
-		ret = f()
+		ret = self:loadFile(mapscript, lev, old_lev)
 	elseif self.data.custom then
 		ret = self.data.custom(self, lev, old_lev)
 	end
