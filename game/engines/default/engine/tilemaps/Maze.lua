@@ -26,6 +26,7 @@ local HMap = require "engine.Heightmap"
 module(..., package.seeall, class.inherit(Tilemap))
 
 function _M:init()
+	Tilemap.init(self)
 end
 
 function _M:makeSimple(w, h, floors, walls, enclosed)
@@ -34,6 +35,7 @@ function _M:makeSimple(w, h, floors, walls, enclosed)
 
 	self.data_w = w
 	self.data_h = h
+	self.data_size = self:point(w, h)
 	self.data = self:makeData(w, h, ' ')
 
 	local lastx, lasty = 0, 0

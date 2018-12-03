@@ -26,6 +26,7 @@ local HMap = require "engine.Heightmap"
 module(..., package.seeall, class.inherit(Tilemap))
 
 function _M:init(roughness, start)
+	Tilemap.init(self)
 	self.roughness = roughness or 1.2
 	self.start = start or {}
 	for k, e in pairs(start) do start[k] = e * HMap.max end
@@ -35,6 +36,7 @@ function _M:make(w, h, chars, normalize)
 	if normalize == nil then normalize = true end
 	self.data_w = w
 	self.data_h = h
+	self.data_size = self:point(w, h)
 	self.data = self:makeData(w, h, ' ')
 
 	local hmap = HMap.new(w, h, self.roughness, self.start)

@@ -25,7 +25,7 @@ return {
 	decay = {300, 800},
 	actor_adjust_level = function(zone, level, e) return zone.base_level + e:getRankLevelAdjust() + level.level-1 + rng.range(-1,2) end,
 	width = 80, height = 80,
-	all_remembered = true,
+	-- all_remembered = true,
 	all_lited = true,
 	no_level_connectivity = true,
 	

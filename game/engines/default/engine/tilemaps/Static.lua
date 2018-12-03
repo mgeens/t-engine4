@@ -25,7 +25,10 @@ local Tilemap = require "engine.tilemaps.Tilemap"
 module(..., package.seeall, class.inherit(Tilemap))
 
 function _M:init(file)
+	Tilemap.init(self)
+
 	self.data = self:tmxLoad(file)
 	self.data_h = #self.data
 	self.data_w = self.data[1] and #self.data[1] or 0
+	self.data_size = self:point(self.data_w, self.data_h)
 end

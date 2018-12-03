@@ -53,6 +53,22 @@ function _M:generateRoom(temp_symbol, account_for_border)
 
 	local tm = RoomInstance.new({room.w - (account_for_border and 2 or 0), room.h - (account_for_border and 2 or 0)}, temp_symbol or '⍓')
 	room.temp_symbol = temp_symbol
+	tm.mapscript = mapscript
+	tm.room_data = room
+	tm.room_id = id
+
+	self.room_next_id = self.room_next_id + 1
+	return tm
+end
+
+function RoomInstance:build()
+	local mapscript = self.mapscript
+	local room = self.room_data
+	local id = self.room_id
+
+	if account_for_border == nil then account_for_border = false end
+
+	room.temp_symbol = temp_symbol
 
 	local map = mapscript:makeTemporaryMap(room.w, room.h, function(map)
 		mapscript:roomPlace(room, id, 0, 0)
@@ -72,9 +88,8 @@ function _M:generateRoom(temp_symbol, account_for_border)
 			exits.doors[#exits.doors+1] = self:point(dx, dy)
 		end
 	end
-	tm.mapscript = mapscript
-	tm.exits = exits
-	tm.room_id = id
+	self.static_map = map
+	self.exits = exits
 
 	for i = 0, map.w - 1 do
 		checkexits(i, 0, 8)
@@ -85,8 +100,19 @@ function _M:generateRoom(temp_symbol, account_for_border)
 		checkexits(map.w - 1, j, 6)
 	end
 
-	self.room_next_id = self.room_next_id + 1
-	return tm
+	return self
+end
+
+--- Not used, so we remove all entities
+function RoomInstance:discard()
+	for i = 0, self.static_map.w - 1 do for j = 0, self.static_map.h - 1 do
+		local z = i + j * self.static_map.w
+		if self.static_map.map[z] then
+			for _, e in pairs(self.static_map.map[z]) do
+				e:removed()
+			end
+		end
+	end end
 end
 
 function RoomInstance:mergedAt(x, y)
@@ -99,34 +125,29 @@ function RoomInstance:mergedAt(x, y)
 	for _, door in pairs(self.exits.doors) do door.x, door.y = door.x + d.x, door.y + d.y end
 end
 
-function RoomInstance:findClosestExit(pos, kind)
-	local cur_dist = 9999999
-	local cur_pos = nil
-	local cur_kind = nil
-
+function RoomInstance:findExits(pos, kind)
+	local list = {}
 	if not kind or kind == "openable" then
 		for _, open in pairs(self.exits.openables) do
 			local dist = core.fov.distance(pos.x, pos.y, open.x, open.y)
-			if dist < cur_dist then
-				cur_dist = dist
-				cur_pos = open
-				cur_kind = "open"
-			end
+			table.insert(list, {dist = dist, pos = open, kind = "open"})			
 		end
 	end
 	if not kind or kind == "door" then
 		for _, door in pairs(self.exits.doors) do
 			local dist = core.fov.distance(pos.x, pos.y, door.x, door.y)
-			if dist < cur_dist then
-				cur_dist = dist
-				cur_pos = door
-				cur_kind = "door"
-			end
+			table.insert(list, {dist = dist, pos = door, kind = "door"})			
 		end
 	end
-	return cur_pos, cur_kind, cur_dist
+	table.sort(list, "dist")
+	return list
 end
+
+
 
 function _M:flip(axis) error("Cannot use :flip() on a Room tilemap") end
 function _M:rotate(angle) error("Cannot use :rotate() on a Room tilemap") end
 function _M:scale(sx, sy) error("Cannot use :scale() on a Room tilemap") end
+function RoomInstance:flip(axis) error("Cannot use :flip() on a Room tilemap") end
+function RoomInstance:rotate(angle) error("Cannot use :rotate() on a Room tilemap") end
+function RoomInstance:scale(sx, sy) error("Cannot use :scale() on a Room tilemap") end

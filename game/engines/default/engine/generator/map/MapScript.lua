@@ -112,6 +112,11 @@ function _M:generate(lev, old_lev)
 		self.map:import(map, pos.x - 1, pos.y - 1)
 	end
 
+	if not self.entrance_pos then self.entrance_pos = data:locateTile('<') end
+	if not self.exit_pos then self.exit_pos = data:locateTile('>') end
+	if not self.entrance_pos then self.entrance_pos = data:point(1, 1) end
+	if not self.exit_pos then self.exit_pos = data:point(1, 1) end
+
 	data = data:getResult(true)
 	for i = 0, self.map.w - 1 do
 		for j = 0, self.map.h - 1 do
@@ -125,9 +130,14 @@ function _M:generate(lev, old_lev)
 		post(self, lev, old_lev)
 	end
 
-	return 1, 1, 1, 1
-	-- return self:makeStairsSides(lev, old_lev, {4,6}, self.spots)
-	-- return self:makeStairsInside(lev, old_lev, self.spots)
+	return self.entrance_pos.x - 1, self.entrance_pos.y - 1, self.exit_pos.x - 1, self.exit_pos.y - 1
+end
+
+function _M:setEntrance(pos)
+	self.entrance_pos = pos
+end
+function _M:setExit(pos)
+	self.exit_pos = pos
 end
 
 function _M:addSpot(x, y, type, subtype, data)

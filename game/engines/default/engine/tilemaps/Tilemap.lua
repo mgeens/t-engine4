@@ -29,10 +29,12 @@ function _M:init(size, fill_with)
 	if size then
 		self.data_w = math.floor(size[1])
 		self.data_h = math.floor(size[2])
+		self.data_size = self:point(self.data_w, self.data_h)
 		if self.data_w and self.data_h then
 			self.data = self:makeData(self.data_w, self.data_h, fill_with or ' ')
 		end
 	end
+	self.merged_pos = self:point(1, 1)
 end
 
 function _M:getSize()
@@ -59,6 +61,14 @@ local point_meta = {
 		if type(b) == "number" then return _M:point(a.x - b, a.y - b)
 		else return _M:point(a.x - b.x, a.y - b.y) end
 	end,
+	__mul = function(a, b)
+		if type(b) == "number" then return _M:point(a.x * b, a.y * b)
+		else return _M:point(a.x * b.x, a.y * b.y) end
+	end,
+	__div = function(a, b)
+		if type(b) == "number" then return _M:point(a.x / b, a.y / b)
+		else return _M:point(a.x / b.x, a.y / b.y) end
+	end,
 	__eq = function(a, b)
 		return a.x == b.x and a.y == b.y
 	end,
@@ -68,6 +78,29 @@ function _M:point(x, y)
 	local p = {x=math.floor(x), y=math.floor(y)}
 	setmetatable(p, point_meta)
 	return p
+end
+
+
+--- Returns a point at the center of the map, accounting for merged_pos
+function _M:centerPoint()
+	return self:point(self.data_w / 2, self.data_h / 2) + self.merged_pos - 1
+end
+
+--- Sorts a list of tilemaps by their centerPoint
+function _M:sortListCenter(list)
+	local newlist = {}
+
+	local first = table.remove(list, 1)
+	while #list > 0 do
+		local fp = first:centerPoint()
+		table.sort(list, function(a, b) a = a:centerPoint() b = b:centerPoint() return core.fov.distance(fp.x, fp.y, a.x, a.y) < core.fov.distance(fp.x, fp.y, b.x, b.y) end)
+
+		newlist[#newlist+1] = first
+		first = table.remove(list, 1)
+		if #list == 0 then newlist[#newlist+1] = first end
+	end
+
+	return newlist
 end
 
 --- Find all empty spaces (defaults to ' ') and fill them with a give char
@@ -266,6 +299,35 @@ function _M:locateTile(char, erase)
 	end
 	if #res == 0 then return nil end
 	return rng.table(res), res
+end
+
+--- Finds a random location with enough area available
+function _M:findRandomArea(from, to, w, h, made_of, margin, tries)
+	if not tries then tries = 500 end
+	if not margin then margin = 0 end
+	if not from then from = self:point(1, 1) end
+	if not to then to = self:point(self.data_w, self.data_h) end
+	if not made_of then made_of = {'#'} end
+	if type(made_of) == "string" then made_of = {made_of} end
+	made_of = table.reverse(made_of)
+
+	while tries > 0 do
+		local pos = self:point(rng.range(from.x, to.x - w - margin * 2), rng.range(from.y, to.y - h - margin * 2))
+		local ok = true
+		for i = pos.x - margin, pos.x + w + margin do
+			for j = pos.y - margin, pos.y + h + margin do
+				if not self:isBound(i, j) or not made_of[self.data[j][i]] then
+					ok = false
+					break
+				end
+			end
+			if not ok then break end
+		end
+		if ok then return pos end
+
+		tries = tries - 1
+	end
+	return nil
 end
 
 --- Return a list of groups of tiles that matches the given cond function
@@ -582,6 +644,10 @@ end
 
 --- Merge an other Tilemap's data
 function _M:merge(x, y, tm, char_order, empty_char)
+	if type(x) == "table" then -- If passed a point, shift the parameters
+		x, y, tm, char_order, empty_char = x.x, x.y, y, tm, char_order
+	end
+
 	if not self.data or not tm.data then return end
 	-- if x is a table it's a point data so we shift parameters
 	if type(x) == "table" then
@@ -619,10 +685,65 @@ function _M:merge(x, y, tm, char_order, empty_char)
 	tm:mergedAt(x, y)
 end
 
---- Does nothing, meant to be superloaded
 function _M:mergedAt(x, y)
+	self.merged_pos = self.merged_pos + self:point(x, y) - 1
 end
 
+function _M:findExits(pos, kind, exitable_chars)
+	local list = {}
+
+	if type(exitable_chars) == "string" then exitable_chars = {exitable_chars} end
+	exitable_chars = exitable_chars or {'.', ';'}
+	exitable_chars = table.reverse(exitable_chars)
+
+	local function checkexits(i, j, dir)
+		local c = self.data[j][i]
+		if exitable_chars[c] then
+			local dist = core.fov.distance(pos.x, pos.y, i, j)
+			table.insert(list, {dist = dist, pos = self:point(i, j) + self.merged_pos - 1, kind = "open"})			
+		end
+	end
+
+	for i = 1, self.data_w do
+		checkexits(i, 1, 8)
+		checkexits(i, self.data_h, 2)
+	end
+	for j = 1, self.data_h do
+		checkexits(1, j, 4)
+		checkexits(self.data_w - 1, j, 6)
+	end
+
+	table.sort(list, "dist")
+	return list
+end
+
+function _M:findClosestExit(pos, kind, exitable_chars)
+	local list = self:findExits(pos, kind, exitable_chars)
+	if #list == 0 then return nil end
+	local c = list[1]
+	return c.pos, c.kind, c.dist
+end
+
+function _M:findFurthestExit(pos, kind, exitable_chars)
+	local list = self:findExits(pos, kind, exitable_chars)
+	if #list == 0 then return nil end
+	local c = list[#list]
+	return c.pos, c.kind, c.dist
+end
+
+function _M:findRandomClosestExit(nb, pos, kind, exitable_chars)
+	local list = self:findExits(pos, kind, exitable_chars)
+	if #list == 0 then return nil end
+	local c = list[rng.range(1, math.min(#list, nb))]
+	return c.pos, c.kind, c.dist
+end
+
+function _M:findRandomFurthestExit(nb, pos, kind, exitable_chars)
+	local list = self:findExits(pos, kind, exitable_chars)
+	if #list == 0 then return nil end
+	local c = list[rng.range(math.max(1, #list-nb+1), #list)]
+	return c.pos, c.kind, c.dist
+end
 
 ------------------------------------------------------------------------------
 -- Simple tunneling
@@ -667,12 +788,12 @@ function _M:tunnelMark(x, y, xdir, ydir, id)
 		local xd, yd = util.dirToCoord(d, x, y)
 		if self:isBound(x+xd, y+yd) and not self.tunnels_map[y+yd][x+xd] then 
 			self.tunnels_map[y+yd][x+xd] = id
-			print("mark tunnel", x+xd, y+yd , id)
+			-- print("mark tunnel", x+xd, y+yd , id)
 		end
 	end
 	if not self.tunnels_map[y][x] then
 		self.tunnels_map[y][x] = id
-		print("mark tunnel", x, y , id)
+		-- print("mark tunnel", x, y , id)
 	end
 end
 
@@ -698,7 +819,7 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 	-- local print = function()end
 
 	local xdir, ydir = self:tunnelDir(x1, y1, x2, y2)
-	print("tunneling from",x1, y1, "to", x2, y2, "initial dir", xdir, ydir)
+	-- print("tunneling from",x1, y1, "to", x2, y2, "initial dir", xdir, ydir)
 
 	local startx, starty = x1, y1
 	local tun = {}
@@ -721,23 +842,23 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 			end
 			nx, ny = x1 + xdir, y1 + ydir
 		end
-		print(feat, "try pos", nx, ny, "dir", util.coordToDir(xdir, ydir, nx, ny))
+		-- print(feat, "try pos", nx, ny, "dir", util.coordToDir(xdir, ydir, nx, ny))
 		local nc = self.data[ny][nx]
 
 		if tunnel_avoid[nc] then
 			if nx == from.x and ny == from.y then
 				tun[#tun+1] = {nx,ny}
 				x1, y1 = nx, ny
-				print(feat, "accept avoid (start)", nc)
+				-- print(feat, "accept avoid (start)", nc)
 			elseif nx == to.x and ny == to.y then
 				tun[#tun+1] = {nx,ny}
 				x1, y1 = nx, ny
-				print(feat, "accept avoid (end)", nc)
+				-- print(feat, "accept avoid (end)", nc)
 			else
-				print(feat, "reject avoid", nc)
+				-- print(feat, "reject avoid", nc)
 				if nx == x2 and ny == y2 then -- stop if next to special target
 					x1, y1 = nx, ny
-					print(feat, "end adjacent to special target")
+					-- print(feat, "end adjacent to special target")
 				end
 			end
 		-- elseif nc.can_open ~= nil then
@@ -759,16 +880,18 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 			if no_move_tries >= 15 then
 				tun[#tun+1] = {nx,ny}
 				x1, y1 = nx, ny
-				print(feat, "accept tunnel", nc, id)
+				-- print(feat, "accept tunnel", nc, id)
 			else
-				print(feat, "reject tunnel", nc, id)
+				-- print(feat, "reject tunnel", nc, id)
 			end
 		elseif tunnel_through[nc] or tunnel_through.ALL then
 			tun[#tun+1] = {nx,ny}
 			x1, y1 = nx, ny
-			print(feat, "accept normal", nc)
+			-- print(feat, "accept normal", nc)
 		else
-			print(feat, "reject normal", nc)
+			tun[#tun+1] = {nx,ny,"ignore"}
+			x1, y1 = nx, ny
+			-- print(feat, "reject normal", nc)
 		end
 
 		if x1 == nx and y1 == ny then
@@ -778,7 +901,7 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 			no_move_tries = no_move_tries + 1
 		end
 
-		if x1 == x2 and y1 == y2 then print(feat, "done") break end
+		if x1 == x2 and y1 == y2 then break end
 
 		tries = tries - 1
 	end
@@ -787,9 +910,9 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 	self.possible_doors = self.possible_doors or {}
 	for _, t in ipairs(tun) do
 		local nx, ny = t[1], t[2]
-		if t[3] and self.data.door then self.possible_doors[#self.possible_doors+1] = t end
-		if not t[4] and not virtual then
-			print("=======TUNN", nx, ny)
+		-- if t[3] and self.data.door then self.possible_doors[#self.possible_doors+1] = t end
+		if t[3] ~= "ignore" and not virtual then
+			-- print("=======TUNN", nx, ny)
 			-- self.map(nx, ny, Map.TERRAIN, self:resolve('=') or self:resolve('.') or self:resolve('floor'))
 			self:put(self:point(nx, ny), char)
 		end
@@ -807,7 +930,7 @@ end
 -- @int cy
 -- @int tx
 -- @int ty
-local function heuristicCloserPath(sx, sy, cx, cy, tx, ty)
+local function heuristicCloserPath(sx, sy, cx, cy, tx, ty, config)
 	local h
 	-- Chebyshev  distance
 	h = math.max(math.abs(tx - cx), math.abs(ty - cy))
@@ -817,7 +940,7 @@ local function heuristicCloserPath(sx, sy, cx, cy, tx, ty)
 	local dy1 = cy - ty
 	local dx2 = sx - tx
 	local dy2 = sy - ty
-	return h + 0.01*math.abs(dx1*dy2 - dx2*dy1)
+	return h + 0.01*math.abs(dx1*dy2 - dx2*dy1) + rng.float(-config.erraticness, config.erraticness)
 end
 
 --- A simple heuristic for A*, using distance
@@ -828,7 +951,7 @@ end
 -- @int tx
 -- @int ty
 local function heuristicDistance(sx, sy, cx, cy, tx, ty)
-	return core.fov.distance(cx, cy, tx, ty)
+	return core.fov.distance(cx, cy, tx, ty) + rng.float(-config.erraticness, config.erraticness)
 end
 
 --- Converts x & y into a single value
@@ -850,16 +973,22 @@ end
 --- Create Path
 -- @param came_from
 -- @param cur
-function _M:astarCreatePath(came_from, cur, id, char)
+function _M:astarCreatePath(came_from, from, cur, id, char, config, tunnel_through)
 	if not came_from[cur] then return end
 	local rpath, path = {}, {}
 	while came_from[cur] do
 		local x, y = self:astarToDouble(cur)
 		rpath[#rpath+1] = self:point(x, y)
-		self.data[y][x] = char
+		if not config.virtual and (tunnel_through.ALL or tunnel_through[self.data[y][x]]) then self.data[y][x] = char end
 		self.tunnels_map[y][x] = id
 		cur = came_from[cur]
 	end
+
+	-- First one
+	rpath[#rpath+1] = from
+	if not config.virtual then self.data[from.y][from.x] = char end
+	self.tunnels_map[from.y][from.x] = id
+
 	for i = #rpath, 1, -1 do path[#path+1] = rpath[i] end
 	return path
 end
@@ -877,19 +1006,21 @@ function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
 
 	if sx == tx and sy == ty then return end
 
+	config.weights = config.weights or {}
+	config.weight_erraticness = config.weight_erraticness or 0
 	config.erraticness = config.erraticness or 9
-	config.tunnel_avoidance = config.tunnel_avoidance or 20
+	config.weight_tunnel = config.weight_tunnel or 20
 	if type(config.forbid_diagonals) == "nil" then config.forbid_diagonals = true end
 
-	local heur = heuristic or heuristicCloserPath
+	local heur = config.heuristic or heuristicCloserPath
 	local w, h = self.data_w, self.data_h
 	local start = self:astarToSingle(sx, sy)
 	local stop = self:astarToSingle(tx, ty)
 	local open = {[start]=true}
 	local closed = {}
 	local g_score = {[start] = 0}
-	local h_score = {[start] = heur(sx, sy, sx, sy, tx, ty)}
-	local f_score = {[start] = heur(sx, sy, sx, sy, tx, ty)}
+	local h_score = {[start] = heur(sx, sy, sx, sy, tx, ty, config)}
+	local f_score = {[start] = heur(sx, sy, sx, sy, tx, ty, config)}
 	local came_from = {}
 
 	if not self:isBound(sx, sy) or not self:isBound(tx, ty) then
@@ -899,22 +1030,21 @@ function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
 	local checkPos = function(node, nx, ny)
 		local npos = self:point(nx, ny)
 		local nnode = self:astarToSingle(nx, ny)
-		if self:isBound(nx, ny) then print("---Check", nx, ny,':', self.data[ny][nx], ":", not closed[nnode], self:isBound(nx, ny), (tunnel_through.ALL or tunnel_through[self.data[ny][nx]]), (not tunnel_avoid[self.data[ny][nx]]), (not config.add_check or config.add_check(nx, ny))) end
 		if not closed[nnode] and self:isBound(nx, ny) and (
 		   (
 		   	npos == from or npos == to -- Always allow on start & stop
 		   )
 		   or
 		   (
-		   	(tunnel_through.ALL or tunnel_through[self.data[ny][nx]]) and -- Allowed to tunnel in
 		   	(not tunnel_avoid[self.data[ny][nx]]) and -- Avoid tunneling in
 		   	(not config.add_check or config.add_check(nx, ny)) -- Extra checks
 		   )
 		) then
 			local nc = self.data[ny][nx]
 			local score = 1
-			score = score + rng.float(0, config.erraticness)
-			if self.tunnels_map[ny][nx] then score = score + config.tunnel_avoidance end
+			if config.weight_erraticness > 0 then score = score + rng.float(0, config.weight_erraticness) end
+			if config.weights[nc] then score = score + config.weights[nc] end
+			if self.tunnels_map[ny][nx] then score = score + config.weight_tunnel end
 			local tent_g_score = g_score[node] + score -- we can adjust here for difficult passable terrain
 			local tent_is_better = false
 			if not open[nnode] then open[nnode] = true; tent_is_better = true
@@ -924,7 +1054,7 @@ function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
 			if tent_is_better then
 				came_from[nnode] = node
 				g_score[nnode] = tent_g_score
-				h_score[nnode] = heur(sx, sy, tx, ty, nx, ny)
+				h_score[nnode] = heur(sx, sy, tx, ty, nx, ny, config)
 				f_score[nnode] = g_score[nnode] + h_score[nnode]
 			end
 		end
@@ -939,14 +1069,14 @@ function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
 			n, _ = next(open, n)
 		end
 
-		if node == stop then return self:astarCreatePath(came_from, stop, id, char) end
+		if node == stop then return self:astarCreatePath(came_from, from, stop, id, char, config, tunnel_through) end
 
 		open[node] = nil
 		closed[node] = true
 		local x, y = self:astarToDouble(node)
 
 		-- Check sides
-		for _, coord in pairs(util.adjacentCoords(x, y, forbid_diagonals)) do
+		for _, coord in pairs(util.adjacentCoords(x, y, config.forbid_diagonals)) do
 			checkPos(node, coord[1], coord[2])
 		end
 	end
