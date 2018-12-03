@@ -89,7 +89,8 @@ _M.clone_nodes = table.merge({running_fov=false, running_prev=false,
 
 --- cloneActor default post copy fields (merged by cloneActor)
 _M.clone_copy = table.merge({no_drops=true, no_rod_recall=true, no_inventory_access=true, no_levelup_access=true,
-	remove_from_party_on_death=true, keep_inventory_on_death=false,
+	remove_from_party_on_death=true, keep_inventory_on_death=false, no_source_remove=true,
+
 	energy={value=0},
 	}, _M.clone_copy or {})
 	
@@ -4553,7 +4554,7 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 	-- If objected buffed us, remove
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__object_source == o then todel[#todel+1] = eff_id end
+		if p.__object_source == o and not self.no_source_remove and not o.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
@@ -5023,7 +5024,7 @@ function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
 	-- Remove buffs ?
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__talent_source == t_id then todel[#todel+1] = eff_id end
+		if p.__talent_source == t_id and not self.no_source_remove and not t.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
