@@ -756,6 +756,9 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	end
 
 	-- On hit talent
+	-- Disable friendly fire for procs since players can't control when they happen or where they hit
+	local old_ff = self.nullify_all_friendlyfire
+	self.nullify_all_friendlyfire = true
 	if hitted and not target.dead and weapon and weapon.talent_on_hit and next(weapon.talent_on_hit) and not self.turn_procs.melee_talent then
 		for tid, data in pairs(weapon.talent_on_hit) do
 			if rng.percent(data.chance) then
@@ -773,6 +776,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			end
 		end
 	end
+	self.nullify_all_friendlyfire = old_ff
 
 	-- Shattering Impact
 	if hitted and self:attr("shattering_impact") and (not self.shattering_impact_last_turn or self.shattering_impact_last_turn < game.turn) then
