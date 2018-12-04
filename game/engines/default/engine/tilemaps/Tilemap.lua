@@ -52,6 +52,12 @@ function _M:makeData(w, h, fill_with)
 	return data
 end
 
+function _M:makeCharsTable(v, default)
+	if not v then v = default end
+	if type(v) == "string" then v = {v} end
+	return table.reverse(v)
+end
+
 local point_meta = {
 	__add = function(a, b)
 		if type(b) == "number" then return _M:point(a.x + b, a.y + b)
@@ -72,12 +78,26 @@ local point_meta = {
 	__eq = function(a, b)
 		return a.x == b.x and a.y == b.y
 	end,
+	__tostring = function(p)
+		return ("Point(%d x %d)"):format(p.x, p.y)
+	end,
+	__index = {
+		hashCoord = function(p, tilemap)
+			return p.y * tilemap.data_w + p.x
+		end,
+	},
 }
 --- Make a point data, can be added
 function _M:point(x, y)
-	local p = {x=math.floor(x), y=math.floor(y)}
-	setmetatable(p, point_meta)
-	return p
+	if type(x) == "table" then		
+		local p = {x=math.floor(x.x), y=math.floor(x.y)}
+		setmetatable(p, point_meta)
+		return p
+	else
+		local p = {x=math.floor(x), y=math.floor(y)}
+		setmetatable(p, point_meta)
+		return p
+	end
 end
 
 
@@ -98,6 +118,24 @@ function _M:sortListCenter(list)
 		newlist[#newlist+1] = first
 		first = table.remove(list, 1)
 		if #list == 0 then newlist[#newlist+1] = first end
+	end
+
+	table.replaceWith(list, newlist)
+	return list
+end
+
+--- Sorts a list of tilemaps by their centerPoint
+function _M:findEachClosestCenter(list)
+	local newlist = {}
+
+	for _, map in ipairs(list) do
+		local closests = {}
+		local fp = map:centerPoint()
+
+		for _, cmap in ipairs(list) do if cmap ~= map then closests[#closests+1] = cmap end end
+		table.sort(closests, function(a, b) a = a:centerPoint() b = b:centerPoint() return core.fov.distance(fp.x, fp.y, a.x, a.y) < core.fov.distance(fp.x, fp.y, b.x, b.y) end)
+
+		newlist[map] = closests
 	end
 
 	return newlist
@@ -130,6 +168,8 @@ end
 --- Draw a single tile
 function _M:put(pos, char)
 	if self:isBound(pos) then
+		if type(char) == "function" then char = char(pos)
+		elseif type(char) == "table" then char = rng.table(char) end
 		self.data[pos.y][pos.x] = char
 	end
 end
@@ -350,7 +390,7 @@ function _M:findGroups(cond)
 	local nbg = 0
 	local function floodFill(x, y)
 		nbg=nbg+1
-		local q = {{x=x,y=y}}
+		local q = {self:point{x=x,y=y}}
 		local closed = {}
 		while #q > 0 do
 			local n = table.remove(q, 1)
@@ -359,15 +399,15 @@ function _M:findGroups(cond)
 				closed[#closed+1] = n
 				list[opens[n.x][n.y]] = nil
 				opens[n.x][n.y] = nil
-				q[#q+1] = {x=n.x-1, y=n.y}
-				q[#q+1] = {x=n.x, y=n.y+1}
-				q[#q+1] = {x=n.x+1, y=n.y}
-				q[#q+1] = {x=n.x, y=n.y-1}
+				q[#q+1] = self:point{x=n.x-1, y=n.y}
+				q[#q+1] = self:point{x=n.x, y=n.y+1}
+				q[#q+1] = self:point{x=n.x+1, y=n.y}
+				q[#q+1] = self:point{x=n.x, y=n.y-1}
 
-				q[#q+1] = {x=n.x+1, y=n.y-1}
-				q[#q+1] = {x=n.x+1, y=n.y+1}
-				q[#q+1] = {x=n.x-1, y=n.y-1}
-				q[#q+1] = {x=n.x-1, y=n.y+1}
+				q[#q+1] = self:point{x=n.x+1, y=n.y-1}
+				q[#q+1] = self:point{x=n.x+1, y=n.y+1}
+				q[#q+1] = self:point{x=n.x-1, y=n.y-1}
+				q[#q+1] = self:point{x=n.x-1, y=n.y+1}
 			end
 		end
 		return closed
@@ -378,7 +418,7 @@ function _M:findGroups(cond)
 	while next(list) do
 		local i, l = next(list)
 		local closed = floodFill(l.x, l.y)
-		groups[#groups+1] = {id=id, list=closed}
+		groups[#groups+1] = {list=closed}
 		print("[Tilemap] Floodfill group", i, #closed)
 	end
 
@@ -403,7 +443,7 @@ function _M:applyOnGroups(groups, fct)
 	if not self.data then return end
 	table.sort(groups, function(a,b) return #a.list > #b.list end)
 	for id, group in ipairs(groups) do
-		fct(self.data_w, self.data_h, self.data, group, id)
+		fct(group, id)
 	end
 end
 
@@ -700,18 +740,38 @@ function _M:findExits(pos, kind, exitable_chars)
 		local c = self.data[j][i]
 		if exitable_chars[c] then
 			local dist = core.fov.distance(pos.x, pos.y, i, j)
-			table.insert(list, {dist = dist, pos = self:point(i, j) + self.merged_pos - 1, kind = "open"})			
+			table.insert(list, {dist = dist, pos = self:point(i, j) + self.merged_pos - 1, kind = "open"})
 		end
 	end
 
+	local possibles = {}
+
+	-- Find all possible exits on each sides, but "dig up" inside if the outer layer is just ' '
+	local p, j
 	for i = 1, self.data_w do
-		checkexits(i, 1, 8)
-		checkexits(i, self.data_h, 2)
+		for j = 1, self.data_h / 2 do
+			p = self:point(i, j); p.dir = 8
+			if self.data[j][i] ~= ' ' then possibles[p:hashCoord(self)] = p break end
+		end
+
+		for j = self.data_h, self.data_h / 2, -1 do
+			p = self:point(i, j); p.dir = 2
+			if self.data[j][i] ~= ' ' then possibles[p:hashCoord(self)] = p break end
+		end
 	end
 	for j = 1, self.data_h do
-		checkexits(1, j, 4)
-		checkexits(self.data_w - 1, j, 6)
+		for i = 1, self.data_w / 2 do
+			p = self:point(i, j); p.dir = 4
+			if self.data[j][i] ~= ' ' then possibles[p:hashCoord(self)] = p break end
+		end
+
+		for i = self.data_w, self.data_w / 2, -1 do
+			p = self:point(i, j); p.dir = 6
+			if self.data[j][i] ~= ' ' then possibles[p:hashCoord(self)] = p break end
+		end
 	end
+
+	for _, p in pairs(possibles) do checkexits(p.x, p.y, p.dir) end
 
 	table.sort(list, "dist")
 	return list
@@ -743,6 +803,34 @@ function _M:findRandomFurthestExit(nb, pos, kind, exitable_chars)
 	if #list == 0 then return nil end
 	local c = list[rng.range(math.max(1, #list-nb+1), #list)]
 	return c.pos, c.kind, c.dist
+end
+
+function _M:findRandomExit(pos, kind, exitable_chars)
+	local list = self:findExits(pos, kind, exitable_chars)
+	if #list == 0 then return nil end
+	local c = rng.table(list)
+	return c.pos, c.kind, c.dist
+end
+
+function _M:smartDoor(pos, chance, door_char, walls)
+	if pos.x <= 1 or pos.y <= 1 or pos.x >= self.data_w or pos.y >= self.data_h then return false end
+
+	walls = self:makeCharsTable(walls, {'#','⍓'})
+	
+	local c8 = self.data[pos.y-1][pos.x]
+	local c2 = self.data[pos.y+1][pos.x]
+	local c4 = self.data[pos.y][pos.x-1]
+	local c6 = self.data[pos.y][pos.x+1]
+
+	if (walls[c8] and walls[c2]) and not walls[c4] and not walls[c6] and rng.percent(chance) then
+		if door_char then self.data[pos.y][pos.x] = door_char end
+		return true
+	elseif (walls[c4] and walls[c6]) and not walls[c2] and not walls[c8] and rng.percent(chance) then
+		if door_char then self.data[pos.y][pos.x] = door_char end
+		return true
+	else
+		return false
+	end
 end
 
 ------------------------------------------------------------------------------
@@ -973,21 +1061,26 @@ end
 --- Create Path
 -- @param came_from
 -- @param cur
-function _M:astarCreatePath(came_from, from, cur, id, char, config, tunnel_through)
+function _M:astarCreatePath(came_from, from, to, cur, id, char, config, tunnel_through)
 	if not came_from[cur] then return end
 	local rpath, path = {}, {}
 	while came_from[cur] do
 		local x, y = self:astarToDouble(cur)
 		rpath[#rpath+1] = self:point(x, y)
-		if not config.virtual and (tunnel_through.ALL or tunnel_through[self.data[y][x]]) then self.data[y][x] = char end
+		if not config.virtual and (tunnel_through.ALL or tunnel_through[self.data[y][x]]) then self:put(self:point(x, y), char) end
 		self.tunnels_map[y][x] = id
 		cur = came_from[cur]
 	end
 
 	-- First one
 	rpath[#rpath+1] = from
-	if not config.virtual then self.data[from.y][from.x] = char end
+	if not config.virtual then self:put(from, char) end
 	self.tunnels_map[from.y][from.x] = id
+
+	-- Last one
+	rpath[#rpath+1] = to
+	if not config.virtual then self:put(to, char) end
+	self.tunnels_map[to.y][to.x] = id
 
 	for i = #rpath, 1, -1 do path[#path+1] = rpath[i] end
 	return path
@@ -995,6 +1088,7 @@ end
 
 --- Compute path from sx/sy to tx/ty
 function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
+	print("ASTAR Tunnel from ", from, "to", to)
 	local sx, sy, tx, ty = from.x, from.y, to.x, to.y
 	config = config or {}
 
@@ -1069,7 +1163,7 @@ function _M:tunnelAStar(from, to, char, tunnel_through, tunnel_avoid, config)
 			n, _ = next(open, n)
 		end
 
-		if node == stop then return self:astarCreatePath(came_from, from, stop, id, char, config, tunnel_through) end
+		if node == stop then return self:astarCreatePath(came_from, from, to, stop, id, char, config, tunnel_through) end
 
 		open[node] = nil
 		closed[node] = true

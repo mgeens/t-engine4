@@ -67,6 +67,7 @@ function _M:loadFile(mapscript, lev, old_lev, args)
 		self = self,
 		zone = self.zone,
 		level = self.level,
+		mapdata = self.data,
 		lev = lev,
 		old_lev = old_lev,
 		loadMapScript = function(name, args) return self:loadFile(name, lev, old_lev, args) end,
@@ -74,14 +75,20 @@ function _M:loadFile(mapscript, lev, old_lev, args)
 	for f in fs.iterate("/engine/tilemaps/", function(f) return f:find("%.lua$") end) do
 		local n = f:sub(1, -5)
 		local nf = "engine.tilemaps."..n
-		package.loaded[nf] = nil
 		nenv[n] = require(nf)
 	end
-	setfenv(f, setmetatable(env or nenv, {__index=_G}))
+	setfenv(f, setmetatable(nenv, {__index=_G}))
 	return f()
 end
 
 function _M:custom(lev, old_lev)
+	for f in fs.iterate("/engine/tilemaps/", function(f) return f:find("%.lua$") end) do
+		local n = f:sub(1, -5)
+		local nf = "engine.tilemaps."..n
+		package.loaded[nf] = nil
+	end
+
+
 	local ret = nil
 	if self.data.mapscript then
 		local mapscript = self.data.mapscript
@@ -105,12 +112,14 @@ function _M:generate(lev, old_lev)
 	self.lev, self.old_lev = lev, old_lev
 	self.force_regen = false
 	local data = self:custom(lev, old_lev)
-	if self.force_regen then return self:generate(lev, old_lev) end
 
 	for id, map in pairs(self.maps_registers) do
 		local pos = self.maps_positions[id]
 		self.map:import(map, pos.x - 1, pos.y - 1)
 	end
+
+	-- We do it AFTER importing submaps to ensure entities on them are correctly released
+	if self.force_regen then self.level.force_recreate = true return false end
 
 	if not self.entrance_pos then self.entrance_pos = data:locateTile('<') end
 	if not self.exit_pos then self.exit_pos = data:locateTile('>') end
@@ -120,7 +129,7 @@ function _M:generate(lev, old_lev)
 	data = data:getResult(true)
 	for i = 0, self.map.w - 1 do
 		for j = 0, self.map.h - 1 do
-			if data[j+1][i+1] ~= "⍓" then
+			if data[j+1][i+1] ~= "⍓" and data[j+1][i+1] ~= "⎕" then
 				self.map(i, j, Map.TERRAIN, self:resolve(data[j+1][i+1] or '#'))
 			end
 		end

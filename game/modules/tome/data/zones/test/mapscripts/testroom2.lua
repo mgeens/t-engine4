@@ -17,15 +17,15 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
--- Merge them all
+-- rng.seed(2)
+
 local tm = Tilemap.new(self.mapsize, '#')
--- tm:carveArea(';', tm:point(1, 1), tm:point(4, 4))
 
 -- self.data.greater_vaults_list = {"32-chambers"}
 local room_factory = Rooms.new(self, "random_room")
 
 local rooms = {}
-for i = 1, 15 do
+for i = 1, 20 do
 	local proom = room_factory:generateRoom()
 	local pos = tm:findRandomArea(nil, tm.data_size, proom.data_w, proom.data_h, '#', 1)
 	if pos then
@@ -35,35 +35,33 @@ for i = 1, 15 do
 end
 
 local up_stairs = true
-for i = 1, 3 do
-	local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(15, 15, {' ', ';', ';', 'T', '=', '=', up_stairs and '<' or ';'})
-	local pos = tm:findRandomArea(nil, tm.data_size, pond.data_w, pond.data_h, '#', 1)
-	if pos then
-		tm:merge(pos, pond)
-		rooms[#rooms+1] = pond
-		up_stairs = false
-	end
-end
-
-rooms = tm:sortListCenter(rooms)
-
-for i, room in ipairs(rooms) do
-	if i > 1 then
-		local proom = rooms[i-1]
-		local pos1, kind1 = proom:findRandomClosestExit(7, room:centerPoint(), nil, {'.', ' ', ';'})
-		local pos2, kind2 = room:findRandomClosestExit(7, proom:centerPoint(), nil, {'.', ' ', ';'})
-		if pos1 and pos2 then
-			tm:tunnelAStar(pos1, pos2, '.', {'#','⍓'}, nil, {erraticness=5})
-			if kind1 == 'open' and rng.percent(40) then tm:put(pos1, '+') end
-			if kind2 == 'open' and rng.percent(40) then tm:put(pos2, '+') end
+for i = 1, 20 do
+	-- Make a little lake
+	local r = rng.range(7, 15)
+	local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(r, r, {' ', ' ', ';', ';', 'T', '=', '=', up_stairs and '<' or '='})
+	-- Ensure exit from the lake to exterrior
+	local pond_exit = pond:findRandomExit(pond:centerPoint(), nil, {';'})
+	pond:tunnelAStar(pond:centerPoint(), pond_exit, ';', {'T'}, {}, {erraticness=9})
+	-- If lake is big enough and we find a spot, place it
+	if pond:eliminateByFloodfill{'T', ' '} > 8 then
+		local pos = tm:findRandomArea(nil, tm.data_size, pond.data_w, pond.data_h, '#', 1)
+		if pos then
+			tm:merge(pos, pond)
+			rooms[#rooms+1] = pond
+			up_stairs = false
 		end
-
 	end
-	-- tm:carveArea(string.char(string.byte('0')+i-1), room.merged_pos, room.merged_pos + room.data_size - 1)
 end
+
+if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, edges_surplus=0}) then return self:regenerate() end
+-- loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms})
+
 
 self:setEntrance(tm:locateTile('<'))
 self:setExit(rooms[#rooms]:centerPoint()) tm:put(rooms[#rooms]:centerPoint(), '>')
+
+-- Elimitate the rest
+-- if tm:eliminateByFloodfill{'#', 'T'} < 600 then return self:regenerate() end
 
 tm:printResult()
 

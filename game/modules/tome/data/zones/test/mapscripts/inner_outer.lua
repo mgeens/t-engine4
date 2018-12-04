@@ -64,7 +64,7 @@ tm:carveLinearPath('.', doorwaytunnel + doorwaypos, 6, '.')
 -- Find rooms
 local rooms = tm:findGroupsOf{'r'}
 local noroomforest = true
-tm:applyOnGroups(rooms, function(w, h, data, room, idx)
+tm:applyOnGroups(rooms, function(room, idx)
 	local p1, p2, rw, rh = tm:groupOuterRectangle(room)
 	print("ROOM", idx, "::", rw, rh, "=>", rw * rh)
 	tm:fillGroup(room, '.')

@@ -51,7 +51,9 @@ function _M:generateRoom(temp_symbol, account_for_border)
 
 	if account_for_border == nil then account_for_border = false end
 
-	local tm = RoomInstance.new({room.w - (account_for_border and 2 or 0), room.h - (account_for_border and 2 or 0)}, temp_symbol or '⍓')
+	temp_symbol = temp_symbol or {wall='⍓', floor='⎕'}
+	
+	local tm = RoomInstance.new({room.w - (account_for_border and 2 or 0), room.h - (account_for_border and 2 or 0)}, temp_symbol and temp_symbol.wall)
 	room.temp_symbol = temp_symbol
 	tm.mapscript = mapscript
 	tm.room_data = room
@@ -67,8 +69,6 @@ function RoomInstance:build()
 	local id = self.room_id
 
 	if account_for_border == nil then account_for_border = false end
-
-	room.temp_symbol = temp_symbol
 
 	local map = mapscript:makeTemporaryMap(room.w, room.h, function(map)
 		mapscript:roomPlace(room, id, 0, 0)
@@ -99,6 +99,13 @@ function RoomInstance:build()
 		checkexits(0, j, 4)
 		checkexits(map.w - 1, j, 6)
 	end
+
+	-- Mark floor & walls
+	for i = 0, map.w - 1 do	for j = 0, map.h - 1 do
+		if not map:checkEntity(i, j, map.TERRAIN, 'block_move') then
+			self.data[j+1][i+1] = room.temp_symbol.floor
+		end
+	end end
 
 	return self
 end
