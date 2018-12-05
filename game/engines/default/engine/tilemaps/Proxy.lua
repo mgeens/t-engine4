@@ -25,39 +25,41 @@ local HMap = require "engine.Heightmap"
 -- @classmod engine.tilemaps.Heightmap
 module(..., package.seeall, class.inherit(Tilemap))
 
-function _M:init(roughness, start)
+function _M:init(source_map, offset, w, h)
 	Tilemap.init(self)
-	self.roughness = roughness or 1.2
-	self.start = start or {}
-	for k, e in pairs(start) do start[k] = e * HMap.max end
+	self.unmergable = true
+	self.source_map = source_map
+	self.merged_pos = offset
+	self:setSize(w, h)
+
+	-- Make data an actual proxy
+	self.data = {}
+
+	local proxy_t = {
+		__newindex = function(ys, x, v)
+			if self.mask and self.mask[ys.__y] and not self.mask[ys.__y][x] then return end -- Woops, not allowed!
+			local pos = self.merged_pos + self:point(x, ys.__y) - 1 + self.source_map.merged_pos - 1
+			self.source_map:put(pos, v)
+		end,
+		__index = function(ys, x)
+			local pos = self.merged_pos + self:point(x, ys.__y) - 1 + self.source_map.merged_pos - 1
+			return self.source_map.data[pos.y][pos.x]
+		end,
+	}
+
+	for j = 1, h do
+		self.data[j] = setmetatable({__y=j}, proxy_t)
+	end
 end
 
-function _M:make(w, h, chars, normalize)
-	if normalize == nil then normalize = true end
-
-	self:setSize(w, h, ' ')
-
-	local hmap = HMap.new(w, h, self.roughness, self.start)
-	hmap:generate()
-
-	local tmp = {}
-	local min, max = 1, 0
-	for j = 1, h do for i = 1, w do
-		local nv = hmap.hmap[i][j] / hmap.max
-
-		tmp[j] = tmp[j] or {}
-		tmp[j][i] = nv
-		if nv < min then min = nv end
-		if nv > max then max = nv end
-	end end
-
-	for j = 1, h do for i = 1, w do
-		local nv = tmp[j][i]
-		if normalize then nv = (nv - min) / (max - min) end
-
-		local c = util.bound(math.floor(nv * (#chars - 1)) + 1, 1, #chars)
-		self.data[j][i] = chars[c]
-	end end
-	
-	return self
+function _M:maskOtherPoints(list, source_coords)
+	if not self.mask then self.mask = self:makeData(self.data_w, self.data_h, false) end
+	for _, p in ipairs(list) do
+		if source_coords then
+			local np = p - self.merged_pos + 1
+			self.mask[np.y][np.x] = true
+		else
+			self.mask[p.y][p.x] = true
+		end
+	end
 end

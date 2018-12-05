@@ -48,8 +48,15 @@ mstrun:fattenRandom(args.edges_surplus or 0)
 -- Draw the paths
 local full = true
 for _, edge in pairs(mstrun.mst) do
-	local pos1, kind1 = edge.from:findRandomClosestExit(7, edge.to:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
-	local pos2, kind2 = edge.to:findRandomClosestExit(7, edge.from:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
+	local pos1, kind1
+	local pos2, kind2
+	if args.from_center then
+		pos1, kind1 = edge.to:centerPoint(), 'open'
+		pos2, kind2 = edge.from:centerPoint(), 'open'
+	else
+		pos1, kind1 = edge.from:findRandomClosestExit(7, edge.to:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
+		pos2, kind2 = edge.to:findRandomClosestExit(7, edge.from:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
+	end
 	if pos1 and pos2 then
 		map:tunnelAStar(pos1, pos2, args.tunnel_char or '.', args.tunnel_through or {'#'}, args.tunnel_avoid or nil, {erraticness=args.erraticness or 5})
 		if kind1 == 'open' then map:smartDoor(pos1, args.door_chance or 40, '+') end

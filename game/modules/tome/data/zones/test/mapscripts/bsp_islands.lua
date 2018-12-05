@@ -23,16 +23,20 @@ local BSP = require "engine.tilemaps.BSP"
 
 local tm = Tilemap.new(self.mapsize, '=', 1)
 
-local bsp = BSP.new(10, 10, 8):make(50, 50, '.', '#')
+local bsp = BSP.new(10, 10, 2):make(50, 50, nil, '=')
 
-local rooms = {}
 for _, room in ipairs(bsp.rooms) do
-	rooms[#rooms+1] = room.map
+	local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(room.map.data_w, room.map.data_h, {' ', ' ', ';', ';', 'T', ';', ';', ';'})
+	-- Ensure exit from the lake to exterrior
+	local pond_exit = pond:findRandomExit(pond:centerPoint(), nil, {';'})
+	pond:tunnelAStar(pond:centerPoint(), pond_exit, ';', {'T'}, {}, {erraticness=9})
+	-- If lake is big enough and we find a spot, place it
+	if pond:eliminateByFloodfill{'T', ' '} < 8 then return self:regenerate() end
+
+	room.map:merge(1, 1, pond)
 end
 
 tm:merge(1, 1, bsp)
-
-if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, tunnel_char='.', tunnel_through={'#'}, edges_surplus=0}) then return self:regenerate() end
 
 -- if tm:eliminateByFloodfill{'T','#'} < 800 then return self:regenerate() end
 

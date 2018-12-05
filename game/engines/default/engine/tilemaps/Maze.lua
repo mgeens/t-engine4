@@ -33,10 +33,7 @@ function _M:makeSimple(w, h, floors, walls, enclosed)
 	if type(floors) == "string" then floors = {floors} end
 	if type(walls) == "string" then walls = {walls} end
 
-	self.data_w = w
-	self.data_h = h
-	self.data_size = self:point(w, h)
-	self.data = self:makeData(w, h, ' ')
+	self:setSize(w, h, ' ')
 
 	local lastx, lasty = 0, 0
 

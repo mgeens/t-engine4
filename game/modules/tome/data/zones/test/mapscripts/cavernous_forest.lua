@@ -17,22 +17,21 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-local BSP = require "engine.tilemaps.BSP"
-
 -- rng.seed(2)
 
-local tm = Tilemap.new(self.mapsize, '=', 1)
+local tm = Tilemap.new(self.mapsize, '#')
 
-local bsp = BSP.new(10, 10, 8):make(50, 50, '.', '#')
+local noise = Noise.new("simplex", 0.2, 4, 12, 1):make(50, 50, {'T', 'T', ';', ';', '=', '='})
 
-local rooms = {}
-for _, room in ipairs(bsp.rooms) do
-	rooms[#rooms+1] = room.map
-end
+-- Eliminate water ponds that are too small
+noise:applyOnGroups(noise:findGroupsOf{'='}, function(room, idx)
+	if #room.list < 18 then noise:fillGroup(room, ';') end
+	-- room.map:carveArea('#', room.map:point(1, 1), room.map.data_size)
+end)
 
-tm:merge(1, 1, bsp)
+-- MAKE MINIMUM SPANNING TREE A GENERIC ALGORITHM IN UTIL
 
-if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, tunnel_char='.', tunnel_through={'#'}, edges_surplus=0}) then return self:regenerate() end
+tm:merge(1, 1, noise)
 
 -- if tm:eliminateByFloodfill{'T','#'} < 800 then return self:regenerate() end
 

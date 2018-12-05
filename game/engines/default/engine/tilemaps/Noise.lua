@@ -42,10 +42,7 @@ end
 function _M:make(w, h, chars, normalize)
 	if normalize == nil then normalize = true end
 
-	self.data_w = w
-	self.data_h = h
-	self.data_size = self:point(w, h)
-	self.data = self:makeData(w, h, ' ')
+	self:setSize(w, h, ' ')
 
 	local tmp = {}
 	local min, max = 1, 0

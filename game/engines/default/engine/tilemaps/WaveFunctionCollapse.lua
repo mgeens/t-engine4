@@ -34,9 +34,8 @@ function _M:init(t)
 
 	Tilemap.init(self)
 
-	self.data_w = math.floor(t.size[1])
-	self.data_h = math.floor(t.size[2])
-	self.data_size = self:point(self.data_w, self.data_h)
+	self:setSize(t.size[1], t.size[2], ' ')
+
 	if t.mode == "overlapping" then
 		if type(t.sample) == "string" then
 			t.sample = self:collapseToLineFormat(self:tmxLoad(t.sample))

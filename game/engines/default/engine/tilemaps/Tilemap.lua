@@ -27,18 +27,22 @@ module(..., package.seeall, class.make)
 
 function _M:init(size, fill_with)
 	if size then
-		self.data_w = math.floor(size[1])
-		self.data_h = math.floor(size[2])
-		self.data_size = self:point(self.data_w, self.data_h)
-		if self.data_w and self.data_h then
-			self.data = self:makeData(self.data_w, self.data_h, fill_with or ' ')
-		end
+		self:setSize(size[1], size[2], fill_with)
 	end
 	self.merged_pos = self:point(1, 1)
 end
 
 function _M:getSize()
 	return self.data_w, self.data_h
+end
+
+function _M:setSize(w, h, fill_with)
+	self.data_w = math.floor(w)
+	self.data_h = math.floor(h)
+	self.data_size = self:point(self.data_w, self.data_h)
+	if self.data_w and self.data_h then
+		self.data = self:makeData(self.data_w, self.data_h, fill_with or ' ')
+	end
 end
 
 function _M:makeData(w, h, fill_with)
@@ -370,9 +374,23 @@ function _M:findRandomArea(from, to, w, h, made_of, margin, tries)
 	return nil
 end
 
+--- Returns the bounding rectangle of a list of points
+function _M:pointsBoundingRectangle(list)
+	local to = self:point(1, 1)
+	local from = self:point(self.data_w, self.data_h)
+	for _, p in ipairs(list) do
+		if p.x < from.x then from.x = p.x end
+		if p.x > to.x then to.x = p.x end
+		if p.y < from.y then from.y = p.y end
+		if p.y > to.y then to.y = p.y end
+	end
+	return from, to
+end
+
 --- Return a list of groups of tiles that matches the given cond function
 function _M:findGroups(cond)
 	if not self.data then return {} end
+	local Proxy = require "engine.tilemaps.Proxy"
 
 	local fills = {}
 	local opens = {}
@@ -418,7 +436,13 @@ function _M:findGroups(cond)
 	while next(list) do
 		local i, l = next(list)
 		local closed = floodFill(l.x, l.y)
-		groups[#groups+1] = {list=closed}
+
+		local from, to = self:pointsBoundingRectangle(closed)
+		to = to - from + 1
+		local map = Proxy.new(self, from, to.x, to.y)
+		map:maskOtherPoints(closed, true)
+
+		groups[#groups+1] = {list=closed, map=map}
 		print("[Tilemap] Floodfill group", i, #closed)
 	end
 
@@ -684,6 +708,8 @@ end
 
 --- Merge an other Tilemap's data
 function _M:merge(x, y, tm, char_order, empty_char)
+	if tm.unmergable then error("Trying to merge an unmergable tilemap, likely to be a Proxy") end
+
 	if type(x) == "table" then -- If passed a point, shift the parameters
 		x, y, tm, char_order, empty_char = x.x, x.y, y, tm, char_order
 	end
