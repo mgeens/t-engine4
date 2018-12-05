@@ -18,22 +18,58 @@
 -- darkgod@te4.org
 
 local BSP = require "engine.tilemaps.BSP"
+local MST = require "engine.algorithms.MST"
 
--- rng.seed(2)
+-- rng.seed(1)
 
 local tm = Tilemap.new(self.mapsize, '=', 1)
 
-local bsp = BSP.new(10, 10, 8):make(50, 50, '.', '#')
+local bsp = BSP.new(4, 4, 10):make(50, 50, '.', '#')
 
-local rooms = {}
-for _, room in ipairs(bsp.rooms) do
-	rooms[#rooms+1] = room.map
+-- Remove a few rooms
+for i = 1, #bsp.rooms / 4 do
+	local room = rng.tableRemove(bsp.rooms)
+	room.map:carveArea('#', room.map:point(1, 1), room.map.data_size)
 end
+
+local mstrun = MST.new()
+
+-- Generate all possible edges
+for i, room1 in ipairs(bsp.rooms) do
+	local c = room1.map:centerPoint()
+	for j, room2 in ipairs(bsp.rooms) do if room1 ~= room2 then
+		local c1, c2 = room1.map:centerPoint(), room2.map:centerPoint()
+		mstrun:edge(room1, room2, core.fov.distance(c1.x, c1.y, c2.x, c2.y))
+	end end
+end
+
+-- Compute!
+mstrun:run()
+
+for _, edge in pairs(mstrun.mst) do
+	if edge.from.from.x - 1 == edge.to.to.x + 1 then
+		local min_y, max_y = math.max(edge.from.from.y, edge.to.from.y), math.min(edge.from.to.y, edge.to.to.y)
+		bsp:put(bsp:point(edge.from.from.x - 1, rng.range(min_y, max_y)), rng.percent(40) and '+' or '.')
+	elseif edge.from.to.x + 1 == edge.to.from.x - 1 then
+		local min_y, max_y = math.max(edge.from.from.y, edge.to.from.y), math.min(edge.from.to.y, edge.to.to.y)
+		bsp:put(bsp:point(edge.from.to.x + 1, rng.range(min_y, max_y)), rng.percent(40) and '+' or '.')
+	elseif edge.from.from.y - 1 == edge.to.to.y + 1 then
+		local min_x, max_x = math.max(edge.from.from.x, edge.to.from.x), math.min(edge.from.to.x, edge.to.to.x)
+		bsp:put(bsp:point(rng.range(min_x, max_x), edge.from.from.y - 1), rng.percent(40) and '+' or '.')
+	elseif edge.from.to.y + 1 == edge.to.from.y - 1 then
+		local min_x, max_x = math.max(edge.from.from.x, edge.to.from.x), math.min(edge.from.to.x, edge.to.to.x)
+		bsp:put(bsp:point(rng.range(min_x, max_x), edge.from.to.y + 1), rng.percent(40) and '+' or '.')
+	end
+end
+
+bsp:applyOnGroups(bsp:findGroupsOf{'.', '+'}, function(room, idx)
+	if room.map.data_size:area() < 10 then
+		room.map:carveArea('#', room.map:point(1, 1), room.map.data_size)
+	end
+end)
+-- if bsp:eliminateByFloodfill{'#'} < 10 then return self:regenerate() end
 
 tm:merge(1, 1, bsp)
 
-if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, tunnel_char='.', tunnel_through={'#'}, edges_surplus=0}) then return self:regenerate() end
-
--- if tm:eliminateByFloodfill{'T','#'} < 800 then return self:regenerate() end
 
 return tm

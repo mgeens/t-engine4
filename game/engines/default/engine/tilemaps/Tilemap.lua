@@ -89,6 +89,9 @@ local point_meta = {
 		hashCoord = function(p, tilemap)
 			return p.y * tilemap.data_w + p.x
 		end,
+		area = function(p)
+			return p.y * p.x
+		end,
 	},
 }
 --- Make a point data, can be added
