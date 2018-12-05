@@ -17,12 +17,22 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-return function(gen, id)
-	local w = rng.table{4,6,8,10}
-	local h = w
-	local function make_pod(self, x, y, is_lit)
-		gen:makePod(x + w / 2, y + h / 2, w, id)
-	end
+-- rng.seed(2)
 
-	return { name="pod"..w.."x"..h, w=w, h=h, generator = make_pod}
-end
+local tm = Tilemap.new(self.mapsize, '#')
+
+local noise = Noise.new("simplex", 0.2, 4, 12, 1):make(50, 50, {'T', 'T', ';', ';', '=', '='})
+
+-- Eliminate water ponds that are too small
+noise:applyOnGroups(noise:findGroupsOf{'='}, function(room, idx)
+	if #room.list < 18 then noise:fillGroup(room, ';') end
+	-- room.map:carveArea('#', room.map:point(1, 1), room.map.data_size)
+end)
+
+-- MAKE MINIMUM SPANNING TREE A GENERIC ALGORITHM IN UTIL
+
+tm:merge(1, 1, noise)
+
+-- if tm:eliminateByFloodfill{'T','#'} < 800 then return self:regenerate() end
+
+return tm

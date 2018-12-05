@@ -1,4 +1,4 @@
--- ToME - Tales of Maj'Eyal
+-- TE4 - T-Engine 4
 -- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,18 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-return function(gen, id)
-	local w = rng.table{4,6,8,10}
-	local h = w
-	local function make_pod(self, x, y, is_lit)
-		gen:makePod(x + w / 2, y + h / 2, w, id)
-	end
+require "engine.class"
+local Tilemap = require "engine.tilemaps.Tilemap"
 
-	return { name="pod"..w.."x"..h, w=w, h=h, generator = make_pod}
+--- Generate map-like data from a tmx file
+-- @classmod engine.tilemaps.Static
+module(..., package.seeall, class.inherit(Tilemap))
+
+function _M:init(file)
+	Tilemap.init(self)
+
+	self.data = self:tmxLoad(file)
+	self.data_h = #self.data
+	self.data_w = self.data[1] and #self.data[1] or 0
+	self.data_size = self:point(self.data_w, self.data_h)
 end
