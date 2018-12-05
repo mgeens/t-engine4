@@ -177,7 +177,7 @@ newEffect{
 newEffect{
 	name = "ARCANE_STORM", image = "talents/disruption_shield.png",
 	desc = "Arcane Storm",
-	long_desc = function(self, eff) return ("The target is the epicenter of a terrible arcane storm, he gets +%d%% arcane resistance."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is the epicenter of a terrible arcane storm, providing +%d%% arcane resistance."):format(eff.power) end,
 	type = "magical",
 	subtype = { arcane=true},
 	status = "beneficial",
