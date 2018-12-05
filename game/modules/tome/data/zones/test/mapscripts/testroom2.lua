@@ -21,64 +21,15 @@
 
 local tm = Tilemap.new(self.mapsize, '#')
 
--- self.data.greater_vaults_list = {"32-chambers"}
-local room_factory = Rooms.new(self, "random_room")
+local noise = Noise.new("simplex", 0.2, 4, 12, 1):make(50, 50, {'T', 'T', ';', ';', '=', '='})
 
-local rooms = {}
-for i = 1, 20 do
-	local proom = room_factory:generateRoom()
-	local pos = tm:findRandomArea(nil, tm.data_size, proom.data_w, proom.data_h, '#', 1)
-	if pos then
-		tm:merge(pos, proom:build())
-		rooms[#rooms+1] = proom
-	end
-end
+-- Eliminate water ponds that are too small
+noise:applyOnGroups(noise:findGroupsOf{'='}, function(room, idx)
+	if #room.list < 18 then noise:fillGroup(room, ';') end
+end)
 
-local up_stairs = true
-for i = 1, 20 do
-	-- Make a little lake
-	local r = rng.range(7, 15)
-	local pond = Heightmap.new(1.6, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(r, r, {' ', ' ', ';', ';', 'T', '=', '=', up_stairs and '<' or '='})
-	-- Ensure exit from the lake to exterrior
-	local pond_exit = pond:findRandomExit(pond:centerPoint(), nil, {';'})
-	pond:tunnelAStar(pond:centerPoint(), pond_exit, ';', {'T'}, {}, {erraticness=9})
-	-- If lake is big enough and we find a spot, place it
-	if pond:eliminateByFloodfill{'T', ' '} > 8 then
-		local pos = tm:findRandomArea(nil, tm.data_size, pond.data_w, pond.data_h, '#', 1)
-		if pos then
-			tm:merge(pos, pond)
-			rooms[#rooms+1] = pond
-			up_stairs = false
-		end
-	end
-end
+tm:merge(1, 1, noise)
 
-if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, edges_surplus=0}) then return self:regenerate() end
--- loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms})
-
-
-self:setEntrance(tm:locateTile('<'))
-self:setExit(rooms[#rooms]:centerPoint()) tm:put(rooms[#rooms]:centerPoint(), '>')
-
--- Elimitate the rest
--- if tm:eliminateByFloodfill{'#', 'T'} < 600 then return self:regenerate() end
-
-tm:printResult()
-
-
--- print('---==============---')
--- local noise = Noise.new(nil, 0.5, 2, 3, 6):make(80, 50, {'T', 'T', '=', '=', '=', ';', ';'})
--- noise:printResult()
--- print('---==============---')
--- print('---==============---')
--- local pond = Heightmap.new(1.9, {up_left=0, down_left=0, up_right=0, down_right=0, middle=1}):make(30, 30, {';', 'T', '=', '=', ';'})
--- pond:printResult()
--- print('---==============---')
--- print('---==============---')
--- local maze = Maze.new():makeSimple(31, 31, '.', {'#','T'}, true)
--- maze:printResult()
--- print('---==============---')
-
--- DGDGDGDG: make at least Tilemap handlers for BSP, roomer (single room), roomers and correctly handle up/down stairs
+-- if tm:eliminateByFloodfill{'T','#'} < 800 then return self:regenerate() end
 
 return tm

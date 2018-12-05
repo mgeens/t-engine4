@@ -18,10 +18,9 @@
 -- darkgod@te4.org
 
 
--- This file implements Kruskals algorithm to find a minimum spanning tree in a graph of rooms
+-- This file uses Kruskals algorithm to find a MST(minimum spanning tree) in a graph of rooms
 
-
-local unionfind = require "algorithms.unionfind"
+local MST = require "engine.algorithms.MST"
 
 local max_links = args.max_links or 3
 local map = args.map
@@ -29,63 +28,26 @@ local rooms = args.rooms
 
 if #rooms <= 1 then return true end -- Easy !
 
------------------------------------------------------------
--- Small Edge class
------------------------------------------------------------
-local Edge_t
-Edge_t = { __index = {
-	hash = function(e)
-		local s1, s2 = tostring(e.from), tostring(e.to)
-		if s2 < s1 then s2, s1 = s1, s2 end
-		return s1..":"..s2
-	end,
-} }
-local function Edge(r1, r2)
-	local c1, c2 = r1:centerPoint(), r2:centerPoint()
-	return setmetatable({from=r1, to=r2, cost=core.fov.distance(c1.x, c1.y, c2.x, c2.y)}, Edge_t)
-end
------------------------------------------------------------
-
+local mstrun = MST.new()
 
 -- Generate all possible edges
-local edges = {}
 for i, room in ipairs(rooms) do
 	local c = room:centerPoint()
 	for j, proom in ipairs(rooms) do if proom ~= room then
-		local e = Edge(room, proom)
-		edges[e:hash()] = e
+		local c1, c2 = room:centerPoint(), proom:centerPoint()
+		mstrun:edge(room, proom, core.fov.distance(c1.x, c1.y, c2.x, c2.y))
 	end end
 end
-local sorted_edges = table.values(edges)
-table.sort(sorted_edges, "cost")
--- print("===TOTAL EDGES / rooms", #edges, #rooms)
--- table.print(edges)
 
--- Find the MST graph
-local uf = unionfind.create()
-local mst = {}
-for _, edge in ipairs(sorted_edges) do
-	-- Skip this edge to avoid creating a cycle in MST
-	if not uf:connected(edge.from, edge.to) then
-		-- Include this edge
-		uf:union(edge.from, edge.to)
-		mst[edge:hash()] = edge
-	end
-end
--- table.print(mst)
+-- Compute!
+mstrun:run()
 
 -- Add some more randomly selected edges
-local nb_adds = args.edges_surplus or 0
-while nb_adds > 0 and next(edges) do
-	local _, edge = next(edges)
-	edges[edge:hash()] = nil
-	mst[edge:hash()] = edge
-	nb_adds = nb_adds - 1
-end
+mstrun:fattenRandom(args.edges_surplus or 0)
 
 -- Draw the paths
 local full = true
-for _, edge in pairs(mst) do
+for _, edge in pairs(mstrun.mst) do
 	local pos1, kind1 = edge.from:findRandomClosestExit(7, edge.to:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
 	local pos2, kind2 = edge.to:findRandomClosestExit(7, edge.from:centerPoint(), nil, args.exitable_chars or {'.', ';', '='})
 	if pos1 and pos2 then
