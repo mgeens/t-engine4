@@ -1495,51 +1495,6 @@ newEffect{
 }
 
 newEffect{
-	name = "HEIGHTEN_FEAR", image = "talents/heighten_fear.png",
-	desc = "Heighten Fear",
-	long_desc = function(self, eff) return ("The target is in a state of growing fear. If they spend %d more turns within range %d and in sight of the source of this fear (%s), they will be subjected to a new fear."):
-	format(eff.turns_left, eff.range, eff.src.name) end,
-	type = "other",
-	subtype = { fear=true },
-	status = "detrimental",
-	decrease = 0,
-	no_remove = true,
-	cancel_on_level_change = true,
-	parameters = { },
-	on_merge = function(self, old_eff, new_eff)
-		old_eff.src = new_eff.src
-		old_eff.range = new_eff.range
-
-		return old_eff
-	end,
-	on_timeout = function(self, eff)
-		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
-		if tInstillFear.hasEffect(eff.src, tInstillFear, self) then
-			if core.fov.distance(self.x, self.y, eff.src.x, eff.src.y) <= eff.range and self:hasLOS(eff.src.x, eff.src.y) then
-				eff.turns_left = eff.turns_left - 1
-			end
-			if eff.turns_left <= 0 then
-				eff.turns_left = eff.turns
-				if rng.percent(eff.chance or 100) then
-					eff.chance = (eff.chance or 100) - 10
-					game.logSeen(self, "%s succumbs to heightening fears!", self.name:capitalize())
-					tInstillFear.applyEffect(eff.src, tInstillFear, self)
-				else
-					game.logSeen(self, "%s feels a little less afraid!", self.name:capitalize())
-				end
-			end
-		else
-			-- no more fears
-			self:removeEffect(self.EFF_HEIGHTEN_FEAR, false, true)
-		end
-	end,
-	activate = function(self, eff)
-	end,
-	deactivate = function(self, eff)
-	end,
-}
-
-newEffect{
 	name = "CURSED_FORM", image = "talents/seethe.png",
 	desc = "Cursed Form",
 	type = "other",
