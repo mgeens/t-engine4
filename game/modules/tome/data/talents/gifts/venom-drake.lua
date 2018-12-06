@@ -146,21 +146,41 @@ newTalent{
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	on_learn = function(self, t) self.resists[DamageType.ACID] = (self.resists[DamageType.ACID] or 0) + 1 end,
 	on_unlearn = function(self, t) self.resists[DamageType.ACID] = (self.resists[DamageType.ACID] or 0) - 1 end,
+	getDamage = function(self, t) return self:combatTalentWeaponDamage(t, 0.1, 0.60) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
+		
+		-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
+		local shield, shield_combat = self:hasShield()
+		local weapon = self:hasMHWeapon()
+		if not shield then
+			self:attackTarget(target, (self:getTalentLevel(t) >= 2) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)
+			self:attackTarget(target, (self:getTalentLevel(t) >= 4) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)
+			self:attackTarget(target, (self:getTalentLevel(t) >= 6) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)
+			self:attackTarget(target, (self:getTalentLevel(t) >= 8) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)		
+		else
+			self:attackTargetWith(target, weapon, (self:getTalentLevel(t) >= 2) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+			self:attackTargetWith(target, shield_combat, (self:getTalentLevel(t) >= 2) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
 
-		self:attackTarget(target, (self:getTalentLevel(t) >= 2) and DamageType.ACID_BLIND or DamageType.ACID, self:combatTalentWeaponDamage(t, 0.1, 0.60), true)
-		self:attackTarget(target, (self:getTalentLevel(t) >= 4) and DamageType.ACID_BLIND or DamageType.ACID, self:combatTalentWeaponDamage(t, 0.1, 0.60), true)
-		self:attackTarget(target, (self:getTalentLevel(t) >= 6) and DamageType.ACID_BLIND or DamageType.ACID, self:combatTalentWeaponDamage(t, 0.1, 0.60), true)
-		self:attackTarget(target, (self:getTalentLevel(t) >= 8) and DamageType.ACID_BLIND or DamageType.ACID, self:combatTalentWeaponDamage(t, 0.1, 0.60), true)
+			self:attackTargetWith(target, weapon, (self:getTalentLevel(t) >= 4) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+			self:attackTargetWith(target, shield_combat, (self:getTalentLevel(t) >= 4) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+
+			self:attackTargetWith(target, weapon, (self:getTalentLevel(t) >= 6) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+			self:attackTargetWith(target, shield_combat, (self:getTalentLevel(t) >= 6) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+
+			self:attackTargetWith(target, weapon, (self:getTalentLevel(t) >= 8) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+			self:attackTargetWith(target, shield_combat, (self:getTalentLevel(t) >= 8) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t))
+		end
 		return true
 	end,
 	info = function(self, t)
 		return ([[You strike the enemy with a rain of fast, acidic blows. You strike four times for pure acid damage. Every blow does %d%% damage.
 		Every two talent levels, one of your strikes becomes blinding acid instead of normal acid, blinding the target 25%% of the time if it hits.
-		Each point in acid drake talents also increases your acid resistance by 1%%.]]):format(100 * self:combatTalentWeaponDamage(t, 0.1, 0.6))
+		Each point in acid drake talents also increases your acid resistance by 1%%.
+
+		This talent will attack with your shield as well if you have one equipped.]]):format(100 * self:combatTalentWeaponDamage(t, 0.1, 0.6))
 	end,
 }
 
@@ -183,14 +203,24 @@ newTalent{
 	target = function(self, t)
 		return {type="cone", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
-	getDisarm = function(self, t)
-		return 20+self:combatTalentMindDamage(t, 10, 30)
+	getDamage = function(self, t) 
+		local bonus = self:knowTalent(self.T_CHROMATIC_FURY) and self:combatTalentStatDamage(t, "wil", 30, 520) or 0
+		return self:combatTalentStatDamage(t, "str", 30, 520) + bonus
 	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:project(tg, x, y, DamageType.ACID_DISARM, {dam=self:mindCrit(self:combatTalentStatDamage(t, "str", 30, 520)), chance=t.getDisarm(self, t),})
+		local damage = self:mindCrit(t.getDamage(self, t))
+		self:project(tg, x, y, function(tx, ty)
+			local target = game.level.map(tx, ty, Map.ACTOR)
+			if not target or target == self then return end
+			
+			DamageType:get(DamageType.ACID).projector(self, tx, ty, DamageType.ACID, damage)
+			if target:canBe("disarm") then
+				target:setEffect(target.EFF_DISARMED, 3, {apply_power = self:combatMindpower()})
+			end
+		end)
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_acid", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		game:playSoundNear(self, "talents/breath")
 
@@ -201,10 +231,9 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		local disarm = t.getDisarm(self, t)
 		return ([[You breathe acid in a frontal cone of radius %d. Any target caught in the area will take %0.2f acid damage.
-		Enemies caught in the acid have a %d%% chance of their weapons becoming useless for three turns.
-		The damage will increase with your Strength, and the critical chance is based on your Mental crit rate. The Disarm chance is based on your Mindpower.
-		Each point in acid drake talents also increases your acid resistance by 1%%.]]):format(self:getTalentRadius(t), damDesc(self, DamageType.ACID, self:combatTalentStatDamage(t, "str", 30, 520)), disarm)
+		Enemies caught in the acid are disarmed for 3 turns.
+		The damage will increase with your Strength, the critical chance is based on your Mental crit rate, and the Disarm apply power is based on your Mindpower.
+		Each point in acid drake talents also increases your acid resistance by 1%%.]]):format(self:getTalentRadius(t), damDesc(self, DamageType.ACID, t.getDamage(self, t)))
 	end,
 }

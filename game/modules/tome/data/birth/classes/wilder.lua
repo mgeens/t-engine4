@@ -155,8 +155,7 @@ newBirthDescriptor{
 		max_life = 110,
 		resolvers.equipbirth{ id=true,
 			{type="weapon", subtype="battleaxe", name="iron battleaxe", autoreq=true, ego_chance=-1000},
-			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000}
-		},
+			{type="armor", subtype="heavy", name="iron mail armour", autoreq=true, ego_chance=-1000, ego_chance=-1000}		},
 	},
 	copy_add = {
 		life_rating = 2,
