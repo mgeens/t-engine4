@@ -276,8 +276,8 @@ public:
 	/**
 	 * Run the WFC algorithm, and return the result if the algorithm succeeded.
 	 */
-	cl::optional<Array2D<T>> run() noexcept {
-		cl::optional<Array2D<unsigned>> result = wfc.run();
+	nonstd::optional<Array2D<T>> run() noexcept {
+		nonstd::optional<Array2D<unsigned>> result = wfc.run();
 		if(result.has_value()) {
 			return to_image(*result);
 		}
