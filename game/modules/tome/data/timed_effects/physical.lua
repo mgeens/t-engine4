@@ -183,16 +183,12 @@ newEffect{
 	desc = "Regeneration",
 	long_desc = function(self, eff) return ("A flow of life spins around the target, regenerating %0.2f life per turn."):format(eff.power) end,
 	type = "physical",
-	subtype = { nature=true, healing=true },
+	subtype = { nature=true, healing=true, regeneration=true },
 	status = "beneficial",
 	parameters = { power=10 },
 	on_gain = function(self, err) return "#Target# starts regenerating health quickly.", "+Regen" end,
 	on_lose = function(self, err) return "#Target# stops regenerating health quickly.", "-Regen" end,
 	activate = function(self, eff)
-		if not eff.no_wild_growth then
-			if self:attr("liferegen_factor") then eff.power = eff.power * (100 + self:attr("liferegen_factor")) / 100 end
-			if self:attr("liferegen_dur") then eff.dur = eff.dur + self:attr("liferegen_dur") end
-		end
 		eff.tmpid = self:addTemporaryValue("life_regen", eff.power)
 
 		if core.shader.active(4) then
@@ -200,10 +196,6 @@ newEffect{
 			eff.particle2 = self:addParticles(Particles.new("shader_shield", 1, {toback=false, size_factor=1.5, y=-0.3, img="healarcane"}, {type="healing", time_factor=4000, noup=1.0, circleColor={0,0,0,0}, beamsCount=9}))
 		end
 
-		if self:knowTalent(self.T_ANCESTRAL_LIFE) and not self:attr("disable_ancestral_life") then
-			local t = self:getTalentFromId(self.T_ANCESTRAL_LIFE)
-			self.energy.value = self.energy.value + (t.getTurn(self, t) * game.energy_to_act / 100)
-		end
 	end,
 	on_timeout = function(self, eff)
 		if self:knowTalent(self.T_ANCESTRAL_LIFE) then
@@ -1118,18 +1110,39 @@ newEffect{
 newEffect{
 	name = "RESOLVE", image = "talents/resolve.png",
 	desc = "Resolve",
-	long_desc = function(self, eff) return ("You gain %d%% resistance against %s."):format(eff.res, DamageType:get(eff.damtype).name) end,
+	long_desc = function(self, eff)
+		local list = table.keys(eff.types)
+		for i = 1, #list do if DamageType.dam_def[list[i]] then
+			list[i] = DamageType.dam_def[list[i]].name
+		end end
+		local type_str
+		if #list >= 1 then type_str = table.concatNice(list, ", ", " and ") else type_str = "" end
+		return ("You gain %d%% resistance against %s."):format(eff.res, type_str) 
+	end,
+	charges = function(self, eff) return table.count(eff.types) end,
 	type = "physical",
 	subtype = { antimagic=true, nature=true },
 	status = "beneficial",
-	parameters = { res=10, damtype=DamageType.ARCANE },
+	parameters = { res=10, damtype=DamageType.ARCANE,  max_types = 1},
 	on_gain = function(self, err) return "#Target# attunes to the damage.", "+Resolve" end,
 	on_lose = function(self, err) return "#Target# is no longer attuned.", "-Resolve" end,
 	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("resists", {[eff.damtype]=eff.res})
+		eff.types = {}
+		self:effectTemporaryValue(eff, "resists", {[eff.damtype] = eff.res})
+		eff.types[eff.damtype] = true
+	end,
+	on_merge = function(self, old_eff, new_eff)
+		if old_eff.types[new_eff.damtype] then return old_eff end
+		if table.count(old_eff.types) >= new_eff.max_types then
+			return old_eff
+		end
+
+		self:effectTemporaryValue(old_eff, "resists", {[new_eff.damtype] = new_eff.res})
+		old_eff.types[new_eff.damtype] = true
+		old_eff.dur = new_eff.dur
+		return old_eff
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("resists", eff.tmpid)
 	end,
 }
 
@@ -1591,7 +1604,7 @@ newEffect{
 	desc = "Recovery",
 	long_desc = function(self, eff) return ("The target has %d increased life regeneration."):format(eff.regen) end,
 	type = "physical",
-	subtype = { heal=true },
+	subtype = { heal=true, regeneration=true },
 	status = "beneficial",
 	parameters = { regen=10 },
 	on_gain = function(self, err) return "#Target# is recovering from the damage!", "+Recovery" end,
@@ -3348,7 +3361,7 @@ newEffect{
 	desc = "Soothing Darkness",
 	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f, stamina regeneration by %0.1f, and all damage resistance by %d%%."):format(eff.life, eff.stamina, eff.shadowguard) end,
 	type = "physical",
-	subtype = { darkness=true, healing=true },
+	subtype = { darkness=true, healing=true, regeneration=true },
 	status = "beneficial",
 	parameters = { life=1, stamina=0.5, dr=0, shadowguard=0 },
 	activate = function(self, eff)
