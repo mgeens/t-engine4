@@ -28,7 +28,7 @@ newTalent{
 	mode = "passive",
 	points = 5,
 	getRegen = function(self, t) return 0.5 end,
-	getResist = function(self, t) return 5 + combatTalentPhysicalMindDamage(self, t, 10, 35) end,  -- This can crit
+	getResist = function(self, t) return 5 + combatTalentPhysicalMindDamage(self, t, 15, 35) end,  -- This can crit
 	on_absorb = function(self, t, damtype)
 		if not DamageType:get(damtype).antimagic_resolve then return end
 		local max = self:getTalentLevel(t) >= 3 and 3 or 1
@@ -123,7 +123,7 @@ newTalent{
 	cooldown = 6,
 	tactical = { DEFEND = 2 },
 	getMax = function(self, t)
-		local v = combatTalentPhysicalMindDamage(self, t, 10, 75)
+		local v = combatTalentPhysicalMindDamage(self, t, 20, 85)
 		if self:knowTalent(self.T_TRICKY_DEFENSES) then
 			v = v * (1 + self:callTalent(self.T_TRICKY_DEFENSES, "shieldmult"))
 		end
