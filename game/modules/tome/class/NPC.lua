@@ -249,7 +249,7 @@ function _M:seen_by(who)
 	if not who.x or not self:hasLOS(who.x, who.y) then return end
 	-- Check if it's actually a being of cold machinery and not of blood and flesh
 	if not who.aiSeeTargetPos then return end
-	if self.ai_target.actor and not who_target:isTalentActive(who_target.T_STEALTH) then
+	if self.ai_target.actor and not who_target:attr("stealthed_prevents_targetting") then
 		-- Pass last seen coordinates
 		if self.ai_target.actor == who_target then
 			-- Adding some type-safety checks, but this isn't fixing the source of the errors

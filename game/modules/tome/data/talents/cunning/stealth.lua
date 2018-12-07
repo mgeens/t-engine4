@@ -90,6 +90,7 @@ newTalent{
 			stealth = self:addTemporaryValue("stealth", t.getStealthPower(self, t)),
 			lite = self:addTemporaryValue("lite", -1000),
 			infra = self:addTemporaryValue("infravision", 3),  -- Losing wall visibility is already annoying, may as well let stealth have a vision advantage
+			stealthed_prevents_targetting = self:addTemporaryValue("stealthed_prevents_targetting", 1),
 		}
 		self:resetCanSeeCacheOf()
 		if self.updateMainShader then self:updateMainShader() end
@@ -99,6 +100,7 @@ newTalent{
 		self:removeTemporaryValue("stealth", p.stealth)
 		self:removeTemporaryValue("infravision", p.infra)
 		self:removeTemporaryValue("lite", p.lite)
+		self:removeTemporaryValue("stealthed_prevents_targetting", p.stealthed_prevents_targetting)
 		if self:knowTalent(self.T_TERRORIZE) then
 			local t = self:getTalentFromId(self.T_TERRORIZE)
 			t.terrorize(self,t)
