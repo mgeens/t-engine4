@@ -730,7 +730,7 @@ function _M:act()
 
 	if self:attr("never_act") then return false end
 
-	if not game.zone.wilderness and not self:attr("confused") and not self:attr("terrified") then self:automaticTalents() end
+	if not game.zone.wilderness and not self:attr("confused") --[[and not self:attr("terrified")]] then self:automaticTalents() end --terrified check for prosperity
 
 	-- Compute bonuses based on actors in FOV
 	if self:knowTalent(self.T_MILITANT_MIND) then
@@ -5559,7 +5559,8 @@ function _M:preUseTalent(ab, silent, fake)
 			end
 		end
 
-		-- terrified effect
+		-- old terrified effect, for prosperity
+		--[[
 		if self:attr("terrified") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
 			local eff = self:hasEffect(self.EFF_TERRIFIED)
 			if rng.percent(self:attr("terrified")) then
@@ -5568,6 +5569,7 @@ function _M:preUseTalent(ab, silent, fake)
 				return false
 			end
 		end
+		]]
 		
 		-- Fumble
 		if self:attr("scoundrel_failure") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
@@ -6437,6 +6439,12 @@ function _M:getTalentCooldown(t, base)
 		cd = 1 + cd * eff.power
 	end
 
+	--terrified cooldown increase effect
+	local eff = self:hasEffect(self.EFF_TERRIFIED)
+	if eff and not self:attr("talent_reuse") and not (t.fixed_cooldown or base) then
+		cd = math.ceil(cd * (1 + eff.cooldownPower))
+	end
+
 	local p = self:isTalentActive(self.T_MATRIX)
 	if p and p.talent == t.id then
 		cd = math.floor(cd * (1 - self:callTalent(self.T_MATRIX, "getPower")))
@@ -7114,10 +7122,6 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 	if self:knowTalent(self.T_VITALITY) and e.status == "detrimental" and (e.subtype.wound or e.subtype.poison or e.subtype.disease) then
 		local t = self:getTalentFromId(self.T_VITALITY)
 		p.dur = math.ceil(p.dur * (1 - util.bound(t.getWoundReduction(self, t), 0, 1)))
-	end
-	if self:hasEffect(self.EFF_HAUNTED) and e.subtype and e.subtype.fear then
-		local e = self.tempeffect_def[self.EFF_HAUNTED]
-		e.on_setFearEffect(self, e)
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("negative_status_effect_immune") then
 		p.dur = 0
