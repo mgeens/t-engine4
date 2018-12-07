@@ -180,20 +180,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		-- Block talent from shields
-		if dam > 0 and target:attr("block") then
-			local e = target.tempeffect_def[target.EFF_BLOCKING]
-			lastdam = dam
-			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
-			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
-			lastdam = dam
-			dam = t.doForgeShield(type, dam, t, target, src)
-			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
-		end
-
 		-- Increases damage
 		local mind_linked = false
 		local inc = 0
@@ -338,9 +324,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 			local dominated = target:hasEffect(target.EFF_DOMINATED)
 			if dominated and dominated.src == src then pen = pen + (dominated.resistPenetration or 0) end
-			-- Expose Weakness
-			local exposed = (state.is_melee or state.is_archery) and src.__is_actor and src:hasEffect(src.EFF_EXPOSE_WEAKNESS)
-			if exposed and exposed.target == target then pen = pen + exposed.bonus_pen print("[PROJECTOR] expose weakness pen", exposed.bonus_pen) end
 			if target:attr("sleep") and src.attr and src:attr("night_terror") then pen = pen + src:attr("night_terror") end
 			local res = target:combatGetResist(type)
 			pen = util.bound(pen, 0, 100)
@@ -383,6 +366,20 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		end
 		if dam ~= lastdam then
 			game:delayedLogDamage(src, target, 0, ("%s(%d to psi shield)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false)
+		end
+
+		-- Block talent from shields
+		if dam > 0 and target:attr("block") then
+			local e = target.tempeffect_def[target.EFF_BLOCKING]
+			lastdam = dam
+			dam = e.do_block(type, dam, target.tmp[target.EFF_BLOCKING], target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
+		end
+		if dam > 0 and target.isTalentActive and target:isTalentActive(target.T_FORGE_SHIELD) then
+			local t = target:getTalentFromId(target.T_FORGE_SHIELD)
+			lastdam = dam
+			dam = t.doForgeShield(type, dam, t, target, src)
+			if lastdam - dam > 0 then game:delayedLogDamage(src, target, 0, ("%s(%d blocked)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", lastdam-dam), false) end
 		end
 
 		--Vim based defence
@@ -542,10 +539,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
-		if not target.dead and dam > 0 and src.knowTalent and src:knowTalent(src.T_ENDLESS_WOES) then
-			src:triggerTalent(src.T_ENDLESS_WOES, nil, target, type, dam)
-		end
-
 		-- damage affinity healing
 		if not target.dead and affinity_heal > 0 then
 			target:heal(affinity_heal, src)
@@ -578,7 +571,8 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 
 			if src.__projecting_for then
 				-- Disable friendly fire for procs since players can't control when they happen or where they hit
-				src.nullify_all_friendlyfire = 1
+				local old_ff = src.nullify_all_friendlyfire
+				src.nullify_all_friendlyfire = true
 				if src.talent_on_spell and next(src.talent_on_spell) and t.is_spell and not src.turn_procs.spell_talent then
 					for id, d in pairs(src.talent_on_spell) do
 						if rng.percent(d.chance) and t.id ~= d.talent then
@@ -611,7 +605,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 						end
 					end
 				end
-				src.nullify_all_friendlyfire = nil
+				src.nullify_all_friendlyfire = old_ff
 
 				if not target.dead and (t.is_spell or t.is_mind) and not src.turn_procs.meteoric_crash and src.knowTalent and src:knowTalent(src.T_METEORIC_CRASH) then
 					src.turn_procs.meteoric_crash = true
@@ -635,15 +629,6 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 					src.turn_procs.unstoppable_nature = true
 				end
 			end
-		end
-
-		-- Use state, because we don't care if it was shrugged off.
-		if state.crit_power > 1 and not state.crit_elemental_surge then
-			if src.knowTalent and src:knowTalent(src.T_ELEMENTAL_SURGE) then
-				src:triggerTalent(src.T_ELEMENTAL_SURGE, nil, target, type, dam)
-			end
-
-			state.crit_elemental_surge = true
 		end
 
 		if src.turn_procs and not src.turn_procs.dazing_damage and src.hasEffect and src:hasEffect(src.EFF_DAZING_DAMAGE) then

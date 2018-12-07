@@ -48,10 +48,10 @@ newTalent{
 		local damage = self:mindCrit(t.getDamage(self, t))
 		local spreadFactor = t.getSpreadFactor(self, t)
 
-		for i, t in ipairs(table.shuffle(targets)) do
-			self:project({type="hit", talent=t, x=t.x,y=t.y}, t.x, t.y, DamageType.MIND, { dam=damage, crossTierChance=25 })
+		for i, t2 in ipairs(table.shuffle(targets)) do
+			self:project({type="hit", talent=t, x=t2.x,y=t2.y}, t2.x, t2.y, DamageType.MIND, { dam=damage, crossTierChance=25 })
 			damage = damage * spreadFactor
-			game.level.map:particleEmitter(t.x, t.y, 1, "reproach", { dx = self.x - t.x, dy = self.y - t.y })
+			game.level.map:particleEmitter(t2.x, t2.y, 1, "reproach", { dx = self.x - t2.x, dy = self.y - t2.y })
 		end
 
 		game:playSoundNear(self, "talents/fire")

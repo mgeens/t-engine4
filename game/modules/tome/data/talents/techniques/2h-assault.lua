@@ -143,7 +143,7 @@ newTalent{
 				self:attackTargetWith(target, weapon.combat, nil, self:combatTalentWeaponDamage(t, 1.4, 2.1))
 				local life_diff = oldlife - target.life
 				if life_diff > 0 and target:canBe('cut') and scale then
-					target:setEffect(target.EFF_CUT, 5, {power=life_diff * scale / 5, src=self, apply_power=self:combatPhysicalpower()})
+					target:setEffect(target.EFF_CUT, 5, {power=life_diff * scale / 5, src=self})
 				end
 			end
 		end)

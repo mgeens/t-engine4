@@ -1176,5 +1176,7 @@ function _M:runPostGeneration(level)
 		end
 	end
 
-	level.map.room_map = nil -- delete the room map
+	if not config.settings.cheat then
+		level.map.room_map = nil -- delete the room map, but keep it for debugging
+	end
 end

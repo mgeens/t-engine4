@@ -349,8 +349,6 @@ on_grant = function(self, who)
 		end
 	end
 
-	for i, pp in ipairs(possible_types) do if pp.name == "lost sun paladin" then self.kind = pp end end
-
 	escorts_seen[self.kind.name] = (escorts_seen[self.kind.name] or 0) + 1
 
 	if self.kind.random == "player" then
@@ -420,6 +418,7 @@ on_grant = function(self, who)
 
 	g:resolve() g:resolve(nil, true)
 	game.zone:addEntity(game.level, g, "terrain", gx, gy)
+	game.state:locationRevealAround(gx, gy)
 	npc.escort_target = {x=gx, y=gy}
 	npc.x, npc.y = nil, nil
 	game.zone:addEntity(game.level, npc, "actor", x, y)

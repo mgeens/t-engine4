@@ -89,7 +89,8 @@ _M.clone_nodes = table.merge({running_fov=false, running_prev=false,
 
 --- cloneActor default post copy fields (merged by cloneActor)
 _M.clone_copy = table.merge({no_drops=true, no_rod_recall=true, no_inventory_access=true, no_levelup_access=true,
-	remove_from_party_on_death=true, keep_inventory_on_death=false,
+	remove_from_party_on_death=true, keep_inventory_on_death=false, no_source_remove=true,
+
 	energy={value=0},
 	}, _M.clone_copy or {})
 	
@@ -467,9 +468,6 @@ function _M:useEnergy(val)
 	-- Curse of Shrouds: turn shroud of passing on or off
 	local eff = self:hasEffect(self.EFF_CURSE_OF_SHROUDS)
 	if eff then self.tempeffect_def[self.EFF_CURSE_OF_SHROUDS].doShroudOfPassing(self, eff) end
-
-	-- Do not fire those talents if this is not turn's end
-	if self:enoughEnergy() or game.zone.wilderness then return end
 end
 
 -- Called at the start of a turn before the actor chooses their action, energy is handled, etc
@@ -611,12 +609,45 @@ function _M:actBase()
 	self:checkStillInCombat()
 end
 
+function _M:hasProc(proc)
+	if not self.turn_procs then return end
+	if self.turn_procs[proc] then 
+		return self.turn_procs[proc] 
+	elseif self.turn_procs.multi then 
+		return self.turn_procs.multi[proc] 
+	end
+end
+
+function _M:setProc(name, val, turns)
+	turns = turns or 1
+	val = val or true
+	local proc = {val = val, turns = turns}
+	if turns > 1 then
+		table.set(self, "turn_procs", "multi", name, proc)
+	else 
+		self.turn_procs[name] = proc
+	end
+end
+
 -- General entry point for Actors to act, called by NPC:act or Player:act
 function _M:act()
 	if not engine.Actor.act(self) then return end
 
 	self.changed = true
+
+	-- Store procs with more than 1 turn remaining and re-add them after we clear turn_procs
+	local temp = {}
+	if self.turn_procs.multi then
+		for proc, val in pairs(self.turn_procs.multi) do
+			if proc then
+				self.turn_procs.multi[proc].turns = self.turn_procs.multi[proc].turns - 1
+				if self.turn_procs.multi[proc].turns > 0 then temp[proc] = val end
+			end
+		end
+	end
+
 	self.turn_procs = {}
+	if temp then self.turn_procs.multi = temp end
 
 	-- Break some sustains if certain resources are too low
 	-- Note: force_talent_ignore_ressources has no effect here
@@ -1869,7 +1900,7 @@ function _M:tooltip(x, y, seen_by)
 	if self.hide_level_tooltip then ts:add({"color", 0, 255, 255}, "Level: unknown", {"color", "WHITE"}, true)
 	else ts:add({"color", 0, 255, 255}, ("Level: %d"):format(self.level), {"color", "WHITE"}, true) end
 	if self:attr("invulnerable") then ts:add({"color", "PURPLE"}, "INVULNERABLE!", true) end
-	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%)"):format(self.life, self.life * 100 / self.max_life), {"color", "WHITE"})
+	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%) #GREEN#+%0.2f#LAST#"):format(self.life, self.life * 100 / self.max_life, self.life_regen * util.bound(self.healing_factor or 1)), {"color", "WHITE"})
 
 	if self:knowTalent(self.T_SOLIPSISM) then
 		local psi_percent = 100*self.psi/self.max_psi
@@ -1883,23 +1914,30 @@ function _M:tooltip(x, y, seen_by)
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
 
+	local dt_order = function(a, b)
+		if a[1] == "all" then return true
+		elseif b[1] == "all" then return false
+		else return a[2] > b[2] end
+	end
+
 	local resists = tstring{}
 	local first = true
 	ts:add({"color", "ANTIQUE_WHITE"}, "Resists: ")
-	for t, v in pairs(self.resists) do
+	for t, _ in table.orderedPairs2(self.resists, dt_order) do
+		local v = self:combatGetResist(t)
 		if t == "all" or t == "absolute" then
-			if first then first = false else ts:add(", ") end
 			ts:add({"color", "LIGHT_BLUE"}, tostring(math.floor(v)) .. "%", " ", {"color", "LAST"}, t..", ")
 		elseif type(t) == "string" and math.abs(v) >= 20 then
-			local res = tostring ( math.floor(self:combatGetResist(t)) ) .. "%"
+			local res = tostring(math.floor(v)) .. "%"
 			if first then first = false else ts:add(", ") end
 			if v > 0 then
-				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			else
-				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			end
 		end
 	end
+
 	if self:attr("speed_resist") then
 		local res = 100 - (util.bound(self.global_speed * self.movement_speed, (100-(self.speed_resist_cap or 70))/100, 1)) * 100
 		if res > 0 then
@@ -3953,7 +3991,7 @@ end
 
 function _M:getMaxEncumbrance()
 	local add = 0
-	return math.floor(40 + self:getStr() * 1.8 + (self.max_encumber or 0) + add)
+	return math.floor(70 + self:getStr() * 1.8 + (self.max_encumber or 0) + add)
 end
 
 function _M:getEncumbrance()
@@ -4516,7 +4554,7 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 	-- If objected buffed us, remove
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__object_source == o then todel[#todel+1] = eff_id end
+		if p.__object_source == o and not self.no_source_remove and not o.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
@@ -4768,7 +4806,15 @@ function _M:searchAllInventories(o, fct)
 	end)
 	return inv, slot, attached
 end
-		
+
+local oldGetTalentTypeMastery = _M.getTalentTypeMastery
+function _M:getTalentTypeMastery(tt)
+	local mastery = oldGetTalentTypeMastery(self, tt)
+	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[tt.category] or 0
+	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
+	return mastery + bonus1 + bonus2
+end
+
 function _M:lastLearntTalentsMax(what)
 	if self:attr("infinite_respec") then return 99999 end
 	return what == "generic" and 3 or 4
@@ -4978,7 +5024,7 @@ function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
 	-- Remove buffs ?
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__talent_source == t_id then todel[#todel+1] = eff_id end
+		if p.__talent_source == t_id and not self.no_source_remove and not t.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
@@ -5597,6 +5643,7 @@ local sustainCallbackCheck = {
 	callbackOnHit = "talents_on_hit",
 	callbackOnAct = "talents_on_act",
 	callbackOnActBase = "talents_on_act_base",
+	callbackOnActEnd = "talents_on_act_end",
 	callbackOnMove = "talents_on_move",
 	callbackOnRest = "talents_on_rest",
 	callbackOnWait = "talents_on_wait",
@@ -7057,7 +7104,7 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 		end
 	end
 
-	if e.status == "detrimental" and self:knowTalent(self.T_RESILIENT_BONES) then
+	if e.status == "detrimental" and e.type ~= "other" and self:knowTalent(self.T_RESILIENT_BONES) then
 		p.dur = math.ceil(p.dur * (1 - self:callTalent(self.T_RESILIENT_BONES,"durresist")))
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("reduce_detrimental_status_effects_time") then
@@ -7697,4 +7744,12 @@ function _M:updateInCombatStatus()
 	else
 		self:fireTalentCheck("callbackOnCombat", false)
 	end
+end
+
+-- Projects with a specified source and preserves the old one
+function _M:projectSource(t, x, y, damtype, dam, particles, source)
+	local old_source = self.__project_source
+	self.__project_source = source
+	self:project(t, x, y, damtype, dam, particles)
+	self.__project_source = old_source
 end

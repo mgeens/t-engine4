@@ -1084,7 +1084,9 @@ newTalent{
 	mode = "passive",
 	getChance = function(self, t) return self:combatTalentLimit(t, 100, 20, 45) end, -- Limit < 100%
 	callbackOnCrit = function(self, t)
+		if self.turn_procs.scar_scripted_flesh then return end
 		if not rng.percent(t.getChance(self, t)) then return end
+		self.turn_procs.scar_scripted_flesh = true
 		self:alterEffectDuration(self.EFF_RUNE_COOLDOWN, -1)
 		self:alterEffectDuration(self.EFF_INFUSION_COOLDOWN, -1)
 

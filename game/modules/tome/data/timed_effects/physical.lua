@@ -1396,7 +1396,7 @@ newEffect{
 newEffect{
 	name = "GRAPPLED", image = "talents/grab.png",
 	desc = "Grappled",
-	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s"):format("Damage reduced by " .. math.ceil(eff.reduce), "Slowed by " .. eff.slow, "Damage per turn " .. math.ceil(eff.power) ) end,
+	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s#LAST#"):format("Physical power reduced by " .. math.ceil(eff.reduce), "Slowed by " .. math.floor(eff.slow * 100).."%", "Damage per turn " .. math.ceil(eff.power) ) end,
 	type = "physical",
 	subtype = { grapple=true, pin=true },
 	status = "detrimental",
@@ -1405,6 +1405,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is grappled!", "+Grappled" end,
 	on_lose = function(self, err) return "#Target# is free from the grapple.", "-Grappled" end,
 	activate = function(self, eff)
+		if self:attr("never_move") then self:effectTemporaryValue(eff, "never_move_before_grapple", 1) end  -- Flag for Hurricane Throw
 		self:effectTemporaryValue(eff, "never_move", 1)
 		self:effectTemporaryValue(eff, "combat_dam", -eff.reduce)
 		if (eff.silence > 0) then
@@ -2233,7 +2234,7 @@ newEffect{ -- Note: This effect is cancelled by EFF_DISARMED
 newEffect{
 	name = "BLOCKING", image = "talents/block.png",
 	desc = "Blocking",
-	long_desc = function(self, eff) return ("Absorbs %d damage from the next blockable attack."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken."):format(eff.power) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
@@ -2253,8 +2254,8 @@ newEffect{
 		local b = false
 		if eff.d_types[type] then b = true end
 		if not b then return dam end
-		if not self:knowTalent(self.T_ETERNAL_GUARD) then eff.dur = 0 end
 		local amt = util.bound(dam - eff.power, 0, dam)
+		if eff.bonus_block_pct and eff.bonus_block_pct[type] then amt = amt * eff.bonus_block_pct[type] end
 		local blocked = dam - amt
 		local shield1, combat1, shield2, combat2 = self:hasShield()
 		if shield1 and shield1.on_block and shield1.on_block.fct then shield1.on_block.fct(shield1, self, src, type, dam, eff) end
@@ -2265,9 +2266,10 @@ newEffect{
 		end
 		if eff.properties.ref and src.life then DamageType.defaultProjector(src, src.x, src.y, type, blocked, tmp, true) end
 		local full = false
-		if (self:knowTalent(self.T_RIPOSTE) or amt == 0) and src.life then
+		if (self:knowTalent(self.T_RIPOSTE) or amt == 0) and not eff.did_counterstrike and src.life then
 			full = true
-			src:setEffect(src.EFF_COUNTERSTRIKE, (1 + dur_inc) * math.max(1, (src.global_speed or 1)), {power=eff.power, no_ct_effect=true, src=self, crit_inc=crit_inc, nb=nb})
+			if not self:knowTalent(self.T_ETERNAL_GUARD) then eff.did_counterstrike = true end
+			src:setEffect(src.EFF_COUNTERSTRIKE, 2, {power=eff.power, no_ct_effect=true, src=self, crit_inc=crit_inc, nb=nb})
 			if eff.properties.sb then
 				if src:canBe("disarm") then
 					src:setEffect(src.EFF_DISARMED, 3, {apply_power=self:combatPhysicalpower()})
@@ -2278,7 +2280,7 @@ newEffect{
 			if eff.properties.on_cs then
 				eff.properties.on_cs(self, eff, dam, type, src)
 			end
-		end-- specify duration here to avoid stacking for high speed attackers
+		end
 
 		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
 
@@ -2295,6 +2297,38 @@ newEffect{
 		self:removeTemporaryValue("combat_def", eff.def)
 		self:removeTemporaryValue("combat_def_ct", eff.ctdef)
 		if eff.properties.sp then self:removeTemporaryValue("combat_spellresist", eff.spell) end
+	end,
+}
+
+newEffect{
+	name = "COUNTERSTRIKE", image = "effects/counterstrike.png",
+	desc = "Counterstrike",
+	long_desc = function(self, eff) return "Vulnerable to deadly counterstrikes. Next melee attack will inflict double damage." end,
+	type = "physical",
+	subtype = { tactic=true },
+	status = "detrimental",
+	parameters = { nb=1 },
+	on_gain = function(self, eff) return nil, "+Counter" end,
+	on_lose = function(self, eff) return nil, "-Counter" end,
+	onStrike = function(self, eff, dam, src)
+		eff.nb = eff.nb - 1
+		if eff.nb <= 0 then self:removeEffect(self.EFF_COUNTERSTRIKE) end
+
+		if self.x and src.x and core.fov.distance(self.x, self.y, src.x, src.y) >= 5 then
+			game:setAllowedBuild("rogue_skirmisher", true)
+		end
+
+		return dam * 2
+	end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("counterstrike", 1)
+		eff.def = self:addTemporaryValue("combat_def", -eff.power)
+		eff.crit = self:addTemporaryValue("combat_crit_vulnerable", eff.crit_inc or 0)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("counterstrike", eff.tmpid)
+		self:removeTemporaryValue("combat_def", eff.def)
+		self:removeTemporaryValue("combat_crit_vulnerable", eff.crit)
 	end,
 }
 
@@ -2396,38 +2430,6 @@ newEffect{
 		if eff.throws <= 0 or eff.chance <= 0 then eff.dur = 0 end
 	end,
 	deactivate = function(self, eff)
-	end,
-}
-
-newEffect{
-	name = "COUNTERSTRIKE", image = "effects/counterstrike.png",
-	desc = "Counterstrike",
-	long_desc = function(self, eff) return "Vulnerable to deadly counterstrikes. Next melee attack will inflict double damage." end,
-	type = "physical",
-	subtype = { tactic=true },
-	status = "detrimental",
-	parameters = { nb=1 },
-	on_gain = function(self, eff) return nil, "+Counter" end,
-	on_lose = function(self, eff) return nil, "-Counter" end,
-	onStrike = function(self, eff, dam, src)
-		eff.nb = eff.nb - 1
-		if eff.nb <= 0 then self:removeEffect(self.EFF_COUNTERSTRIKE) end
-
-		if self.x and src.x and core.fov.distance(self.x, self.y, src.x, src.y) >= 5 then
-			game:setAllowedBuild("rogue_skirmisher", true)
-		end
-
-		return dam * 2
-	end,
-	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("counterstrike", 1)
-		eff.def = self:addTemporaryValue("combat_def", -eff.power)
-		eff.crit = self:addTemporaryValue("combat_crit_vulnerable", eff.crit_inc or 0)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("counterstrike", eff.tmpid)
-		self:removeTemporaryValue("combat_def", eff.def)
-		self:removeTemporaryValue("combat_crit_vulnerable", eff.crit)
 	end,
 }
 
@@ -2567,19 +2569,6 @@ newEffect{
 		if eff.particle then
 			self:removeParticles(eff.particle)
 		end
-	end,
-}
-
-newEffect{
-	name = "ELEMENTAL_SURGE_NATURE", image = "talents/elemental_surge.png",
-	desc = "Elemental Surge: Nature",
-	long_desc = function(self, eff) return ("Immune to physical effects.") end,
-	type = "physical",
-	subtype = { status=true },
-	status = "beneficial",
-	parameters = { },
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "spell_negative_status_effect_immune", 1)
 	end,
 }
 
@@ -3357,14 +3346,15 @@ newEffect{
 newEffect{
 	name = "SOOTHING_DARKNESS", image = "talents/soothing_darkness.png",
 	desc = "Soothing Darkness",
-	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f and stamina regeneration by %0.1f."):format(eff.life, eff.stamina) end,
+	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f, stamina regeneration by %0.1f, and all damage resistance by %d%%."):format(eff.life, eff.stamina, eff.shadowguard) end,
 	type = "physical",
 	subtype = { darkness=true, healing=true },
 	status = "beneficial",
-	parameters = { life=1, stamina=0.5, dr=0 },
+	parameters = { life=1, stamina=0.5, dr=0, shadowguard=0 },
 	activate = function(self, eff)
 		eff.lifeid = self:addTemporaryValue("life_regen", eff.life)
 		eff.staid = self:addTemporaryValue("stamina_regen", eff.stamina)
+		self:effectTemporaryValue(eff, "resists", {all = eff.shadowguard})
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("life_regen", eff.lifeid)
@@ -3388,19 +3378,11 @@ newEffect{
 		end
 	end,
 	deactivate = function(self, eff)
-		if not eff.no_cancel_stealth and not rng.percent(self.hide_chance or 0) then
-			local detect = self:stealthDetection(eff.rad)
-			local netstealth = (self:callTalent(self.T_STEALTH, "getStealthPower") + (self:attr("inc_stealth") or 0))
-			if detect > 0 and self:checkHit(detect, netstealth) then
-				game.logPlayer(self, "You have been detected!")
-				self:forceUseTalent(self.T_STEALTH, {ignore_energy=true, ignore_cd=true, no_talent_fail=true, silent=false})
-			end
-		end
 	end,
 }
 
 newEffect{
-	name = "SEDATED", image = "talents/dart_launcher_rt.png",
+	name = "SEDATED", image = "talents/dart_launcher.png",
 	desc = "Sedated",
 	long_desc = function(self, eff) return ("The target is in a deep sleep and unable to act.  Every %d damage it takes will reduce the duration of the effect by one turn."):format(eff.power) end,
 	type = "physical",
