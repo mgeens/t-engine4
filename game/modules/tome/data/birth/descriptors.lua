@@ -240,7 +240,6 @@ newBirthDescriptor{
 	copy = {
 		instakill_immune = 1,
 		__game_difficulty = 4,
-		money = 100,
 	},
 	game_state = {
 		default_random_rare_chance = 3,
@@ -278,7 +277,6 @@ newBirthDescriptor{
 	copy = {
 		instakill_immune = 1,
 		__game_difficulty = 5,
-		money = 150,
 	},
 	game_state = {
 		default_random_rare_chance = 3,

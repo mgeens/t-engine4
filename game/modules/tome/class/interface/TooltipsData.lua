@@ -205,19 +205,23 @@ Note that the amount of time to performa various actions like moving, casting sp
 TOOLTIP_SPEED_MOVEMENT = [[#GOLD#Movement Speed#LAST#
 How quickly you move compared to normal.
 Higher is faster, so 200% means that you move twice as fast as normal.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_SPELL = [[#GOLD#Spell Speed#LAST#
 How quickly you cast spells.
 Higher is faster, so 200% means that you can cast spells twice as fast as normal.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_ATTACK = [[#GOLD#Attack Speed#LAST#
 How quickly you attack with weapons, either ranged or melee.
 Higher is faster, so 200% means that you can attack twice as fast as normal.
 The actual speed may also be affected by the weapon used.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_MENTAL = [[#GOLD#Mental Speed#LAST#
 How quickly you perform mind powers.
 Higher is faster, so 200% means that you can use mind powers twice as fast as normal.
+Minimum:  40%
 ]]
 -------------------------------------------------------------
 -- Stats
@@ -307,7 +311,7 @@ This is countered by armour penetration and is applied before all kinds of criti
 ]]
 TOOLTIP_ARMOR_HARDINESS = [[#GOLD#Armour Hardiness#LAST#
 Armour hardiness represents how much of each incoming blows the armour will affect.
-Absorbs (hardiness)% of incoming physical damage, up to a maximum of (armour) damage absorbed.
+Absorbs (hardiness)% of incoming weapon damage, up to a maximum of (armour) damage absorbed.
 ]]
 TOOLTIP_CRIT_REDUCTION = [[#GOLD#Crit Reduction#LAST#
 Crit reduction reduces the chance an opponent has of landing a critical strike with a melee or ranged attack.
@@ -316,10 +320,10 @@ TOOLTIP_CRIT_SHRUG = [[#GOLD#Crits Shrug Off#LAST#
 Gives a chance to ignore the bonus critical damage from any direct damage attacks (melee, spells, ranged, mind powers, ...).
 ]]
 TOOLTIP_DEFENSE = [[#GOLD#Defense#LAST#
-Defense represents your chance to avoid physical melee attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
+Defense represents your chance to avoid melee weapon attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
 ]]
 TOOLTIP_RDEFENSE = [[#GOLD#Ranged Defense#LAST#
-Defense represents your chance to avoid physical ranged attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
+Defense represents your chance to avoid ranged weapon attacks and reduces the chance you'll be knocked off-balance by an enemy's attack. It is measured against the attacker's Accuracy.
 ]]
 TOOLTIP_SAVES = [[#GOLD#Saves#LAST#
 Saving throws represent your ability to shrug off, partially or fully, detrimental effects applied to you.  Most detrimental effects will check their power (physical, spell, mental) vs your corresponding save type to determine if they take effect or not.  The chance is usually ~50% when power and save are equal.
@@ -482,7 +486,6 @@ If you have 50% penetration against a creature with 50% resistance it will have 
 ]]
 TOOLTIP_FLAT_RESIST = [[#GOLD#Flat resistances#LAST#
 Reduces each hit of a certain damage type (or all) by this amount.
-This has disminishing returns, every tier of 40 it takes one more point to increase by 1. The value showed here is the one after computation of disminishing returns.
 ]]
 
 -------------------------------------------------------------

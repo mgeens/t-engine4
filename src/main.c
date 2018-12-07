@@ -36,6 +36,7 @@
 #include "physfs.h"
 #include "physfsrwops.h"
 #include "core_lua.h"
+#include "wfc/lua_wfc_external.h"
 #include "getself.h"
 #include "music.h"
 #include "serial.h"
@@ -93,6 +94,7 @@ int requested_fps_idle = DEFAULT_IDLE_FPS;
 /* The currently "saved" fps, used for idle transitions. */
 int requested_fps_idle_saved = 0;
 bool forbid_idle_mode = FALSE;
+bool no_connectivity = FALSE;
 
 SDL_TimerID display_timer_id = 0;
 SDL_TimerID realtime_timer_id = 0;
@@ -1138,6 +1140,7 @@ void boot_lua(int state, bool rebooting, int argc, char *argv[])
 		/***************** Physfs Init *****************/
 		PHYSFS_init(argv[0]);
 
+		bool bootstrap_mounted = FALSE;
 		selfexe = get_self_executable(argc, argv);
 		if (selfexe && PHYSFS_mount(selfexe, "/", 1))
 		{
@@ -1146,6 +1149,7 @@ void boot_lua(int state, bool rebooting, int argc, char *argv[])
 		{
 			printf("NO SELFEXE: bootstrapping from CWD\n");
 			PHYSFS_mount("bootstrap", "/bootstrap", 1);
+			bootstrap_mounted = TRUE;
 		}
 
 		/***************** Lua Init *****************/
@@ -1173,6 +1177,7 @@ void boot_lua(int state, bool rebooting, int argc, char *argv[])
 		luaopen_zlib(L);
 		luaopen_bit(L);
 		luaopen_wait(L);
+		luaopen_wfc(L);
 
 		physfs_reset_dir_allowed(L);
 
@@ -1222,6 +1227,16 @@ void boot_lua(int state, bool rebooting, int argc, char *argv[])
 			printf("WARNING: No bootstrap code found, defaulting to working directory for engine code!\n");
 			PHYSFS_mount("game/thirdparty", "/", 1);
 			PHYSFS_mount("game/", "/", 1);
+			luaL_loadstring(L,
+				"fs.setPathAllowed(fs.getRealPath('/addons/', true)) " \
+				"if fs.getRealPath('/dlcs/') then fs.setPathAllowed(fs.getRealPath('/dlcs/', true)) end " \
+				"fs.setPathAllowed(fs.getRealPath('/modules/', true)) "
+			);
+			lua_pcall(L, 0, 0, 0);
+		}
+
+		if (bootstrap_mounted) {
+			PHYSFS_removeFromSearchPath("bootstrap");
 		}
 
 		if (te4_web_init) te4_web_init(L);

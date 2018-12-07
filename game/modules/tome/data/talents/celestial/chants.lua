@@ -19,6 +19,7 @@
 
 -- TODO: update tactical information for these talents
 
+-- Regen makes resting super slow
 -- Looks weaker than the other options, but extra life is a more universally useful stat and mind save is generally lower for celestial classes.
 newTalent{
 	name = "Chant of Fortitude",
@@ -346,6 +347,7 @@ newTalent{
 	getDebuffCures = function(self, t) return math.floor(self:combatTalentScale(t, 0.4, 1.8, 0.75)) end,
 	getBonusLight = function(self, t) return math.floor(self:combatTalentScale(t, 0.75, 3.5, 0.75)) end,
 	doCure = function(self, t, type)
+		if self.turn_procs.resetting_talents then return false end  -- Avoid levelup screen cleanse exploit
 		local cures = t.getDebuffCures(self, t)
 		local effs = {}
 		local force = {}
@@ -401,7 +403,7 @@ newTalent{
 	points = 5,
 	mode = "passive",
 	getLightDamageIncrease = function(self, t) return self:combatTalentSpellDamage(t, 10, 30) end,
-	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 end,
+	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 + 0.5 end,
 	callbackOnRest = function(self, t)
 		if not self:knowTalent(self.T_POSITIVE_POOL) then return false end
 		if self.positive_regen > 0 and self.positive < self.max_positive then return true end
