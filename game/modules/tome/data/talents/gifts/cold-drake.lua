@@ -28,26 +28,22 @@ newTalent{
 	equilibrium = 3,
 	cooldown = 7,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1, 3)) end,
+	radius = function(self, t) return 3 end,
 	direct_hit = true,
 	requires_target = true,
 	tactical = { ATTACKAREA = { COLD = 2 } },
 	is_melee = true,
 	on_learn = function(self, t)
-		self.combat_physresist = self.combat_physresist + 4
-		self.combat_spellresist = self.combat_spellresist + 4
-		self.combat_mentalresist = self.combat_mentalresist + 4
+		self.combat_physresist = self.combat_physresist + 2
 		self.resists[DamageType.COLD] = (self.resists[DamageType.COLD] or 0) + 1
 	end,
 	on_unlearn = function(self, t)
-		self.combat_physresist = self.combat_physresist - 4
-		self.combat_spellresist = self.combat_spellresist - 4
-		self.combat_mentalresist = self.combat_mentalresist - 4
+		self.combat_physresist = self.combat_physresist - 2
 		self.resists[DamageType.COLD] = (self.resists[DamageType.COLD] or 0) - 1
 	end,
-	damagemult = function(self, t) return self:combatTalentScale(t, 1.6, 2.3) end,
+	damagemult = function(self, t) return self:combatTalentWeaponDamage(t, 1.6, 2.3) end,
 	target = function(self, t)
-		return {type="cone", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t)}
+		return {type="cone", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t), talent=t}
 	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -56,7 +52,7 @@ newTalent{
 		self:project(tg, x, y, function(px, py, tg, self)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if target and target ~= self then
-				local hit = self:attackTarget(target, DamageType.ICE, self:combatTalentWeaponDamage(t, 1.6, 2.3), true)
+				local hit = self:attackTarget(target, DamageType.ICE, t.damagemult(self, t), true)
 			end
 		end)
 		game:playSoundNear(self, "talents/breath")
@@ -64,7 +60,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[You call upon the mighty claw of a cold drake and rake a wave of freezing cold in front of you, doing %d%% weapon damage as Ice damage in a cone of radius %d. Ice damage gives a chance of freezing the target.
-		Every level in Ice Claw additionally raises your Physical, Mental and Spell Saves by 4.
+		Every level in Ice Claw additionally raises your Physical Save by 2.
 		Each point in cold drake talents also increases your cold resistance by 1%%.]]):format(100 * t.damagemult(self, t), self:getTalentRadius(t))
 	end,
 }
@@ -155,7 +151,7 @@ newTalent{
 				show_tooltip = true,
 				block_move = true,
 				block_sight = false,
-				temporary = 4 + self:getTalentLevel(t),
+				temporary = t.getDuration(self, t),
 				x = px, y = py,
 				canAct = false,
 				dam = ice_damage,

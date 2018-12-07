@@ -1396,7 +1396,7 @@ newEffect{
 newEffect{
 	name = "GRAPPLED", image = "talents/grab.png",
 	desc = "Grappled",
-	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s"):format("Damage reduced by " .. math.ceil(eff.reduce), "Slowed by " .. eff.slow, "Damage per turn " .. math.ceil(eff.power) ) end,
+	long_desc = function(self, eff) return ("The target is grappled, unable to move, and limited in its offensive capabilities.\n#RED#Silenced\nPinned\n%s\n%s\n%s#LAST#"):format("Physical power reduced by " .. math.ceil(eff.reduce), "Slowed by " .. math.floor(eff.slow * 100).."%", "Damage per turn " .. math.ceil(eff.power) ) end,
 	type = "physical",
 	subtype = { grapple=true, pin=true },
 	status = "detrimental",
@@ -1405,6 +1405,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is grappled!", "+Grappled" end,
 	on_lose = function(self, err) return "#Target# is free from the grapple.", "-Grappled" end,
 	activate = function(self, eff)
+		if self:attr("never_move") then self:effectTemporaryValue(eff, "never_move_before_grapple", 1) end  -- Flag for Hurricane Throw
 		self:effectTemporaryValue(eff, "never_move", 1)
 		self:effectTemporaryValue(eff, "combat_dam", -eff.reduce)
 		if (eff.silence > 0) then
@@ -2233,7 +2234,7 @@ newEffect{ -- Note: This effect is cancelled by EFF_DISARMED
 newEffect{
 	name = "BLOCKING", image = "talents/block.png",
 	desc = "Blocking",
-	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken.  This effect is removed at the start of your next turn."):format(eff.power) end,
+	long_desc = function(self, eff) return ("Prevents %d damage from all hits taken."):format(eff.power) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
@@ -2279,14 +2280,11 @@ newEffect{
 			if eff.properties.on_cs then
 				eff.properties.on_cs(self, eff, dam, type, src)
 			end
-		end-- specify duration here to avoid stacking for high speed attackers
+		end
 
 		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
 
 		return amt
-	end,
-	callbackOnActBase = function(self, eff)
-		if not self:knowTalent(self.T_ETERNAL_GUARD) then self:removeEffect(self.EFF_BLOCKING) end
 	end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("block", eff.power)
@@ -3348,14 +3346,15 @@ newEffect{
 newEffect{
 	name = "SOOTHING_DARKNESS", image = "talents/soothing_darkness.png",
 	desc = "Soothing Darkness",
-	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f and stamina regeneration by %0.1f."):format(eff.life, eff.stamina) end,
+	long_desc = function(self, eff) return ("The target is wreathed in shadows, increasing life regeneration by %0.1f, stamina regeneration by %0.1f, and all damage resistance by %d%%."):format(eff.life, eff.stamina, eff.shadowguard) end,
 	type = "physical",
 	subtype = { darkness=true, healing=true },
 	status = "beneficial",
-	parameters = { life=1, stamina=0.5, dr=0 },
+	parameters = { life=1, stamina=0.5, dr=0, shadowguard=0 },
 	activate = function(self, eff)
 		eff.lifeid = self:addTemporaryValue("life_regen", eff.life)
 		eff.staid = self:addTemporaryValue("stamina_regen", eff.stamina)
+		self:effectTemporaryValue(eff, "resists", {all = eff.shadowguard})
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("life_regen", eff.lifeid)
@@ -3379,19 +3378,11 @@ newEffect{
 		end
 	end,
 	deactivate = function(self, eff)
-		if not eff.no_cancel_stealth and not rng.percent(self.hide_chance or 0) then
-			local detect = self:stealthDetection(eff.rad)
-			local netstealth = (self:callTalent(self.T_STEALTH, "getStealthPower") + (self:attr("inc_stealth") or 0))
-			if detect > 0 and self:checkHit(detect, netstealth) then
-				game.logPlayer(self, "You have been detected!")
-				self:forceUseTalent(self.T_STEALTH, {ignore_energy=true, ignore_cd=true, no_talent_fail=true, silent=false})
-			end
-		end
 	end,
 }
 
 newEffect{
-	name = "SEDATED", image = "talents/dart_launcher_rt.png",
+	name = "SEDATED", image = "talents/dart_launcher.png",
 	desc = "Sedated",
 	long_desc = function(self, eff) return ("The target is in a deep sleep and unable to act.  Every %d damage it takes will reduce the duration of the effect by one turn."):format(eff.power) end,
 	type = "physical",

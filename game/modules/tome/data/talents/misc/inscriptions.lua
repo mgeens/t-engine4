@@ -245,7 +245,6 @@ newInscription{
 	end,
 }
 
--- Tree walls?  Tree summons?
 newInscription{
 	name = "Infusion: Wild Growth",
 	type = {"inscriptions/infusions", 1},
@@ -254,6 +253,7 @@ newInscription{
 	range = 0,
 	radius = 5,
 	direct_hit = true,
+	no_energy = true,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, friendlyfire = false, talent=t}
 	end,

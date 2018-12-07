@@ -225,7 +225,7 @@ newTalent{
 	getNb = function(self, t) return math.floor(self:combatTalentScale(t, 8, 20)) end,
 	range = 0,
 	cooldown = 10,
-	stamina = 30,
+	stamina = 20,
 	radius = function(self, t) return 5 end,
 	target = function(self, t) return {type="cone", cone_angle = 75, range=0, stop_block = true, friendlyfire=false, radius=t.radius(self, t), display_line_step=false} end,
 	action = function(self, t)

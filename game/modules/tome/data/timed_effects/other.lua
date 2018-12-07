@@ -868,15 +868,16 @@ newEffect{
 	type = "other",
 	subtype = { darkness=true },
 	status = "beneficial",
-	parameters = { res=10, dam=1.5, range=5},
+	parameters = { res=10, dam=1.5, range=5, x=0, y=0},
 	on_gain = function(self, err) return "#Target# is covered in a veil of shadows!", "+Assail" end,
 	on_lose = function(self, err) return "#Target# is no longer covered by shadows.", "-Assail" end,
 	activate = function(self, eff)
 		eff.sefid = self:addTemporaryValue("negative_status_effect_immune", 1)
 		eff.resid = self:addTemporaryValue("resists", {all=eff.res})
+		self.never_act = true
 	end,
 	on_timeout = function(self, eff)
-		local maxdist = self:callTalent(self.T_SHADOW_VEIL,"getBlinkRange")
+		local maxdist = self:callTalent(self.T_SHADOW_VEIL, "getBlinkRange")
 		self.never_act = true
 		repeat
 			local acts = {}
@@ -885,12 +886,16 @@ newEffect{
 			self:doFOV() -- update actors seen
 			for i = 1, #self.fov.actors_dist do
 				act = self.fov.actors_dist[i]
-				if act and self:reactionToward(act) < 0 and not act.dead and self:isNear(act.x,act.y,maxdist) then
+				if act and self:reactionToward(act) < 0 and not act.dead and act:isNear(eff.x, eff.y, maxdist) then
 					local sx, sy = util.findFreeGrid(act.x, act.y, 1, true, {[engine.Map.ACTOR]=true})
 					if sx then acts[#acts+1] = {act, sx, sy} end
 				end
 			end
-			if #acts == 0 then self.never_act = nil return end
+			if #acts == 0 then 
+				self.never_act = nil  -- If there was ever something worth making redundant..
+				self:removeEffect(self.EFF_SHADOW_VEIL)
+				return 
+			end
 
 			act = rng.table(acts)
 			self:move(act[2], act[3], true)
@@ -3569,5 +3574,25 @@ newEffect{
 		else
 			game.logPlayer(self, "Space restabilizes around you.")
 		end
+	end,
+}
+
+newEffect{
+	name = "STEALTH_SKEPTICAL", image = "talents/stealth.png",
+	desc = "Skeptical",
+	long_desc = function(self, eff) return "The target doesn't believe it's ally truly saw anything in the shadows." end,
+	type = "other",
+	subtype = { },
+	status = "neutral",
+	parameters = {target = {} },
+	activate = function(self, eff)
+	end,
+	on_merge = function(self, old_eff, new_eff)
+		--old_eff.dur = new_eff.dur
+		old_eff.target = new_eff.target
+		return old_eff
+	end,
+	deactivate = function(self, eff)
+		self:setTarget(eff.target.actor, {x=eff.target.x, y=eff.target.y})
 	end,
 }
