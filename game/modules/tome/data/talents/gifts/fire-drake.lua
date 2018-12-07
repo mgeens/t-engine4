@@ -188,7 +188,7 @@ newTalent{
 	message = "@Source@ breathes fire!",
 	tactical = { ATTACKAREA = { FIRE = 2 }},
 	range = 0,
-	radius = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 5, 9))) end,
+	radius = function(self, t) return math.min(13, math.floor(self:combatTalentScale(t, 5, 9))) end,
 	direct_hit = true,
 	requires_target = true,
 	on_learn = function(self, t) self.resists[DamageType.FIRE] = (self.resists[DamageType.FIRE] or 0) + 1 end,

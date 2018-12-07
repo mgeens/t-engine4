@@ -217,7 +217,7 @@ newTalent{
 	message = "@Source@ breathes ice!",
 	tactical = { ATTACKAREA = { COLD = 2 }, DISABLE = { stun = 1 } },
 	range = 0,
-	radius = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 5, 9))) end,
+	radius = function(self, t) return math.min(13, math.floor(self:combatTalentScale(t, 5, 9))) end,
 	getDamage = function(self, t)
 		local bonus = self:knowTalent(self.T_CHROMATIC_FURY) and self:combatTalentStatDamage(t, "wil", 30, 500) or 0
 		return self:combatTalentStatDamage(t, "str", 30, 500) + bonus

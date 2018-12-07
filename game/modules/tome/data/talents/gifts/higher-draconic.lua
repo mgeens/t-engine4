@@ -115,7 +115,7 @@ newTalent{
 	message = "@Source@ breathes venom!",
 	tactical = { ATTACKAREA = { poison = 2 } },
 	range = 0,
-	radius = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 5, 9))) end,
+	radius = function(self, t) return math.min(13, math.floor(self:combatTalentScale(t, 5, 9))) end,
 	requires_target = true,
 	getDamage = function(self, t) 
 		local bonus = self:knowTalent(self.T_CHROMATIC_FURY) and self:combatTalentStatDamage(t, "wil", 60, 750) or 0

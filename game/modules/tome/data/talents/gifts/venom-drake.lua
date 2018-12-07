@@ -195,7 +195,7 @@ newTalent{
 	message = "@Source@ breathes acid!",
 	tactical = { ATTACKAREA = { ACID = 2 }, DISABLE = {disarm = 1} },
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 5, 9)) end,
+	radius = function(self, t) return math.min(13, math.floor(self:combatTalentScale(t, 5, 9))) end,
 	direct_hit = true,
 	requires_target = true,
 	on_learn = function(self, t) self.resists[DamageType.ACID] = (self.resists[DamageType.ACID] or 0) + 1 end,
