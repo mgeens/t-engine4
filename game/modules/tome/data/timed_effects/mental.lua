@@ -1007,10 +1007,11 @@ end
 newEffect{
 	name = "HEIGHTEN_FEAR", image = "talents/heighten_fear.png",
 	desc = "Heighten Fear",
-	long_desc = function(self, eff) return ("The target is in a state of growing fear. If they spend %d more turns within range %d and in sight of the source of this fear (%s), they will be subjected to a new fear."):
-	format(eff.turns_left, eff.range, eff.src.name) end,
-	type = "mental",
-	subtype = { fear=true },
+	long_desc = function(self, eff) return ("The target is in a state of growing fear. If they spend %d more turns within range %d and in sight of the source of this fear (%s), they will take %d mind and darkness damage and be subjected to a new fear."):
+		format(eff.turns_left, eff.range, eff.damage, eff.src.name) end,
+	type = "other",
+	charges = function(self, eff) return "#ORANGE#"..eff.turns_left.."#LAST#" end,
+	subtype = { },
 	status = "detrimental",
 	cancel_on_level_change = true,
 	parameters = { },
@@ -1024,6 +1025,8 @@ newEffect{
 				eff.turns_left = eff.turns
 				if rng.percent(eff.chance or 100) then
 					game.logSeen(self, "%s succumbs to heightening fears!", self.name:capitalize())
+					DamageType:get(DamageType.MIND).projector(eff.src, self.x, self.y, DamageType.MIND, { dam=eff.damage, crossTierChance=25 })
+					DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.damage)
 					tInstillFear.applyEffect(eff.src, tInstillFear, self, true)
 				else
 					game.logSeen(self, "%s feels a little less afraid!", self.name:capitalize())
@@ -1157,7 +1160,7 @@ newEffect{
 newEffect{
 	name = "TERRIFIED", image = "effects/terrified.png",
 	desc = "Terrified",
-	long_desc = function(self, eff) return ("The target is terrified, increasing all their cooldowns by %d%%."):format(eff.cooldownPower * 100) end,
+	long_desc = function(self, eff) return ("The target is terrified taking %d mind and darkness damage per turn and increasing all their cooldowns by %d%%."):format(eff.damage, eff.cooldownPower * 100) end,
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1171,10 +1174,15 @@ newEffect{
 		end
 		updateFearParticles(self)
 	end,
+	on_timeout = function(self, eff)
+		eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, eff.damage)
+		eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.DARKNESS, eff.damage)
+	end,
 	deactivate = function(self, eff)
 		updateFearParticles(self)
 	end,
 }
+
 -- distressed fear for prosperity
 --[[
 newEffect{
@@ -1208,7 +1216,7 @@ newEffect{
 newEffect{
 	name = "HAUNTED", image = "effects/haunted.png",
 	desc = "Haunted",
-	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each detrimental mental effect to inflict %d mind damage every turn."):format(eff.damage) end, --perhaps add total.
+	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each detrimental mental effect to inflict %d mind and darkness damage every turn."):format(eff.damage) end, --perhaps add total.
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1232,11 +1240,10 @@ newEffect{
 			end
 		end
 		if nb > 0 and not self.dead then
-			game.logSeen(self, "#F53CBE#%s is struck by fear of the haunting.", self.name:capitalize() )
-			eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, { dam=nb * eff.damage,alwaysHit=true,criticals=true,crossTierChance=0 })
+			eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, { dam=nb * eff.damage,alwaysHit=true,crossTierChance=0 })
+			eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.DARKNESS, nb * eff.damage)
 		end
 	end,
-	
 	deactivate = function(self, eff)
 		updateFearParticles(self)
 	end,

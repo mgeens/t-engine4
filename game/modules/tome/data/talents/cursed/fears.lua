@@ -31,11 +31,17 @@ newTalent{
 	getDuration = function(self, t)
 		return 8
 	end,
+	getDamage = function(self,t)
+		return math.floor(self:combatTalentMindDamage(t, 1, 200))
+	end,
 	getParanoidAttackChance = function(self, t)
 		return math.min(60, self:combatTalentMindDamage(t, 30, 50))
 	end,
 	getDespairStatChange = function(self, t)
 		return -self:combatTalentMindDamage(t, 15, 40)
+	end,
+	getTerrifiedDamage = function(self,t)
+		return math.floor(self:combatTalentMindDamage(t, 10, 30))
 	end,
 	getTerrifiedPower = function(self,t)
 		return math.floor(self:combatTalentMindDamage(t, 25, 60))
@@ -56,10 +62,10 @@ newTalent{
 		--tyrant mindpower bonus
 		local tTyrant = nil
 		if self:knowTalent(self.T_TYRANT) then tTyrant = self:getTalentFromId(self.T_TYRANT) end
-		local mindpowerChange = tTyrant and tTyrant.getMindpowerChange(self, tTyrant) or 0
+		local mindpowerChange = 0
 		
 		--mindpower check
-		local mindpower = self:combatMindpower(1, mindpowerChange)
+		local mindpower = self:combatMindpower()
 		if not target:checkHit(mindpower, target:combatMentalResist()) then
 			game.logSeen(target, "%s resists the fear!", target.name:capitalize())
 			return nil
@@ -70,13 +76,14 @@ newTalent{
 		if self:knowTalent(self.T_HEIGHTEN_FEAR) then tHeightenFear = self:getTalentFromId(self.T_HEIGHTEN_FEAR) end
 		if tHeightenFear and not target:hasEffect(target.EFF_HEIGHTEN_FEAR) then
 			local turnsUntilTrigger = tHeightenFear.getTurnsUntilTrigger(self, tHeightenFear)
-			local dur = t.getDuration(self, t)
-			target:setEffect(target.EFF_HEIGHTEN_FEAR, dur, {src=self, range=self:getTalentRange(tHeightenFear), turns=turnsUntilTrigger, turns_left=turnsUntilTrigger })
+			local dur = tHeightenFear.getDuration(self, t)
+			local damage = tHeightenFear.getDamage(self, t)
+			target:setEffect(target.EFF_HEIGHTEN_FEAR, dur, {src=self, range=self:getTalentRange(tHeightenFear), turns=turnsUntilTrigger, turns_left=turnsUntilTrigger, damage=damage })
 		end
 		
 		--fear res check & heighten fear bypass
 		if not no_fearRes and not target:canBe("fear") then
-			game.logSeen(target, "#F53CBE#%s ignores the fear!", target.name:capitalize())
+			game.logSeen(target, "#F53CBE#%s resists the fear!", target.name:capitalize())
 			return true
 		end
 		
@@ -100,9 +107,11 @@ newTalent{
 		elseif effectId == target.EFF_DISPAIR then
 			eff.statChange = t.getDespairStatChange(self, t)
 		elseif effectId == target.EFF_TERRIFIED then
+			-- Not really ideal to double crit but whatever
+			eff.damage = self:mindCrit(t.getTerrifiedDamage(self, t) / 2)
 			eff.cooldownPower = t.getTerrifiedPower(self, t) / 100
 		elseif effectId == target.EFF_HAUNTED then
-			eff.damage = t.getHauntedDamage(self, t)
+			eff.damage = self:mindCrit(t.getHauntedDamage(self, t) / 2)
 		else
 			print("* fears: failed to get effect", effectId)
 		end
@@ -161,6 +170,9 @@ newTalent{
 			function(px, py)
 				local actor = game.level.map(px, py, engine.Map.ACTOR)
 				if actor and self:reactionToward(actor) < 0 and actor ~= self then
+					local damage = self:mindCrit(t.getDamage(self, t) / 2)
+					DamageType:get(DamageType.MIND).projector(self, actor.x, actor.y, DamageType.MIND, { dam=damage, crossTierChance=25 })
+					DamageType:get(DamageType.DARKNESS).projector(self, actor.x, actor.y, DamageType.DARKNESS, damage)
 					local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
 					tInstillFear.applyEffect(self, tInstillFear, actor)
 				end
@@ -169,17 +181,21 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Instill fear in your foes within %d radius of a target location, causing one of 4 possible fears that lasts for %d turns. The target can save versus Mindpower to resist the effect, and can be affected by multiple fears.  
+		damage = t.getDamage(self, t)
+		return ([[Instill fear in your foes within %d radius of a target location dealing %0.2f mind and %0.2f darkness damage and causing one of 4 possible fears that last for %d turns.
+		The targets can save vs your Mindpower to resist the effect.
+		Fear effects improve with your Mindpower.
+
 		Possible fears are:
-		Paranoid gives the target an %d%% chance to physically attack a nearby creature, friend or foe. If hit, their target will be afflicted with Paranoia as well.
-		Despair reduces mind resist, mindsave, armour and defence by %d.
-		Terrified increases cooldowns by %d%%.
-		Haunted causes the target to suffer %d mind damage for each detrimental mental effect every turn.
-		Fear effects improve with your Mindpower.]]):format(self:getTalentRadius(self, t), t.getDuration(self, t),
+		#ORANGE#Paranoid:#LAST# Gives the target an %d%% chance to physically attack a nearby creature, friend or foe. If hit, their target will be afflicted with Paranoia as well.
+		#ORANGE#Despair:#LAST# Reduces mind resist, mindsave, armour and defence by %d.
+		#ORANGE#Terrified:#LAST# Deals %0.2f mind and %0.2f darkness damage per turn and increases cooldowns by %d%%.
+		#ORANGE#Haunted:#LAST# Causes the target to suffer %0.2f mind and %0.2f darkness damage for each detrimental mental effect every turn.
+		]]):format(self:getTalentRadius(t), damDesc(self, DamageType.MIND, damage / 2), damDesc(self, DamageType.DARKNESS, damage / 2), t.getDuration(self, t),
 		t.getParanoidAttackChance(self, t),
 		-t.getDespairStatChange(self, t),
-		t.getTerrifiedPower(self, t),
-		t.getHauntedDamage(self, t))
+		damDesc(self, DamageType.MIND, t.getTerrifiedDamage(self, t) / 2), damDesc(self, DamageType.DARKNESS, t.getTerrifiedDamage(self, t) / 2), t.getTerrifiedPower(self, t),
+		damDesc(self, DamageType.MIND, t.getHauntedDamage(self, t) / 2), damDesc(self, DamageType.DARKNESS, t.getHauntedDamage(self, t) / 2 ))
 	end,
 }
 
@@ -190,10 +206,16 @@ newTalent{
 	mode = "passive",
 	points = 5,
 	range = function(self, t)
-		return math.floor(self:combatTalentScale(t, 4, 9))
+		return 10
 	end,
 	getTurnsUntilTrigger = function(self, t)
 		return 4
+	end,
+	getDuration = function(self, t)
+		return 10
+	end,
+	getDamage = function(self,t)
+		return math.floor(self:combatTalentMindDamage(t, 1, 200))
 	end,
 	tactical = { DISABLE = 2 },
 	info = function(self, t)
@@ -201,7 +223,10 @@ newTalent{
 		local range = self:getTalentRange(t)
 		local turnsUntilTrigger = t.getTurnsUntilTrigger(self, t)
 		local duration = tInstillFear.getDuration(self, tInstillFear)
-		return ([[Heighten the fears of those near to you. Any foe you attempt to inflict a fear upon and who remains in a radius of %d and in sight of you for %d (non-consecutive) turns, will gain a new fear that lasts for %d turns. This effect completely ignores fear resistance, but can be saved against.]]):format(range, turnsUntilTrigger, duration)
+		local damage = t.getDamage(self, t)
+		return ([[Heighten the fears of those near to you. Any foe you attempt to inflict a fear upon and who remains in a radius of %d and in sight of you for %d (non-consecutive) turns, will take %0.2f mind and %0.2f darkness damage and gain a new fear that lasts for %d turns. 
+			This effect completely ignores fear resistance, but can be saved against.]]):
+			format(range, turnsUntilTrigger, damDesc(self, DamageType.MIND, t.getDamage(self, t) / 2), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t) / 2 ), duration)
 	end,
 }
 
@@ -215,14 +240,13 @@ newTalent{
 	end,
 	on_unlearn = function(self, t)
 	end,
-	getMindpowerChange = function(self, t) return math.floor(self:combatTalentScale(t, 10, 35)) end,
 	getTyrantPower = function(self, t) return 2 end,
 	getMaxStacks = function(self, t) return math.floor(self:combatTalentScale(t, 7, 20)) end,
 	getTyrantDur = function(self, t) return 5 end,
-	getExtendFear = function(self, t) return self:combatTalentScale(t, 1, 4) end
+	getExtendFear = function(self, t) return self:combatTalentScale(t, 1, 4) end,
 	info = function(self, t)
-		return ([[Impose your tyranny on the minds of those who fear you. When a foe gains a fear, you increase the duration of any existing fears by %d turns, to a maximum of 8 turns.
-		Additionally, your mindpower is increased by %d against foes who attempt to resist your fears and you gain %d mindpower and physpower for 5 turns every time you apply a fear, stacking up to %d times.]]):format(t.getExtendFear(self, t), t.getMindpowerChange(self, t), t.getTyrantPower(self, t), t.getMaxStacks(self, t))
+		return ([[Impose your tyranny on the minds of those who fear you. When a foe gains an effect with the fear subtype, you increase the duration of any existing fear effects by %d turns, to a maximum of 8 turns.
+		Additionally, you gain %d Mindpower and Physicalpower for 5 turns every time you apply a fear, stacking up to %d times.]]):format(t.getExtendFear(self, t), t.getTyrantPower(self, t), t.getMaxStacks(self, t))
 	end,
 }
 
