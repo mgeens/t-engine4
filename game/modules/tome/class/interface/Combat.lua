@@ -2070,6 +2070,12 @@ function _M:combatMindpower(mod, add)
 		add = add + 60 * self:getStr() / 100
 	end
 
+	local gloom = self:knowTalent(self.T_GLOOM)
+	if gloom then
+		local t = self:getTalentFromId(self.T_GLOOM)
+		add = add + t.getMindpower(self)
+	end
+
 	if self:knowTalent(self.T_GESTURE_OF_POWER) then
 		local t = self:getTalentFromId(self.T_GESTURE_OF_POWER)
 		add = add + t.getMindpowerChange(self, t)

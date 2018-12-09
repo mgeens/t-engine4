@@ -3621,3 +3621,19 @@ newTalent{
 		format(duration)
 	end,
 }
+
+newTalent{
+	name = "Dismay",
+	type = {"psionic/other", 1},
+	mode = "passive",
+	points = 1,
+	getChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^.5, 100, 3.5, 1, 7.83, 2.23) end, -- Limit < 100%
+	getDuration = function(self, t)
+		return 3
+	end,
+	info = function(self, t)
+		local chance = t.getChance(self, t)
+		local duration = t.getDuration(self, t)
+		return ([[Each turn, those caught in your gloom must save against your Mindpower or have an %0.1f%% chance of becoming dismayed for %d turns. When dismayed, the first melee attack against the foe will result in a critical hit.]]):format(chance, duration, mindpowerChange)
+	end,
+}
