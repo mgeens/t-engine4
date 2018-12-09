@@ -2486,6 +2486,11 @@ newDamageType{
 		state = initState(state)
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
+
+		if target and src == target then
+			target:setEffect(target.EFF_RETCHED, 1, {})
+		end
+
 		if target and (target:attr("undead") or target:attr(retch_heal)) then
 			target:heal(dam * 1.5, src)
 
