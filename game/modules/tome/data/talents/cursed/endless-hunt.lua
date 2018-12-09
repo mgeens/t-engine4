@@ -115,7 +115,7 @@ newTalent{
 		return eff and not eff.target.dead and core.fov.distance(self.x, self.y, eff.target.x, eff.target.y) <= 1
 	end,
 	action = function(self, t)
-		local damageMultipler = t.getDamageMultiplier(self, t)
+		local damageMultiplier = t.getDamageMultiplier(self, t)
 		local cooldownDuration = t.getCooldownDuration(self, t)
 		local targetDamageChange = t.getTargetDamageChange(self, t)
 		local duration = t.getDuration(self, t)
@@ -126,8 +126,18 @@ newTalent{
 		target:setEffect(target.EFF_HARASSED, duration, {src=self, damageChange=targetDamageChange })
 
 		for i = 1, 2 do
-			if not target.dead and self:attackTarget(target, nil, damageMultipler, true) then
-				-- remove effects
+			-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
+			local shield, shield_combat = self:hasShield()
+			local weapon = self:hasMHWeapon().combat
+			local hit = false
+			if not shield then
+				hit = self:attackTarget(target, nil, damageMultiplier, true)
+			else
+				hit = self:attackTargetWith(target, weapon, nil, damageMultiplier)
+				if self:attackTargetWith(target, shield_combat, nil, damageMultiplier) or hit then hit = true end
+			end
+
+			if not target.dead then
 				local tids = {}
 				for tid, lev in pairs(target.talents) do
 					local t = target:getTalentFromId(tid)
@@ -145,12 +155,14 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		local damageMultipler = t.getDamageMultiplier(self, t)
+		local damageMultiplier = t.getDamageMultiplier(self, t)
 		local cooldownDuration = t.getCooldownDuration(self, t)
 		local targetDamageChange = t.getTargetDamageChange(self, t)
 		local duration = t.getDuration(self, t)
 		return ([[Harass your stalked victim with two quick attacks for %d%% (at 0 Hate) to %d%% (at 100+ Hate) damage each. Each attack that scores a hit disrupts one talent, rune or infusion for %d turns. Your opponent will be unnerved by the attacks, reducing the damage they deal by %d%% for %d turns.
-		Damage reduction increases with the Willpower stat.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, cooldownDuration, -targetDamageChange, duration)
+		Damage reduction increases with the Willpower stat.
+
+		This talent will attack with your shield as well if you have one equipped.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, cooldownDuration, -targetDamageChange, duration)
 	end,
 }
 
