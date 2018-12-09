@@ -56,7 +56,7 @@ newTalent{
 				-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 				state[target] = true
 				local shield, shield_combat = self:hasShield()
-				local weapon = self:hasMHWeapon()
+				local weapon = self:hasMHWeapon().combat
 				if not shield then
 					self:attackTarget(target, DamageType.PHYSKNOCKBACK, t.getDamage(self, t), true)
 				else

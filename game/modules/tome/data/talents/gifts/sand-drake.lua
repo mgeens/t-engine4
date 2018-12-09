@@ -49,13 +49,13 @@ newTalent{
 
 		self:logCombat(target, "#Source# tries to swallow #Target#!")
 		local shield, shield_combat = self:hasShield()
-		local weapon = self:hasMHWeapon()
+		local weapon = self:hasMHWeapon().combat
 		local hit = false
 		if not shield then
 			hit = self:attackTarget(target, DamageType.NATURE, t.getDamage(self, t), true)
 		else
 			hit = self:attackTargetWith(target, weapon, DamageType.NATURE, t.getDamage(self, t))
-			hit = self:attackTargetWith(target, shield_combat, DamageType.NATURE, t.getDamage(self, t))
+			if self:attackTargetWith(target, shield_combat, DamageType.NATURE, t.getDamage(self, t)) or hit then hit = true end
 		end
 		if not hit then return true end
 
