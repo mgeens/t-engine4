@@ -77,7 +77,7 @@ newTalent{
 		At level 3, any wound you inflict with this carries a part of your curse, reducing the effectiveness of healing by %d%% for %d turns. The effect will stack.
 		The damage multiplier increases with your Strength.
 
-		This talent will attack with your shield as well if you have one equipped.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, -healFactorChange * 100, woundDuration)
+		This talent will also attack with your shield, if you have one equipped.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, -healFactorChange * 100, woundDuration)
 	end,
 }
 
@@ -152,7 +152,7 @@ newTalent{
 		At level 3 the intensity of your assault overwhelms anyone who is struck, reducing their Accuracy by %d for 3 turns.
 		The damage multiplier and Accuracy reduction increase with your Strength.
 
-		This talent will attack with your shield as well if you have one equipped.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, -attackChange)
+		This talent will also attack with your shield, if you have one equipped.]]):format(t.getDamageMultiplier(self, t, 0) * 100, t.getDamageMultiplier(self, t, 100) * 100, -attackChange)
 	end,
 }
 
