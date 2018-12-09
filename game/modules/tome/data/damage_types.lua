@@ -2487,7 +2487,7 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 
-		if target and src == target then
+		if target and src == target and target.type == "undead" and target.subtype == "ghoul" then
 			target:setEffect(target.EFF_RETCHED, 1, {})
 		end
 
