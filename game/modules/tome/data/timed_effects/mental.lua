@@ -1008,7 +1008,7 @@ newEffect{
 	name = "HEIGHTEN_FEAR", image = "talents/heighten_fear.png",
 	desc = "Heighten Fear",
 	long_desc = function(self, eff) return ("The target is in a state of growing fear. If they spend %d more turns within range %d and in sight of the source of this fear (%s), they will take %d mind and darkness damage and be subjected to a new fear."):
-		format(eff.turns_left, eff.range, eff.damage, eff.src.name) end,
+		format(eff.turns_left, eff.range, eff.src.name, eff.damage) end,
 	type = "other",
 	charges = function(self, eff) return "#ORANGE#"..eff.turns_left.."#LAST#" end,
 	subtype = { },
