@@ -27,7 +27,7 @@ end
 
 -- mindpower bonus for gloom talents
 local function gloomTalentsMindpower(self)
-	return self:combatScale(self:getTalentLevel(self.T_GLOOM) + self:getTalentLevel(self.T_WEAKNESS) + self:getTalentLevel(self.T_MINDROT) + self:getTalentLevel(self.T_SANCTUARY), 1, 1, 40, 40, 0.75)
+	return self:combatScale(self:getTalentLevel(self.T_GLOOM) + self:getTalentLevel(self.T_WEAKNESS) + self:getTalentLevel(self.T_MINDROT) + self:getTalentLevel(self.T_SANCTUARY), 1, 1, 40, 20)
 end
 
 newTalent{
@@ -121,9 +121,9 @@ newTalent{
 		local chance = t.getChance(self, t)
 		local duration = t.getDuration(self, t)
 		local mindpowerChange = gloomTalentsMindpower(self)
-		return ([[A terrible gloom surrounds you, affecting all those who approach to within radius 3. At the end of each turn those caught in your gloom must save against your Mindpower, or have an %d%% chance to suffer from slowness (30%%), stun or confusion (30%%) for %d turns.
+		return ([[A terrible gloom surrounds you, affecting all those who approach to within radius 3. At the end of each turn, those caught in your gloom must save against your Mindpower, or have an %d%% chance to suffer from slowness (30%%), stun or confusion (30%%) for %d turns.
 		This ability is innate, and carries no cost to activate or deactivate.
-		Each point in Gloom talents increases your Mindpower (%d total currently).]]):format(chance, duration, mindpowerChange)
+		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(chance, duration, mindpowerChange)
 	end,
 }
 
@@ -148,7 +148,7 @@ newTalent{
 		local hateBonus = t.getHateBonus(self, t)
 		local mindpowerChange = gloomTalentsMindpower(self)
 		return ([[Each turn, those caught in your gloom must save against your Mindpower, or have an %d%% chance to be crippled by fear for %d turns, reducing damage they inflict by %d%%. The first time you melee strike a foe after they have been weakened will give you %d hate.
-		Each point in Gloom talents increases your Mindpower (%d total currently).]]):format(chance, duration, -incDamageChange, hateBonus, mindpowerChange)
+		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(chance, duration, -incDamageChange, hateBonus, mindpowerChange)
 	end,
 }
 
@@ -166,11 +166,12 @@ newTalent{
 	end,
 	callbackOnActEnd = function(self, t)
 		local tg = self:getTalentTarget(t)
-		self:projectSource(tg, self.x, self.y, DamageType.MIND, self:mindCrit(t.getDamage(self, t)), nil, t)
+		self:projectSource(tg, self.x, self.y, DamageType.MIND, self:mindCrit(t.getDamage(self, t) * 0.5), nil, t)
+		self:projectSource(tg, self.x, self.y, DamageType.DARKNESS, self:mindCrit(t.getDamage(self, t) * 0.5), nil, t)
 	end,
 	info = function(self, t)
-		return ([[At the end of your turns all enemies in your gloom take %0.2f mind damage.
-		Each point in Gloom talents increases your Mindpower (%d total currently).]]):format(damDesc(self, DamageType.MIND, t.getDamage(self, t)), gloomTalentsMindpower(self))
+		return ([[At the end of your turns all enemies in your gloom take %0.2f mind damage and %0.2f darkness damage.
+		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(damDesc(self, DamageType.MIND, t.getDamage(self, t) * 0.5), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t) * 0.5), gloomTalentsMindpower(self))
 	end,
 }
 
@@ -187,6 +188,6 @@ newTalent{
 		local damageChange = t.getDamageChange(self, t)
 		local mindpowerChange = gloomTalentsMindpower(self)
 		return ([[Your gloom has become a sanctuary from the outside world. Damage from any attack that originates beyond the boundary of your gloom is reduced by %d%%.
-		Each point in Gloom talents increases your Mindpower (%d total currently).]]):format(-damageChange, mindpowerChange)
+		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(-damageChange, mindpowerChange)
 	end,
 }
