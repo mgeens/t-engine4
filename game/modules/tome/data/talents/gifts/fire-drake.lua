@@ -75,11 +75,11 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[You summon a powerful gust of wind, knocking back your foes within a radius of %d up to 3 tiles away and damaging them for %d%% weapon damage.
+		return ([[You summon a powerful gust of wind, knocking back your foes within a radius of %d up to 3 tiles away and hitting them for %d%% weapon damage.
 		Every level in Wing Buffet additionally raises your Physical Power and Accuracy by 2, passively.
 		Each point in fire drake talents also increases your fire resistance by 1%%.
 
-		This talent will attack with your shield as well if you have one equipped.]]):format(self:getTalentRadius(t),damage*100)
+		This talent will also attack with your shield, if you have one equipped.]]):format(self:getTalentRadius(t),damage*100)
 	end,
 }
 
@@ -115,10 +115,11 @@ newTalent{
 	end,
 	info = function(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[You let out a powerful roar that sends your foes into utter confusion for 3 turns in a radius of %d.
+		local power = 20 + 6 * self:getTalentLevel(t)
+		return ([[You let out a powerful roar that sends your foes in radius %d into utter confusion (power: %d%%) for 3 turns.
 		The sound wave is so strong, your foes also take %0.2f physical damage.
 		The damage improves with your Strength.
-		Each point in fire drake talents also increases your fire resistance by 1%%.]]):format(radius, self:combatTalentStatDamage(t, "str", 30, 380))
+		Each point in fire drake talents also increases your fire resistance by 1%%.]]):format(radius, power, self:combatTalentStatDamage(t, "str", 30, 380))
 	end,
 }
 

@@ -180,7 +180,7 @@ newTalent{
 		Every two talent levels, one of your strikes becomes blinding acid instead of normal acid, blinding the target 25%% of the time if it hits.
 		Each point in acid drake talents also increases your acid resistance by 1%%.
 
-		This talent will attack with your shield as well if you have one equipped.]]):format(100 * self:combatTalentWeaponDamage(t, 0.1, 0.6))
+		This talent will also attack with your shield, if you have one equipped.]]):format(100 * self:combatTalentWeaponDamage(t, 0.1, 0.6))
 	end,
 }
 

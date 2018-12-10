@@ -72,7 +72,7 @@ newTalent{
 		Every level in Ice Claw additionally raises your Physical Save by 2.
 		Each point in cold drake talents also increases your cold resistance by 1%%.
 
-		This talent will attack with your shield as well if you have one equipped.]]):format(100 * t.damagemult(self, t), self:getTalentRadius(t))
+		This talent will also attack with your shield, if you have one equipped.]]):format(100 * t.damagemult(self, t), self:getTalentRadius(t))
 	end,
 }
 
