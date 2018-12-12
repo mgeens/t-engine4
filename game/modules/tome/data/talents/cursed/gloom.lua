@@ -27,7 +27,7 @@ end
 
 -- mindpower bonus for gloom talents
 local function gloomTalentsMindpower(self)
-	return self:combatScale(self:getTalentLevel(self.T_GLOOM) + self:getTalentLevel(self.T_WEAKNESS) + self:getTalentLevel(self.T_MINDROT) + self:getTalentLevel(self.T_SANCTUARY), 1, 1, 40, 20)
+	return self:combatScale(self:getTalentLevel(self.T_GLOOM) + self:getTalentLevel(self.T_WEAKNESS) + self:getTalentLevel(self.T_MINDROT) + self:getTalentLevel(self.T_SANCTUARY), 1, 1, 40, 20, 0.7)
 end
 
 newTalent{

@@ -32,22 +32,22 @@ newTalent{
 		return 8
 	end,
 	getDamage = function(self,t)
-		return math.floor(self:combatTalentMindDamage(t, 1, 200))
+		return math.floor(self:combatTalentMindDamage(t, 10, 75))
 	end,
 	getParanoidAttackChance = function(self, t)
-		return math.min(60, self:combatTalentMindDamage(t, 30, 50))
+		return math.min(50, self:combatTalentMindDamage(t, 20, 40))
 	end,
 	getDespairStatChange = function(self, t)
 		return -self:combatTalentMindDamage(t, 15, 40)
 	end,
 	getTerrifiedDamage = function(self,t)
-		return math.floor(self:combatTalentMindDamage(t, 10, 30))
+		return math.floor(self:combatTalentMindDamage(t, 5, 20))
 	end,
 	getTerrifiedPower = function(self,t)
 		return math.floor(self:combatTalentMindDamage(t, 25, 60))
 	end,
 	getHauntedDamage = function(self, t)
-		return self:combatTalentMindDamage(t, 40, 60)
+		return self:combatTalentMindDamage(t, 10, 30)
 	end,
 	hasEffect = function(self, t, target)
 		if not target then return false end
@@ -116,30 +116,31 @@ newTalent{
 			print("* fears: failed to get effect", effectId)
 		end
 		
+		--tyrant stuff
 		if tTyrant then
-			--data for tyrant buff
+			--tyrant buff data
 			eff.tyrantPower = tTyrant.getTyrantPower(self, tTyrant)
 			eff.maxStacks = tTyrant.getMaxStacks(self, tTyrant)
 			eff.tyrantDur = tTyrant.getTyrantDur(self, tTyrant)
-			--extend fear durations
-			local extendfear = tTyrant.getExtendFear(self, tTyrant)
-			for eff_id, p in pairs(target.tmp) do
-				local e = target.tempeffect_def[eff_id]
-				if e.type == "mental" then
-					if e.subtype == "fear" then
-						if e.eff_id == target.EFF_PARANOID then
-							p.dur = math.min(8, p.dur + t.extendfear(self, t))
-						elseif e.eff_id == target.EFF_DISPAIR then
-							p.dur = math.min(8, p.dur + t.extendfear(self, t))
-						elseif e.eff_id == target.EFF_TERRIFIED then
-							p.dur = math.min(8, p.dur + t.extendfear(self, t))
-						elseif e.eff_id == target.EFF_HAUNTED then
-							p.dur = math.min(8, p.dur + t.extendfear(self, t))
-						elseif e.eff_id == target.EFF_HEIGHTEN_FEAR then
-							p.dur = math.min(8, p.dur + t.extendfear(self, t))
-						end
-					end
-				end
+			--extend fear data
+			local extendFear = tTyrant.getExtendFear(self, tTyrant)
+			local extendChance = tTyrant.getExtendChance(self, tTyrant)
+			--roll to extend heighten fear
+			if target:hasEffect(target.EFF_HEIGHTEN_FEAR) and rng.percent(extendChance) then
+				local HF = target:hasEffect(target.EFF_HEIGHTEN_FEAR)
+				HF.dur = math.max(HF.dur, math.min(8, HF.dur + extendFear))
+			end
+			--build table of active fears and choose one
+			local actfear = {}
+			if target:hasEffect(target.EFF_PARANOID) then table.insert(actfear, target.EFF_PARANOID) end
+			if target:hasEffect(target.EFF_DISPAIR) then table.insert(actfear, target.EFF_DISPAIR) end
+			if target:hasEffect(target.EFF_TERRIFIED) then table.insert(actfear, target.EFF_TERRIFIED) end
+			if target:hasEffect(target.EFF_HAUNTED) then table.insert(actfear, target.EFF_HAUNTED) end
+			local rndFear = rng.table(actfear)
+			--roll to extend chosen fear
+			if rndFear and rng.percent(extendChance) then
+				local F = target:hasEffect(rndFear)
+				F.dur = math.max(F.dur, math.min(8, F.dur + extendFear))
 			end
 		end
 		
@@ -212,10 +213,10 @@ newTalent{
 		return 4
 	end,
 	getDuration = function(self, t)
-		return 10
+		return 8
 	end,
 	getDamage = function(self,t)
-		return math.floor(self:combatTalentMindDamage(t, 1, 200))
+		return math.floor(self:combatTalentMindDamage(t, 5, 50))
 	end,
 	tactical = { DISABLE = 2 },
 	info = function(self, t)
@@ -244,9 +245,10 @@ newTalent{
 	getMaxStacks = function(self, t) return math.floor(self:combatTalentScale(t, 7, 20)) end,
 	getTyrantDur = function(self, t) return 5 end,
 	getExtendFear = function(self, t) return self:combatTalentScale(t, 1, 4) end,
+	getExtendChance = function(self, t) return self:combatTalentLimit(t, 60, 20, 50) end,
 	info = function(self, t)
-		return ([[Impose your tyranny on the minds of those who fear you. When a foe gains an effect with the fear subtype, you increase the duration of any existing fear effects by %d turns, to a maximum of 8 turns.
-		Additionally, you gain %d Mindpower and Physicalpower for 5 turns every time you apply a fear, stacking up to %d times.]]):format(t.getExtendFear(self, t), t.getTyrantPower(self, t), t.getMaxStacks(self, t))
+		return ([[Impose your tyranny on the minds of those who fear you. When a foe gains a new fear, you have a %d%% chance to increase the duration of their heightened fear and one random existing fear effect by %d turns, to a maximum of 8 turns.
+		Additionally, you gain %d Mindpower and Physical power for 5 turns every time you apply a fear, stacking up to %d times.]]):format(t. getExtendChance(self, t), t.getExtendFear(self, t), t.getTyrantPower(self, t), t.getMaxStacks(self, t))
 	end,
 }
 
@@ -264,21 +266,12 @@ newTalent{
 		return 3 + math.floor(math.pow(self:getTalentLevel(t), 0.5) * 2.2)
 	end,
 	getChance = function(self, t)
-		return math.min(60, math.floor(30 + (math.sqrt(self:getTalentLevel(t)) - 1) * 22))
+		return math.min(50, math.floor(self:combatTalentScale(t, 25, 40)))
 	end,
 	action = function(self, t)
 		local range = self:getTalentRange(t)
 		local duration = t.getDuration(self, t)
 		local chance = t.getChance(self, t)
-		local tTyrant = nil
-		if self:knowTalent(self.T_TYRANT) then
-			tTyrant = self:getTalentFromId(self.T_TYRANT)
-		end
-		if tTyrant then
-			tyrantPower = tTyrant.getTyrantPower(self, tTyrant)
-			maxStacks = tTyrant.getMaxStacks(self, tTyrant)
-			tyrantDur = tTyrant.getTyrantDur(self, tTyrant)
-		end
 		self:project(
 			{type="ball", radius=range}, self.x, self.y,
 			function(px, py)

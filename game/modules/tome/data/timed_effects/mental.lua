@@ -1354,10 +1354,6 @@ newEffect{
 	on_gain = function(self, err) return "#F53CBE##Target# becomes panicked!", "+Panicked" end,
 	on_lose = function(self, err) return "#Target# is no longer panicked", "-Panicked" end,
 	activate = function(self, eff)
-		--fear effect for each fear effect in mental.lua to give caster a buff
-		if eff.src and eff.src.knowTalent and eff.src:knowTalent(eff.src.T_TYRANT) then
-			eff.src:setEffect(eff.src.EFF_TYRANT, eff.tyrantDur, { tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
-		end
 		eff.particlesId = self:addParticles(Particles.new("fear_violet", 1))
 	end,
 	deactivate = function(self, eff)
