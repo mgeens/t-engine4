@@ -110,10 +110,13 @@ newTalent{
 	getDuration = function(self, t)
 		return 2
 	end,
-	on_pre_use = function(self, t)
+	on_pre_use = function(self, t, silent)
+		if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end
 		local eff = self:hasEffect(self.EFF_STALKER)
 		return eff and not eff.target.dead and core.fov.distance(self.x, self.y, eff.target.x, eff.target.y) <= 1
+		return true
 	end,
+	
 	action = function(self, t)
 		local damageMultiplier = t.getDamageMultiplier(self, t)
 		local cooldownDuration = t.getCooldownDuration(self, t)

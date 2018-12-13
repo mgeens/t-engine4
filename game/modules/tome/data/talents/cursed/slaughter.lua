@@ -42,6 +42,7 @@ newTalent{
 	getWoundDuration = function(self, t)
 		return 15
 	end,
+	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end return true end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
@@ -99,9 +100,10 @@ newTalent{
 	end,
 	range = 0,
 	radius = 1,
-        target = function(self, t)
-                return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t)}
-        end,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t)}
+	end,
+	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end return true end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 

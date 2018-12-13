@@ -63,7 +63,7 @@ newTalent{
 		if core.fov.distance(self.x, self.y, x, y) <= 1 then
 			-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 			local shield, shield_combat = self:hasShield()
-			local weapon = self:hasMHWeapon().combat
+			local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat --can do unarmed attack
 			local hit = false
 			if not shield then
 				hit = self:attackTarget(target, nil, 1, true)
