@@ -28,6 +28,7 @@ newTalent{
 	range = 1,
 	is_melee = true,
 	tactical = { ATTACK = { PHYSICAL = 1, COLD = 1, FIRE = 1, LIGHTNING = 1, ACID = 1 } },
+	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end return true end,
 	requires_target = true,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	getWeaponDamage = function(self, t) return self:combatTalentWeaponDamage(t, 1.6, 2.3) end,

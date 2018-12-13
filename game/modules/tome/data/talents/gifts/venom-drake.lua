@@ -142,6 +142,7 @@ newTalent{
 	range = 1,
 	is_melee = true,
 	tactical = { ATTACK = { ACID = 2 }, DISABLE = {blind = 1} },
+	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end return true end,
 	requires_target = true,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	on_learn = function(self, t) self.resists[DamageType.ACID] = (self.resists[DamageType.ACID] or 0) + 1 end,
