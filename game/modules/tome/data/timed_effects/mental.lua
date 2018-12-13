@@ -1941,7 +1941,7 @@ newEffect{
 	name = "RAMPAGE", image = "talents/rampage.png",
 	desc = "Rampaging",
 	long_desc = function(self, eff)
-		local desc = ("The target is rampaging! (+%d%% movement speed, +%d%% attack speed"):format(eff.movementSpeedChange * 100, eff.combatPhysSpeedChange * 100)
+		local desc = ("The target is rampaging! (+%d%% movement speed, +%d%% attack speed, +%d%% mind speed"):format(eff.movementSpeedChange * 100, eff.combatPhysSpeedChange * 100, eff.combatMindSpeedChange * 100)
 		if eff.physicalDamageChange > 0 then
 			desc = desc..(", +%d%% physical damage, +%d physical save, +%d mental save"):format(eff.physicalDamageChange, eff.combatPhysResistChange, eff.combatMentalResistChange)
 		end
@@ -1960,6 +1960,7 @@ newEffect{
 	activate = function(self, eff)
 		if eff.movementSpeedChange or 0 > 0 then eff.movementSpeedId = self:addTemporaryValue("movement_speed", eff.movementSpeedChange) end
 		if eff.combatPhysSpeedChange or 0 > 0 then eff.combatPhysSpeedId = self:addTemporaryValue("combat_physspeed", eff.combatPhysSpeedChange) end
+		if eff.combatMindSpeedChange or 0 > 0 then eff.combatMindSpeedId = self:addTemporaryValue("combat_mindspeed", eff.combatMindSpeedChange) end
 		if eff.physicalDamageChange or 0 > 0 then eff.physicalDamageId = self:addTemporaryValue("inc_damage", { [DamageType.PHYSICAL] = eff.physicalDamageChange }) end
 		if eff.combatPhysResistChange or 0 > 0 then eff.combatPhysResistId = self:addTemporaryValue("combat_physresist", eff.combatPhysResistChange) end
 		if eff.combatMentalResistChange or 0 > 0 then eff.combatMentalResistId = self:addTemporaryValue("combat_mentalresist", eff.combatMentalResistChange) end
@@ -1971,6 +1972,7 @@ newEffect{
 	deactivate = function(self, eff)
 		if eff.movementSpeedId then self:removeTemporaryValue("movement_speed", eff.movementSpeedId) end
 		if eff.combatPhysSpeedId then self:removeTemporaryValue("combat_physspeed", eff.combatPhysSpeedId) end
+		if eff.combatMindSpeedId then self:removeTemporaryValue("combat_mindspeed", eff.combatMindSpeedId) end
 		if eff.physicalDamageId then self:removeTemporaryValue("inc_damage", eff.physicalDamageId) end
 		if eff.combatPhysResistId then self:removeTemporaryValue("combat_physresist", eff.combatPhysResistId) end
 		if eff.combatMentalResistId then self:removeTemporaryValue("combat_mentalresist", eff.combatMentalResistId) end

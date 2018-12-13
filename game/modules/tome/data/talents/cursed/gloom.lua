@@ -39,8 +39,8 @@ newTalent{
 	cooldown = 0,
 	range = 3,
 	no_energy = true,
-	tactical = { BUFF = 5 },
-	getChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^.5, 100, 7, 1, 15.65, 2.23) end, -- Limit < 100%
+	tactical = { BUFF = 5 },	
+	getChance = function(self, t) return math.min(25, self:combatScale(self:getTalentLevel(t), 7, 1, 15, 6.5) * math.max(1, self:combatScale(self.combat_mindspeed, 1, 1, 1.35, 1.5))) end,
 	getMindpower = gloomTalentsMindpower,
 	getDuration = function(self, t)
 		return 3
@@ -56,7 +56,7 @@ newTalent{
 		self:removeParticles(p.particle)
 		return true
 	end,
-	callbackOnActEnd = function(self, tGloom)
+	callbackOnActBase = function(self, tGloom)
 		-- all gloom effects are handled here
 		local tWeakness = self:getTalentFromId(self.T_WEAKNESS)
 		local tDismay = self:getTalentFromId(self.T_DISMAY)
@@ -121,7 +121,8 @@ newTalent{
 		local chance = t.getChance(self, t)
 		local duration = t.getDuration(self, t)
 		local mindpowerChange = gloomTalentsMindpower(self)
-		return ([[A terrible gloom surrounds you, affecting all those who approach to within radius 3. At the end of each turn, those caught in your gloom must save against your Mindpower, or have an %d%% chance to suffer from slowness (30%%), stun or confusion (30%%) for %d turns.
+		return ([[A terrible gloom surrounds you, affecting all those who approach to within radius 3. At the end of each turn, those caught in your gloom must save against your Mindpower, or have a %d%% chance to suffer from slowness (30%%), stun or confusion (30%%) for %d turns.
+		The chance increases with your mind speed.
 		This ability is innate, and carries no cost to activate or deactivate.
 		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(chance, duration, mindpowerChange)
 	end,
@@ -133,7 +134,7 @@ newTalent{
 	mode = "passive",
 	require = cursed_wil_req2,
 	points = 5,
-	getChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^.5, 100, 7, 1, 15.65, 2.23) end, -- Limit < 100%
+	getChance = function(self, t) return math.min(25, self:combatScale(self:getTalentLevel(t), 7, 1, 15, 6.5) * math.max(1, self:combatScale(self.combat_mindspeed, 1, 1, 1.35, 1.5))) end,
 	getDuration = function(self, t)
 		return 3
 	end,
@@ -147,7 +148,8 @@ newTalent{
 		local incDamageChange = t.getIncDamageChange(self, t)
 		local hateBonus = t.getHateBonus(self, t)
 		local mindpowerChange = gloomTalentsMindpower(self)
-		return ([[Each turn, those caught in your gloom must save against your Mindpower, or have an %d%% chance to be crippled by fear for %d turns, reducing damage they inflict by %d%%. The first time you melee strike a foe after they have been weakened will give you %d hate.
+		return ([[Each turn, those caught in your gloom must save against your Mindpower, or have a %d%% chance to be crippled by fear for %d turns, reducing damage they inflict by %d%%. The first time you melee strike a foe after they have been weakened will give you %d hate.
+		The chance increases with your mind speed.
 		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(chance, duration, -incDamageChange, hateBonus, mindpowerChange)
 	end,
 }
@@ -159,18 +161,19 @@ newTalent{
 	mode = "passive",
 	require = cursed_wil_req3,
 	points = 5,
-	getDamage = function(self, t) return self:combatTalentMindDamage(t, 10, 70) end,
+	getDamage = function(self, t) return self:combatTalentMindDamage(t, 5, 30) * math.min(2.5, self.combat_mindspeed) end,
 	radius = function(self, t) return 3 end,
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
 	end,
-	callbackOnActEnd = function(self, t)
+	callbackOnActBase = function(self, t)
 		local tg = self:getTalentTarget(t)
 		self:projectSource(tg, self.x, self.y, DamageType.MIND, self:mindCrit(t.getDamage(self, t) * 0.5), nil, t)
 		self:projectSource(tg, self.x, self.y, DamageType.DARKNESS, self:mindCrit(t.getDamage(self, t) * 0.5), nil, t)
 	end,
 	info = function(self, t)
-		return ([[At the end of your turns all enemies in your gloom take %0.2f mind damage and %0.2f darkness damage.
+		return ([[Each turn, all enemies in your gloom take %0.2f mind damage and %0.2f darkness damage.
+		The damage scales with your Mindpower and mind speed.
 		Each point in Gloom talents increases your Mindpower (current total: %d).]]):format(damDesc(self, DamageType.MIND, t.getDamage(self, t) * 0.5), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t) * 0.5), gloomTalentsMindpower(self))
 	end,
 }
