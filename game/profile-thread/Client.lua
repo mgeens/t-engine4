@@ -746,7 +746,30 @@ function _M:orderAddonAuthoring(o)
 end
 
 function _M:orderMicroTxn(o)
-	if o.suborder == "list_purchasables" then
+	if o.suborder == "get_actionables" then
+		self:command("MTXN GET_ACTIONABLES", o.module)
+		if self:read("200") then
+			local _, _, size = self.last_line:find("^([0-9]+)")
+			size = tonumber(size)
+			local body = {}
+			if size and size > 1 then
+				body = self:receive(size)
+				if body then body = zlib.decompress(body) end
+			end
+
+			cprofile.pushEvent(("e='MicroTxnListActionables' list=%q"):format(body))
+			return
+		else
+			cprofile.pushEvent(("e='MicroTxnListActionables' error=%q"):format(self.last_error))
+		end
+	elseif o.suborder == "use_actionable" then
+		self:command("MTXN USE_ACTIONABLE", o.module, o.id_purchasable)
+		if self:read("200") then
+			cprofile.pushEvent(("e='MicroTxnUseActionable' success=true"):format())
+		else
+			cprofile.pushEvent(("e='MicroTxnUseActionable' success=false error=%q"):format(tostring(self.last_error)))
+		end
+	elseif o.suborder == "list_purchasables" then
 		self:command("MTXN LIST_PURCHASABLE", o.module, o.store)
 		if self:read("200") then
 			local _, _, size = self.last_line:find("^([0-9]+)")
@@ -759,6 +782,8 @@ function _M:orderMicroTxn(o)
 
 			cprofile.pushEvent(("e='MicroTxnListPurchasables' data=%q"):format(body))
 			return
+		else
+			cprofile.pushEvent(("e='MicroTxnListPurchasables' error=%q"):format(self.last_error))
 		end
 	elseif o.suborder == "create_cart" then
 		local data = table.serialize{module=o.module, store=o.store, cart=o.cart:unserialize()}
@@ -769,6 +794,17 @@ function _M:orderMicroTxn(o)
 				cprofile.pushEvent(("e='MicroTxnListCartResult' success=true"):format())
 			else
 				cprofile.pushEvent(("e='MicroTxnListCartResult' success=false"):format())
+			end
+		end
+	elseif o.suborder == "steam_finalize_cart" then
+		local data = table.serialize{module=o.module, store=o.store, id_cart=o.id_cart}
+		self:command("MTXN STEAM_FINALIZE_CART ", #data)
+		if self:read("200") then
+			self.sock:send(data)
+			if self:read("200") then
+				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=true"):format())
+			else
+				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=false"):format())
 			end
 		end
 	end

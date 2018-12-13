@@ -2017,6 +2017,9 @@ do return end
 			print(pcall(f))
 		end end,
 		[{"_f","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
+do return end
 			self.player.quests["love-melinda"] = nil
 			self.player:grantQuest("love-melinda")
 			self.player:hasQuest("love-melinda"):melindaCompanion(self.player, "Defiler", "Corruptor")
