@@ -110,11 +110,9 @@ newTalent{
 	getDuration = function(self, t)
 		return 2
 	end,
-	on_pre_use = function(self, t, silent)
-		if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end
+	on_pre_use = function(self, t)
 		local eff = self:hasEffect(self.EFF_STALKER)
 		return eff and not eff.target.dead and core.fov.distance(self.x, self.y, eff.target.x, eff.target.y) <= 1
-		return true
 	end,
 	
 	action = function(self, t)
@@ -131,7 +129,7 @@ newTalent{
 		for i = 1, 2 do
 			-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 			local shield, shield_combat = self:hasShield()
-			local weapon = self:hasMHWeapon().combat
+			local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat --can do unarmed attack
 			local hit = false
 			if not shield then
 				hit = self:attackTarget(target, nil, damageMultiplier, true)
