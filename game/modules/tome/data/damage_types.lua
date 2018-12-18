@@ -2499,7 +2499,7 @@ newDamageType{
 			target:setEffect(target.EFF_RETCHED, 1, {})
 		end
 
-		if target and (target:attr("undead") or target:attr(retch_heal)) then
+		if target and (target:attr("undead") or target:attr("retch_heal")) then
 			target:heal(dam * 1.5, src)
 
 			if src.callTalent then
