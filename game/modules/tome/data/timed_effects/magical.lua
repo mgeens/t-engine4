@@ -4338,3 +4338,18 @@ newEffect{
 		self:effectTemporaryValue(eff, "combat_def", eff.spellpower)
 	end,
 }
+
+newEffect{
+	name = "RETCHED", image = "talents/retch.png",
+	desc = "Retched",
+	long_desc = function(self, eff) return ("The target is walking in its own retch, negating the natural ghoul's speed penalty."):format() end,
+	type = "magical",
+	subtype = { undead=true, speed=true },
+	status = "beneficial",
+	on_gain = function(self, err) return "#Target# speeds up in the retch.", "+Retched" end,
+	on_lose = function(self, err) return "#Target# speeds down outside of the retch.", "-Retched" end,
+	parameters = { spellpower=0},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "global_speed_add", 0.2)
+	end,
+}
