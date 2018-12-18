@@ -36,7 +36,7 @@ newTalent{
 	end,
 	getRegenRate = function(self, t) return 3 + combatTalentDamage(self, t, 15, 25) end,
 	updateHealingFactor = function(self, t)
-		local change = -0.5 + math.min(100, self:getHate()) * .005
+		local change = -0.5 + math.min(200, self:getHate()) * .005 --bonus healmod from hate>100. limit for safety
 		self.healing_factor = (self.healing_factor or 1) - (self.unnatural_body_healing_factor or 0) + change
 		self.unnatural_body_healing_factor = change
 	end,

@@ -3248,9 +3248,7 @@ function _M:die(src, death_note)
 	if src and src.hasEffect and src:hasEffect(src.EFF_CURSE_OF_CORPSES) then
 		local eff = src:hasEffect(src.EFF_CURSE_OF_CORPSES)
 		local def = src.tempeffect_def[src.EFF_CURSE_OF_CORPSES]
-		if not def.doReprieveFromDeath(src, eff, self) then
-			def.doCorpselight(src, eff, self)
-		end
+		def.doReprieveFromDeath(src, eff, self)
 	end
 
 	-- Curse of Shrouds: Shroud of Death

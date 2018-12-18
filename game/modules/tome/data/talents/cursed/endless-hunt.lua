@@ -100,12 +100,12 @@ newTalent{
 	cooldown = 6,
 	hate = 5,
 	tactical = { ATTACK = { PHYSICAL = 3 } },
-	getCooldownDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3.75, 6.75, "log", 0, 1)) end,
+	getCooldownDuration = function(self, t) return math.ceil(self:combatTalentLimit(t, 5, 0.75, 2.7)) end,
 	getDamageMultiplier = function(self, t, hate)
 		return getHateMultiplier(self, 0.35, 0.67, false, hate)
 	end,
 	getTargetDamageChange = function(self, t)
-		return -self:combatLimit(self:combatTalentStatDamage(t, "wil", 0.7, 0.9), 1, 0, 0, 0.75, 0.87)*100 -- Limit < 100%
+		return -self:combatLimit(self:getTalentLevel(t), 100, 45.5, 1.3, 55, 6.5)
 	end,
 	getDuration = function(self, t)
 		return 2
@@ -144,10 +144,10 @@ newTalent{
 					local t = target:getTalentFromId(tid)
 					if not target.talents_cd[tid] and t.mode == "activated" and not t.innate then tids[#tids+1] = t end
 				end
-
+					
 				local t = rng.tableRemove(tids)
 				if t then
-					target.talents_cd[t.id] = rng.range(3, 5)
+					target.talents_cd[t.id] = getCooldownDuration
 					game.logSeen(target, "#F53CBE#%s's %s is disrupted!", target.name:capitalize(), t.name)
 				end
 			end

@@ -650,6 +650,14 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
+		--curse of madness effect spread on crit
+		if state.crit_power > 1 and src.hasEffect and src:hasEffect(src.EFF_CURSE_OF_MADNESS) then
+			local eff = src:hasEffect(src.EFF_CURSE_OF_MADNESS)
+			local def = src.tempeffect_def[src.EFF_CURSE_OF_MADNESS]
+			def.doConspirator(src, eff, target)
+		end
+
+
 		return dam + add_dam
 	end
 	return 0 + add_dam
@@ -2486,7 +2494,7 @@ newDamageType{
 		state = initState(state)
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
-		if target and (target:attr("undead") or target:attr(retch_heal)) then
+		if target and (target:attr("undead") or target:attr("retch_heal")) then
 			target:heal(dam * 1.5, src)
 
 			if src.callTalent then
@@ -3344,11 +3352,25 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and src:reactionToward(target) < 0 then
+
+			--hateful whisper
 			if rng.chance(10) and not target:hasEffect(target.EFF_HATEFUL_WHISPER) then
-				src:forceUseTalent(src.T_HATEFUL_WHISPER, {ignore_cd=true, ignore_energy=true, force_target=target, force_level=1, ignore_ressources=true})
+				--hateful whisper uses talent level of src
+				if src:knowTalent(src.T_HATEFUL_WHISPER) then tHateWhisp = src:getTalentFromId(src.T_HATEFUL_WHISPER) end
+				if src:hasEffect(src.EFF_CURSE_OF_NIGHTMARES) then efNightmare = src.tempeffect_def[src.CURSE_OF_NIGHTMARES] end
+				if tHateWhisp and efNightmare then
+					nightLevel = math.max(1, tHateWhisp.getTalentLevel(tHateWhisp), efNightmare.level - 2)
+				elseif tHateWhisp then
+					nightLevel = tHateWhisp.getTalentLevel(tHateWhisp)
+				elseif effNightmare then
+					nightLevel = math.max(1, efNightmare.level - 2)
+				else nightLevel = 1
+				end
+				src:forceUseTalent(src.T_HATEFUL_WHISPER, {ignore_cd=true, ignore_energy=true, force_target=target, force_level=nightLevel, ignore_ressources=true})
 			end
 
-			if rng.chance(30) then
+			--slow
+			if rng.chance(10) then
 				target:setEffect(target.EFF_SLOW, 3, {power=0.3})
 			end
 		end

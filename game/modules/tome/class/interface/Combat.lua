@@ -1095,7 +1095,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 
 	if hitted and not target.dead then
 		-- Curse of Madness: Twisted Mind
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_MADNESS)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(self, eff, target)
@@ -1104,10 +1104,10 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_MADNESS)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(target, eff, self)
-		end
+		end]]
 
 		-- Curse of Nightmares: Suffocate
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(self, eff, target)
@@ -1116,7 +1116,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_NIGHTMARES)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(target, eff, self)
-		end
+		end]]
 	end
 
 	if target:isTalentActive(target.T_SHARDS) and hitted and not target.dead and not target.turn_procs.shield_shards then

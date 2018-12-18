@@ -161,7 +161,7 @@ newTalent{
 	mode = "passive",
 	require = cursed_wil_req3,
 	points = 5,
-	getDamage = function(self, t) return self:combatTalentMindDamage(t, 5, 20) * math.min(2.5, self.combat_mindspeed) end,
+	getDamage = function(self, t) return self:combatTalentMindDamage(t, 3, 35) end,
 	radius = function(self, t) return 3 end,
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
@@ -173,7 +173,7 @@ newTalent{
 		end
 		return false
 	end,
-	callbackOnActBase = function(self, t)
+	callbackOnActEnd = function(self, t)
 		if self:isTalentActive(self.T_GLOOM) and t.hasFoes(self) then
 			local tg = self:getTalentTarget(t)
 			self:projectSource(tg, self.x, self.y, DamageType.MIND, self:mindCrit(t.getDamage(self, t) * 0.5), nil, t)

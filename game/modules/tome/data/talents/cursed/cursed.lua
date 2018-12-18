@@ -152,7 +152,7 @@ function getHateMultiplier(self, min, max, cursedWeaponBonus, hate)
 			if self:hasCursedWeapon() then fraction = fraction + 0.2 end
 		end
 	end
-	fraction = math.min(fraction, 1)
+	fraction = math.min(fraction, 2)
 	return (min + ((max - min) * fraction))
 end
 
