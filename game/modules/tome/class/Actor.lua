@@ -1901,6 +1901,22 @@ function _M:tooltip(x, y, seen_by)
 	else ts:add({"color", 0, 255, 255}, ("Level: %d"):format(self.level), {"color", "WHITE"}, true) end
 	if self:attr("invulnerable") then ts:add({"color", "PURPLE"}, "INVULNERABLE!", true) end
 	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%) #GREEN#+%0.2f#LAST#"):format(self.life, self.life * 100 / self.max_life, self.life_regen * util.bound(self.healing_factor or 1)), {"color", "WHITE"})
+	
+	-- Avoid cluttering tooltip if resources aren't relevant (add menu option?)
+	if game.player:knowTalentType("wild-gift/antimagic") then
+		if self:knowTalent(self.T_MANA_POOL) then 
+			ts:add(("\nMana:  "..self.resources_def.mana.color.."%d / %d#LAST#"):format(self.mana, self.max_mana, true))
+		end
+		if self:knowTalent(self.T_VIM_POOL) then
+			ts:add(("\nVim:  "..self.resources_def.vim.color.."%d / %d#LAST#"):format(self.vim, self.max_vim, true))
+		end
+		if self:knowTalent(self.T_POSITIVE_POOL) then
+			ts:add(("\nPositive:  "..self.resources_def.positive.color.."%d / %d#LAST#"):format(self.positive, self.max_positive, true))
+		end
+		if self:knowTalent(self.T_NEGATIVE_POOL) then
+			ts:add(("\nNegative:  "..self.resources_def.negative.color.."%d / %d#LAST#"):format(self.negative, self.max_negative, true))
+		end
+	end
 
 	if self:knowTalent(self.T_SOLIPSISM) then
 		local psi_percent = 100*self.psi/self.max_psi
@@ -2155,10 +2171,6 @@ function _M:onHeal(value, src)
 
 	if self:attr("arcane_shield") and self:attr("allow_on_heal") and value > 0 then
 		self:setEffect(self.EFF_DAMAGE_SHIELD, 3, {power=value * self.arcane_shield / 100})
-	end
-
-	if self:attr("fungal_growth") and self:attr("allow_on_heal") and value > 0 and not self:hasEffect(self.EFF_REGENERATION) then
-		self:setEffect(self.EFF_REGENERATION, 6, {power=(value * self.fungal_growth / 100) / 6, no_wild_growth=true})
 	end
 
 	-- Must be last!

@@ -1724,7 +1724,7 @@ newEffect{
 	desc = "Bloodbath",
 	long_desc = function(self, eff) return ("The thrill of combat improves the target's maximum life by %d%%, life regeneration by %0.2f, and stamina regeneration by %0.2f."):format(eff.hp, eff.cur_regen or eff.regen, eff.cur_regen/5 or eff.regen/5) end,
 	type = "mental",
-	subtype = { frenzy=true, heal=true },
+	subtype = { frenzy=true, heal=true, regeneration=true, },
 	status = "beneficial",
 	parameters = { hp=10, regen=10, max=50 },
 	on_gain = function(self, err) return nil, "+Bloodbath" end,
