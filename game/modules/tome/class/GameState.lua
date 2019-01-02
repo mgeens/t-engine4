@@ -1678,8 +1678,18 @@ function _M:egoFilter(zone, level, type, etype, e, ego_filter, egos_list, picked
 		fcts[#fcts+1] = function(ego) return not ego.power_source or not ego.power_source.arcane end
 	end
 
+	-- If unique_ego is a string it represents a category a single item can only have 1 ego from, this is useful for stuff that overwrites each other like item actives, etc
+	-- If unique_ego is a non-string we just prevent it from being applied to the same item twice
 	if unique_check then
-		fcts[#fcts+1] = function(ego) 
+		fcts[#fcts+1] = function(ego)
+			if _G.type(ego.unique_ego) == "string" then
+				for k,v in pairs(e.ego_list) do
+					if v and v[1] and v[1].unique_ego and v[1].unique_ego == ego.unique_ego then
+						return false 
+					end
+				end
+			end
+
 			-- Use keywords as a proxy for name, a bit simpler than going through Object.ego_list
 			for k,v in pairs(ego.keywords) do
 				if e.keywords and e.keywords[k] then return false end
