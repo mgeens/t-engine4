@@ -95,6 +95,12 @@ newEntity{ define_as = "GREATER_MUMMY_LORD",
 	resolvers.inscriptions(1, "rune", "attack"),
 	resolvers.inscriptions(1, "rune", "protect"),
 	resolvers.inscriptions(2, "rune"),
+
+	auto_classes={
+		{class="Bulwark", start_level=30, level_rate=50},
+		{class="Archmage", start_level=30, level_rate=50},
+		add_trees = {["spell/ice"]=true}
+	},
 }
 
 -- Some mummies

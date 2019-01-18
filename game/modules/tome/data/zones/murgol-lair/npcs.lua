@@ -48,7 +48,7 @@ newEntity{ base = "BASE_NPC_YAECH", define_as = "MURGOL",
 	resolvers.equip{
 		{type="weapon", subtype="trident", autoreq=true, special_rarity="trident_rarity"},
 		{type="armor", subtype="light", defined="EEL_SKIN", random_art_replace={chance=65}, autoreq=true},
-		{type="charm", subtype="torque", autoreq=true}
+		--{type="charm", subtype="torque", autoreq=true}
 	},
 	resolvers.drops{chance=100, nb=3, {tome_drops="boss"} },
 
