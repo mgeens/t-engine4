@@ -486,22 +486,14 @@ end
 function _M:addedToLevel(level, x, y)
 	if not self:attr("difficulty_boosted") and not game.party:hasMember(self) and not (self.summoner or self.summoned) then
 		-- make adjustments for game difficulty to talent levels, max life, and bonus fixedboss classes
-		local talent_mult, life_mult, class_mult = 1,1,1
-		if game.difficulty == game.DIFFICULTY_NIGHTMARE then
-			talent_mult = 1.3
-			class_mult = 1.3
-			life_mult = 1.1
-		elseif game.difficulty == game.DIFFICULTY_INSANE then
-			talent_mult = 1.8
-			class_mult = 1.8
-			life_mult = 1.2
-		elseif game.difficulty == game.DIFFICULTY_MADNESS then
-			talent_mult = 2.7
-			class_mult = 2.7
-			life_mult = 3.0
-		end
+		local talent_mult = game.state.birth.difficulty_talent_mult or 1
+		local life_mult = game.state.birth.difficulty_life_mult or 1
+		local level_rate = game.state.birth.default_fixedboss_class_level_rate or 1
+		local start_level_pct = game.state.birth.default_fixedboss_class_start_level_pct or 0.8
 		if talent_mult ~= 1 then
 			-- increase level of innate talents
+			-- Note: talent levels from added classes are not adjusted for difficulty directly
+			-- This means that the NPC's innate talents are generally higher level, preserving its "character"
 			for tid, lev in pairs(self.talents) do
 				local t = self:getTalentFromId(tid)
 				if t.points ~= 1 then
@@ -510,21 +502,21 @@ function _M:addedToLevel(level, x, y)
 			end
 
 			-- Resolve bonus classes for fixed bosses
-			-- Note: talent levels from added classes are not adjusted for difficulty directly
-			-- This means that the NPC's innate talents are generally higher level, preserving its "character"
-			-- Fixedboss random classes start at level 14 to avoid breaking early game balance
+			-- Fixedboss random classes start at player level 10 by default to avoid breaking early game balance
 			-- For now if not defined the starting level of fixedboss classes is 80% of their actor level, unsure what this value should be
 			if self.rank >= 3.5 and not self.randboss and not self.no_difficulty_random_class then
-				if self.auto_classes then
-					for _, class in pairs(self.auto_classes) do
-						class.level_rate = class.level_rate * class_mult
-					end
-				else
-					local data = {auto_sustain=true, forbid_equip=false, start_level = math.max(14, self.level * 0.8), nb_classes=1, level_rate = class_mult*100, update_body=true, spend_points=true, autolevel="random_boss"}
+				if not self.auto_classes then
+					local start_level = math.max(10, self.level * 0.8)
+					self.start_level = start_level
+					local data = {
+						forbid_equip=false, start_level = self.level * start_level_pct, nb_classes=1,
+						level_rate = level_rate * 100, update_body=true, spend_points=true, autolevel="random_boss", calculate_tactical = true, auto_sustain=true,
+					}
 					game.state:applyRandomClassNew(self, data, true)
 				end
 
-				self[#self+1] = resolvers.talented_ai_tactic("instant") -- regenerate AI TACTICS with the new class(es)
+				-- Does this always happen after classes are fully resolved?
+				if self.ai_calculate_tactical then self[#self+1] = resolvers.talented_ai_tactic("instant") end -- regenerate AI TACTICS with the new class(es)
 				self:resolve() self:resolve(nil, true)
 				self:resetToFull()
 			end
