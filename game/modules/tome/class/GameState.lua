@@ -381,6 +381,7 @@ end
 -- @param data.nb_powers_add = #extra random powers to add <0>
 -- @param data.powers_special = function(p) that must return true on each random power to add (from base.randart_able)
 -- @param data.nb_themes = #power themes (power groups) for random powers to use <scales to 5 with lev>
+-- @param data.nb_themes_add = #extra power themes to add <0>
 -- @param data.force_themes = additional power theme(s) to use for random powers = {"attack", "arcane", ...}
 -- @param data.egos = total #egos to include (forced + random) <3>
 -- @param data.greater_egos_bias = #egos that should be greater egos <2/3 * data.egos>
@@ -427,9 +428,11 @@ function _M:generateRandart(data)
 	-- Pick Themes
 	-----------------------------------------------------------
 	local nb_themes = data.nb_themes
+	local nb_themes_add = data.nb_themes_add or 0
 	if not nb_themes then -- Gradually increase number of themes at higher levels so there are enough powers to spend points on
 		nb_themes = math.max(2,5*lev/(lev+50)) -- Maximum 5 themes possible
 		nb_themes= math.floor(nb_themes) + (rng.percent((nb_themes-math.floor(nb_themes))*100) and 1 or 0)
+		nb_themes = math.min(5, nb_themes + nb_themes_add)
 	end
 	-- update power sources and themes lists based on base object properties
 	local psource
@@ -602,6 +605,8 @@ function _M:generateRandart(data)
 	-----------------------------------------------------------
 	-- Imbue random powers into the randart according to themes
 	-----------------------------------------------------------
+	-- Note:  The same power can be selected twice for both the base power list as well as the bias power list, this will lead to wasted points very easily at low theme/high power point counts
+	local max_reached = false
 	local function merger(d, e, k, dst, src, rules, state) --scale: factor to adjust power limits for levels higher than 50
 		if (not state.path or #state.path == 0) and not state.copy then
 			if k == "copy" then -- copy into root
@@ -615,11 +620,13 @@ function _M:generateRandart(data)
 			d.max = e.max
 			if e.max < 0 then
 				if d.v < e.max * scale then --Adjust maximum values for higher levels
-					d.v = math.floor(e.max * scale)
+					d.v = e.max * scale
+					max_reached = true
 				end
 			else
 				if d.v > e.max * scale then --Adjust maximum values for higher levels
-					d.v = math.floor(e.max * scale)
+					d.v = e.max * scale
+					max_reached = true
 				end
 			end
 			return true
@@ -636,9 +643,15 @@ function _M:generateRandart(data)
 		local p = powers[i]
 		if p and p.points <= hpoints*2 then -- Intentionally allow the budget to be exceeded slightly to guarantee powers at low levels
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
-		print(" * adding power: "..p.name.."("..p.points.." points)")
-			selected_powers[p.name] = selected_powers[p.name] or {}
+			print(" * adding power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
+			if max_reached or p.unique then
+				print("Removing power from the list, ", p.name, "==", powers[i], "remaining:")
+				for i, v in ripairs(powers) do
+					if v.name == p.name then table.remove(powers, i) end
+				end
+				max_reached = false
+			end
 			hpoints = hpoints - p.points 
 			p.points = p.points * 1.5 --increased cost (=diminishing returns) on extra applications of the same power
 		else
@@ -656,15 +669,20 @@ function _M:generateRandart(data)
 	fails = 0 
 	while hpoints > 0 and fails <= #bias_powers do
 		i = util.boundWrap(i + 1, 1, #bias_powers)
-
 		local p = bias_powers[i] and bias_powers[i]
 		if p and p.points <= hpoints * 2 then
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
---			print(" * adding bias power: "..p.name.."("..p.points.." points)")
-			selected_powers[p.name] = selected_powers[p.name] or {}
+			print(" * adding bias power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
+			if max_reached or p.unique then
+				print("Removing power from bias list , ", p.name)
+				for i, v in ripairs(bias_powers) do
+					if v.name == p.name then table.remove(bias_powers, i) end
+				end
+				max_reached = false
+			end
 			hpoints = hpoints - p.points
-			p.points = p.points * 1.5 --increased cost (=diminishing returns) on extra applications of the same power
+			p.points = p.points * 1.2 --increased cost (=diminishing returns) on extra applications of the same power, but less on the biased powers
 		else
 			fails = fails + 1
 		end
