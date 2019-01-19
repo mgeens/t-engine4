@@ -2273,6 +2273,17 @@ newEffect{
 		local shield1, combat1, shield2, combat2 = self:hasShield()
 		if shield1 and shield1.on_block and shield1.on_block.fct then shield1.on_block.fct(shield1, self, src, type, dam, eff) end
 		if shield2 and shield2.on_block and shield2.on_block.fct then shield2.on_block.fct(shield2, self, src, type, dam, eff) end
+
+		if shield1 and shield1.on_block and _G.type(shield1.on_block) == "table" then
+			for _, on_block in pairs(shield1.on_block) do
+				on_block.fct(shield1, self, src, type, dam, eff, on_block)
+			end
+		end
+		if shield2 and shield2.on_block and _G.type(shield2.on_block) == "table" then
+			for _, on_block in pairs(shield1.on_block) do
+				on_block.fct(shield2, self, src, type, dam, eff, on_block)
+			end
+		end
 		if eff.properties.br then
 			self:heal(blocked, src)
 			game:delayedLogMessage(self, src, "block_heal", "#CRIMSON##Source# heals from blocking with %s shield!", string.his_her(self))
