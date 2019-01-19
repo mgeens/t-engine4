@@ -1989,6 +1989,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Main:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -1998,6 +1999,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Off :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -2007,6 +2009,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Psi :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -2016,6 +2019,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Ammo:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
