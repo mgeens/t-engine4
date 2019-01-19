@@ -1023,7 +1023,11 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 			for dt, amount in pairs(combat.melee_project or combat.ranged_project or {}) do
 				local dt_def = DamageType:get(dt)
 				if dt_def and dt_def.tdesc then
-					list[dt] = {0, dt_def.tdesc, amount}
+					local desc = function(dam)
+						return dt_def.tdesc(dam, nil, use_actor)
+					end
+					list[dt] = {0, desc, amount}
+					--list[dt] = {0, dt_def.tdesc, amount}
 				end
 			end
 			-- Get specials
@@ -1285,7 +1289,7 @@ function _M:getTextualDesc(compare_with, use_actor)
 		for i, v in pairs(w.melee_project or {}) do
 			local def = DamageType.dam_def[i]
 			if def and def.tdesc then
-				local d = def.tdesc(v)
+				local d = def.tdesc(v, nil, use_actor)
 				found = true
 				dt_string:add(d, {"color","LAST"}, true)
 			else
@@ -1304,7 +1308,7 @@ function _M:getTextualDesc(compare_with, use_actor)
 		for i, v in pairs(w.ranged_project or {}) do
 			local def = DamageType.dam_def[i]
 			if def and def.tdesc then
-				local d = def.tdesc(v)
+				local d = def.tdesc(v, nil, use_actor)
 				ranged_found = true
 				ranged:add(d, {"color","LAST"}, true)
 			else
@@ -1318,7 +1322,7 @@ function _M:getTextualDesc(compare_with, use_actor)
 		for i, v in pairs(w.on_melee_hit or {}) do
 			local def = DamageType.dam_def[i]
 			if def and def.tdesc then
-				local d = def.tdesc(v)
+				local d = def.tdesc(v, nil, use_actor)
 				found = true
 				onhit:add(d, {"color","LAST"}, true)
 			else
