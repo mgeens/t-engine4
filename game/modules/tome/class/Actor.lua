@@ -3797,8 +3797,8 @@ function _M:levelup()
 	engine.interface.ActorLevel.levelup(self)
 	self:resolveLevelTalents()
 
-	-- Restock shops at level 5 and every 10 levels
-	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) or (self.level == 5) ) then
+	-- Restock shops at every 10 levels
+	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) ) then
 		if not (game.state.stores_restocks and game.state.stores_restocks[self.level]) then
 			game.state:storesRestock()
 			game.state.stores_restocks = game.state.stores_restocks or {}
