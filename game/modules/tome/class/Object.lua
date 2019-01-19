@@ -1015,7 +1015,7 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 	end
 
 	compare_list(
-		"On weapon hit:",
+		"#YELLOW#On weapon hit:#LAST#",
 		function(combat)
 			if not combat then return {} end
 			local list = {}
@@ -1033,7 +1033,7 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 	)
 
 	compare_list(
-		"On weapon crit:",
+		"#YELLOW#On weapon crit:#LAST#",
 		function(combat)
 			if not combat then return {} end
 			return get_special_list(combat, 'special_on_crit')
@@ -1041,7 +1041,7 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 	)
 
 	compare_list(
-		"On weapon kill:",
+		"#YELLOW#On weapon kill:#LAST#",
 		function(combat)
 			if not combat then return {} end
 			return get_special_list(combat, 'special_on_kill')
