@@ -35,8 +35,9 @@ newEntity{
 		talented = "mindstar",
 		physspeed = 1,
 		damrange = 1.1,
+		accuracy_effect="axe",
 		sound = {"actions/melee", pitch=0.6, vol=1.2}, sound_miss = {"actions/melee", pitch=0.6, vol=1.2},
-		damtype = resolvers.rngtable{DamageType.NATURE, DamageType.MIND},
+		damtype = DamageType.NATURE,
 	},
 	desc = [[Mindstars are natural products. Natural gems covered in living matter, they are used to focus the mental powers of all nature defenders and psionics.
 Using mindstars in the offhand does not incur the normal offhand damage penalty.]],
