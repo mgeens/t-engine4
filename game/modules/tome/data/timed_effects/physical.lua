@@ -3208,12 +3208,10 @@ newEffect{
 		self:effectParticles(eff, {type="circle", args={toback=true, oversize=1.8, base_rot=180, a=255, shader=true, appear=12, img="marked_death_aura", speed=0, radius=0}})
 	end,
 	deactivate = function(self, eff)
-		if eff.turns >= eff.max_dur then
-			eff.src.__project_source = eff
-			eff.src:project({type="hit", x=self.x, y=self.y}, self.x, self.y, DamageType.PHYSICAL, eff.dam, nil)
-			game.level.map:particleEmitter(self.x, self.y, 1, "blood")
-			eff.src.__project_source = nil
-		end
+		eff.src.__project_source = eff
+		eff.src:project({type="hit", x=self.x, y=self.y}, self.x, self.y, DamageType.PHYSICAL, eff.dam, nil)
+		game.level.map:particleEmitter(self.x, self.y, 1, "blood")
+		eff.src.__project_source = nil
 	end,
 	on_timeout = function(self, eff)
 		eff.turns = eff.turns + 1
