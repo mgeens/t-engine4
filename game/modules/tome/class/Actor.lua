@@ -3371,7 +3371,7 @@ end
 -- @field level_rate: rate levels in character class are gained as % of actor level <100>
 -- @field check_talents_level: set true to enforce character level limits on talent levels (i.e. level 5 at level 50) <nil>
 -- @field level_by_class: set true to use class level rather than actor level when checking talent/stat limits <nil>
--- @foe;d ignore_special: set true to skip checking talent special requirements
+-- @field ignore_special: set true to skip checking talent special requirements
 -- @field auto_sustain: set true to automatically turn on sustained talents learned <nil>
 -- @field tt_focus: talent type focus, higher values cause talent selections to be focused within fewer talent types <3>
 -- @field use_actor_points: set true to apply stat/talent points from base actor levels in addtion to class levels <nil>
@@ -3380,14 +3380,19 @@ end
 --		{talent_type_name = {[1]=known, [2]=mastery_add}, ...}
 -- @field auto_stats: ordered list of stat ids to use when applying unused_stats points
 --		generated from class descriptor by default, set false to disable, see Actor:learnStats
+-- @field calculate_tactical:  set true to recalculate ai_tactic weights based on learned talents <nil>
 -- Additional talent inputs for each talent definition t:
 --	t.random_boss_rarity: if defined, the percent chance the talent may be learned each time randomly selected
 function _M:levelupClass(c_data)
+	if game.player.level <= (game.state.birth.fixedboss_class_minimum_level or 0) then return end
+	local difficulty_adjusted_level_rate = (game.state.birth.fixedboss_class_level_rate_mult or 1) * (c_data.level_rate or 100)	
+	
+	
 	c_data.last_level = c_data.last_level or 0
 	c_data.start_level = c_data.start_level or 1
-
-	local new_level = math.ceil((self.level - c_data.start_level + 1)*(c_data.level_rate or 100)/100)
+	if c_data.calculate_tactical then self.ai_calculate_tactical = true end
 	
+	local new_level = math.ceil((self.level - c_data.start_level + 1)*difficulty_adjusted_level_rate/100)
 	if new_level <= c_data.last_level then return end
 	print("[Actor:levelupClass]", self.name, "auto level up", c_data.class, c_data.last_level, "-->", new_level, c_data)
 	
@@ -3417,7 +3422,7 @@ function _M:levelupClass(c_data)
 			return 
 		end
 
-		print(("[Actor:levelupClass] %s %s ## Initialzing auto_class %s (%s) %s%% level_rate from level %s ##"):format(self.uid, self.name, c_data.class, mclass.name, c_data.level_rate, c_data.start_level))
+		print(("[Actor:levelupClass] %s %s ## Initialzing auto_class %s (%s) %s%% level_rate from level %s ##"):format(self.uid, self.name, c_data.class, mclass.name, difficulty_adjusted_level_rate, c_data.start_level))
 
 		-- update class descriptor list and build inherent power sources
 		self.descriptor = self.descriptor or {}

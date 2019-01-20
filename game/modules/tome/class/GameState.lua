@@ -1491,8 +1491,9 @@ local standard_rnd_boss_adjust = function(b)
 	if b.level <= 30 then
 		-- Damage reduction is applied in all cases, acknowledging the frontloaded strength of randbosses and the potential for players to lack tools early
 		b.inc_damage = b.inc_damage or {}
-		local change =  (70 * (30 - b.level + 1) / 30) + 20
-		b.inc_damage.all = math.max(-80, (b.inc_damage.all or 0) - change)
+		--local change =  (70 * (30 - b.level + 1) / 30) + 20
+		local change =  95 - b.level * 3
+		b.inc_damage.all = math.max(-80, (b.inc_damage.all or 0) - change)  -- Minimum of 20% damage
 		
 		-- Things prone to binary outcomes (0 damage, 0 hit rate, ...) like armor and defense are only reduced if they exceed a cap per level regardless of source
 		-- This lets us not worry about stuff like Shield Wall+lucky equipment creating early threats that some builds cannot hurt
@@ -1567,7 +1568,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 			if _G.type(filter.random_boss) == "boolean" then filter.random_boss = {}
 			else filter.random_boss = table.clone(filter.random_boss, true) end
 			filter.random_boss.level = filter.random_boss.level or zone:level_adjust_level(level, zone, type)
-			filter.random_boss.rnd_boss_final_adjust = filter.random_boss.rnd_boss_final_adjust or standard_rnd_boss_adjust
+			filter.random_boss.rnd_boss_final_adjust = filter.random_boss.rnd_boss_final_adjust or game.state.birth.random_boss_adjust_fct or standard_rnd_boss_adjust
 			e = self:createRandomBoss(e, filter.random_boss)
 		elseif filter.random_elite and not e.unique then
 			if _G.type(filter.random_elite) == "boolean" then filter.random_elite = {}
@@ -1576,7 +1577,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 			local base = {
 				nb_classes=1,
 				rank=3.2, ai = "tactical",
-				life_rating = filter.random_elite.life_rating or function(v) return v * 1.3 + 2 end,
+				life_rating = filter.random_elite.life_rating or function(v) return v * 1.5 + 2 end,
 				loot_quality = "store",
 				loot_quantity = 0,
 				drop_equipment = false,
@@ -1614,7 +1615,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 					end
 					if data.user_post then data.user_post(b, data) end
 				end,
-				rnd_boss_final_adjust = filter.random_elite.rnd_boss_final_adjust or standard_rnd_boss_adjust
+				rnd_boss_final_adjust = filter.random_elite.rnd_boss_final_adjust or game.state.birth.random_boss_adjust_fct or standard_rnd_boss_adjust
 			}
 			e = self:createRandomBoss(e, table.merge(base, filter.random_elite, true))
 		end
@@ -2287,7 +2288,7 @@ function _M:createRandomBoss(base, data)
 	if data.life_rating then
 		b.life_rating = data.life_rating(b.life_rating)
 	else
-		b.life_rating = b.life_rating * 1.5 + rng.range(2, 6)
+		b.life_rating = b.life_rating * 1.7 + rng.range(4, 9)
 	end
 	b.max_life = b.max_life or 150
 	b.max_inscriptions = 5 -- Note:  This usually won't add inscriptions to NPC bases without them
@@ -2437,10 +2438,13 @@ end
 --	@field data.forbid_equip set true to ignore class equipment resolvers (and filters) or equip inventory <nil>
 --	@field data.loot_quality = drop table to use for equipment <"boss">
 --	@field data.drop_equipment set true to force dropping of equipment <nil>
+--  @field data.calculate_tactical:  set true to recalculate ai_tactic weights based on learned talents <nil>
+
 --	@param instant set true to force instant learning of talents and generating golem <nil>
 function _M:applyRandomClassNew(b, data, instant)
 	if not data.level then data.level = b.level end -- use the level specified if needed
 
+	if data.calculate_tactical then self.ai_calculate_tactical = true end
 	------------------------------------------------------------
 	-- Apply talents from classes
 	------------------------------------------------------------
@@ -2507,6 +2511,7 @@ function _M:applyRandomClassNew(b, data, instant)
 			auto_sustain = data.auto_sustain,
 			check_talents_level = data.check_talents_level,
 			level_by_class = data.level_by_class,
+			calculate_tactical = data.calculate_tactical,
 		}
 		table.insert(b.auto_classes, c_data)
 		return true
