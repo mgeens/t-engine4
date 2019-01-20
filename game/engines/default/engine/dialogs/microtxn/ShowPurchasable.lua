@@ -29,6 +29,9 @@ local Button = require "engine.ui.Button"
 
 module(..., package.seeall, class.inherit(Dialog))
 
+local bonus_vault_slots_text = "#{italic}##UMBER#Bonus vault slots from this order: #ROYAL_BLUE#%d#{normal}#"
+local bonus_vault_slots_tooltip = "Each purchase/donations you do for the game grants you one more vault space for every 2 euros spent (when paying with other currencies the convertion to base price of the item is made). If your current total is an odd number, then the next euro will make you get the vault slot."
+
 function _M:init(mode)
 	if not mode then mode = core.steam and "steam" or "te4" end
 	self.mode = mode
@@ -60,6 +63,17 @@ function _M:init(mode)
 	}, list=self.list, all_clicks=true, fct=function(item, _, button) self:use(item, button) end, select=function(item, sel) self:onSelectItem(item) end}
 	self.c_list.on_focus_change = function(_, v) if not v then game:tooltipHide() end end
 
+	self.c_bonus_vault_slots = Textzone.new{width=350, auto_height=1, text=bonus_vault_slots_text:format(0), can_focus=true}
+	self.c_bonus_vault_slots.on_focus_change = function(_, v)
+		game.log("====")
+		if v then
+			local txt = self:getUIElement(self.c_bonus_vault_slots)
+			game:tooltipDisplayAtMap(txt.x, txt.y, item.tooltip)
+		else
+			game:tooltipHide()
+		end
+	end
+
 	self.c_do_purchase = Button.new{text="Purchase", fct=function() self:doPurchase() end}
 
 	self.c_recap = ListColumns.new{width=350, height=self.ih - self.c_do_purchase.h, scrollbar=true, columns={
@@ -73,12 +87,18 @@ function _M:init(mode)
 		self:use(item.item, button)
 	end, select=function(item, sel) end}
 
-	self:loadUI{
+	local uis = {
 		{vcenter=0, hcenter=0, ui=self.c_waiter},
 		{left=0, top=0, ui=self.c_list},
 		{right=0, top=0, ui=self.c_recap},
 		{right=0, bottom=0, ui=self.c_do_purchase},
 	}
+	-- Only show those for steam as te4.org purchases require already having a donation up
+	if core.steam then
+		uis[#uis+1] = {right=0, bottom=self.c_do_purchase, ui=self.c_bonus_vault_slots}
+	end
+	self:loadUI(uis)
+
 	self:setupUI(false, false)
 	self:toggleDisplay(self.c_list, false)
 
@@ -129,13 +149,14 @@ function _M:currencyDisplay(v)
 end
 
 function _M:updateCart()
-	local nb_items, total_sum = 0, 0
+	local nb_items, total_sum, total_core_sum = 0, 0, 0
 	table.empty(self.recap)
 
 	for id, ok in pairs(self.cart) do if ok then
 		local item = self.purchasables[id]
 		nb_items = nb_items + item.nb_purchase
 		total_sum = total_sum + item.nb_purchase * item.price
+		total_core_sum = total_core_sum + item.nb_purchase * item.core_price
 
 		self.recap[#self.recap+1] = {
 			sort_name = item.name,
@@ -157,6 +178,9 @@ function _M:updateCart()
 	self:updateTitle(self.base_title_text..("  (%d items in cart, %s)"):format(nb_items, self:currencyDisplay(total_sum)))
 
 	self:toggleDisplay(self.c_do_purchase, nb_items > 0)
+
+	self.c_bonus_vault_slots.text = bonus_vault_slots_text:format(total_core_sum / 20 + (profile.auth.donated % 2) / 2)
+	self.c_bonus_vault_slots:generate()
 end
 
 function _M:doPurchase()
@@ -256,6 +280,7 @@ function _M:doPurchaseSteam()
 		profile:registerTemporaryEventHandler("MicroTxnSteamFinalizeCartResult", function(e)
 			game:unregisterDialog(finalpopup)
 			if e.success then
+				if e.new_donated then profile.auth.donated = e.new_donated end
 				self:paymentSuccess()
 			else
 				Dialog:simplePopup("Payment", "Payment refused, you have not been billed.")
@@ -280,23 +305,26 @@ end
 function _M:buildTooltip(item)
 	local text = {}
 	if item.community_event then
-		text[#text+1] = [[- Once you have purchased a community event you will be able to trigger it at any later date, on whichever character you choose.
+		text[#text+1] = [[#{bold}##GOLD#Community Online Event#WHITE##{normal}#: Once you have purchased a community event you will be able to trigger it at any later date, on whichever character you choose.
 Community events once triggered will activate for #{bold}#every player currently logged on#{normal}# including yourself. Every player receiving it will know you sent it and thus that you are to thank for it.
 To activate it you will need to have your online events option set to "all" (which is the default value).]]
 	end
 	if item.self_event then
-		text[#text+1] = [[- Once you have purchased an event you will be able to trigger it at any later date, on whichever character you choose.
+		text[#text+1] = [[#{bold}##GOLD#Event#WHITE##{normal}#: Once you have purchased an event you will be able to trigger it at any later date, on whichever character you choose.
 To activate it you will need to have your online events option set to "all" (which is the default value).]]
 	end
+	if item.non_immediate then
+		text[#text+1] = [[#{bold}##GOLD#Non Immediate#WHITE##{normal}#: This events adds new content that you have to find by exploration. If you die before finding it, there can be no refunds.]]
+	end
 	if item.once_per_character then
-		text[#text+1] = [[- This event can only be received #{bold}#once per character#{normal}#. Usualy because it adds a new zone or effect to the game that would not make sense to duplicate.]]
+		text[#text+1] = [[#{bold}##GOLD#Once per Character#WHITE##{normal}#: This event can only be received #{bold}#once per character#{normal}#. Usualy because it adds a new zone or effect to the game that would not make sense to duplicate.]]
 	end
 	if item.is_shimmer then
-		text[#text+1] = [[- Once purchased the game will automatically install the shimmer pack to your game and enable it for your current character too (you will still need to use the Mirror of Reflection to switch them on).
+		text[#text+1] = [[#{bold}##GOLD#Shimmer Pack#WHITE##{normal}#: Once purchased the game will automatically install the shimmer pack to your game and enable it for your current character too (you will still need to use the Mirror of Reflection to switch them on).
 #LIGHT_GREEN#Bonus perk:#LAST# purchasing any shimmer pack will also give your characters a portable Mirror of Reflection to be able to change your appearance anywhere, anytime!]]
 	end
 	if item.effect == "vaultspace" then
-		text[#text+1] = [[- Once purchased your vault space is permanently increased.]]
+		text[#text+1] = [[#{bold}##GOLD#Vault Space#WHITE##{normal}#: Once purchased your vault space is permanently increased.]]
 	end
 	return table.concat(text, '\n')
 end

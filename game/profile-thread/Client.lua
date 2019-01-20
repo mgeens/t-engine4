@@ -802,7 +802,7 @@ function _M:orderMicroTxn(o)
 		if self:read("200") then
 			self.sock:send(data)
 			if self:read("200") then
-				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=true"):format())
+				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=true new_donated=%d"):format(tonumber(self.last_line)))
 			else
 				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=false"):format())
 			end
