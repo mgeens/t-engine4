@@ -321,7 +321,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			local pen = 0
 			if src.combatGetResistPen then 
 				pen = src:combatGetResistPen(type)
-				if type == DamageType.ARCANE and src:knowTalent(src.T_AURA_OF_SILENCE) then pen = pen + src:combatGetResistPen(DamageType.NATURE) end
+				if type == DamageType.ARCANE and src.knowTalent and src:knowTalent(src.T_AURA_OF_SILENCE) then pen = pen + src:combatGetResistPen(DamageType.NATURE) end
 			elseif src.resists_pen then pen = (src.resists_pen.all or 0) + (src.resists_pen[type] or 0)
 			end
 			local dominated = target:hasEffect(target.EFF_DOMINATED)

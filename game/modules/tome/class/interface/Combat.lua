@@ -2258,7 +2258,7 @@ function _M:combatGetResistPen(type, straight)
 		return highest + self.auto_highest_resists_pen[type]
 	end
 
-	if self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
+	if self.knowTalent and self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
 		local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
 		add = add + t.getPenetration(self, t)
 	end
