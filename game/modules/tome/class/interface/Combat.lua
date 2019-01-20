@@ -816,7 +816,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Arcane Destruction
 	if hitted and crit and weapon and self:knowTalent(self.T_ARCANE_DESTRUCTION) then
 		local chance = 100
-		if self:hasShield() then chance = 75
+		if self:hasShield() then chance = 50
 		elseif self:hasDualWeapon() then chance = 50
 		end
 		if rng.percent(chance) then
