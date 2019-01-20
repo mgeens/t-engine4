@@ -822,6 +822,26 @@ newEffect{
 }
 
 newEffect{
+	name = "HIGHBORN_WRATH", image = "talents/higher_heal.png",
+	desc = "Wrath of the Highborn",
+	long_desc = function(self, eff) return ("The target calls upon its inner resources, improving all damage by %d%% and reducing all damage taken by %d%%."):format(eff.power, eff.power) end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { power=10 },
+	on_gain = function(self, err) return "#Target# radiates power." end,
+	on_lose = function(self, err) return "#Target#'s aura of power vanishes." end,
+	activate = function(self, eff)
+		eff.pid1 = self:addTemporaryValue("inc_damage", {all=eff.power})
+		eff.pid2 = self:addTemporaryValue("resists", {all=eff.power})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.pid1)
+		self:removeTemporaryValue("resists", eff.pid2)
+	end,
+}
+
+newEffect{
 	name = "SHELL_SHIELD", image = "talents/shell_shield.png",
 	desc = "Shell Shield",
 	long_desc = function(self, eff) return ("The target takes cover in its shell, reducing all damage taken by %d%%."):format(eff.power) end,

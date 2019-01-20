@@ -37,24 +37,23 @@ racial_req4 = {
 newTalentType{ type="race/higher", name = "higher", generic = true, description = "The various racial bonuses a character can have." }
 
 newTalent{
-	short_name = "HIGHER_HEAL",
-	name = "Gift of the Highborn",
+	short_name = "HIGHER_HEAL",  -- Backwards compatibility, two tier 1 racials were swapped
+	name = "Wrath of the Highborn",
 	type = {"race/higher", 1},
 	require = racial_req1,
 	points = 5,
 	no_energy = true,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 10, 45, 25)) end, -- Limit >10
-	tactical = { HEAL = 2 },
-	on_pre_use = function(self, t) return not self:hasEffect(self.EFF_REGENERATION) end,
-	getHealMod = function(self, t) return self:combatTalentLimit(t, 50, 10, 30) end,
+	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 5, 45, 25)) end, -- Limit > 5
+	getPower = function(self, t) return self:combatStatScale("mag", 11, 25) end,
+	tactical = { ATTACK = 1, DEFEND = 1 },
 	action = function(self, t)
-		self:setEffect(self.EFF_REGENERATION, 10, {power=5 + self:getWil() * 0.5})
-		self:setEffect(self.EFF_EMPOWERED_HEALING, 10, {power=t.getHealMod(self, t) / 100})
+		self:setEffect(self.EFF_HIGHBORN_WRATH, 5, {power=t.getPower(self, t)})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Call upon the gift of the highborn to regenerate your body for %d life every turn and increase healing mod by %d%% for 10 turns.
-		The life healed will increase with your Willpower.]]):format(5 + self:getWil() * 0.5, t.getHealMod(self, t))
+		return ([[Call upon the power of the Highborn, increasing all damage by %d%% and reducing all damage taken by %d%% for 5 turns.
+		The bonus will increase with your Magic.]]):
+		format(t.getPower(self, t), t.getPower(self, t))
 	end,
 }
 
@@ -309,23 +308,24 @@ newTalent{
 ------------------------------------------------------------------
 newTalentType{ type="race/thalore", name = "thalore", generic = true, is_nature=true, description = "The various racial bonuses a character can have." }
 newTalent{
-	short_name = "THALOREN_WRATH",
-	name = "Wrath of the Woods",
+	short_name = "THALOREN_WRATH",  -- Backwards compatibility..
+	name = "Gift of the Woods",
 	type = {"race/thalore", 1},
 	require = racial_req1,
 	points = 5,
 	no_energy = true,
-	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 5, 45, 25)) end, -- Limit > 5
-	getPower = function(self, t) return self:combatStatScale("wil", 11, 20) end,
-	tactical = { ATTACK = 1, DEFEND = 1 },
+	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 10, 45, 25)) end, -- Limit >10
+	tactical = { HEAL = 2 },
+	on_pre_use = function(self, t) return not self:hasEffect(self.EFF_REGENERATION) end,
+	getHealMod = function(self, t) return self:combatTalentLimit(t, 50, 10, 30) end,
 	action = function(self, t)
-		self:setEffect(self.EFF_ETERNAL_WRATH, 5, {power=t.getPower(self, t)})
+		self:setEffect(self.EFF_REGENERATION, 10, {power=5 + self:getWil() * 0.5})
+		self:setEffect(self.EFF_EMPOWERED_HEALING, 10, {power=t.getHealMod(self, t) / 100})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Call upon the power of the Eternals, increasing all damage by %d%% and reducing all damage taken by %d%% for 5 turns.
-		The bonus will increase with your Willpower.]]):
-		format(t.getPower(self, t), t.getPower(self, t))
+		return ([[Call upon nature to regenerate your body for %d life every turn and increase healing mod by %d%% for 10 turns.
+		The life healed will increase with your Willpower.]]):format(5 + self:getWil() * 0.5, t.getHealMod(self, t))
 	end,
 }
 
