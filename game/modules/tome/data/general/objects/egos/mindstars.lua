@@ -360,7 +360,6 @@ newEntity{
 			[DamageType.PHYSICAL] = resolvers.mbonus_material(16, 4),
 		},
 	},
-	resolvers.charmt(Talents.T_BURROW, 1, 30),
 }
 
 newEntity{

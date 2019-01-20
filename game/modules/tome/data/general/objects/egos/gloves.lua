@@ -548,6 +548,7 @@ newEntity{
 	},
 }
 
+--[[ Temp disable prior finding something interesting to put here
 newEntity{
 	power_source = {arcane=true},
 	name = " of dispersion", suffix=true, instant_resolve=true,
@@ -556,7 +557,7 @@ newEntity{
 	greater_ego = 1,
 	rarity = 35,
 	cost = 70,
-	resolvers.charmt(Talents.T_DISPERSE_MAGIC, 3, 20),
+	--resolvers.charmt(Talents.T_DISPERSE_MAGIC, 3, 20),
 	wielder = {
 		resists={
 			[DamageType.ARCANE] = resolvers.mbonus_material(7, 3),
@@ -573,7 +574,7 @@ newEntity{
 			talent_on_hit = { [Talents.T_MANATHRUST] = {level=3, chance=10} },
 		},
 	},
-}
+}]]
 
 newEntity{
 	power_source = {nature=true},
