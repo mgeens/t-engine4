@@ -1604,7 +1604,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "PSIONIC_FURY",
 		dam = 12,
 		apr = 25,
 		physcrit = 5,
-		dammod = {wil=0.4, cun=0.2},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.MIND,
 	},
 	wielder = {

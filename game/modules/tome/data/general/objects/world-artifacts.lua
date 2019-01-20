@@ -2334,7 +2334,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 16,
 		apr = 28,
 		physcrit = 5,
-		dammod = {wil=0.45, cun=0.25},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.MIND,
 		convert_damage = {
 			[DamageType.DARKNESS] = 30,
@@ -2470,7 +2470,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 15,
 		apr = 26,
 		physcrit = 6,
-		dammod = {wil=0.45, cun=0.22},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.MIND,
 	},
 	wielder = {
@@ -2561,7 +2561,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 17,
 		apr = 25,
 		physcrit = 7,
-		dammod = {wil=0.5, cun=0.2},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.SLIME,
 	},
 	wielder = {
@@ -2608,7 +2608,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 8,
 		apr = 13,
 		physcrit = 7,
-		dammod = {wil=0.25, cun=0.1},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.NATURE,
 	},
 	wielder = {
@@ -2679,7 +2679,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 16,
 		apr = 24,
 		physcrit = 2.5,
-		dammod = {wil=0.4, cun=0.1, str=0.2},
+		dammod = {wil=0.5, cun=0.1, str=0.2},
 		damtype=DamageType.PHYSICAL,
 		convert_damage = {
 			[DamageType.COLD] = 18,
@@ -2729,15 +2729,15 @@ newEntity{ base = "BASE_MINDSTAR",
 			if inven_id == "MAINHAND" then
 				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
 			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10)
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10)
+			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "harmonious")
+			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "harmonious")
 		end,
 		wyrm = function(self, who, inven_id)
 			if inven_id == "MAINHAND" then
 				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
 			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10)
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10)
+			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "wyrm")
+			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "wyrm")
 		end,
 	},
 	on_set_broken = {
@@ -2789,7 +2789,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 10,
 		apr = 18,
 		physcrit = 2.5,
-		dammod = {wil=0.35, cun=0.5},
+		dammod = {wil=0.3, cun=0.5},
 		damtype=DamageType.NATURE,
 	},
 	wielder = {
@@ -3210,7 +3210,7 @@ newEntity{ base = "BASE_MINDSTAR",
 		dam = 7,
 		apr = 15,
 		physcrit = 7,
-		dammod = {wil=0.30, cun=0.1},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.NATURE,
 		convert_damage={[DamageType.POISON] = 30,}
 	},
@@ -7804,7 +7804,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "EYE_OF_SUMMER",
 		dam = 8,
 		apr = 18,
 		physcrit = 5,
-		dammod = {wil=0.35, cun=0.15},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.FIRE,
 	},
 	wielder = {
@@ -7828,13 +7828,13 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "EYE_OF_SUMMER",
 	on_set_complete = {
 		multiple = true,
 		seasons = function(self, who)
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.COLD]=20 })
-			self:specialSetAdd({"wielder","combat_mindpower"}, 4)
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.COLD]=20 }, "seasons")
+			self:specialSetAdd({"wielder","combat_mindpower"}, 4, "seasons")
 			game.logSeen(who, "#GREEN#You feel the seasons in perfect balance.")
 		end,
 		harmonious = function(self, who)
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.COLD]=20 })
-			self:specialSetAdd({"wielder","combat_mindpower"}, 4)
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.COLD]=20 }, "harmonious")
+			self:specialSetAdd({"wielder","combat_mindpower"}, 4, "harmonious")
 			game.logSeen(who, "#GREEN#You feel the seasons in perfect balance.")
 		end,
 	},
@@ -7860,7 +7860,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "EYE_OF_WINTER",
 		dam = 8,
 		apr = 18,
 		physcrit = 5,
-		dammod = {wil=0.35, cun=0.15},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.COLD,
 	},
 	wielder = {
@@ -7884,12 +7884,12 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "EYE_OF_WINTER",
 	on_set_complete = {
 		multiple = true,
 		seasons = function(self, who)
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=20 })
-			self:specialSetAdd({"wielder","combat_mindpower"}, 4)
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=20 }, "seasons")
+			self:specialSetAdd({"wielder","combat_mindpower"}, 4, "seasons")
 		end,
 		harmonious = function(self, who)
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=20 })
-			self:specialSetAdd({"wielder","combat_mindpower"}, 4)
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=20 }, "harmonious")
+			self:specialSetAdd({"wielder","combat_mindpower"}, 4, "harmonious")
 		end,
 	},
 	on_set_broken = function(self, who)
@@ -8063,7 +8063,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "KINETIC_FOCUS",
 		dam = 6,
 		apr = 18,
 		physcrit = 5,
-		dammod = {wil=0.35, cun=0.15},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.PHYSICAL,
 	},
 	wielder = {
@@ -8090,36 +8090,36 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "KINETIC_FOCUS",
 	on_set_complete = { 
 		multiple = true,
 		kinchar = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 6)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 3)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=10 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=6 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=10 })
-			self:specialSetAdd({"wielder","psi_on_crit"}, 1)
-			self:specialSetAdd({"wielder","combat_physresist"}, 6)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.1 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 6, "kinchar")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 3, "kinchar")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=10 }, "kinchar")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=6 }, "kinchar")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=10 }, "kinchar")
+			self:specialSetAdd({"wielder","psi_on_crit"}, 1, "kinchar")
+			self:specialSetAdd({"wielder","combat_physresist"}, 6, "kinchar")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.1 }, "kinchar")
 			game.logSeen(who, "#YELLOW#You feel psionic energy linking the mindstars.")
 		end,
 		kinther = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 6)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 3)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=10 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=6 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=10 })
-			self:specialSetAdd({"wielder","psi_on_crit"}, 1)
-			self:specialSetAdd({"wielder","combat_physresist"}, 6)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.1 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 6, "kinther")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 3, "kinther")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=10 }, "kinther")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=6 }, "kinther")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=10 }, "kinther")
+			self:specialSetAdd({"wielder","psi_on_crit"}, 1, "kinther")
+			self:specialSetAdd({"wielder","combat_physresist"}, 6, "kinther")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.1 }, "kinther")
 			game.logSeen(who, "#YELLOW#You feel psionic energy linking the mindstars.")
 		end,
 		resonating = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=5 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=3 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=5 })
-			self:specialSetAdd({"wielder","psi_on_crit"}, 0.5)
-			self:specialSetAdd({"wielder","combat_physresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "resonating")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "resonating")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.PHYSICAL]=5 }, "resonating")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.PHYSICAL]=3 }, "resonating")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.PHYSICAL]=5 }, "resonating")
+			self:specialSetAdd({"wielder","psi_on_crit"}, 0.5, "resonating")
+			self:specialSetAdd({"wielder","combat_physresist"}, 3, "resonating")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/kinetic-mastery"] = 0.05 }, "resonating")
 			game.logSeen(who, "#YELLOW#You feel psionic energy linking the mindstars.")
 		end,
 	},
@@ -8144,7 +8144,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "CHARGED_FOCUS",
 		dam = 10,
 		apr = 24,
 		physcrit = 5,
-		dammod = {wil=0.4, cun=0.2},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.LIGHTNING,
 	},
 	wielder = {
@@ -8171,34 +8171,34 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "CHARGED_FOCUS",
 	on_set_complete = { 
 		multiple = true,
 		kinchar = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=5 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=3 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=5 })
-			self:specialSetAdd({"wielder","max_psi"}, 10)
-			self:specialSetAdd({"wielder","combat_mentalresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "kinchar")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "kinchar")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=5 }, "kinchar")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=3 }, "kinchar")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=5 }, "kinchar")
+			self:specialSetAdd({"wielder","max_psi"}, 10, "kinchar")
+			self:specialSetAdd({"wielder","combat_mentalresist"}, 3, "kinchar")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.05 }, "kinchar")
 		end,
 		charther = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 6)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 3)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=10 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=6 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=10 })
-			self:specialSetAdd({"wielder","max_psi"}, 20)
-			self:specialSetAdd({"wielder","combat_mentalresist"}, 6)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.1 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 6, "charther")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 3, "charther")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=10 }, "charther")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=6 }, "charther")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=10 }, "charther")
+			self:specialSetAdd({"wielder","max_psi"}, 20, "charther")
+			self:specialSetAdd({"wielder","combat_mentalresist"}, 6, "charther")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.1 }, "charther")
 		end,
 		resonating = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=5 })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=3 })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=5 })
-			self:specialSetAdd({"wielder","max_psi"}, 10)
-			self:specialSetAdd({"wielder","combat_mentalresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "resonating")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "resonating")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.LIGHTNING]=5 }, "resonating")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.LIGHTNING]=3 }, "resonating")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.LIGHTNING]=5 }, "resonating")
+			self:specialSetAdd({"wielder","max_psi"}, 10, "resonating")
+			self:specialSetAdd({"wielder","combat_mentalresist"}, 3, "resonating")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/charged-mastery"] = 0.05 }, "resonating")
 		end,
 	},
 	on_set_broken = function(self, who)
@@ -8222,7 +8222,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "THERMAL_FOCUS",
 		dam = 14,
 		apr = 32,
 		physcrit = 5,
-		dammod = {wil=0.45, cun=0.25},
+		dammod = {wil=0.5, cun=0.3},
 		damtype = DamageType.FIRE,
 		convert_damage = {
 			[DamageType.COLD] = 50,
@@ -8252,34 +8252,34 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "THERMAL_FOCUS",
 	on_set_complete = { 
 		multiple = true,
 		kinther = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","psi_regen"}, 1)
-			self:specialSetAdd({"wielder","combat_spellresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "kinther")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "kinther")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "kinther")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, }, "kinther")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "kinther")
+			self:specialSetAdd({"wielder","psi_regen"}, 1, "kinther")
+			self:specialSetAdd({"wielder","combat_spellresist"}, 3, "kinther")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 }, "kinther")
 		end,
 		charther = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","psi_regen"}, 1)
-			self:specialSetAdd({"wielder","combat_spellresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "charther")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "charther")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "charther")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, }, "charther")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "charther")
+			self:specialSetAdd({"wielder","psi_regen"}, 1, "charther")
+			self:specialSetAdd({"wielder","combat_spellresist"}, 3, "charther")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 }, "charther")
 		end,
 		resonating = function(self, who)
-			self:specialSetAdd({"wielder","combat_mindpower"}, 2)
-			self:specialSetAdd({"wielder","combat_mindcrit"}, 1)
-			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, })
-			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, })
-			self:specialSetAdd({"wielder","psi_regen"}, 1)
-			self:specialSetAdd({"wielder","combat_spellresist"}, 3)
-			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 })
+			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "resonating")
+			self:specialSetAdd({"wielder","combat_mindcrit"}, 1, "resonating")
+			self:specialSetAdd({"wielder","inc_damage"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "resonating")
+			self:specialSetAdd({"wielder","resists_pen"}, { [engine.DamageType.FIRE]=3, [engine.DamageType.COLD]=3, }, "resonating")
+			self:specialSetAdd({"wielder","resists"}, { [engine.DamageType.FIRE]=5, [engine.DamageType.COLD]=5, }, "resonating")
+			self:specialSetAdd({"wielder","psi_regen"}, 1, "resonating")
+			self:specialSetAdd({"wielder","combat_spellresist"}, 3, "resonating")
+			self:specialSetAdd({"wielder","talents_types_mastery"},{ ["psionic/thermal-mastery"] = 0.05 }, "resonating")
 		end,
 	},
 	on_set_broken = function(self, who)

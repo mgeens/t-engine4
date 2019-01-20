@@ -2449,10 +2449,19 @@ function _M:specialWearAdd(prop, value)
 	self._special_wear[prop] = self:addTemporaryValue(prop, value)
 end
 
---- Add some special properties right when completting a set
-function _M:specialSetAdd(prop, value)
+--- Add some special properties right when completing a set
+-- Items with overlapping sets (such as Kinetic/Thermal/Charged focus) must
+-- include the set_id parameter identifying which of the overlapping sets the
+-- bonus belongs to. Otherwise, breaking one of the overlapping sets will
+-- remove ALL set bonuses from the other item(s).
+function _M:specialSetAdd(prop, value, set_id)
 	self._special_set = self._special_set or {}
-	self._special_set[prop] = self:addTemporaryValue(prop, value)
+	if set_id then
+		self._special_set[set_id] = self._special_set[set_id] or {}
+		self._special_set[set_id][prop] = self:addTemporaryValue(prop, value)
+	else
+		self._special_set[prop] = self:addTemporaryValue(prop, value)
+	end
 end
 
 function _M:getCharmPower(who, raw)
