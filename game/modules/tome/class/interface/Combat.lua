@@ -851,6 +851,11 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Reactive target on_melee_hit damage
 	if hitted then
 		local dr, fa, pct = 0
+
+		-- Use an intermediary talent to give retaliation damage a unique source in the combat log
+		local old = target.__project_source
+		target.__project_source = target:getTalentFromId(target.T_MELEE_RETALIATION)
+
 		for typ, dam in pairs(target.on_melee_hit) do
 			if not fa then
 				if self:knowTalent(self.T_CLOSE_COMBAT_MANAGEMENT) then
@@ -888,7 +893,9 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 					end
 				end
 			end
-		end 
+		end
+		target.__project_source = old
+
 	end
 	-- Acid splash
 	if hitted and not target.dead and target:knowTalent(target.T_ACID_BLOOD) then
