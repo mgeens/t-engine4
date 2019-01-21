@@ -24,10 +24,15 @@ newTalent{
 	points = 5,
 	require = cuns_req1,
 	sustain_stamina = 10,
-	mana = 50,
+	sustain_mana = 50,
 	cooldown = 5,
 	tactical = { BUFF = 2 },
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 150) end,  -- This doesn't crit or generally scale easily so its safe to be aggressive
+	iconOverlay = function(self, t, p)
+		local p = self.sustain_talents[t.id]
+		if not p then return "" end
+		return tostring(math.floor(damDesc(self, DamageType.DARKNESS, t.getDamage(self, t)))), "buff_font_smaller"
+	end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 90) end,  -- This doesn't crit or generally scale easily so its safe to be aggressive
 	getManaCost = function(self, t) return 0 end,
 	activate = function(self, t)
 		local ret = {}
