@@ -644,6 +644,7 @@ function _M:generateRandart(data)
 		if p and p.points <= hpoints*2 then -- Intentionally allow the budget to be exceeded slightly to guarantee powers at low levels
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
 			print(" * adding power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
+			selected_powers[p.name] = selected_powers[p.name] or {}
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
 			if max_reached or p.unique then
 				print("Removing power from the list, ", p.name, "==", powers[i], "remaining:")
@@ -673,6 +674,7 @@ function _M:generateRandart(data)
 		if p and p.points <= hpoints * 2 then
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
 			print(" * adding bias power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
+			selected_powers[p.name] = selected_powers[p.name] or {}
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
 			if max_reached or p.unique then
 				print("Removing power from bias list , ", p.name)
