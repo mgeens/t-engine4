@@ -119,10 +119,13 @@ newTalent{
 	cooldown = 10,
 	points = 5,
 	cooldown = 50,
-	getPower = function(self, t) return 10 + self:combatTalentMindDamage(t, 0, 300) end,
+	getPower = function(self, t) return 10 + self:combatTalentMindDamage(t, 0, 700) end, --be generous
 	onDie = function(self, t, value, src)
 		local shadow = self:callTalent(self.T_SHADOW_EMPATHY, "getRandomShadow")
-		if not shadow then return false end
+		if not shadow and self:knowTalent(self.T_CALL_SHADOWS) then
+			local t = self:getTalentFromId(self.T_BLOODBATH)
+			t.summonShadow(self, t) --summon a shadow if you have none
+		end
 
 		game:delayedLogDamage(src, self, 0, ("#GOLD#(%d decoy)#LAST#"):format(value), false)
 		game:delayedLogDamage(src, shadow, value, ("#GOLD#%d decoy#LAST#"):format(value), false)
