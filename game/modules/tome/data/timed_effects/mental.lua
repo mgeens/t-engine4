@@ -159,6 +159,29 @@ newEffect{
 }
 
 newEffect{
+	name = "DOMINANT_WILL_BOSS", image = "talents/yeek_will.png",
+	desc = "Mental Domination",
+	long_desc = function(self, eff) return ("The target's mind has been shaken. It is temporarily aligned with %s."):format(eff.src.name:capitalize()) end,
+	type = "mental",
+	subtype = { dominate=true },
+	status = "detrimental",
+	parameters = { },
+	on_gain = function(self, err) return "#Target#'s mind is dominated.", "+Dominant Will" end,
+	on_lose = function(self, err) return "#Target# is free from the domination.",  "-Dominant Will"  end,
+	activate = function(self, eff)
+		self:setTarget() -- clear ai target
+		eff.old_faction = self.faction
+		self.faction = eff.src.faction
+		self:effectTemporaryValue(eff, "never_anger", 1)
+	end,
+	deactivate = function(self, eff)
+		if eff.particle then self:removeParticles(eff.particle) end
+		self.faction = eff.old_faction
+		self:setTarget(eff.src)
+	end,
+}
+
+newEffect{
 	name = "BATTLE_SHOUT", image = "talents/battle_shout.png",
 	desc = "Battle Shout",
 	long_desc = function(self, eff) return ("Increases maximum life and stamina by %d%%. When the effect ends, the extra life and stamina will be lost."):format(eff.power) end,
