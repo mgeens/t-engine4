@@ -2739,7 +2739,7 @@ function _M:onTakeHit(value, src, death_note)
 			game.logSeen(self, "#YELLOW#%s has been healed by a blast of positive energy!#LAST#", self.name:capitalize())
 			if value > 0 then
 				if self.player then
-					self:setEmote(Emote.new("The Sun Protects!", 45))
+					self:setEmote(require("engine.Emote").new("The Sun Protects!", 45))
 					world:gainAchievement("AVOID_DEATH", self)
 				end
 			end
