@@ -123,7 +123,7 @@ newTalent{
 	onDie = function(self, t, value, src)
 		local shadow = self:callTalent(self.T_SHADOW_EMPATHY, "getRandomShadow")
 		if not shadow and self:knowTalent(self.T_CALL_SHADOWS) then
-			local t = self:getTalentFromId(self.T_BLOODBATH)
+			local t = self:getTalentFromId(self.T_CALL_SHADOWS)
 			t.summonShadow(self, t) --summon a shadow if you have none
 		end
 
