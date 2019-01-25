@@ -3637,3 +3637,43 @@ newTalent{
 		return ([[Each turn, those caught in your gloom must save against your Mindpower or have an %0.1f%% chance of becoming dismayed for %d turns. When dismayed, the first melee attack against the foe will result in a critical hit.]]):format(chance, duration, mindpowerChange)
 	end,
 }
+
+newTalent{
+	name = "Shadow Empathy",
+	type = {"cursed/one-with-shadows", 2},
+	require = cursed_cun_req_high2,
+	points = 5,
+	hate = 10,
+	cooldown = 25,
+	getRandomShadow = function(self, t)
+		local shadows = {}
+		if game.party and game.party:hasMember(self) then
+			for act, def in pairs(game.party.members) do
+				if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
+					shadows[#shadows+1] = act
+				end
+			end
+		else
+			for uid, act in pairs(game.level.entities) do
+				if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
+					shadows[#shadows+1] = act
+				end
+			end
+		end
+		return #shadows > 0 and rng.table(shadows)
+	end,
+	getDur = function(self, t) return math.floor(self:combatTalentScale(t, 3, 10)) end,
+	getPower = function(self, t) return 5 + self:combatTalentMindDamage(t, 0, 300) / 8 end,
+	on_pre_use = function(self, t) return self:callTalent(self.T_CALL_SHADOWS, "nbShadowsUp") > 0 end,
+	action = function(self, t)
+		self:setEffect(self.EFF_SHADOW_EMPATHY, t.getDur(self, t), {power=t.getPower(self, t)})
+		return true
+	end,
+	info = function(self, t)
+		local power = t.getPower(self, t)
+		local duration = t.getDur(self, t)
+		return ([[You are linked to your shadows for %d turns, diverting %d%% of all damage you take to a random shadow.
+		Effect increases with Mindpower.]]):
+		format(duration, power)
+	end,
+}
