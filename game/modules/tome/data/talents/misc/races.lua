@@ -1119,7 +1119,7 @@ newTalent{
 	cooldown = function(self, t) return math.ceil(self:combatTalentLimit(t, 6, 47, 35)) end, -- Limit >6
 	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 15, 5, 10)) end,
 	on_levelup_close = function(self, t, lvl, old_lvl, lvl_raw, old_lvl_raw)
-		if lvl >= 5 and old_lvl < 5 then
+		if lvl_raw >= 5 and old_lvl_raw < 5 then
 			self.inscriptions_slots_added = self.inscriptions_slots_added - 1
 			game.logPlayer(self, "#PURPLE#Your mastery over inscriptions is unmatched! One more inscriptions slot available to buy.")
 		end
