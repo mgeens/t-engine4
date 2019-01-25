@@ -23,7 +23,7 @@ newTalent{
 	require = cursed_wil_req1,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 6,
+	cooldown = 8,
 	hate = 8,
 	range = 8,
 	radius = function(self, t) return 2 end,
@@ -210,13 +210,13 @@ newTalent{
 	mode = "passive",
 	points = 5,
 	range = function(self, t)
-		return 10
+		return 8
 	end,
 	getTurnsUntilTrigger = function(self, t)
 		return 4
 	end,
 	getDuration = function(self, t)
-		return 8
+		return 5
 	end,
 	getDamage = function(self,t)
 		return math.floor(self:combatTalentMindDamage(t, 5, 50))
