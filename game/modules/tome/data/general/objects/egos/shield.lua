@@ -325,7 +325,7 @@ newEntity{
 	level_range = {10, 50},
 	greater_ego = 1,
 	unique_ego = 1,
-	rarity = 1,
+	rarity = 30,
 	cost = 60,
 	special_combat = {
 		melee_project = {
@@ -356,8 +356,9 @@ newEntity{
 			
 			local dam = special.shield_wintry(who)
 			local damage = who:spellCrit(dam)
+			local check = math.max(who:combatSpellpower(), who:combatMindpower(), who:combatAttack())
 			local tg = {type="ball", range=0, radius=4, selffire=false, friendlyfire=false}
-			local grids = who:project(tg, who.x, who.y, DamageType.COLDNEVERMOVE, {dur=3, dam=dam})
+			local grids = who:project(tg, who.x, who.y, DamageType.COLDNEVERMOVE, {dur=3, dam=dam, apply_power = check})
 			game.level.map:particleEmitter(who.x, who.y, tg.radius, "circle", {oversize=1.1, a=255, limit_life=16, grow=true, speed=0, img="ice_nova", radius=tg.radius})
 			game:playSoundNear(self, "talents/ice")
 		end,			
@@ -378,7 +379,7 @@ newEntity{
 		block = resolvers.mbonus_material(80, 20),
 	},
 	wielder = {
-		combat_armor = resolvers.mbonus_material(8, 4),
+		combat_armor = resolvers.mbonus_material(10, 1),
 	},
 }
 
@@ -449,7 +450,7 @@ newEntity{
 	name = "warded ", prefix=true, instant_resolve=true,
 	keywords = {ward=true},
 	level_range = {10, 50},
-	rarity = 15,
+	rarity = 40,
 	greater_ego = 1,
 	cost = 5,
 	special_combat = {
@@ -462,12 +463,16 @@ newEntity{
 	},
 	wielder = {
 		wards = {
-			[DamageType.PHYSICAL] = resolvers.mbonus_material(5, 1),
-			[DamageType.FIRE] = resolvers.mbonus_material(5, 1),
-			[DamageType.COLD] = resolvers.mbonus_material(5, 1),
-			[DamageType.LIGHTNING] = resolvers.mbonus_material(5, 1),
-			[DamageType.TEMPORAL] = resolvers.mbonus_material(5, 1),
-			[DamageType.BLIGHT] = resolvers.mbonus_material(5, 1),
+			-- Non-phys
+			[DamageType.FIRE] = resolvers.mbonus_material(5, 3),
+			[DamageType.COLD] = resolvers.mbonus_material(5, 3),
+			[DamageType.LIGHTNING] = resolvers.mbonus_material(5, 3),
+			[DamageType.TEMPORAL] = resolvers.mbonus_material(5, 3),
+			[DamageType.BLIGHT] = resolvers.mbonus_material(5, 3),
+			[DamageType.ARCANE] = resolvers.mbonus_material(5, 3),
+			[DamageType.DARKNESS] = resolvers.mbonus_material(5, 3),
+			[DamageType.LIGHT] = resolvers.mbonus_material(5, 3),
+			[DamageType.NATURE] = resolvers.mbonus_material(5, 3),
 		},
 		learn_talent = {[Talents.T_WARD] = 1},
 	},
@@ -500,7 +505,7 @@ newEntity{
 			return ("Deals #ORCHID#%d#LAST# light and fire damage to each enemy blocked"):format(dam)
 		end,
 		shield_wrathful=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 50, 450))
+			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 50, 450) / 2)
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -513,8 +518,8 @@ newEntity{
 			
 
 			local tg = {type="hit", range=10}
-			local dam = special.shield_wrathful(self.combat, who)
-			local damage = self:spellCrit(dam)
+			local dam = special.shield_wrathful(who)
+			local damage = who:spellCrit(dam)
 
 			who:project(tg, target.x, target.y, engine.DamageType.FIRE, damage)
 			who:project(tg, target.x, target.y, engine.DamageType.LIGHT, damage)
@@ -648,10 +653,39 @@ newEntity{
 		},
 	},
 	wielder = {
-		combat_dam = resolvers.mbonus_material(5, 5),
-		combat_physcrit = resolvers.mbonus_material(3, 3),
+		combat_dam = resolvers.mbonus_material(10, 5),
+		combat_physcrit = resolvers.mbonus_material(15, 3),
 	},
+}
 
+newEntity{
+	power_source = {techniquee=true},
+	name = " of shrapnel", suffix=true, instant_resolve=true,
+	keywords = {shrapnel=true},
+	level_range = {10, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 20,
+	cost = 60,
+	on_block = {
+		desc=function(self, who, special)
+			local dam = special.shield_shrapnel(who)
+			return ("Cause enemies within radius 6 to bleed for #RED#%d#LAST# physical damage over 5 turns (1/turn)"):format(dam)
+		end,
+		shield_shrapnel=function(who)
+			local dam = math.floor(who:combatStatScale(who:combatPhysicalpower(), 30, 250))
+			return dam
+		end,
+		fct=function(self, who, target, type, dam, eff, special)
+			if who.turn_procs and who.turn_procs.shield_shrapnel then return end
+			who.turn_procs.shield_shrapnel = true
+			game.logSeen(who, "Shards of metal explode from %s's shield!", who.name:capitalize())
+			local tg = {type="ball", friendlyfire=false, radius=6}
+			local dam = special.shield_shrapnel(who)
+			local damage = who:physicalCrit(dam)
+			local grids = who:project(tg, who.x, who.y, engine.DamageType.BLEED, damage)
+		end,
+	},
 }
 
 newEntity{
@@ -677,9 +711,7 @@ newEntity{
 		},
 	},
 	wielder = {
-		combat_armor = resolvers.mbonus_material(10, 5),
-		combat_armor_hardiness = resolvers.mbonus_material(5, 5),
-		resists={[DamageType.PHYSICAL] = resolvers.mbonus_material(10, 10)},
+		combat_armor = resolvers.mbonus_material(10, 1),
 	},
 }
 
