@@ -186,8 +186,7 @@ newEntity{
 		resists = { [DamageType.LIGHT] = resolvers.mbonus_material(10, 5), },
 		melee_project= { [DamageType.LIGHT] = resolvers.mbonus_material(15, 5) },
 		combat = {
-			melee_project= { [DamageType.ITEM_LIGHT_BLIND] = resolvers.mbonus_material(10, 5) },
-			--talent_on_hit = { [Talents.T_SEARING_LIGHT] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=20} },
+			talent_on_hit = { [Talents.T_SEARING_LIGHT] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=20} },
 		},
 	},
 }
@@ -609,7 +608,7 @@ newEntity{
 		melee_project = {
 			[DamageType.MIND] = resolvers.mbonus_material(30, 10),
 			[DamageType.DARKNESS] = resolvers.mbonus_material(30, 10),
-			[DamageType.ITEM_MIND_GLOOM] = resolvers.mbonus_material(15, 10),
+			[DamageType.ITEM_MIND_EXPOSE] = resolvers.mbonus_material(15, 10),
 		},
 		combat = {
 			 talent_on_hit = { [Talents.T_REPROACH] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },

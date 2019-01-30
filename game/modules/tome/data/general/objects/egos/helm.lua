@@ -499,9 +499,8 @@ newEntity{
 	resolvers.charmt(Talents.T_SKULLCRACKER, 3, 20),
 	wielder = {
 		inc_stats = {
-			[Stats.STAT_STR] = resolvers.mbonus_material(3, 2),
+			[Stats.STAT_STR] = resolvers.mbonus_material(10, 2),
 		},
-		on_melee_hit={[DamageType.PHYSICAL] = resolvers.mbonus_material(5, 5)},
 	},
 }
 
