@@ -1359,12 +1359,13 @@ newDamageType{
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
-		if _G.type(dam) == "number" then dam = {dam=dam, dur=4} end
+		if _G.type(dam) == "number" then dam = {dam=dam, dur=4, apply_power = math.max(src:combatSpellpower(), src:combatMindpower())} end
 		DamageType:get(DamageType.COLD).projector(src, x, y, DamageType.COLD, dam.dam, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
-			if target:canBe("pin") and target:canBe("stun") and not target:attr("fly") and not target:attr("levitation") then
-				target:setEffect(target.EFF_FROZEN_FEET, dam.dur, {apply_power=math.max(src:combatSpellpower(), src:combatMindpower())})
+			local apply = dam.apply_power
+			if target:canBe("pin") and not target:attr("fly") and not target:attr("levitation") then
+				target:setEffect(target.EFF_FROZEN_FEET, dam.dur, {apply_power=dam.apply_power})
 			end
 
 			if dam.shatter_reduce and target:hasEffect(target.EFF_WET) then
