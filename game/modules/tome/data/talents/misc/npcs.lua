@@ -909,6 +909,33 @@ newTalent{
 	end,
 }
 
+
+newTalent{
+	name = "Poison Strike",
+	type = {"technique/other", 1},
+	points = 5,
+	cooldown = 6,
+	range = 10,
+	requires_target = true,
+	tactical = { ATTACK = { NATURE = 1, poison = 1} },
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
+	getDamage = function(self, t) return self:combatTalentMindDamage(t, 10, 400) end,
+	is_mind = true,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		self:project(tg, x, y, DamageType.POISON, t.getDamage(self,t), {type="slime"})
+		game:playSoundNear(self, "talents/slime")
+		return true
+	end,
+	info = function(self, t)
+		return ([[Strike your target with poison, doing %0.2f poison damage over six turns.
+		The damage will increase with your mindpower.]]):
+		format(damDesc(self, DamageType.POISON, t.getDamage(self,t)))
+	end,
+}
+
 newTalent{
 	name = "Spit Blight",
 	type = {"wild-gift/other", 1},
