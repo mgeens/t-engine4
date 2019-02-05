@@ -319,7 +319,9 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		-- Reduce damage with resistance
 		if target.resists then
 			local pen = 0
-			if src.combatGetResistPen then pen = src:combatGetResistPen(type)
+			if src.combatGetResistPen then 
+				pen = src:combatGetResistPen(type)
+				if type == DamageType.ARCANE and src:knowTalent(src.T_AURA_OF_SILENCE) then pen = pen + src:combatGetResistPen(DamageType.NATURE) end
 			elseif src.resists_pen then pen = (src.resists_pen.all or 0) + (src.resists_pen[type] or 0)
 			end
 			local dominated = target:hasEffect(target.EFF_DOMINATED)
@@ -516,7 +518,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			game:onTickEnd(function()target:callEffect(target.EFF_BRAIDED, "doBraid", dam)end)
 		end
 
-		if target.knowTalent and target:knowTalent(target.T_RESOLVE) then local t = target:getTalentFromId(target.T_RESOLVE) t.on_absorb(target, t, type, dam) end
+		if target.knowTalent and target:knowTalent(target.T_RESOLVE) and target:reactionToward(src) <= 0 then local t = target:getTalentFromId(target.T_RESOLVE) t.on_absorb(target, t, type, dam) end
 
 		if target ~= src and target.attr and target:attr("damage_resonance") and not target:hasEffect(target.EFF_RESONANCE) then
 			target:setEffect(target.EFF_RESONANCE, 5, {damtype=type, dam=target:attr("damage_resonance")})
@@ -2274,8 +2276,7 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
-			dam = target.burnArcaneResources and target:burnArcaneResources(dam) or 0
-			return DamageType:get(DamageType.ARCANE).projector(src, x, y, DamageType.ARCANE, dam, state)
+			return DamageType:get(DamageType.MANABURN).projector(src, x, y, DamageType.MANABURN, dam, state)
 		end
 		return 0
 	end,
@@ -3399,6 +3400,10 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			dam = target.burnArcaneResources and target:burnArcaneResources(dam) or 0
+			if src:knowTalent(src.T_AURA_OF_SILENCE) and src.combatGetDamageIncrease then
+				local bonus = src:combatGetDamageIncrease(DamageType.NATURE) / 100
+				if bonus > 0 then dam = dam * (1 + bonus) end
+			end
 			return DamageType:get(DamageType.ARCANE).projector(src, x, y, DamageType.ARCANE, dam, state)
 		end
 		return 0

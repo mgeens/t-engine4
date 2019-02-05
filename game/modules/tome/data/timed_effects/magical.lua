@@ -1534,7 +1534,7 @@ newEffect{
 	desc = "Invigorate",
 	long_desc = function(self, eff) return ("The target is regaining %d life per turn and refreshing talents at twice the normal rate."):format(eff.power) end,
 	type = "magical",
-	subtype = { temporal=true },
+	subtype = { temporal=true, regeneration=true },
 	status = "beneficial",
 	parameters = {power = 10},
 	on_gain = function(self, err) return "#Target# is invigorated.", "+Invigorate" end,
