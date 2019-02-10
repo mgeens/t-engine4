@@ -196,8 +196,8 @@ newEntity{
 	rarity = 16,
 	cost = 30,
 	wielder = {
-		max_life=resolvers.mbonus_material(60, 40),
-		life_regen = resolvers.mbonus_material(30, 10, function(e, v) v=v/10 return 0, v end),
+		max_life=resolvers.mbonus_material(60, 20),
+		life_regen = resolvers.mbonus_material(10, 1, function(e, v) return 0, v end),
 		healing_factor = resolvers.mbonus_material(10, 10, function(e, v) v=v/100 return 0, v end),
 	},
 }

@@ -387,7 +387,7 @@ newEntity{
 		},
 		combat_spellresist = resolvers.mbonus_material(7, 3),
 		max_life = resolvers.mbonus_material(70, 40),
-		healing_factor = resolvers.mbonus_material(20, 10, function(e, v) v=v/100 return 0, v end),
+		healing_factor = resolvers.mbonus_material(10, 10, function(e, v) v=v/100 return 0, v end),
 	},
 }
 

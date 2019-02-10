@@ -80,7 +80,7 @@ newEntity{
 	rarity = 4,
 	cost = 5,
 	wielder = {
-		life_regen = resolvers.mbonus_material(40, 8, function(e, v) v=v/10 return 0, v end),
+		life_regen = resolvers.mbonus_material(8, 1, function(e, v) return 0, v end),
 		stun_immune = resolvers.mbonus_material(30, 20, function(e, v) v=v/100 return 0, v end),
 	},
 }
@@ -513,7 +513,7 @@ newEntity{
 	cost = 50,
 	wielder = {
 		max_life=resolvers.mbonus_material(60, 40),
-		life_regen = resolvers.mbonus_material(15, 5, function(e, v) v=v/10 return 0, v end),
+		life_regen = resolvers.mbonus_material(15, 5, function(e, v) return 0, v end),
 		healing_factor = resolvers.mbonus_material(10, 10, function(e, v) v=v/100 return 0, v end),
 	},
 }
