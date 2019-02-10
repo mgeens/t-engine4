@@ -413,7 +413,7 @@ newEntity{
 	power_source = {arcane=true},
 	name = " of blood magic", suffix=true, instant_resolve=true,
 	keywords = {blood=true},
-	level_range = {40, 50},
+	level_range = {30, 50},
 	greater_ego = 1,
 	rarity = 30,
 	cost = 100,
@@ -512,6 +512,7 @@ newEntity{
 	rarity = 17,
 	cost = 50,
 	skullcracker_mult = resolvers.mbonus_material(2, 1),
+	resolvers.charmt(Talents.T_SKULLCRACKER, 3, 20),
 	wielder = {
 		inc_stats = {
 			[Stats.STAT_STR] = resolvers.mbonus_material(4, 5),
