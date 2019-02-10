@@ -127,7 +127,7 @@ newEntity{ base="BASE_NPC_BEAR", define_as = "NORGOS",
 	ai_tactic = resolvers.tactic"melee",
 
 	resolvers.auto_equip_filters("Brawler"),
-	auto_classes={{class="Brawler", start_level=12, level_rate=75}},
+	auto_classes={{class="Brawler", start_level=12, level_rate=50}},
 
 	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
 	on_added_to_level = function(self)
