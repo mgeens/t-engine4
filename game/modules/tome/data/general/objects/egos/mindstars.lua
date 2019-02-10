@@ -305,7 +305,7 @@ newEntity{
 	wielder = {
 		combat_armor = resolvers.mbonus_material(15, 5),
 		melee_project={
-			[DamageType.ICE] = resolvers.mbonus_material(16, 4),
+			[DamageType.COLD] = resolvers.mbonus_material(16, 4),
 		},
 		inc_damage={
 			[DamageType.COLD] = resolvers.mbonus_material(16, 4),
