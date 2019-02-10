@@ -6853,7 +6853,8 @@ function _M:canSeeNoCache(actor, def, def_pct)
 	end
 
 	-- Blindness means can't see anything
-	if self:attr("blind") then
+	if self:attr("blind") and not (actor == game.player) then
+
 		return false, 0
 	end
 	
