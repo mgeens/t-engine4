@@ -37,7 +37,7 @@ newTalent {
 		local inc = t.getPercentInc(self, t)
 		local reloads = t.ammo_mastery_reload(self, t)
 		return ([[Increases weapon damage by %d%% and physical power by 30 when using slings.
-		Also, increases your reload rate by %d.]]):format(damage, inc * 100, reloads)
+		Also, increases your reload rate by %d.]]):format(inc * 100, reloads)
 	end,
 }
 

@@ -115,7 +115,7 @@ uberTalent{
 		Any time you deal darkness damage, you will unlight both the target tile and yours.
 		Passively increases your stealth rating by %d.
 		The armor bonus scales with your Constitution.]])
-		:format(t.ArmourBonus(self,t))
+		:format(t.ArmourBonus(self,t), t.getStealth(self, t))
 	end,
 }
 

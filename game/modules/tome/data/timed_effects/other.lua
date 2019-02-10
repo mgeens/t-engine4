@@ -35,6 +35,7 @@ newEffect{
 	status = "detrimental",
 	parameters = { stacks = 0},
 	charges = function(self, eff) return eff.stacks end,
+	no_stop_enter_worlmap = true, no_stop_resting = true,
 	updateEffect = function(self, eff)
 		eff.stacks = math.min(5, eff.stacks)
 		if eff.resists then self:removeTemporaryValue("resists", eff.resists) end
