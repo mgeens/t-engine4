@@ -330,20 +330,23 @@ newTalent{
 }
 
 newTalent{
-	name = "Unshackled",
+	name = "Verdant",
+	short_name = "UNSHACKLED",
 	type = {"race/thalore", 2},
 	require = racial_req2,
 	points = 5,
 	mode = "passive",
-	getSave = function(self, t) return self:combatTalentScale(t, 6, 25, 0.75) end,
+	getAffinity = function(self, t) return self:combatTalentScale(t, 25, 35) end,
 	passives = function(self, t, p)
-		self:talentTemporaryValue(p, "combat_physresist", t.getSave(self, t))
-		self:talentTemporaryValue(p, "combat_mentalresist", t.getSave(self, t))
+		self:talentTemporaryValue(p, "damage_affinity", {
+			[DamageType.ACID] = t.getAffinity(self, t),
+			[DamageType.NATURE] = t.getAffinity(self, t)
+			})
 	end,
 	info = function(self, t)
-		return ([[Thaloren have always been a free people, living in their beloved forest and never caring much about the world outside.
-		Increase Physical and Mental Save by +%d.]]):
-		format(t.getSave(self, t))
+		return ([[Thaloren have an affinity for natural elements allowing them to heal for a portion of damage taken from them.
+		You gain %d%% Nature and Acid damage affinity.]]):
+		format(t.getAffinity(self, t))
 	end,
 }
 
@@ -404,26 +407,31 @@ newTalent{
 				body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1 },
 
 				rank = 3,
-				life_rating = 13,
+				life_rating = 16,
 				max_life = resolvers.rngavg(50,80),
 				infravision = 10,
-
 				autolevel = "none",
-				ai = "summoned", ai_real = "tactical", ai_state = { talent_in=2, },
+				ai = "summoned", ai_real = "tactical", ai_state = { talent_in=1, },
 				stats = {str=0, dex=0, con=0, cun=0, wil=0, mag=0},
-				combat = { dam=resolvers.levelup(resolvers.rngavg(15,25), 1, 1.3), atk=resolvers.levelup(resolvers.rngavg(15,25), 1, 1.6), dammod={str=1.1} },
+				combat = { dam=resolvers.levelup(resolvers.rngavg(15,25), 1, 2), atk=resolvers.levelup(resolvers.rngavg(15,25), 1, 2), dammod={str=3} },
+				combat_dam = resolvers.levelup(1, 1, 2),
+				combat_atk = resolvers.levelup(1, 1, 2),
+
 				inc_stats = {
-					str=25 + self:combatScale(self:getWil() * self:getTalentLevel(t), 0, 0, 100, 500, 0.75),
-					dex=18,
-					con=10 + self:combatTalentScale(t, 3, 10, 0.75),
+					str=25 + self:getWil(),
+					dex=18 + self:getWil(),
+					con=10 + self:getWil(),
+					wil=25 + self:getWil(),
+					cun=25 + self:getWil(),
 				},
-				level_range = {1, nil}, exp_worth = 0,
+				level_range = {1, self.level}, exp_worth = 0,
 				silent_levelup = true,
 
 				resists = {all = self:combatGetResist(DamageType.BLIGHT)},
 
-				combat_armor = 13, combat_def = 8,
-				resolvers.talents{ [Talents.T_STUN]=self:getTalentLevelRaw(t), [Talents.T_KNOCKBACK]=self:getTalentLevelRaw(t), [Talents.T_TAUNT]=self:getTalentLevelRaw(t), },
+				combat_armor = 13 + self.level / 2, combat_def = 8,
+				combat_armor_hardiness = 30,  -- 50% total
+				resolvers.talents{ [Talents.T_STUN]=self:getTalentLevel(t), [Talents.T_KNOCKBACK]=self:getTalentLevel(t), [Talents.T_TAUNT]=self:getTalentLevel(t), },
 
 				faction = self.faction,
 				summoner = self, summoner_gain_exp=true,
@@ -437,10 +445,12 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
+		local base_stats = self:combatScale(self:getWil() * self:getTalentLevel(t), 25, 0, 125, 500, 0.75)
 		return ([[Nature is with you; you can always feel the call of the woods.
 		Summons two elite Treants to your side for 8 turns.
 		The treants have a global resistance equal to your blight resistance, and can stun, knockback and taunt your foes.
-		Their power increases with your Willpower and Talent Level.]]):format()
+		Your Willpower (%d) will be added to all of their non-Magic primary stats and their talent levels will increase with your Nature's Pride talent level.
+		Your increased damage, damage penetration, and many other stats will be inherited.]]):format(self:getWil())
 	end,
 }
 

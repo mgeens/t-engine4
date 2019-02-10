@@ -91,10 +91,9 @@ newBirthDescriptor
 		"#LIGHT_BLUE# * +1 Strength, +1 Dexterity, +0 Constitution",
 		"#LIGHT_BLUE# * +1 Magic, +1 Willpower, +0 Cunning",
 		"#GOLD#Life per level:#LIGHT_BLUE# 11",
-		"#GOLD#Experience penalty:#LIGHT_BLUE# 15%",
+		"#GOLD#Experience penalty:#LIGHT_BLUE# 0%",
 	},
 	inc_stats = { str=1, mag=1, dex=1, wil=1 },
-	experience = 1.15,
 	talents_types = { ["race/higher"]={true, 0} },
 	talents = {
 		[ActorTalents.T_HIGHER_HEAL]=1,
