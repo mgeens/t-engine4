@@ -374,14 +374,9 @@ function _M:applyDifficulty(zone, level_range)
 			zone.level_range = table.clone(level_range)
 		end
 		-- difficulty effects are phased in as the player reaches level 10
-		local lev_mult, lev_add, diff_adjust = 1, 0, math.min(1, game:getPlayer(true).level/10)
-		if self.difficulty == self.DIFFICULTY_NIGHTMARE then
-			lev_mult, lev_add = 1.5, 0
-		elseif self.difficulty == self.DIFFICULTY_INSANE then
-			lev_mult, lev_add = 1.5, 1
-		elseif self.difficulty == self.DIFFICULTY_MADNESS then
-			lev_mult, lev_add = 2.5, 2
-		end
+		local diff_adjust = math.min(1, game:getPlayer(true).level/10)
+		local lev_mult = game.state.birth.difficulty_level_mult or 1
+		local lev_add = game.state.birth.difficulty_level_add or 0
 		
 		if lev_mult ~= 1 then
 			local diff_adjust = math.min(1, game:getPlayer(true).level/10)
