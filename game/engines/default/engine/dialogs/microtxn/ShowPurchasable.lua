@@ -24,6 +24,7 @@ local Entity = require "engine.Entity"
 local Dialog = require "engine.ui.Dialog"
 local Image = require "engine.ui.Image"
 local Textzone = require "engine.ui.Textzone"
+local TextzoneList = require "engine.ui.TextzoneList"
 local ListColumns = require "engine.ui.ListColumns"
 local Button = require "engine.ui.Button"
 
@@ -63,12 +64,11 @@ function _M:init(mode)
 	}, list=self.list, all_clicks=true, fct=function(item, _, button) self:use(item, button) end, select=function(item, sel) self:onSelectItem(item) end}
 	self.c_list.on_focus_change = function(_, v) if not v then game:tooltipHide() end end
 
-	self.c_bonus_vault_slots = Textzone.new{width=350, auto_height=1, text=bonus_vault_slots_text:format(0), can_focus=true}
+	self.c_bonus_vault_slots = Textzone.new{has_box=true, width=340, auto_height=1, text=bonus_vault_slots_text:format(0), can_focus=true}
 	self.c_bonus_vault_slots.on_focus_change = function(_, v)
-		game.log("====")
 		if v then
 			local txt = self:getUIElement(self.c_bonus_vault_slots)
-			game:tooltipDisplayAtMap(txt.x, txt.y, item.tooltip)
+			game:tooltipDisplayAtMap(txt.x, txt.y, ("For every purchase of #{italic}##GREY#%s#LAST##{normal}# you gain a permanent additional vault slot.\n#GOLD##{italic}#Because why not!#{normal}#"):format(self:currencyDisplay(2)))
 		else
 			game:tooltipHide()
 		end
@@ -76,7 +76,7 @@ function _M:init(mode)
 
 	self.c_do_purchase = Button.new{text="Purchase", fct=function() self:doPurchase() end}
 
-	self.c_recap = ListColumns.new{width=350, height=self.ih - self.c_do_purchase.h, scrollbar=true, columns={
+	self.c_recap = ListColumns.new{width=350, height=self.ih - self.c_do_purchase.h - self.c_bonus_vault_slots.h, scrollbar=true, columns={
 		{name="Name", width=50, display_prop="recap_name"},
 		{name="Price", width=35, display_prop="recap_price"},
 		{name="Qty", width=15, display_prop="recap_qty"},
@@ -115,11 +115,15 @@ function _M:onSelectItem(item)
 	if self.in_paying_ui then game:tooltipHide() return end
 	if not item then return game:tooltipHide() end
 
+	if self.cur_sel_item then self.cur_sel_item.txt.pingpong = nil self.cur_sel_item.txt.scrollbar.pos = 0 end
+	item.txt.pingpong = 0
+
 	if item.last_display_x then
 		game:tooltipDisplayAtMap(item.last_display_x + self.c_list.w, item.last_display_y, item.tooltip)
 	else
 		game:tooltipHide()
 	end
+	self.cur_sel_item = item
 end
 
 function _M:use(item, button)
@@ -302,6 +306,47 @@ function _M:doPurchaseSteam()
 	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, core.steam and "steam" or "te4", table.serialize(cart)))
 end
 
+function _M:doPurchaseTE4()
+	util.browserOpenUrl("https://te4.org/donate")
+	do return end
+	local popup = Dialog:simplePopup("Connecting to server", "Please wait...", nil, true)
+
+	local cart = {}
+	for id, ok in pairs(self.cart) do if ok then
+		local item = self.purchasables[id]
+		cart[#cart+1] = {
+			id_purchasable = id,
+			nb_purchase = item.nb_purchase,
+		}
+	end end
+
+	local function onMTXResult(id_cart, ok)
+		local finalpopup = Dialog:simplePopup("Connecting to Steam", "Finalizing transaction with Steam servers...", nil, true)
+		profile:registerTemporaryEventHandler("MicroTxnSteamFinalizeCartResult", function(e)
+			game:unregisterDialog(finalpopup)
+			if e.success then
+				if e.new_donated then profile.auth.donated = e.new_donated end
+				self:paymentSuccess()
+			else
+				Dialog:simplePopup("Payment", "Payment refused, you have not been billed.")
+				self:paymentFailure()
+			end
+		end)
+		core.profile.pushOrder(string.format("o='MicroTxn' suborder='steam_finalize_cart' module=%q store=%q id_cart=%q", game.__mod_info.short_name, "steam", id_cart))
+	end
+
+	profile:registerTemporaryEventHandler("MicroTxnListCartResult", function(e)
+		game:unregisterDialog(popup)
+		if e.success then
+			core.steam.waitMTXResult(onMTXResult)
+		else
+			Dialog:simplePopup("Payment", "Payment refused, you have not been billed.")
+			self:paymentFailure()
+		end
+	end)
+	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, core.steam and "steam" or "te4", table.serialize(cart)))
+end
+
 function _M:buildTooltip(item)
 	local text = {}
 	if item.community_event then
@@ -354,7 +399,9 @@ function _M:generateList()
 			res.nb_purchase = 0
 			res.img = Entity.new{image=res.image}
 			res.category_img = self.categories_icons[res.category or "misc"] or self.categories_icons.misc
-			res.txt = Textzone.new{width=self.iw - 10 - 132 - 350, auto_height=true, text=("%s (%s)\n#SLATE##{italic}#%s#{normal}#"):format(res.name, self:currencyDisplay(res.price), res.desc)}
+			res.txt = TextzoneList.new{width=self.iw - 10 - 132 - 350, height=128, pingpong=20, scrollbar=true}
+			res.txt:switchItem(true, ("%s (%s)\n#SLATE##{italic}#%s#{normal}#"):format(res.name, self:currencyDisplay(res.price), res.desc))
+			res.txt.pingpong = nil
 			res.tooltip = self:buildTooltip(res)
 			list[#list+1] = res
 			self.purchasables[res.id] = res
@@ -364,7 +411,7 @@ function _M:generateList()
 		self:toggleDisplay(self.c_list, true)
 		self:toggleDisplay(self.c_waiter, false)
 		self:setFocus(self.c_list)
-		game.log("===balance: %s", tostring(e.data.infos.balance))
+		game.log("===balance: %s", tostring(e.data.infos.balance))		
 	end)
 	core.profile.pushOrder(string.format("o='MicroTxn' suborder='list_purchasables' module=%q store=%q", game.__mod_info.short_name, core.steam and "steam" or "te4"))
 end

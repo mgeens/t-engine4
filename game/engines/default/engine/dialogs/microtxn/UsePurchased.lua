@@ -71,6 +71,11 @@ end
 function _M:use(item, button)
 	if not item then return end
 
+	if game.zone.wilderness then
+		Dialog:simplePopup(item.name, "Please use purchased options when not on the worldmap.")
+		return
+	end
+
 	if item.once_per_character and game.state["has_"..item.effect] then
 		Dialog:simplePopup(item.name, "This option may only be used once per character to prevent wasting it.")
 		return
@@ -124,6 +129,14 @@ function _M:generateList()
 		self:toggleDisplay(self.c_list, true)
 		self:toggleDisplay(self.c_waiter, false)
 		self:setFocus(self.c_list)
+
+		if #list == 0 then
+			game:unregisterDialog(self)
+			Dialog:yesnoPopup("Online Store", "You have not purchased any usable options yet. Would you like to see the store?", function(ret) if ret then
+				package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
+				game:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+			end end)
+		end
 	end)
 	core.profile.pushOrder(string.format("o='MicroTxn' suborder='get_actionables' module=%q", game.__mod_info.short_name))
 end
