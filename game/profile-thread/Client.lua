@@ -791,7 +791,7 @@ function _M:orderMicroTxn(o)
 		if self:read("200") then
 			self.sock:send(data)
 			if self:read("200") then
-				cprofile.pushEvent(("e='MicroTxnListCartResult' success=true"):format())
+				cprofile.pushEvent(("e='MicroTxnListCartResult' success=true info=%q"):format(self.last_line))
 			else
 				cprofile.pushEvent(("e='MicroTxnListCartResult' success=false"):format())
 			end
@@ -805,6 +805,17 @@ function _M:orderMicroTxn(o)
 				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=true new_donated=%d"):format(tonumber(self.last_line)))
 			else
 				cprofile.pushEvent(("e='MicroTxnSteamFinalizeCartResult' success=false"):format())
+			end
+		end
+	elseif o.suborder == "te4_finalize_cart" then
+		local data = table.serialize{module=o.module, store=o.store, id_cart=o.id_cart}
+		self:command("MTXN TE4_FINALIZE_CART ", #data)
+		if self:read("200") then
+			self.sock:send(data)
+			if self:read("200") then
+				cprofile.pushEvent(("e='MicroTxnTE4FinalizeCartResult' success=true new_donated=%d"):format(tonumber(self.last_line)))
+			else
+				cprofile.pushEvent(("e='MicroTxnTE4FinalizeCartResult' success=false"):format())
 			end
 		end
 	end

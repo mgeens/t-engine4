@@ -31,7 +31,10 @@ local Button = require "engine.ui.Button"
 module(..., package.seeall, class.inherit(Dialog))
 
 local bonus_vault_slots_text = "#{italic}##UMBER#Bonus vault slots from this order: #ROYAL_BLUE#%d#{normal}#"
-local bonus_vault_slots_tooltip = "Each purchase/donations you do for the game grants you one more vault space for every 2 euros spent (when paying with other currencies the convertion to base price of the item is made). If your current total is an odd number, then the next euro will make you get the vault slot."
+local bonus_vault_slots_tooltip = "For every purchase of #{italic}##GREY#%s#LAST##{normal}# you gain a permanent additional vault slot.\n#GOLD##{italic}#Because why not!#{normal}#"
+
+local coins_balance_text = "#{italic}##UMBER#Voratun Coins available from your donations: #ROYAL_BLUE#%d#{normal}#"
+local coins_balance_tooltip = "For every donations you've ever made you have earned voratun coins. These can be spent purchasing expansions or options on the online store. This is the amount you have left, if your purchase total is below this number you'll instantly get your purchase validated, if not you'll need to donate some more first.\n#GOLD##{italic}#Thanks for your support, every little bit helps the game survive for years on!#{normal}#"
 
 function _M:init(mode)
 	if not mode then mode = core.steam and "steam" or "te4" end
@@ -48,9 +51,10 @@ function _M:init(mode)
 		cosmetic = Entity.new{image="/data/gfx/mtx/ui/category_cosmetic.png"},
 		misc = Entity.new{image="/data/gfx/mtx/ui/category_misc.png"},
 	}
-	local in_cart_icon = Entity.new{image="/data/gfx/mtx/ui/in_cart.png"},
+	local in_cart_icon = Entity.new{image="/data/gfx/mtx/ui/in_cart.png"}
 
-	self:generateList()
+	self.list = {}
+	self.purchasables = {}
 	self.recap = {}
 
 	self.c_waiter = Textzone.new{auto_width=1, auto_height=1, text="#YELLOW#-- connecting to server... --"}
@@ -68,7 +72,17 @@ function _M:init(mode)
 	self.c_bonus_vault_slots.on_focus_change = function(_, v)
 		if v then
 			local txt = self:getUIElement(self.c_bonus_vault_slots)
-			game:tooltipDisplayAtMap(txt.x, txt.y, ("For every purchase of #{italic}##GREY#%s#LAST##{normal}# you gain a permanent additional vault slot.\n#GOLD##{italic}#Because why not!#{normal}#"):format(self:currencyDisplay(2)))
+			game:tooltipDisplayAtMap(txt.x, txt.y, (bonus_vault_slots_tooltip):format(self:currencyDisplay(2)))
+		else
+			game:tooltipHide()
+		end
+	end
+
+	self.c_coins_available = Textzone.new{has_box=true, width=340, auto_height=1, text=coins_balance_text:format(0), can_focus=true}
+	self.c_coins_available.on_focus_change = function(_, v)
+		if v then
+			local txt = self:getUIElement(self.c_coins_available)
+			game:tooltipDisplayAtMap(txt.x, txt.y, (coins_balance_tooltip):format())
 		else
 			game:tooltipHide()
 		end
@@ -76,7 +90,7 @@ function _M:init(mode)
 
 	self.c_do_purchase = Button.new{text="Purchase", fct=function() self:doPurchase() end}
 
-	self.c_recap = ListColumns.new{width=350, height=self.ih - self.c_do_purchase.h - self.c_bonus_vault_slots.h, scrollbar=true, columns={
+	self.c_recap = ListColumns.new{width=350, height=self.ih - self.c_do_purchase.h - math.max(self.c_bonus_vault_slots.h, self.c_coins_available.h), scrollbar=true, columns={
 		{name="Name", width=50, display_prop="recap_name"},
 		{name="Price", width=35, display_prop="recap_price"},
 		{name="Qty", width=15, display_prop="recap_qty"},
@@ -94,8 +108,10 @@ function _M:init(mode)
 		{right=0, bottom=0, ui=self.c_do_purchase},
 	}
 	-- Only show those for steam as te4.org purchases require already having a donation up
-	if core.steam then
+	if mode == "steam" then
 		uis[#uis+1] = {right=0, bottom=self.c_do_purchase, ui=self.c_bonus_vault_slots}
+	elseif mode == "te4" then
+		uis[#uis+1] = {right=0, bottom=self.c_do_purchase, ui=self.c_coins_available}
 	end
 	self:loadUI(uis)
 
@@ -109,7 +125,36 @@ function _M:init(mode)
 			if on_exit then on_exit() end
 		end,
 	}
+
+	self:checks()
+
+	self:generateList()
 end
+
+function _M:checks() game:onTickEnd(function()
+	if not profile.auth then
+		game:unregisterDialog(self)
+		Dialog:simplePopup("Online Store", "You need to be logged in before using the store. Please go back to the main menu and login.")
+		return
+	end
+
+	if self.mode == "steam" then
+		if not profile.auth.steamid then
+			game:unregisterDialog(self)
+			Dialog:yesnoPopup("Online Store", "Steam users need to link their profiles to their steam account. This is very easy in just a few clicks. Once this is done, simply restart the game.", function(ret) if ret then
+				util.browserOpenUrl("https://te4.org/user/"..profile.auth.drupid.."/steam", {is_external=true})
+			end end, "Let's do it! (Opens in your browser)", "Not now")
+		end
+	elseif self.mode == "te4" then
+		-- Handle me more smoothly
+		if profile.auth.donated < 6 then
+			game:unregisterDialog(self)
+			Dialog:yesnoPopup("Online Store", "The Online Store (and expansions) are only purchasable by players that bought the game. Plaese go have a look at the donation page for more explanations.", function(ret) if ret then
+				util.browserOpenUrl("https://te4.org/donate", {is_external=true})
+			end end, "Let's go! (Opens in your browser)", "Not now")
+		end
+	end
+end) end
 
 function _M:onSelectItem(item)
 	if self.in_paying_ui then game:tooltipHide() return end
@@ -267,6 +312,10 @@ function _M:paymentFailure()
 	self.in_paying_ui = false
 end
 
+function _M:paymentCancel()
+	self.in_paying_ui = false
+end
+
 function _M:doPurchaseSteam()
 	local popup = Dialog:simplePopup("Connecting to Steam", "Steam Overlay should appear, if it does not please make sure it you have not disabled it.", nil, true)
 
@@ -303,12 +352,10 @@ function _M:doPurchaseSteam()
 			self:paymentFailure()
 		end
 	end)
-	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, core.steam and "steam" or "te4", table.serialize(cart)))
+	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, "steam", table.serialize(cart)))
 end
 
 function _M:doPurchaseTE4()
-	util.browserOpenUrl("https://te4.org/donate")
-	do return end
 	local popup = Dialog:simplePopup("Connecting to server", "Please wait...", nil, true)
 
 	local cart = {}
@@ -320,9 +367,9 @@ function _M:doPurchaseTE4()
 		}
 	end end
 
-	local function onMTXResult(id_cart, ok)
-		local finalpopup = Dialog:simplePopup("Connecting to Steam", "Finalizing transaction with Steam servers...", nil, true)
-		profile:registerTemporaryEventHandler("MicroTxnSteamFinalizeCartResult", function(e)
+	local function finalizePurchase(id_cart)
+		local finalpopup = Dialog:simplePopup("Connecting to server", "Please wait...", nil, true)
+		profile:registerTemporaryEventHandler("MicroTxnTE4FinalizeCartResult", function(e)
 			game:unregisterDialog(finalpopup)
 			if e.success then
 				if e.new_donated then profile.auth.donated = e.new_donated end
@@ -332,19 +379,30 @@ function _M:doPurchaseTE4()
 				self:paymentFailure()
 			end
 		end)
-		core.profile.pushOrder(string.format("o='MicroTxn' suborder='steam_finalize_cart' module=%q store=%q id_cart=%q", game.__mod_info.short_name, "steam", id_cart))
+		core.profile.pushOrder(string.format("o='MicroTxn' suborder='te4_finalize_cart' module=%q store=%q id_cart=%q", game.__mod_info.short_name, "te4", id_cart))
 	end
 
 	profile:registerTemporaryEventHandler("MicroTxnListCartResult", function(e)
 		game:unregisterDialog(popup)
-		if e.success then
-			core.steam.waitMTXResult(onMTXResult)
+		if e.success and e.info then
+			if e.info:prefix("instant_buy:") then
+				local id_cart = tonumber(e.info:sub(13))
+				Dialog:yesnoPopup("Online Store", "You have enough coins to instantly purchase those options. Confirm?", function(ret) if ret then
+					finalizePurchase(id_cart)
+				end end, "Purchase", "Cancel")
+			elseif e.info:prefix("requires:") then
+				local more = tonumber(e.info:sub(10))
+				Dialog:yesnoPopup("Online Store", "You need "..more.." more coins to purchase those options. Do you want to go to the donation page now?", function(ret) if ret then
+					util.browserOpenUrl("https://te4.org/donate", {is_external=true})
+				end end, "Let's go! (Opens in your browser)", "Not now")
+				self:paymentCancel()
+			end
 		else
 			Dialog:simplePopup("Payment", "Payment refused, you have not been billed.")
 			self:paymentFailure()
 		end
 	end)
-	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, core.steam and "steam" or "te4", table.serialize(cart)))
+	core.profile.pushOrder(string.format("o='MicroTxn' suborder='create_cart' module=%q store=%q cart=%q", game.__mod_info.short_name, "te4", table.serialize(cart)))
 end
 
 function _M:buildTooltip(item)
@@ -375,9 +433,6 @@ To activate it you will need to have your online events option set to "all" (whi
 end
 
 function _M:generateList()
-	self.list = {}
-	self.purchasables = {}
-
 	profile:registerTemporaryEventHandler("MicroTxnListPurchasables", function(e)
 		if e.error then
 			Dialog:simplePopup("Online Store", e.error:capitalize())
@@ -411,7 +466,10 @@ function _M:generateList()
 		self:toggleDisplay(self.c_list, true)
 		self:toggleDisplay(self.c_waiter, false)
 		self:setFocus(self.c_list)
-		game.log("===balance: %s", tostring(e.data.infos.balance))		
+
+		self.c_coins_available.text = coins_balance_text:format((e.data.infos.balance or 0) * 10)
+		self.c_coins_available:generate()
+		self.cur_coins_left = e.data.infos.balance or 0
 	end)
 	core.profile.pushOrder(string.format("o='MicroTxn' suborder='list_purchasables' module=%q store=%q", game.__mod_info.short_name, core.steam and "steam" or "te4"))
 end

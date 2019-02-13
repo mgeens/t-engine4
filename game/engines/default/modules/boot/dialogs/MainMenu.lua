@@ -79,7 +79,7 @@ function _M:init()
 	l[#l+1] = {name="Credits", fct=function() game:registerDialog(require("mod.dialogs.Credits").new()) end}
 	l[#l+1] = {name="Exit", fct=function() game:onQuit() end}
 	if config.settings.cheat then l[#l+1] = {name="Reboot", fct=function() util.showMainMenu() end} end
---	if config.settings.cheat then l[#l+1] = {name="webtest", fct=function() util.browserOpenUrl("http://google.com") end} end
+	-- if config.settings.cheat then l[#l+1] = {name="webtest", fct=function() util.browserOpenUrl("http://google.com") end} end
 --	if config.settings.cheat then l[#l+1] = {name="webtest", fct=function() util.browserOpenUrl("asset://te4/html/test.html") end} end
 
 	self.c_background = Checkbox.new{title="Disable animated background", checked=game.stopped and true or false, on_change=function() self:switchBackground() end}
