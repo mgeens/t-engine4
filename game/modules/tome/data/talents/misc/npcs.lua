@@ -29,6 +29,7 @@ newTalentType{ type="psionic/other", name = "other", hide = true, description = 
 newTalentType{ type="other/other", name = "other", hide = true, description = "Talents of the various entities of the world." }
 newTalentType{ type="undead/other", name = "other", hide = true, description = "Talents of the various entities of the world." }
 newTalentType{ type="undead/keepsake", name = "keepsake shadow", generic = true, description = "Keepsake shadows's innate abilities." }
+newTalentType{ is_mind=true, type="cursed/misc", name = "misc", description = "Talents of the various entities of the world." }
 
 local oldTalent = newTalent
 local newTalent = function(t) if type(t.hide) == "nil" then t.hide = true end return oldTalent(t) end
@@ -3667,8 +3668,7 @@ newTalent{
 
 newTalent{
 	name = "Shadow Empathy",
-	type = {"cursed/one-with-shadows", 2},
-	require = cursed_cun_req_high2,
+	type = {"cursed/misc", 1},
 	points = 5,
 	hate = 10,
 	cooldown = 25,

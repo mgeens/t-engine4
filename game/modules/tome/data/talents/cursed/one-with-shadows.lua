@@ -35,7 +35,7 @@ newTalent{
 }
 
 newTalent{
-	name = "Shadows Empathy",
+	name = "Shadows Empathy", image = "talents/shadow_empathy.png",
 	type = {"cursed/one-with-shadows", 2},
 	require = cursed_cun_req_high2,
 	points = 5,
@@ -140,22 +140,22 @@ newTalent{
 	getPower = function(self, t) return 10 + self:combatTalentMindDamage(t, 0, 700) end, --be generous
 	onDie = function(self, t, value, src)
 		local shadow = function(self, t)
-				local shadows = {}
-				if game.party and game.party:hasMember(self) then
-					for act, def in pairs(game.party.members) do
-						if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
-							shadows[#shadows+1] = act
-						end
-					end
-				else
-					for uid, act in pairs(game.level.entities) do
-						if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
-							shadows[#shadows+1] = act
-						end
+			local shadows = {}
+			if game.party and game.party:hasMember(self) then
+				for act, def in pairs(game.party.members) do
+					if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
+						shadows[#shadows+1] = act
 					end
 				end
-				return #shadows > 0 and rng.table(shadows)
-			end,
+			else
+				for uid, act in pairs(game.level.entities) do
+					if act.summoner and act.summoner == self and act.is_doomed_shadow and not act.dead then
+						shadows[#shadows+1] = act
+					end
+				end
+			end
+			return #shadows > 0 and rng.table(shadows)
+		end
 		if not shadow and self:knowTalent(self.T_CALL_SHADOWS) then
 			local t = self:getTalentFromId(self.T_CALL_SHADOWS)
 			t.summonShadow(self, t) --summon a shadow if you have none
