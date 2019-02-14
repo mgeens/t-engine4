@@ -4160,10 +4160,17 @@ function _M:updateModdableTile()
 			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
 		end
 	end
+	if self.moddable_tile_base_shimmer_aura then
+		local def = self.moddable_tile_base_shimmer_aura
+		add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
+	end
 
-	local basebody = self.moddable_tile_base or "base_01.png"
+	local basebody = self.moddable_tile_base_shimmer or self.moddable_tile_base or "base_01.png"
 	if self.moddable_tile_base_alter then basebody = self:moddable_tile_base_alter(basebody) end
 	add[#add+1] = {image = base..basebody, auto_tall=1}
+
+	if self.moddable_tile_base_shimmer_facial then add[#add+1] = {image = base..self.moddable_tile_base_shimmer_facial, auto_tall=1} end
+	if self.moddable_tile_base_shimmer_hair then add[#add+1] = {image = base..self.moddable_tile_base_shimmer_hair, auto_tall=1} end
 
 	if not self:attr("disarmed") then
 		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then

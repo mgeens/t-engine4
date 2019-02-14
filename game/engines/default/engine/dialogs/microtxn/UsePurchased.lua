@@ -34,7 +34,7 @@ function _M:init(mode)
 	self.cart = {}
 
 	self.base_title_text = game.__mod_info.long_name.." #GOLD#Purchased Options#LAST#"
-	Dialog.init(self, self.base_title_text, game.w * 0.8, game.h * 0.8)
+	Dialog.init(self, self.base_title_text, 600, game.h * 0.8)
 
 	self.categories_icons = {
 		pay2die = Entity.new{image="/data/gfx/mtx/ui/category_pay2die.png"},
@@ -47,7 +47,7 @@ function _M:init(mode)
 	self:generateList()
 
 	self.c_waiter = Textzone.new{auto_width=1, auto_height=1, text="#YELLOW#-- connecting to server... --"}
-	self.c_list = ListColumns.new{width=self.iw, height=self.ih, scrollbar=true, sortable=true, columns={
+	self.c_list = ListColumns.new{width=self.iw, height=200, scrollbar=true, sortable=true, columns={
 		{name="Name", width=80, display_prop="display_name"},
 		{name="Available", width=20, display_prop="nb_available"},
 	}, list=self.list, all_clicks=true, fct=function(item, _, button) self:use(item, button) end, select=function(item, sel) end}
@@ -56,7 +56,7 @@ function _M:init(mode)
 		{vcenter=0, hcenter=0, ui=self.c_waiter},
 		{left=0, top=0, ui=self.c_list},
 	}
-	self:setupUI(false, false)
+	self:setupUI(false, true)
 	self:toggleDisplay(self.c_list, false)
 
 	self.key:addBinds{

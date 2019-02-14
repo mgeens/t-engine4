@@ -263,7 +263,7 @@ function _M:installShimmer(item)
 
 		if not found then
 			Dialog:simpleLongPopup(item.name, [[Could not dynamically link addon to current character, maybe the installation weng wrong.
-	You can fix that by manually downloading the shimmer addon from https://te4.org/ and placing it in game/addons/ folder.]], 600)
+You can fix that by manually downloading the shimmer addon from https://te4.org/ and placing it in game/addons/ folder.]], 600)
 		end
 	end
 
