@@ -360,7 +360,7 @@ end
 function _M:getAccuracyEffect(weapon, atk, def, scale, max)
 	max = max or 10000000
 	scale = scale or 1
-	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale or 1))
+	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale and 0.5 or 1))
 end
 
 function _M:isAccuracyEffect(weapon, kind)

@@ -1989,6 +1989,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Main:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -1998,6 +1999,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Off :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -2007,6 +2009,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Psi :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -2016,6 +2019,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Ammo:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -3795,8 +3799,8 @@ function _M:levelup()
 	engine.interface.ActorLevel.levelup(self)
 	self:resolveLevelTalents()
 
-	-- Restock shops at level 5 and every 10 levels
-	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) or (self.level == 5) ) then
+	-- Restock shops at every 10 levels
+	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) ) then
 		if not (game.state.stores_restocks and game.state.stores_restocks[self.level]) then
 			game.state:storesRestock()
 			game.state.stores_restocks = game.state.stores_restocks or {}
@@ -4359,11 +4363,26 @@ function _M:onWear(o, inven_id, bypass_set, silent)
 							object_inven, conditions[1], conditions[2])
 					end
 				else
-					object, index, object_inven_id =
-						self:findInAllInventoriesBy(conditions[1], conditions[2])
+					-- Can't use Actor:findInAllInventories() here;
+					-- if a matching item is worn but there's also a
+					-- matching item in the pack,
+					-- findInAllInventories() may return the one that
+					-- is in the pack instead of the worn one
+					--
+					-- So manually search only the worn inventories
+					-- instead
+					for inven_id, inven in pairs(self.inven) do
+						if self:getInven(inven_id).worn then
+							object, index = self:findInInventoryBy(inven, conditions[1], conditions[2])
+							if object then
+								object_inven_id = inven_id
+								break
+							end
+						end
+					end
 				end
 				-- If we're wearing it, add it to the list.
-				if object and self:getInven(object_inven_id).worn and
+				if object and
 					(not object.set_complete or not object.set_complete[set_id])
 				then
 					table.insert(set_objects, {
@@ -4513,19 +4532,30 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 				if type(broken) == "table" then broken = broken[set_id] end
 				if broken then broken(d.object, self, d.inven_id, set_objects) end
 				if d.object._special_set then
-					for k, id in pairs(d.object._special_set) do
-						d.object:removeTemporaryValue(k, id)
+					if d.object._special_set[set_id] then
+						for k, id in pairs(d.object._special_set[set_id]) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set[set_id] = nil
+						-- Remove if empty.
+						if not next(d.object._special_set) then
+							d.object._special_set = nil
+						end
+					else -- Object only has one set (old behaviour)
+						for k, id in pairs(d.object._special_set) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set = nil
 					end
-					d.object._special_set = nil
 				end
 				if d.object ~= o then self:onWear(d.object, d.inven_id, true) end
 				self:useObjectDisable(d.object)
 				self:useObjectEnable(d.object)
 				d.object.set_complete[set_id] = nil
 				-- Remove if empty.
-				local empty = true
-				for k, v in pairs(d.object.set_complete) do empty = false break end
-				if empty then d.object.set_complete = nil end
+				if not next(d.object.set_complete) then
+					d.object.set_complete = nil
+				end
 			end
 		end
 	end
@@ -4832,7 +4862,8 @@ end
 local oldGetTalentTypeMastery = _M.getTalentTypeMastery
 function _M:getTalentTypeMastery(tt)
 	local mastery = oldGetTalentTypeMastery(self, tt)
-	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[tt.category] or 0
+	local def = self:getTalentTypeFrom(tt)
+	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[def.category] or 0
 	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
 	return mastery + bonus1 + bonus2
 end

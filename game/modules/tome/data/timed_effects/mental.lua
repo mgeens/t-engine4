@@ -25,6 +25,29 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 local Astar = require "engine.Astar"
 
+-- Item specific
+newEffect{
+	name = "ITEM_EXPOSED", image = "talents/curse_of_the_meek.png",  -- Re-used icon
+	desc = "Exposed",
+	long_desc = function(self, eff) return ("Mind and body exposed to effects and attacks, reducing all saves and defense by %d."):format(eff.reduce) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
+	type = "mental",
+	subtype = { },
+	status = "detrimental",
+	parameters = {reduce=0},
+	on_gain = function(self, err) return "#Target#'s is vulnerable to attacks and effects!" end,
+	on_lose = function(self, err) return "#Target# is less vulnerable." end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_physresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_spellresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_mentalresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_def", -eff.reduce)
+	end,
+	deactivate = function(self, eff)
+
+	end,
+}
+
 newEffect{
 	name = "SILENCED", image = "effects/silenced.png",
 	desc = "Silenced",
