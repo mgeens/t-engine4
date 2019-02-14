@@ -2422,35 +2422,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	if value > 0 and self:isTalentActive(self.T_DISRUPTION_SHIELD) then
-		local mana = math.max(0, self:getMaxMana() - self:getMana())
-		local mana_val = value * self:attr("disruption_shield")
-		local converted = math.min(value, mana / self:attr("disruption_shield"))
-		game:delayedLogMessage(self, nil,  "disruption_shield", "#LIGHT_BLUE##Source# converts damage to mana!")
-		game:delayedLogDamage(src, self, 0, ("#LIGHT_BLUE#(%d converted)#LAST#"):format(converted), false)
-
-		-- We have enough to absorb the full hit
-		if mana_val <= mana then
-			self:incMana(mana_val)
-			self.disruption_shield_absorb = self.disruption_shield_absorb + value
-			return 0
-		-- Or the shield collapses in a deadly arcane explosion
-		else
-			self:incMana(mana)
-			self.disruption_shield_absorb = self.disruption_shield_absorb + mana / self:attr("disruption_shield")
-			value = value - mana / self:attr("disruption_shield")
-
-			local dam = self.disruption_shield_absorb
-
-			-- Deactivate without loosing energy
-			self:forceUseTalent(self.T_DISRUPTION_SHIELD, {ignore_energy=true})
-
-			-- Explode!
-			local t = self:getTalentFromId(self.T_DISRUPTION_SHIELD)
-			t.explode(self, t, dam)
-		end
-	end
-
 	if value <=0 then return 0 end
 	if self.knowTalent and (self:knowTalent(self.T_SEETHE) or self:knowTalent(self.T_GRIM_RESOLVE)) then
 		if not self:hasEffect(self.EFF_CURSED_FORM) then
@@ -3744,10 +3715,7 @@ function _M:resetToFull()
 		if res_def.short_name == "paradox" then
 			self.paradox = self.preferred_paradox or 300
 		elseif res_def.short_name == "mana" then
-			-- Special handling of Disruption Shield to avoid penalizing Archmages on levelup
-			if not (self.isTalentActive and self:isTalentActive(self.T_DISRUPTION_SHIELD)) then
-				self.mana = self:getMaxMana()
-			end
+			self.mana = self:getMaxMana()
 		else
 			if res_def.invert_values or res_def.switch_direction then
 				self[res_def.short_name] = self:check(res_def.getMinFunction) or self[res_def.short_name] or res_def.min
@@ -6184,7 +6152,7 @@ function _M:postUseTalent(ab, ret, silent)
 
 	if self.turn_procs.anomalies_checked then self.turn_procs.anomalies_checked = nil end  -- clears out anomaly checks
 
-	if config.settings.tome.talents_flyers and not self:attr("save_cleanup") and self.x and self.y and game.level.map.seens(self.x, self.y) then
+	if config.settings.tome.talents_flyers and not self:attr("save_cleanup") and self.x and self.y and game.level.map.seens(self.x, self.y) and ab.id ~= "T_ATTACK" then
 		local name = (ab.display_entity and ab.display_entity:getDisplayString() or "")..ab.name
 		local sx, sy = game.level.map:getTileToScreen(self.x, self.y, true)
 		game.flyers:add(sx, sy - game.level.map.tile_h / 2, 20, rng.float(-0.1, 0.1), rng.float(-0.5,-0.8), name, colors.simple(colors.OLIVE_DRAB))
