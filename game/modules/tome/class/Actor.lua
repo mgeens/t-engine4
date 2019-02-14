@@ -7775,3 +7775,31 @@ function _M:projectSource(t, x, y, damtype, dam, particles, source)
 	self:project(t, x, y, damtype, dam, particles)
 	self.__project_source = old_source
 end
+
+-- Superload from ActorPoject to handle player_selffire
+function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
+	-- Now project on each grid, one type
+	-- Call the projected method of the target grid if possible
+	if not game.level.map:checkAllEntities(px, py, "projected", self, typ, px, py, damtype, dam, particles) then
+		-- Check self- and friendly-fire, and if the projection "misses"
+		local act = game.level.map(px, py, engine.Map.ACTOR)
+		if act and act == self and not (
+			((type(typ.selffire) == "number" and rng.percent(typ.selffire)) 
+			or 
+			(type(typ.selffire) ~= "number" and typ.selffire))
+			and (act == game.player and typ.player_selffire)  -- Disable friendlyfire for player projectiles unless explicitly overriden
+			)
+			then
+		elseif act and self.reactionToward and (self:reactionToward(act) >= 0) and not ((type(typ.friendlyfire) == "number" and rng.percent(typ.friendlyfire)) or (type(typ.friendlyfire) ~= "number" and typ.friendlyfire)) then
+		-- Otherwise hit
+		else
+			DamageType:projectingFor(self, {project_type=tg})
+			if type(damtype) == "function" then if damtype(px, py, tg, self, tmp) then return true end
+			else DamageType:get(damtype).projector(self, px, py, damtype, dam, tmp, nil, tg) end
+			if particles and type(particles) == "table" then
+				game.level.map:particleEmitter(px, py, 1, particles.type, particles.args)
+			end
+			DamageType:projectingFor(self, nil)
+		end
+	end
+end

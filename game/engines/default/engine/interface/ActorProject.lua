@@ -411,13 +411,7 @@ function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
 	if not game.level.map:checkAllEntities(px, py, "projected", self, typ, px, py, damtype, dam, particles) then
 		-- Check self- and friendly-fire, and if the projection "misses"
 		local act = game.level.map(px, py, engine.Map.ACTOR)
-		if act and act == self and not (
-			((type(typ.selffire) == "number" and rng.percent(typ.selffire)) 
-			or 
-			(type(typ.selffire) ~= "number" and typ.selffire))
-			and (act == game.player and typ.player_selffire)  -- Disable friendlyfire for player projectiles unless explicitly overriden
-			)
-			then
+		if act and act == self and not ((type(typ.selffire) == "number" and rng.percent(typ.selffire)) or (type(typ.selffire) ~= "number" and typ.selffire)) then
 		elseif act and self.reactionToward and (self:reactionToward(act) >= 0) and not ((type(typ.friendlyfire) == "number" and rng.percent(typ.friendlyfire)) or (type(typ.friendlyfire) ~= "number" and typ.friendlyfire)) then
 		-- Otherwise hit
 		else
