@@ -86,7 +86,7 @@ function _M:init(actor, on_finish, on_birth)
 		end
 	end
 
-	Dialog.init(self, "Levelup: "..actor.name, game.w * 0.9, game.h * 0.9, game.w * 0.05, game.h * 0.05)
+	Dialog.init(self, "Levelup: "..actor.name..", level "..actor.level, game.w * 0.9, game.h * 0.9, game.w * 0.05, game.h * 0.05)
 	if game.w * 0.9 >= 1000 then
 		self.no_tooltip = true
 	end
