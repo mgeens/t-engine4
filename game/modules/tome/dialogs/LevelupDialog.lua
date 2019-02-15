@@ -958,11 +958,10 @@ function _M:getTalentDesc(item)
 		end
 		if traw == 0 then
 			local req = self.actor:getTalentReqDesc(item.talent, 1):toTString():tokenize(" ()[]")
-			local req2 = self.actor:getTalentReqDesc(item.talent, 1000):toTString():tokenize(" ()[]")
 			text:add{"color","WHITE"}
 			text:add({"font", "bold"}, "First talent level: ", tostring(traw+1), {"font", "normal"})
 			text:add(true)
-			text:merge(req2:diffWith(req, diff_color))
+			text:merge(req)
 			text:merge(self.actor:getTalentFullDescription(t, 1000):diffWith(self.actor:getTalentFullDescription(t, 1), diff_color))
 		elseif traw < self:getMaxTPoints(t) then
 			local req = self.actor:getTalentReqDesc(item.talent):toTString():tokenize(" ()[]")
@@ -973,11 +972,10 @@ function _M:getTalentDesc(item)
 			text:merge(req2:diffWith(req, diff_full))
 			text:merge(self.actor:getTalentFullDescription(t, 1):diffWith(self.actor:getTalentFullDescription(t), diff_full))
 		else
-			local req = self.actor:getTalentReqDesc(item.talent)
-			local req2 = self.actor:getTalentReqDesc(item.talent, 1000):toTString():tokenize(" ()[]")
+			local req = self.actor:getTalentReqDesc(item.talent):toTString():tokenize(" ()[]")
 			text:add({"font", "bold"}, "Current talent level: "..traw, {"font", "normal"})
 			text:add(true)
-			text:merge(req2:diffWith(req, diff_color))
+			text:merge(req)
 			text:merge(self.actor:getTalentFullDescription(t, 1000):diffWith(self.actor:getTalentFullDescription(t), diff_color))
 		end
 	end
