@@ -1869,9 +1869,14 @@ function _M:display(nb_keyframes)
 	-- If switching resolution, blank everything but the dialog
 	if self.change_res_dialog then engine.GameTurnBased.display(self, nb_keyframes) return end
 
-	-- Reset gamma setting, something somewhere is disrupting it, this is a stop gap solution
-	if self.support_shader_gamma and self.full_fbo_shader and self.full_fbo_shader.shad then self.full_fbo_shader.shad:uniGamma(config.settings.gamma_correction / 100) end
+	if not core.display.redrawingForSavefileScreenshot() then
+		-- Don't change gamma here during redrawing for savefile screenshot.
+		-- I suspect that the following code is actually unnecessary, but I'm not changing it.
 
+		-- Reset gamma setting, something somewhere is disrupting it, this is a stop gap solution
+		if self.support_shader_gamma and self.full_fbo_shader and self.full_fbo_shader.shad then self.full_fbo_shader.shad:uniGamma(config.settings.gamma_correction / 100) end
+	end
+ 
 	if self.full_fbo then self.full_fbo:use(true) end
 
 	-- Now the ui

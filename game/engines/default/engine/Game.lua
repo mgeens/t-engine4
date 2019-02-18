@@ -680,6 +680,20 @@ function _M:setGamma(gamma)
 	end
 end
 
+--- Sets the gamma of the window only if using a fullscreen shader
+-- @param gamma
+function _M:setFullscreenShaderGamma(gamma)
+	if self.support_shader_gamma and core.shader.active() then
+		if self.full_fbo_shader then
+			-- Tell the shader which gamma to use
+			self.full_fbo_shader:setUniform("gamma", gamma)
+			print("[GAMMA] Setting gamma correction using fullscreen shader", gamma)
+		else
+			print("[GAMMA] Not setting gamma correction yet, no fullscreen shader found", gamma)
+		end
+	end
+end
+
 --- Requests the game to save
 function _M:saveGame()
 end

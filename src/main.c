@@ -770,9 +770,38 @@ void on_redraw()
 
 void redraw_now(redraw_type_t rtype)
 {
+	bool changed_gamma = FALSE;
+	if (rtype == redraw_type_savefile_screenshot)
+	{
+		if (current_game != LUA_NOREF)
+		{
+			// current_game:setFullscreenShaderGamma(1)
+			lua_rawgeti(L, LUA_REGISTRYINDEX, current_game);
+			lua_pushstring(L, "setFullscreenShaderGamma");
+			lua_gettable(L, -2);
+			lua_remove(L, -2);
+			lua_rawgeti(L, LUA_REGISTRYINDEX, current_game);
+			lua_pushnumber(L, 1);
+			docall(L, 2, 0);
+			changed_gamma = TRUE;
+		}
+	}
+
 	current_redraw_type = rtype;
 	on_redraw();
 	current_redraw_type = redraw_type_normal;
+
+	if (changed_gamma)
+	{
+		// current_game:setFullscreenShaderGamma(gamma_correction)
+		lua_rawgeti(L, LUA_REGISTRYINDEX, current_game);
+		lua_pushstring(L, "setFullscreenShaderGamma");
+		lua_gettable(L, -2);
+		lua_remove(L, -2);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, current_game);
+		lua_pushnumber(L, gamma_correction);
+		docall(L, 2, 0);
+	}
 }
 
 redraw_type_t get_current_redraw_type()
