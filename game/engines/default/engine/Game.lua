@@ -178,7 +178,8 @@ function _M:display(nb_keyframes)
 		self.flyers:display(nb_keyframes)
 	end
 
-	if not self.suppressDialogs and #self.dialogs then
+	-- Suppress the display of dialogs when drawing for a savefile screenshot.
+	if not core.display.redrawingForSavefileScreenshot() and #self.dialogs then
 		local last = self.dialogs[#self.dialogs]
 		for i = last and last.__show_only and #self.dialogs or 1, #self.dialogs do
 			local d = self.dialogs[i]
@@ -724,13 +725,9 @@ end
 -- @param[type=boolean] for_savefile The screenshot will be used for savefile display
 -- @return screenshot
 function _M:takeScreenshot(for_savefile)
+	core.display.forceRedrawForScreenshot(for_savefile)
 	if for_savefile then
-		self.suppressDialogs = true
-		core.display.forceRedraw()
-		local sc = core.display.getScreenshot(self.w / 4, self.h / 4, self.w / 2, self.h / 2)
-		self.suppressDialogs = nil
-		core.display.forceRedraw()
-		return sc
+		return core.display.getScreenshot(self.w / 4, self.h / 4, self.w / 2, self.h / 2)
 	else
 		return core.display.getScreenshot(0, 0, self.w, self.h)
 	end

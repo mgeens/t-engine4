@@ -695,6 +695,7 @@ void call_draw(int nb_keyframes)
 }
 
 long total_keyframes = 0;
+redraw_type_t current_redraw_type = redraw_type_normal;
 void on_redraw()
 {
 	static int Frames = 0;
@@ -743,8 +744,17 @@ void on_redraw()
 //	printf("keyframes: %f / %f by %f => %d\n", nb_keyframes, reference_fps, step, nb - (last_keyframe));
 	call_draw(nb - last_keyframe);
 
-	//SDL_GL_SwapBuffers();
-	SDL_GL_SwapWindow(window);
+	switch (current_redraw_type)
+	{
+	case redraw_type_screenshot:
+	case redraw_type_savefile_screenshot:
+		// glReadPixels reads from the back buffer, so skip swap when we're doing a screenshot.
+		break;
+	default:
+		//SDL_GL_SwapBuffers();
+		SDL_GL_SwapWindow(window);
+		break;
+	}
 
 	last_keyframe = nb;
 
@@ -756,6 +766,18 @@ void on_redraw()
 	te4_discord_update();
 #endif
 	if (te4_web_update) te4_web_update(L);
+}
+
+void redraw_now(redraw_type_t rtype)
+{
+	current_redraw_type = rtype;
+	on_redraw();
+	current_redraw_type = redraw_type_normal;
+}
+
+redraw_type_t get_current_redraw_type()
+{
+	return current_redraw_type;
 }
 
 void pass_command_args(int argc, char *argv[])

@@ -2465,11 +2465,26 @@ static int sdl_set_window_pos(lua_State *L)
 	return 1;
 }
 
-extern void on_redraw();
 static int sdl_redraw_screen(lua_State *L)
 {
-	on_redraw();
+	redraw_now(redraw_type_normal);
 	return 0;
+}
+
+static int sdl_redraw_screen_for_screenshot(lua_State *L)
+{
+	bool for_savefile = lua_toboolean(L, 1);
+	if (for_savefile)
+		redraw_now(redraw_type_savefile_screenshot);
+	else
+		redraw_now(redraw_type_screenshot);
+	return 0;
+}
+
+static int redrawing_for_savefile_screenshot(lua_State *L)
+{
+	lua_pushboolean(L, (get_current_redraw_type() == redraw_type_savefile_screenshot));
+	return 1;
 }
 
 int mouse_cursor_s_ref = LUA_NOREF;
@@ -3361,6 +3376,8 @@ static const struct luaL_Reg displaylib[] =
 	{"setTextBlended", set_text_aa},
 	{"getTextBlended", get_text_aa},
 	{"forceRedraw", sdl_redraw_screen},
+	{"forceRedrawForScreenshot", sdl_redraw_screen_for_screenshot},
+	{"redrawingForSavefileScreenshot", redrawing_for_savefile_screenshot},
 	{"size", sdl_screen_size},
 	{"windowPos", sdl_window_pos},
 	{"newFont", sdl_new_font},
