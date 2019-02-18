@@ -26,7 +26,6 @@
 #include "auxiliar.h"
 #include "types.h"
 #include "script.h"
-#include "display.h"
 #include "physfs.h"
 #include "physfsrwops.h"
 #include "SFMT.h"
@@ -2981,14 +2980,8 @@ static int sdl_set_gamma(lua_State *L)
 	{
 		gamma_correction = lua_tonumber(L, 1);
 
-		Uint16 red_ramp[256];
-		Uint16 green_ramp[256];
-		Uint16 blue_ramp[256];
-
-		SDL_CalculateGammaRamp(gamma_correction, red_ramp);
-		SDL_memcpy(green_ramp, red_ramp, sizeof(red_ramp));
-		SDL_memcpy(blue_ramp, red_ramp, sizeof(red_ramp));
-		SDL_SetWindowGammaRamp(window, red_ramp, green_ramp, blue_ramp);
+		// SDL_SetWindowBrightness is sufficient for a simple gamma adjustment.
+		SDL_SetWindowBrightness(window, gamma_correction);
 	}
 	lua_pushnumber(L, gamma_correction);
 	return 1;

@@ -1732,6 +1732,8 @@ int main(int argc, char *argv[])
 	printf("Terminating!\n");
 	te4_web_terminate();
 	printf("Webcore shutdown complete\n");
+	// Restore default gamma on exit.
+	SDL_SetWindowBrightness(window, 1.0);
 //	SDL_Quit();
 	printf("SDL shutdown complete\n");
 //	deinit_openal();
