@@ -2692,7 +2692,7 @@ function _M:takeScreenshot(for_savefile)
 	if for_savefile then
 		local x, y = self.w / 4, self.h / 4
 		if self.level then
-			x, y = self.level.map:getTileToScreen(self.player.x, self.player.y)
+			x, y = self.level.map:getTileToScreen(self.player.x, self.player.y, true)
 			x, y = x - self.w / 4, y - self.h / 4
 			x, y = util.bound(x, 0, self.w / 2), util.bound(y, 0, self.h / 2)
 		end

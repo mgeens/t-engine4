@@ -3018,6 +3018,12 @@ static int sdl_get_png_screenshot(lua_State *L)
 	png_colorp palette;
 	png_byte *image;
 	png_bytep *row_pointers;
+	int aw, ah;
+
+	SDL_GetWindowSize(window, &aw, &ah);
+
+	/* Y coordinate must be reversed for OpenGL. */
+	y = ah - (y + height);
 
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
