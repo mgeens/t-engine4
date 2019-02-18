@@ -56,7 +56,7 @@ extern void do_resize(int w, int h, bool fullscreen, bool borderless, float zoom
 
 typedef enum {
 	redraw_type_normal,
-	redraw_type_screenshot,
+	redraw_type_user_screenshot,
 	redraw_type_savefile_screenshot
 } redraw_type_t;
 

@@ -746,7 +746,7 @@ void on_redraw()
 
 	switch (current_redraw_type)
 	{
-	case redraw_type_screenshot:
+	case redraw_type_user_screenshot:
 	case redraw_type_savefile_screenshot:
 		// glReadPixels reads from the back buffer, so skip swap when we're doing a screenshot.
 		break;
@@ -789,7 +789,6 @@ void redraw_now(redraw_type_t rtype)
 
 	current_redraw_type = rtype;
 	on_redraw();
-	current_redraw_type = redraw_type_normal;
 
 	if (changed_gamma)
 	{
@@ -1652,6 +1651,7 @@ int main(int argc, char *argv[])
 				{
 				case 0:
 					if (isActive) {
+						current_redraw_type = redraw_type_normal;
 						on_redraw();
 						SDL_mutexP(renderingLock);
 						redraw_pending = 0;

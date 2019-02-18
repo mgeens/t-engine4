@@ -2476,7 +2476,7 @@ static int sdl_redraw_screen_for_screenshot(lua_State *L)
 	if (for_savefile)
 		redraw_now(redraw_type_savefile_screenshot);
 	else
-		redraw_now(redraw_type_screenshot);
+		redraw_now(redraw_type_user_screenshot);
 	return 0;
 }
 
@@ -2987,11 +2987,33 @@ static int sdl_set_gamma(lua_State *L)
 	return 1;
 }
 
+static void screenshot_apply_gamma(png_byte *image, unsigned long width, unsigned long height)
+{
+	// User screenshots (but not saved game screenshots) should have gamma applied.
+	if (gamma_correction != 1.0 && get_current_redraw_type() == redraw_type_user_screenshot)
+	{
+		Uint16 ramp16[256];
+		png_byte ramp8[256];
+		unsigned long i;
+
+		// This is sufficient for the simple gamma adjustment used above.
+		// If that changes, we may need to query the gamma ramp.
+		SDL_CalculateGammaRamp(gamma_correction, ramp16);
+		for (i = 0; i < 256; i++)
+			ramp8[i] = ramp16[i] / 256;
+
+		// Red, green and blue component are all the same for simple gamma.
+		for (i = 0; i < width * height * 3; i++)
+			image[i] = ramp8[image[i]];
+	}
+}
+
 static void png_write_data_fn(png_structp png_ptr, png_bytep data, png_size_t length)
 {
 	luaL_Buffer *B = (luaL_Buffer*)png_get_io_ptr(png_ptr);
 	luaL_addlstring(B, data, length);
 }
+
 static void png_output_flush_fn(png_structp png_ptr)
 {
 }
@@ -3065,6 +3087,7 @@ static int sdl_get_png_screenshot(lua_State *L)
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *)image);
+	screenshot_apply_gamma(image, width, height);
 
 	for (i = 0; i < height; i++)
 	{
