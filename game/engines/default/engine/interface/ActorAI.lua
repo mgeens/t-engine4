@@ -71,7 +71,7 @@ end
 
 function _M:aiCanPass(x, y)
 	-- Nothing blocks, just go on
-	if not game.level.map:checkAllEntities(x, y, "block_move", self, true) then return true end
+	if not game.level.map:checkAllEntities(x, y, "block_move", self, nil, true) then return true end
 
 	-- If there is an other actor, check hostility, if hostile, we move to attack
 	local target = game.level.map(x, y, Map.ACTOR)
