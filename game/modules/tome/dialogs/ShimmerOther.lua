@@ -76,6 +76,7 @@ function _M:applyShimmer(actor, shimmer)
 		actor.moddable_tile_base_shimmer_facial = shimmer.moddable_tile
 	elseif self.slot == "SHIMMER_AURA" then
 		actor.moddable_tile_base_shimmer_aura = shimmer.moddable_tile
+		actor.moddable_tile_base_shimmer_particle = shimmer.moddable_tile2
 	end
 end
 
@@ -88,6 +89,7 @@ function _M:resetShimmer(actor)
 		actor.moddable_tile_base_shimmer_facial = nil
 	elseif self.slot == "SHIMMER_AURA" then
 		actor.moddable_tile_base_shimmer_aura = nil
+		actor.moddable_tile_base_shimmer_particle = nil
 	end
 end
 
