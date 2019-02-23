@@ -83,6 +83,10 @@ function _M:aiCanPass(x, y)
 	return false
 end
 
+function _M:aiPathingBlockCheck(x, y, target)
+
+end
+
 --- Move one step to the given target if possible
 -- This tries the most direct route, if not available it checks sides and always tries to get closer
 function _M:moveDirection(x, y, force)

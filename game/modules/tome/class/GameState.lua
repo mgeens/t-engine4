@@ -2320,6 +2320,9 @@ function _M:createRandomBoss(base, data)
 	-- Randbosses resemble players so they should use the same resist cap rules
 	-- This is particularly important because at high levels boss ranks get a lot of free resist all
 	b.resists_cap = { all = 70 }
+
+	b.move_others = true
+	b.open_door = true
 	
 	-- Update default equipment, if any, to "boss" levels
 	for k, resolver in ipairs(b) do
@@ -2636,6 +2639,8 @@ function _M:createRandomBossNew(base, data)
 	b.rank = data.rank or (rng.percent(30) and 4 or 3.5)
 	b.level_range[1] = data.level
 	b.fixed_rating = true
+	b.move_others = true
+	b.open_door = true
 	if data.life_rating then
 		b.life_rating = data.life_rating(b.life_rating)
 	else
