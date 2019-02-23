@@ -360,7 +360,7 @@ end
 function _M:getAccuracyEffect(weapon, atk, def, scale, max)
 	max = max or 10000000
 	scale = scale or 1
-	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale or 1))
+	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale and 0.5 or 1))
 end
 
 function _M:isAccuracyEffect(weapon, kind)
@@ -816,7 +816,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Arcane Destruction
 	if hitted and crit and weapon and self:knowTalent(self.T_ARCANE_DESTRUCTION) then
 		local chance = 100
-		if self:hasShield() then chance = 75
+		if self:hasShield() then chance = 50
 		elseif self:hasDualWeapon() then chance = 50
 		end
 		if rng.percent(chance) then
@@ -851,6 +851,11 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Reactive target on_melee_hit damage
 	if hitted then
 		local dr, fa, pct = 0
+
+		-- Use an intermediary talent to give retaliation damage a unique source in the combat log
+		local old = target.__project_source
+		target.__project_source = target:getTalentFromId(target.T_MELEE_RETALIATION)
+
 		for typ, dam in pairs(target.on_melee_hit) do
 			if not fa then
 				if self:knowTalent(self.T_CLOSE_COMBAT_MANAGEMENT) then
@@ -888,7 +893,9 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 					end
 				end
 			end
-		end 
+		end
+		target.__project_source = old
+
 	end
 	-- Acid splash
 	if hitted and not target.dead and target:knowTalent(target.T_ACID_BLOOD) then
@@ -1095,7 +1102,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 
 	if hitted and not target.dead then
 		-- Curse of Madness: Twisted Mind
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_MADNESS)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(self, eff, target)
@@ -1104,10 +1111,10 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_MADNESS)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(target, eff, self)
-		end
+		end]]
 
 		-- Curse of Nightmares: Suffocate
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(self, eff, target)
@@ -1116,7 +1123,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_NIGHTMARES)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(target, eff, self)
-		end
+		end]]
 	end
 
 	if target:isTalentActive(target.T_SHARDS) and hitted and not target.dead and not target.turn_procs.shield_shards then
@@ -1677,7 +1684,6 @@ function _M:combatDamage(weapon, adddammod, damage)
 	end
 	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then totstat = totstat + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
-	if talented_mod > 1 then totstat = totstat + 30 end -- This is horrible, but its to prevent the +30 constant put in to help keep the weapon damage changes symmetric from effecting things without a mastery
 	local power = self:combatDamagePower(damage or weapon, totstat)
 	local phys = self:combatPhysicalpower(nil, weapon, totstat)
 	return 0.3 * phys * power * talented_mod
@@ -2070,6 +2076,12 @@ function _M:combatMindpower(mod, add)
 		add = add + 60 * self:getStr() / 100
 	end
 
+	local gloom = self:knowTalent(self.T_GLOOM)
+	if gloom then
+		local t = self:getTalentFromId(self.T_GLOOM)
+		add = add + t.getMindpower(self)
+	end
+
 	if self:knowTalent(self.T_GESTURE_OF_POWER) then
 		local t = self:getTalentFromId(self.T_GESTURE_OF_POWER)
 		add = add + t.getMindpowerChange(self, t)
@@ -2259,7 +2271,7 @@ function _M:combatGetResistPen(type, straight)
 		return highest + self.auto_highest_resists_pen[type]
 	end
 
-	if self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
+	if self.knowTalent and self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
 		local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
 		add = add + t.getPenetration(self, t)
 	end

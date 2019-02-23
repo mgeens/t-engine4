@@ -286,7 +286,7 @@ function _M:seen_by(who)
 	
 	-- If we have no current target but the passed target is stealthed, delay aquiring for 3 turns but make sure they can't avoid aggro entirely
 	if who_target:attr("stealthed_prevents_targetting") and not (self.ai_target and self.ai_target.actor) then
-		self:setEffect(self.EFF_STEALTH_SKEPTICAL, 3, {target = {actor=who_target, x=who_target.x, y=who_target.y}})
+		self:setEffect(self.EFF_STEALTH_SKEPTICAL, 3, {target = {actor=who_target, last = who.ai_state.target_last_seen}})
 		return
 	end
 	self:setTarget(who_target, who.ai_state.target_last_seen)
@@ -359,7 +359,7 @@ function _M:onTakeHit(value, src, death_note)
 	if value > 0 and src and src ~= self and src.resolveSource then
 		if not src.targetable then src = util.getval(src.resolveSource, src) end
 		if src then
-			if src.targetable and not self.ai_target.actor then self:setTarget(src) end
+			if src.targetable and not self.ai_target.actor and not (self.never_anger and self:reactionToward(src) > 0) then self:setTarget(src) end
 			-- Get angry if hurt by a friend
 			if src.faction and self:reactionToward(src) >= 0 and self.fov then
 				self:checkAngered(src, false, -50)

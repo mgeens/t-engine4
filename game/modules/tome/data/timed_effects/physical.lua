@@ -822,6 +822,26 @@ newEffect{
 }
 
 newEffect{
+	name = "HIGHBORN_WRATH", image = "talents/higher_heal.png",
+	desc = "Wrath of the Highborn",
+	long_desc = function(self, eff) return ("The target calls upon its inner resources, improving all damage by %d%% and reducing all damage taken by %d%%."):format(eff.power, eff.power) end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { power=10 },
+	on_gain = function(self, err) return "#Target# radiates power." end,
+	on_lose = function(self, err) return "#Target#'s aura of power vanishes." end,
+	activate = function(self, eff)
+		eff.pid1 = self:addTemporaryValue("inc_damage", {all=eff.power})
+		eff.pid2 = self:addTemporaryValue("resists", {all=eff.power})
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_damage", eff.pid1)
+		self:removeTemporaryValue("resists", eff.pid2)
+	end,
+}
+
+newEffect{
 	name = "SHELL_SHIELD", image = "talents/shell_shield.png",
 	desc = "Shell Shield",
 	long_desc = function(self, eff) return ("The target takes cover in its shell, reducing all damage taken by %d%%."):format(eff.power) end,
@@ -939,6 +959,7 @@ newEffect{
 	end,
 	type = "physical",
 	subtype = { nature=true },
+	no_player_remove = true,
 	status = "beneficial",
 	parameters = { die_at = 0 },
 	activate = function(self, eff)
@@ -1703,6 +1724,7 @@ newEffect{
 	subtype = { nature=true },
 	status = "beneficial",
 	parameters = { },
+	no_player_remove = true,
 	activate = function(self, eff)
 		if eff.type == DamageType.FIRE then
 			eff.tmpid = self:addTemporaryValue("global_speed_add", self:callTalent(self.T_ELEMENTAL_HARMONY, "fireSpeed"))
@@ -2271,8 +2293,22 @@ newEffect{
 		if eff.bonus_block_pct and eff.bonus_block_pct[type] then amt = amt * eff.bonus_block_pct[type] end
 		local blocked = dam - amt
 		local shield1, combat1, shield2, combat2 = self:hasShield()
+
+		-- on_block can have two structures, an older single table, and a newer list of on_block functions used by randomly generated items
 		if shield1 and shield1.on_block and shield1.on_block.fct then shield1.on_block.fct(shield1, self, src, type, dam, eff) end
 		if shield2 and shield2.on_block and shield2.on_block.fct then shield2.on_block.fct(shield2, self, src, type, dam, eff) end
+
+		if shield1 and shield1.on_block and shield1.on_block[1] then
+			for _, on_block in pairs(shield1.on_block) do
+				on_block.fct(shield1, self, src, type, dam, eff, on_block)
+			end
+		end
+		if shield2 and shield2.on_block and shield2.on_block[1] then
+			for _, on_block in pairs(shield2.on_block) do
+				on_block.fct(shield2, self, src, type, dam, eff, on_block)
+			end
+		end
+
 		if eff.properties.br then
 			self:heal(blocked, src)
 			game:delayedLogMessage(self, src, "block_heal", "#CRIMSON##Source# heals from blocking with %s shield!", string.his_her(self))
@@ -3208,12 +3244,10 @@ newEffect{
 		self:effectParticles(eff, {type="circle", args={toback=true, oversize=1.8, base_rot=180, a=255, shader=true, appear=12, img="marked_death_aura", speed=0, radius=0}})
 	end,
 	deactivate = function(self, eff)
-		if eff.turns >= eff.max_dur then
-			eff.src.__project_source = eff
-			eff.src:project({type="hit", x=self.x, y=self.y}, self.x, self.y, DamageType.PHYSICAL, eff.dam, nil)
-			game.level.map:particleEmitter(self.x, self.y, 1, "blood")
-			eff.src.__project_source = nil
-		end
+		eff.src.__project_source = eff
+		eff.src:project({type="hit", x=self.x, y=self.y}, self.x, self.y, DamageType.PHYSICAL, eff.dam, nil)
+		game.level.map:particleEmitter(self.x, self.y, 1, "blood")
+		eff.src.__project_source = nil
 	end,
 	on_timeout = function(self, eff)
 		eff.turns = eff.turns + 1
