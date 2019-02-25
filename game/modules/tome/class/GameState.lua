@@ -2403,7 +2403,11 @@ function _M:createRandomBoss(base, data)
 	if data.ai then b.ai = data.ai
 	else b.ai = (b.rank > 3) and "tactical" or b.ai
 	end
-	b.ai_state = { talent_in=1, ai_move=data.ai_move or "move_astar" }
+	b.ai_state = { talent_in=1 }
+	if not b.no_overwrite_ai_move then 
+		b.ai_state.ai_move = "move_astar_advanced" 
+	end
+
 	if data.ai_tactic then
 		b.ai_tactic = data.ai_tactic
 	else
@@ -2754,7 +2758,10 @@ function _M:createRandomBossNew(base, data)
 	if data.ai then b.ai = data.ai
 	else b.ai = (b.rank > 3) and "tactical" or b.ai
 	end
-	b.ai_state = { talent_in=1, ai_move=data.ai_move or "move_astar" }
+	b.ai_state = { talent_in=1}
+	if not b.no_overwrite_ai_move then 
+		b.ai_state.ai_move = "move_astar_advanced" 
+	end
 	if data.ai_tactic then
 		b.ai_tactic = data.ai_tactic
 	else
