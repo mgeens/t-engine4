@@ -318,50 +318,50 @@ function _M:getZones(zones)
 end
 
 function _M:clearLevel()
-		local act = game.player
-		local data = {}
-		data.items_list = {}
-		data.items_skipped = {}
-		data.exp_list = {}
-		data.ranks = {}
-		data.total_exp = 0
-		data.start_level = act:getExpChart(act.level+1)
-		data.end_level = act.level
+	local act = game.player
+	local data = {}
+	data.items_list = {}
+	data.items_skipped = {}
+	data.exp_list = {}
+	data.ranks = {}
+	data.total_exp = 0
+	data.start_level = act:getExpChart(act.level+1)
+	data.end_level = act.level
 
-		-- Ensure any early turn state stuff happens like NPCs spawning their escorts
-		for i = 1,20 do
-			game.player.energy.value = 0
-			game:tick(game.level)
-		end
+	-- Ensure any early turn state stuff happens like NPCs spawning their escorts
+	for i = 1,20 do
+		game.player.energy.value = 0
+		game:tick(game.level)
+	end
 
-		local l = {}
-		for uid, e in pairs(game.level.entities) do
-			if e.__is_actor and not game.party:hasMember(e) and (act:reactionToward(e) < 0) then l[#l+1] = e end
-		end
-		
-		-- Technically we should simulate this with actual player movement in case kill sequence is important.. not worth the effort
-		for i, e in ipairs(l) do
-			local rname, rcolor = e:TextRank()
-			data.exp_list[#data.exp_list+1] = {exp=e:worthExp(act), name=e.name, rank=e.rank, rank_name = rname:capitalize(), rank_color = rcolor }
-			data.ranks[e:TextRank()] = data.ranks[e:TextRank()] or 0
-			data.ranks[e:TextRank()] = data.ranks[e:TextRank()] + 1
-			data.total_exp = data.total_exp + e:worthExp(act)
-			e:die(act)
-		end
+	local l = {}
+	for uid, e in pairs(game.level.entities) do
+		if e.__is_actor and not game.party:hasMember(e) and (act:reactionToward(e) < 0) then l[#l+1] = e end
+	end
+	
+	-- Technically we should simulate this with actual player movement in case kill sequence is important.. not worth the effort
+	for i, e in ipairs(l) do
+		local rname, rcolor = e:TextRank()
+		data.exp_list[#data.exp_list+1] = {exp=e:worthExp(act), name=e.name, rank=e.rank, rank_name = rname:capitalize(), rank_color = rcolor }
+		data.ranks[e:TextRank()] = data.ranks[e:TextRank()] or 0
+		data.ranks[e:TextRank()] = data.ranks[e:TextRank()] + 1
+		data.total_exp = data.total_exp + e:worthExp(act)
+		e:die(act)
+	end
 
-		-- Grab all items on the map
-		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
-			for i = game.level.map:getObjectTotal(x, y), 1, -1 do
-				local o = game.level.map:getObject(x, y, i)
-				if o and self:pickupObject(i, x, y) then
-					if act:transmoFilter(o) then o.__transmo = true end
-					data.items_list[#data.items_list + 1] = o  -- Store items incase we want to do analysis on drops or some such.. should clone?
-				end
+	-- Grab all items on the map
+	for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
+		for i = game.level.map:getObjectTotal(x, y), 1, -1 do
+			local o = game.level.map:getObject(x, y, i)
+			if o and self:pickupObject(i, x, y) then
+				if act:transmoFilter(o) then o.__transmo = true end
+				data.items_list[#data.items_list + 1] = o  -- Store items incase we want to do analysis on drops or some such.. should clone?
 			end
-		end end
+		end
+	end end
 
-		data.end_level = act:getExpChart(act.level+1)
-		return data
+	data.end_level = act:getExpChart(act.level+1)
+	return data
 end
 
 -- TODO:  
