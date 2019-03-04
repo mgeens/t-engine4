@@ -1296,6 +1296,7 @@ newEffect{
 		eff.tmpid = self:addTemporaryValue("can_pass", {pass_wall=20})
 		eff.defid = self:addTemporaryValue("combat_def", eff.def)
 		eff.armid = self:addTemporaryValue("combat_armor", eff.armor)
+		self:effectTemporaryValue(eff, "no_breath", 1)
 		if not self.shader then
 			eff.set_shader = true
 			self.shader = "moving_transparency"
