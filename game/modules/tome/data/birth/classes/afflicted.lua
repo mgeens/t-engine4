@@ -76,7 +76,7 @@ newBirthDescriptor{
 		-- ["cursed/unyielding"]={true, 0.0},
 		["technique/combat-training"]={true, 0.3},
 		["cunning/survival"]={false, 0.0},
-		["cursed/rampage"]={false, 0.0},
+		["cursed/rampage"]={false, 0.3},
 		["cursed/predator"]={true, 0.0},
 		["cursed/fears"]={false, 0.0},
 	},
