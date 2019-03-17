@@ -625,9 +625,11 @@ function _M:updateDescriptors()
 	end
 
 	self.cosmetic_options = {}
+	self.cosmetic_options_flat = {}
 	for _, d in ipairs(self.descriptors) do if d.cosmetic_options then
 		for kind, list in pairs(d.cosmetic_options) do
 			local clist = {}
+			local sublists = {}
 			for _, data in ipairs(list) do
 				if (not data.unlock or profile.mod.allow_build[data.unlock]) and (not data.check or data.check(self)) then
 					local ok = true
@@ -643,10 +645,22 @@ function _M:updateDescriptors()
 							if item.selected then return colors.simple(colors.LIGHT_GREEN)
 							else return colors.simple(colors.WHITE) end
 						end
-						table.insert(clist, data)
+						if data.subkind then
+							sublists[data.subkind] = sublists[data.subkind] or {}
+							table.insert(sublists[data.subkind], data)
+						else
+							table.insert(clist, data)
+						end
+						table.insert(self.cosmetic_options_flat, data)
 					end
 				end
 			end
+
+			for name, list in pairs(sublists) do
+				table.sort(list, function(a, b) return a.name < b.name end)
+				table.insert(clist, {name=name, subkind=name, color=function() return colors.simple(colors.ROYAL_BLUE) end, nodes=list})
+			end
+
 			if #clist > 0 then
 				table.sort(clist, function(a, b) return a.name < b.name end)
 				table.insert(self.cosmetic_options, {name=kind:gsub("_", " "):capitalize(), kind=kind, color=function() return colors.simple(colors.GOLD) end, nodes=clist})
@@ -1232,10 +1246,8 @@ function _M:applyCosmeticActor(last)
 				if self.descriptors_by_type[k] ~= v then return end
 			end end
 
-			for i, dn in ipairs(self.cosmetic_options) do
-				for j, d in ipairs(dn.nodes) do
-					if d.kind == kind and d.name == name then return d end
-				end
+			for i, d in ipairs(self.cosmetic_options_flat) do
+				if d.kind == kind and d.name == name then return d end
 			end
 		end
 
@@ -1612,13 +1624,26 @@ function _M:customizeOptions()
 	local d = Dialog.new("Customization Options", 600, 550)
 
 	local sel = nil
-	local list list = TreeList.new{width=450, tree=self.cosmetic_options, height=400, scrollbar=true,
+	local list list = TreeList.new{width=450, tree=self.cosmetic_options, height=400, scrollbar=true, all_clicks=true,
 		columns={
 			{name="Name", width=100, display_prop="name"},
 		},
-		fct=function(item)
+		fct=function(item, sel, button)
 			if item.nodes then
 				list:treeExpand(nil, item)
+				return
+			end
+			if button == "right" then
+				local function recurs(list)
+					for _, ii in ipairs(list.nodes or list) do
+						if ii == item then return list end
+						if ii.nodes then local r = recurs(ii) if r then return r end end
+					end
+				end
+				local ii = recurs(self.cosmetic_options)
+				if ii then
+					list:treeExpand(false, ii)
+				end
 				return
 			end
 
@@ -1641,14 +1666,10 @@ function _M:customizeOptions()
 			item.selected = selected
 
 			if self.cosmetic_options_config[item.kind] == "single" and selected then
-				for _, nlist in ipairs(self.cosmetic_options) do
-					if nlist.kind == item.kind then
-						for _, ii in ipairs(nlist.nodes) do
-							if item.name ~= ii.name then
-								ii.selected = false
-								list:drawItem(ii, 0)
-							end
-						end
+				for _, ii in ipairs(self.cosmetic_options_flat) do
+					if ii.kind == item.kind and item.name ~= ii.name and ii.selected then
+						ii.selected = false
+						list:drawItem(ii, 0)
 					end
 				end
 			end
@@ -1667,7 +1688,7 @@ function _M:customizeOptions()
 end
 
 function _M:extraOptions()
-  local options = OptionTree.new(game.extra_birth_option_defs, 'Birth Options', 600, 550)
-  options:initialize()
-  game:registerDialog(options)
+	local options = OptionTree.new(game.extra_birth_option_defs, 'Birth Options', 600, 550)
+	options:initialize()
+	game:registerDialog(options)
 end
