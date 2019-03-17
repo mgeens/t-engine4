@@ -22,6 +22,7 @@ local Dialog = require "engine.ui.Dialog"
 local Birther = require "engine.Birther"
 local List = require "engine.ui.List"
 local TreeList = require "engine.ui.TreeList"
+local ListColumns = require "engine.ui.ListColumns"
 local Button = require "engine.ui.Button"
 local Dropdown = require "engine.ui.Dropdown"
 local Textbox = require "engine.ui.Textbox"
@@ -43,6 +44,15 @@ local Entity = require "engine.Entity"
 
 module(..., package.seeall, class.inherit(Birther))
 
+_M.cosmetic_options_config = {
+	hairs = "single",
+	skin = "single",
+	facial_features = "multiple",
+	tatoos = "single",
+	horns = "single",
+	special = "multiple",
+}
+
 function _M:setSubclassIcon(t)
 	t.image32 = "class-icons/"..(t.name:lower():gsub("[^a-z0-9]", "_")).."_32_bg.png"
 	t.image128 = "class-icons/"..(t.name:lower():gsub("[^a-z0-9]", "_")).."_128_bg.png"
@@ -62,7 +72,7 @@ function _M:init(title, actor, order, at_end, quickbirth, w, h)
 	self.actor_base = actor
 	self.order = order
 	self.at_end = at_end
-	self.selected_cosmetic_unlocks = {}
+	self.selected_cosmetic_options = nil
 	self.tiles = Tiles.new(64, 64, nil, nil, true, nil)
 
 	Dialog.init(self, title and title or "Character Creation", w or 600, h or 400)
@@ -614,18 +624,45 @@ function _M:updateDescriptors()
 		table.insert(self.descriptors, self.birth_descriptor_def.subclass[self.descriptors_by_type.subclass])
 	end
 
-	self.cosmetic_unlocks = {}
-	for _, d in ipairs(self.descriptors) do
-		if d.cosmetic_unlock then
-			for u, datas in pairs(d.cosmetic_unlock) do for _, data in ipairs(datas) do
-				if profile.mod.allow_build[u] and (not data.check or data.check(self)) then
-					table.insert(self.cosmetic_unlocks, data)
+	self.cosmetic_options = {}
+	for _, d in ipairs(self.descriptors) do if d.cosmetic_options then
+		for kind, list in pairs(d.cosmetic_options) do
+			local clist = {}
+			for _, data in ipairs(list) do
+				if (not data.unlock or profile.mod.allow_build[data.unlock]) and (not data.check or data.check(self)) then
+					local ok = true
+					if data.addons then for i, v in ipairs(data.addons) do
+						if not game:isAddonActive(v) then ok = false break end
+					end end
+					if data.only_for then for k, v in pairs(data.only_for) do
+						if self.descriptors_by_type[k] ~= v then ok = false break end
+					end end
+					if ok then
+						data.kind = kind
+						data.color = function(item)
+							if item.selected then return colors.simple(colors.LIGHT_GREEN)
+							else return colors.simple(colors.WHITE) end
+						end
+						table.insert(clist, data)
+					end
 				end
-			end end
+			end
+			if #clist > 0 then
+				table.sort(clist, function(a, b) return a.name < b.name end)
+				table.insert(self.cosmetic_options, {name=kind:gsub("_", " "):capitalize(), kind=kind, color=function() return colors.simple(colors.GOLD) end, nodes=clist})
+			end
 		end
+	end end
+	table.sort(self.cosmetic_options, function(a, b) return a.name < b.name end)
+	self.c_options.hide = #self.cosmetic_options == 0
+	
+	if self.old_cosmetic_sex ~= self.descriptors_by_type.sex or self.old_cosmetic_race ~= self.descriptors_by_type.race or self.old_cosmetic_subrace ~= self.descriptors_by_type.subrace then
+		self.selected_cosmetic_options = nil
 	end
-	table.sort(self.cosmetic_unlocks, function(a, b) return a.name < b.name end)
-	self.c_options.hide = #self.cosmetic_unlocks == 0
+
+	self.old_cosmetic_sex = self.descriptors_by_type.sex
+	self.old_cosmetic_race = self.descriptors_by_type.race
+	self.old_cosmetic_subrace = self.descriptors_by_type.subrace
 end
 
 function _M:isDescriptorSet(key, val)
@@ -1050,9 +1087,9 @@ end
 -- Display the player tile
 function _M:innerDisplay(x, y, nb_keyframes)
 	if self.actor.image then
-		self.actor:toScreen(self.tiles, x + self.iw - 64, y, 64, 64)
+		self.actor:toScreen(self.tiles, x + self.iw - 64, y, 128, 128)
 	elseif self.actor.image and self.actor.add_mos then
-		self.actor:toScreen(self.tiles, x + self.iw - 64, y - 64, 128, 64)
+		self.actor:toScreen(self.tiles, x + self.iw - 64, y - 64, 256, 128)
 	end
 
 	if self.descriptors_by_type.subclass then
@@ -1065,10 +1102,10 @@ end
 
 --- Fake a body & starting equipment
 function _M:fakeEquip(v)
-	if not v then
-		self.actor.body = nil
-		self.actor.inven = {}
-	else
+	-- if not v then
+	-- 	self.actor.body = nil
+	-- 	self.actor.inven = {}
+	-- else
 		self.actor.inven = {}
 		local fake_body = { INVEN = 1000, QS_MAINHAND = 1, QS_OFFHAND = 1, MAINHAND = 1, OFFHAND = 1, FINGER = 2, NECK = 1, LITE = 1, BODY = 1, HEAD = 1, CLOAK = 1, HANDS = 1, BELT = 1, FEET = 1, TOOL = 1, QUIVER = 1 }
 		self.actor.body = fake_body
@@ -1090,9 +1127,11 @@ function _M:fakeEquip(v)
 			end
 		end
 
-		for _, r in pairs(c.copy or {}) do if type(r) == "table" and r.__resolver == "equip" then apply_equip(r) end end
-		for _, r in pairs(sc.copy or {}) do if type(r) == "table" and r.__resolver == "equip" then apply_equip(r) end end
-	end
+		if v then
+			for _, r in pairs(c.copy or {}) do if type(r) == "table" and r.__resolver == "equip" then apply_equip(r) end end
+			for _, r in pairs(sc.copy or {}) do if type(r) == "table" and r.__resolver == "equip" then apply_equip(r) end end
+		end
+	-- end
 end
 
 function _M:resetAttachementSpots()
@@ -1116,7 +1155,7 @@ function _M:resetAttachementSpots()
 	end
 end
 
-function _M:setTile(f, w, h, last)
+function _M:setTile(f, w, h, last, nude)
 	self.actor:removeAllMOs()
 	if not f then
 		if not self.has_custom_tile then
@@ -1131,6 +1170,7 @@ function _M:setTile(f, w, h, last)
 			self.actor.moddable_tile_base = dr.copy.moddable_tile_base
 			self.actor.moddable_tile_ornament = dr.copy.moddable_tile_ornament
 			self.actor.moddable_tile_ornament2 = dr.copy.moddable_tile_ornament2
+			self.actor.moddable_tile_nude = dr.copy.moddable_tile_nude or dbr.copy.moddable_tile_nude
 		end
 	else
 		self.actor.make_tile = nil
@@ -1162,7 +1202,7 @@ function _M:setTile(f, w, h, last)
 			end
 		end
 
-		self:fakeEquip(true)
+		self:fakeEquip(not nude and true or false)
 		self:applyCosmeticActor(false)
 		self.actor:updateModdableTile()
 		self:fakeEquip(false)
@@ -1174,19 +1214,81 @@ end
 local to_reset_cosmetic = {}
 function _M:applyCosmeticActor(last)
 	for i, d in ipairs(to_reset_cosmetic) do
-		d.reset(self.actor)
+		d(self.actor)
 	end
 	to_reset_cosmetic = {}
 
-	local list = {}
-	for i, d in ipairs(self.cosmetic_unlocks) do
-		if self.selected_cosmetic_unlocks[d.name] and d.on_actor then list[#list+1] = d if not d.priority then d.priority = 1 end end
+	self.actor.moddable_tile_hair = nil
+	self.actor.moddable_tile_facial_features = nil
+	self.actor.moddable_tile_tatoo = nil
+	self.actor.moddable_tile_horn = nil
+
+	-- Grab defaults if we have no custom selection
+	local cosmetics = self.selected_cosmetic_options
+	if not cosmetics then
+		cosmetics = {}
+		local function finder(kind, name, only_for)
+			if only_for then for k, v in pairs(only_for) do
+				if self.descriptors_by_type[k] ~= v then return end
+			end end
+
+			for i, dn in ipairs(self.cosmetic_options) do
+				for j, d in ipairs(dn.nodes) do
+					if d.kind == kind and d.name == name then return d end
+				end
+			end
+		end
+
+		local dbr = self.birth_descriptor_def.race[self.descriptors_by_type.race or "Human"]
+		local dr = self.birth_descriptor_def.subrace[self.descriptors_by_type.subrace or "Cornac"]
+		local default_cosmetics = nil
+		if dr.default_cosmetics then default_cosmetics = dr.default_cosmetics
+		elseif dbr.default_cosmetics then default_cosmetics = dbr.default_cosmetics
+		end
+
+		if default_cosmetics then for _, d in ipairs(default_cosmetics) do
+			if self.cosmetic_options_config[d[1]] == "single" then
+				local c = finder(d[1], d[2], d[3])
+				if c then cosmetics[d[1]] = c end
+			elseif self.cosmetic_options_config[d[1]] == "multiple" then
+				cosmetics[d[1]] = cosmetics[d[1]] or {}
+				local c = finder(d[1], d[2], d[3])
+				if c then table.insert(cosmetics[d[1]], c) end
+			end
+		end end
 	end
-	table.sort(list, function(a,b) return a.priority < b.priority end)
-	for i, d in ipairs(list) do
-		d.on_actor(self.actor, self, last)
-		if not last and d.reset then
-			to_reset_cosmetic[#to_reset_cosmetic+1] = d
+
+	-- Apply!
+	for kind, d in pairs(cosmetics) do
+		if kind == "hairs" then
+			self.actor.moddable_tile_hair = d.file
+		elseif kind == "tatoos" then
+			self.actor.moddable_tile_tatoo = d.file
+		elseif kind == "horns" then
+			self.actor.moddable_tile_horn = d.file
+		elseif kind == "skin" then
+			self.actor.moddable_tile_base = d.file..".png"
+		elseif kind == "facial_features" then
+			for _, dd in ipairs(d) do
+				self.actor.moddable_tile_facial_features = self.actor.moddable_tile_facial_features or {}
+				table.insert(self.actor.moddable_tile_facial_features, dd.file)
+			end
+		end
+
+		if self.cosmetic_options_config[kind] == "multiple" then
+			for _, dd in ipairs(d) do if dd.on_actor then
+				dd.on_actor(self.actor, self, last)
+				if not last and dd.reset then
+					to_reset_cosmetic[#to_reset_cosmetic+1] = dd.reset
+				end
+			end end
+		elseif self.cosmetic_options_config[kind] == "single" then
+			if d.on_actor then
+				d.on_actor(self.actor, self, last)
+				if not last and d.reset then
+					to_reset_cosmetic[#to_reset_cosmetic+1] = d.reset
+				end
+			end
 		end
 	end
 end
@@ -1510,25 +1612,58 @@ function _M:customizeOptions()
 	local d = Dialog.new("Customization Options", 600, 550)
 
 	local sel = nil
-	local list list = List.new{width=450, list=self.cosmetic_unlocks, height=400,
+	local list list = TreeList.new{width=450, tree=self.cosmetic_options, height=400, scrollbar=true,
+		columns={
+			{name="Name", width=100, display_prop="name"},
+		},
 		fct=function(item)
-			if not item.donator or self:isDonator() then
-				self.selected_cosmetic_unlocks[item.name] = not self.selected_cosmetic_unlocks[item.name]
-				item.color = self.selected_cosmetic_unlocks[item.name] and colors.simple(colors.LIGHT_GREEN) or nil
+			if item.nodes then
+				list:treeExpand(nil, item)
+				return
 			end
 
-			local oldsel, oldscroll = list.sel, list.scroll
-			list:generate()
-			list.sel, list.scroll = oldsel, oldscroll
-			self:setTile()
+			local selected = false
+
+			-- if not item.donator or self:isDonator() then
+			self.selected_cosmetic_options = self.selected_cosmetic_options or {}
+			if self.cosmetic_options_config[item.kind] == "single" then
+				if self.selected_cosmetic_options[item.kind] == item then selected = false self.selected_cosmetic_options[item.kind] = nil
+				else selected = true self.selected_cosmetic_options[item.kind] = item end
+			elseif self.cosmetic_options_config[item.kind] == "multiple" then
+				self.selected_cosmetic_options[item.kind] = self.selected_cosmetic_options[item.kind] or {}
+				if table.hasInList(self.selected_cosmetic_options[item.kind], item) then selected = false table.removeFromList(self.selected_cosmetic_options[item.kind], item)
+				else selected = true table.insert(self.selected_cosmetic_options[item.kind], item) end
+				if #self.selected_cosmetic_options[item.kind] == 0 then self.selected_cosmetic_options[item.kind] = nil end
+			end
+				-- item.color = self.selected_cosmetic_options[item.name] and colors.simple(colors.LIGHT_GREEN) or nil
+			-- end
+
+			item.selected = selected
+
+			if self.cosmetic_options_config[item.kind] == "single" and selected then
+				for _, nlist in ipairs(self.cosmetic_options) do
+					if nlist.kind == item.kind then
+						for _, ii in ipairs(nlist.nodes) do
+							if item.name ~= ii.name then
+								ii.selected = false
+								list:drawItem(ii, 0)
+							end
+						end
+					end
+				end
+			end
+
+			list:drawItem(item, 0)
+			self:setTile(nil, nil, nil, false, true)
 		end,
 	}
 	d:loadUI{
 		{left=0, top=0, ui=list},
 	}
 	d:setupUI(true, true)
-	d.key:addBind("EXIT", function() game:unregisterDialog(d) end)
+	d.key:addBind("EXIT", function() self:setTile() game:unregisterDialog(d) end)
 	game:registerDialog(d)
+	self:setTile(nil, nil, nil, false, true)
 end
 
 function _M:extraOptions()
