@@ -69,7 +69,7 @@ newBirthDescriptor{
 
 	cosmetic_options = {
 		special = {
-			{name="Bikini / Mankini", on_actor=function(actor, birther, last)
+			{name="Bikini / Mankini", birth_only=true, on_actor=function(actor, birther, last)
 				if not last then local o = birther.obj_list_by_name[birther.descriptors_by_type.sex == 'Female' and 'Bikini' or 'Mankini'] if not o then print("No bikini/mankini found!") return end actor:getInven(actor.INVEN_BODY)[1] = o:cloneFull() actor.moddable_tile_nude = 1
 				else actor:registerOnBirthForceWear(birther.descriptors_by_type.sex == 'Female' and "FUN_BIKINI" or "FUN_MANKINI") end
 			end},
@@ -261,6 +261,84 @@ newBirthDescriptor
 			{name="White Mustache", file="face_mustache_white_01"},
 			{name="Teeth 1", file="face_teeth_01"},
 			{name="Teeth 2", file="face_teeth_02"},
+		},
+		tatoos = {
+			{name="Cracks", file="tattoo_cracks"},
+			{name="Guts", file="tattoo_guts"},
+			{name="Iron Bolt", file="tattoo_iron_bolt"},
+			{name="Molds", file="tattoo_mold_01"},
+			{name="Runes 1", file="tattoo_runes_01"},
+			{name="Runes 2", file="tattoo_runes_02"},
+			{name="Rust", file="tattoo_rust_01"},
+		},
+	},
+}
+
+---------------------------------------------------------------------
+-- THIS IS NOT TO BIRTH WITH
+-- this is to provide cosmetics to liches when the player turns into one
+---------------------------------------------------------------------
+newBirthDescriptor
+{
+	type = "subrace",
+	name = "Lich",
+	locked = function() return true end,
+	locked_desc = "You should not see this!",
+	desc = {
+	},
+	moddable_attachement_spots = "race_skeleton", moddable_attachement_spots_sexless=true,
+	copy = {
+		moddable_tile = "skeleton",
+		moddable_tile_base = "base_lich_01.png",
+		moddable_tile_nude = 1,
+	},
+	cosmetic_options = {
+		skin = {
+			{name="Skin Color 1", file="base_lich_01"},
+			{name="Skin Color 2", file="base_lich_02"},
+			{name="Skin Color 3", file="base_lich_03"},
+			{name="Skin Color 4", file="base_lich_04"},
+			{name="Skin Color 5", file="base_lich_05"},
+			{name="Skin Color 6", file="base_lich_06"},
+			{name="Skin Color 7", file="base_lich_07"},
+			{name="Skin Color 8", file="base_lich_08"},
+		},
+		hairs = {
+			{name="Hair 1", file="hair_01"},
+			{name="Hair 2", file="hair_02"},
+			{name="Redhead Hair 1", file="hair_redhead_01", unlock="cosmetic_race_human_redhead"},
+			{name="Redhead Hair 2", file="hair_redhead_02", unlock="cosmetic_race_human_redhead"},
+			{name="White Hair 1", file="hair_white_01"},
+			{name="White Hair 2", file="hair_white_02"},
+		},
+		facial_features = {
+			{name="Beard 1", file="beard_01"},
+			{name="Beard 2", file="beard_02"},
+			{name="Redhead Beard 1", file="beard_redhead_01", unlock="cosmetic_race_human_redhead"},
+			{name="Redhead Beard 2", file="beard_redhead_02", unlock="cosmetic_race_human_redhead"},
+			{name="White Beard 1", file="beard_white_01"},
+			{name="White Beard 2", file="beard_white_02"},
+			{name="Eyes 1", file="face_eyes_01"},
+			{name="Eyes 2", file="face_eyes_02"},
+			{name="Eyes 3", file="face_eyes_03"},
+			{name="Mustache", file="face_mustache_01"},
+			{name="Redhead Mustache", file="face_mustache_redhead_01", unlock="cosmetic_race_human_redhead"},
+			{name="White Mustache", file="face_mustache_white_01"},
+			{name="Teeth 1", file="face_teeth_01"},
+			{name="Teeth 2", file="face_teeth_02"},
+			{name="Lich Eyes 1", file="face_lich_eyes_01"},
+			{name="Lich Eyes 2", file="face_lich_eyes_02"},
+			{name="Lich Eyes 3", file="face_lich_eyes_03"},
+			{name="Lich Regalia 1", file="face_lich_regalia_01"},
+			{name="Lich Regalia 2", file="face_lich_regalia_02"},
+			{name="Lich Regalia 3", file="face_lich_regalia_03"},
+			{name="Lich Regalia 4", file="face_lich_regalia_04"},
+			{name="Lich Regalia 5", file="face_lich_regalia_05"},
+			{name="Lich Regalia 6", file="face_lich_regalia_06"},
+			{name="Lich Regalia 7", file="face_lich_regalia_07"},
+			{name="Lich Regalia 8", file="face_lich_regalia_08"},
+			{name="Lich Regalia 9", file="face_lich_regalia_09"},
+			{name="Lich Regalia 10", file="face_lich_regalia_10"},
 		},
 		tatoos = {
 			{name="Cracks", file="tattoo_cracks"},

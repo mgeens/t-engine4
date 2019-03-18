@@ -84,6 +84,8 @@ function _M:init(title, actor, order, at_end, quickbirth, w, h)
 	self.descriptors = {}
 	self.descriptors_by_type = {}
 
+	self.to_reset_cosmetic = {}
+
 	self.c_ok = Button.new{text="     Play!     ", fct=function() self:atEnd("created") end}
 	self.c_random = Button.new{text="Random!", fct=function() self:randomBirth() end}
 	self.c_premade = Button.new{text="Load premade", fct=function() self:loadPremadeUI() end}
@@ -93,7 +95,7 @@ function _M:init(title, actor, order, at_end, quickbirth, w, h)
 	self.c_options = Button.new{text="Customize", fct=function() self:customizeOptions() end}
 	self.c_options.hide = true
 	self.c_extra_options = Button.new{text="Extra Options", fct=function() self:extraOptions() end}
-	self.c_extra_options.hide = #game.extra_birth_option_defs == 0
+	self.c_extra_options.hide = not game.extra_birth_option_defs or #game.extra_birth_option_defs == 0
 
 	self.c_name = Textbox.new{title="Name: ", text=(not config.settings.cheat and game.player_name == "player") and "" or game.player_name, chars=30, max_len=50, fct=function()
 		if config.settings.cheat then self:makeDefault() end
@@ -639,6 +641,7 @@ function _M:updateDescriptors()
 					if data.only_for then for k, v in pairs(data.only_for) do
 						if self.descriptors_by_type[k] ~= v then ok = false break end
 					end end
+					if data.birth_only and self.not_birthing then ok = false end
 					if ok then
 						data.kind = kind
 						data.color = function(item)
@@ -677,6 +680,44 @@ function _M:updateDescriptors()
 	self.old_cosmetic_sex = self.descriptors_by_type.sex
 	self.old_cosmetic_race = self.descriptors_by_type.race
 	self.old_cosmetic_subrace = self.descriptors_by_type.subrace
+end
+
+function _M:selectRandomCosmetics(filters)
+	self.selected_cosmetic_options = {}
+	local function select(items)
+		local item = rng.table(items)
+		if item then
+			if self.cosmetic_options_config[item.kind] == "single" then
+				self.selected_cosmetic_options[item.kind] = item
+			elseif self.cosmetic_options_config[item.kind] == "multiple" then
+				self.selected_cosmetic_options[item.kind] = self.selected_cosmetic_options[item.kind] or {}
+				table.insert(self.selected_cosmetic_options[item.kind], item)
+			end
+		end
+	end
+
+	for _, e in ipairs(filters) do
+		if not e.percent or rng.percent(e.percent) then
+			local items = {}
+
+			if e.filter[1] == "all" then
+				for _, item in ipairs(self.cosmetic_options_flat) do
+					if (e.allow_mtx_pack or not item.mtx_pack) and item.kind == e.kind then items[#items+1] = item end
+				end
+			elseif e.filter[1] == "oneof" then
+				local list = table.reverse(e.filter[2])
+				for _, item in ipairs(self.cosmetic_options_flat) do
+					if (e.allow_mtx_pack or not item.mtx_pack) and item.kind == e.kind and list[item.name] then items[#items+1] = item end
+				end
+			elseif e.filter[1] == "findname" then
+				for _, item in ipairs(self.cosmetic_options_flat) do
+					if (e.allow_mtx_pack or not item.mtx_pack) and item.kind == e.kind and item.name:find(e.filter[2]) then items[#items+1] = item end
+				end
+			end
+
+			select(items)
+		end
+	end
 end
 
 function _M:isDescriptorSet(key, val)
@@ -1176,15 +1217,17 @@ function _M:setTile(f, w, h, last, nude)
 			local dbr = self.birth_descriptor_def.race[self.descriptors_by_type.race or "Human"]
 			local dr = self.birth_descriptor_def.subrace[self.descriptors_by_type.subrace or "Cornac"]
 			local ds = self.birth_descriptor_def.sex[self.descriptors_by_type.sex or "Female"]
+			local drc = dr.copy or {}
+			local dbrc = dbr.copy or {}
 			self.actor.image = "player/"..(self.descriptors_by_type.subrace or "Cornac"):lower():gsub("[^a-z0-9_]", "_").."_"..(self.descriptors_by_type.sex or "Female"):lower():gsub("[^a-z0-9_]", "_")..".png"
 			self.actor.add_mos = nil
 			self.actor.female = ds.copy.female
 			self.actor.male = ds.copy.male
-			self.actor.moddable_tile = dr.copy.moddable_tile
-			self.actor.moddable_tile_base = dr.copy.moddable_tile_base
-			self.actor.moddable_tile_ornament = dr.copy.moddable_tile_ornament
-			self.actor.moddable_tile_ornament2 = dr.copy.moddable_tile_ornament2
-			self.actor.moddable_tile_nude = dr.copy.moddable_tile_nude or dbr.copy.moddable_tile_nude
+			self.actor.moddable_tile = drc.moddable_tile
+			self.actor.moddable_tile_base = drc.moddable_tile_base
+			self.actor.moddable_tile_ornament = drc.moddable_tile_ornament
+			self.actor.moddable_tile_ornament2 = drc.moddable_tile_ornament2
+			self.actor.moddable_tile_nude = drc.moddable_tile_nude or dbrc.moddable_tile_nude
 		end
 	else
 		self.actor.make_tile = nil
@@ -1225,12 +1268,12 @@ function _M:setTile(f, w, h, last, nude)
 	end
 end
 
-local to_reset_cosmetic = {}
+
 function _M:applyCosmeticActor(last)
-	for i, d in ipairs(to_reset_cosmetic) do
+	for i, d in ipairs(self.to_reset_cosmetic) do
 		d(self.actor)
 	end
-	to_reset_cosmetic = {}
+	self.to_reset_cosmetic = {}
 
 	self.actor.moddable_tile_hair = nil
 	self.actor.moddable_tile_facial_features = nil
@@ -1291,14 +1334,14 @@ function _M:applyCosmeticActor(last)
 			for _, dd in ipairs(d) do if dd.on_actor then
 				dd.on_actor(self.actor, self, last)
 				if not last and dd.reset then
-					to_reset_cosmetic[#to_reset_cosmetic+1] = dd.reset
+					self.to_reset_cosmetic[#self.to_reset_cosmetic+1] = dd.reset
 				end
 			end end
 		elseif self.cosmetic_options_config[kind] == "single" then
 			if d.on_actor then
 				d.on_actor(self.actor, self, last)
 				if not last and d.reset then
-					to_reset_cosmetic[#to_reset_cosmetic+1] = d.reset
+					self.to_reset_cosmetic[#self.to_reset_cosmetic+1] = d.reset
 				end
 			end
 		end
@@ -1620,8 +1663,19 @@ function _M:isDonator()
 	return profile:isDonator(1)
 end
 
-function _M:customizeOptions()
-	local d = Dialog.new("Customization Options", 600, 550)
+function _M:customizeOptions(cosmetic_actor, on_exit, title)
+	if not cosmetic_actor then
+		cosmetic_actor = self.actor:cloneFull()
+	end
+
+	local function cosmeticSetTile(...)
+		local oldactor = self.actor
+		self.actor = cosmetic_actor
+		self:setTile(...)
+		self.actor = oldactor
+	end
+
+	local d = Dialog.new(title or "Cosmetic Options", 600, 550)
 
 	local sel = nil
 	local list list = TreeList.new{width=450, tree=self.cosmetic_options, height=400, scrollbar=true, all_clicks=true,
@@ -1647,9 +1701,14 @@ function _M:customizeOptions()
 				return
 			end
 
+			if not self:isDonator() then
+				self:yesnoPopup("Donator Feature", "Cosmetic customization is a donator-only feature.", function(ret) if ret then
+					game:registerDialog(require("mod.dialogs.Donation").new())
+				end end, "I want to help!", "Dismiss")
+			end
+
 			local selected = false
 
-			-- if not item.donator or self:isDonator() then
 			self.selected_cosmetic_options = self.selected_cosmetic_options or {}
 			if self.cosmetic_options_config[item.kind] == "single" then
 				if self.selected_cosmetic_options[item.kind] == item then selected = false self.selected_cosmetic_options[item.kind] = nil
@@ -1660,8 +1719,6 @@ function _M:customizeOptions()
 				else selected = true table.insert(self.selected_cosmetic_options[item.kind], item) end
 				if #self.selected_cosmetic_options[item.kind] == 0 then self.selected_cosmetic_options[item.kind] = nil end
 			end
-				-- item.color = self.selected_cosmetic_options[item.name] and colors.simple(colors.LIGHT_GREEN) or nil
-			-- end
 
 			item.selected = selected
 
@@ -1675,20 +1732,61 @@ function _M:customizeOptions()
 			end
 
 			list:drawItem(item, 0)
-			self:setTile(nil, nil, nil, false, true)
+			cosmeticSetTile(nil, nil, nil, false, true)
 		end,
 	}
+	function d.innerDisplay(this, x, y, nb_keyframes)
+		if cosmetic_actor.image then
+			cosmetic_actor:toScreen(self.tiles, x + this.iw - 90, y + 64, 128, 128)
+		elseif cosmetic_actor.image and cosmetic_actor.add_mos then
+			cosmetic_actor:toScreen(self.tiles, x + this.iw - 90, y + 64, 256, 128)
+		end
+	end
+
 	d:loadUI{
 		{left=0, top=0, ui=list},
 	}
-	d:setupUI(true, true)
-	d.key:addBind("EXIT", function() self:setTile() game:unregisterDialog(d) end)
+	d:setupUI(false, true)
+	d.key:addBind("EXIT", function() self:setTile() if on_exit then on_exit(cosmetic_actor) end game:unregisterDialog(d) end)
 	game:registerDialog(d)
-	self:setTile(nil, nil, nil, false, true)
+	cosmeticSetTile(nil, nil, nil, false, true)
 end
 
 function _M:extraOptions()
 	local options = OptionTree.new(game.extra_birth_option_defs, 'Birth Options', 600, 550)
 	options:initialize()
 	game:registerDialog(options)
+end
+
+--------------------------------------------------
+-- Statics
+--------------------------------------------------
+
+function _M:showCosmeticCustomizer(actor, title, on_end)
+	if not actor.descriptor or not actor.descriptor.sex or not actor.descriptor.race or not actor.descriptor.subrace then
+		return nil, "no actor descriptor infos"
+	end
+
+	local clone_dummy = actor:cloneFull()
+	local clone = actor:cloneFull()
+	local birther = _M.new("", clone_dummy, {}, function() end, nil, nil, nil)
+	birther.not_birthing = true
+
+	birther:setDescriptor("sex", actor.descriptor.sex)
+	birther:setDescriptor("race", actor.descriptor.race)
+	birther:setDescriptor("subrace", actor.descriptor.subrace)
+
+	birther:customizeOptions(clone, function()
+		self:yesnoPopup("Confirm", "Apply the selected cosmetics to "..actor.name.."?", function(ret) if ret then
+			local oldactor = birther.actor
+			birther.actor = actor
+			birther:applyCosmeticActor(true)
+			birther.actor = oldactor
+			actor:removeAllMOs()
+			actor:updateModdableTile()
+			if on_end then on_end() end
+		end end)
+	end, title)
+
+	return true
 end

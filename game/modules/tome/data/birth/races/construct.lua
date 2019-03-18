@@ -146,7 +146,7 @@ newBirthDescriptor
 			{name="Tatoos 7", file="tattoo_runes_07"},
 		},
 		special = {
-			{name="Bikini / Mankini", on_actor=function(actor, birther, last)
+			{name="Bikini / Mankini", birth_only=true, on_actor=function(actor, birther, last)
 				if not last then local o = birther.obj_list_by_name[birther.descriptors_by_type.sex == 'Female' and 'Bikini' or 'Mankini'] if not o then print("No bikini/mankini found!") return end actor:getInven(actor.INVEN_BODY)[1] = o:cloneFull() actor.moddable_tile_nude = 1
 				else actor:registerOnBirthForceWear(birther.descriptors_by_type.sex == 'Female' and "FUN_BIKINI" or "FUN_MANKINI") end
 			end},
