@@ -67,10 +67,10 @@ newBirthDescriptor{
 			{name="Skin Color 6", file="base_06"},
 		},
 		hairs = {
-			{name="Blond Hair 1", file="hair_01"},
-			{name="Blond Hair 2", file="hair_02"},
-			{name="Blond Hair 3", file="hair_03"},
-			{name="Blond Hair 4", file="hair_04"},
+			{name="Blond Hair 1", file="hair_blond_01"},
+			{name="Blond Hair 2", file="hair_blond_02"},
+			{name="Blond Hair 3", file="hair_blond_03"},
+			{name="Blond Hair 4", file="hair_blond_04"},
 			{name="Dark Hair 1", file="hair_black_01"},
 			{name="Dark Hair 2", file="hair_black_02"},
 			{name="Dark Hair 3", file="hair_black_03"},
@@ -81,7 +81,7 @@ newBirthDescriptor{
 			{name="Redhead 4", file="hair_redhead_04", unlock="cosmetic_race_human_redhead"},
 		},
 		special = {
-			{name="Bikini / Mankini", on_actor=function(actor, birther, last)
+			{name="Bikini / Mankini", birth_only=true, on_actor=function(actor, birther, last)
 				if not last then local o = birther.obj_list_by_name[birther.descriptors_by_type.sex == 'Female' and 'Bikini' or 'Mankini'] if not o then print("No bikini/mankini found!") return end actor:getInven(actor.INVEN_BODY)[1] = o:cloneFull() actor.moddable_tile_nude = 1
 				else actor:registerOnBirthForceWear(birther.descriptors_by_type.sex == 'Female' and "FUN_BIKINI" or "FUN_MANKINI") end
 			end},

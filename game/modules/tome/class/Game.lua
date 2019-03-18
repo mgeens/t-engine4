@@ -2015,6 +2015,14 @@ do return end
 			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
 			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
 do return end
+			local m = game.zone:makeEntityByName(game.level, "actor", "NPC_HUMANOID_KROG")
+			local x, y = util.findFreeGrid(game.player.x, game.player.y, 20, true, {[Map.ACTOR]=true})
+			if m and x then
+				game.zone:addEntity(game.level, m, "actor", x, y)
+			end
+do return end
+			Birther:showCosmeticCustomizer(self.player, "plops")
+do return end
 			self.player.quests["love-melinda"] = nil
 			self.player:grantQuest("love-melinda")
 			self.player:hasQuest("love-melinda"):melindaCompanion(self.player, "Defiler", "Corruptor")
