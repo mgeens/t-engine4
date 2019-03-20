@@ -27,6 +27,7 @@ local Textzone = require "engine.ui.Textzone"
 local TextzoneList = require "engine.ui.TextzoneList"
 local ListColumns = require "engine.ui.ListColumns"
 local Button = require "engine.ui.Button"
+local WebView = require "engine.ui.WebView"
 
 module(..., package.seeall, class.inherit(Dialog))
 
@@ -101,11 +102,14 @@ function _M:init(mode)
 		self:use(item.item, button)
 	end, select=function(item, sel) end}
 
+--	local wv = WebView.new{width=500,height=500, url='https://i.giphy.com/media/uk9A7Mz8Jv4GI/giphy-downsized.gif'}
+
 	local uis = {
 		{vcenter=0, hcenter=0, ui=self.c_waiter},
 		{left=0, top=0, ui=self.c_list},
 		{right=0, top=0, ui=self.c_recap},
 		{right=0, bottom=0, ui=self.c_do_purchase},
+--		{left=0, top=0, ui=wv},
 	}
 	-- Only show those for steam as te4.org purchases require already having a donation up
 	if mode == "steam" then
