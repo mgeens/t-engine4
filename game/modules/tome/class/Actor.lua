@@ -2995,6 +2995,7 @@ function _M:die(src, death_note)
 		self.died = (self.died or 0) + 1
 		self:move(self.x, self.y, true)
 		self:check("on_resurrect", "basic_resurrect")
+		self:triggerHook{"Actor:resurrect", reason="basic_resurrect"}
 
 		if self:attr("self_resurrect_chat") then
 			local chat = Chat.new(self.self_resurrect_chat, self, game.player)
