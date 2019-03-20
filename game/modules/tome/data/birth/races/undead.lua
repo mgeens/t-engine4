@@ -65,12 +65,7 @@ newBirthDescriptor{
 		resolvers.inscription("RUNE:_SHIELDING", {cooldown=14, dur=5, power=130}, 1),
 		resolvers.inscription("RUNE:_SHATTER_AFFLICTIONS", {cooldown=18, shield=50}, 2),
 		resolvers.inscription("RUNE:_BLINK", {cooldown=18, power=10, range=4,}, 3),
-		resolvers.generic(function(e)
-			-- Add bonus starting zones to the tier1 list only if the zone they actually started in matches the race/classes
-			-- This is a hacky way to figure out which class/race start got prioritized
-			game.state.birth.bonus_zone_tiers = game.state.birth.bonus_zone_tiers or {}
-			game.state.birth.bonus_zone_tiers[#game.state.birth.bonus_zone_tiers+1] = {name="tier1", condition=function(e) return e.starting_zone == "blighted-ruins" end, "blighted-ruins"}
-		end)
+		resolvers.birth_extra_tier1_zone{name="tier1", condition=function(e) return e.starting_zone == "blighted-ruins" end, "blighted-ruins"},
 	},
 
 	cosmetic_options = {
