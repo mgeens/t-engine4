@@ -52,6 +52,12 @@ newBirthDescriptor{
 		resolvers.inscription("INFUSION:_REGENERATION", {cooldown=10, dur=5, heal=100}, 1),
 		resolvers.inscription("INFUSION:_WILD", {cooldown=14, what={physical=true}, dur=4, power=14}, 2),
 		resolvers.inscription("INFUSION:_HEALING", {cooldown=12, heal=50}, 3),
+		resolvers.generic(function(e)
+			-- Add bonus starting zones to the tier1 list only if the zone they actually started in matches the race/classes
+			-- This is a hacky way to figure out which class/race start got prioritized
+			game.state.birth.bonus_zone_tiers = game.state.birth.bonus_zone_tiers or {}
+			game.state.birth.bonus_zone_tiers[#game.state.birth.bonus_zone_tiers+1] = {name="tier1", condition=function(e) return e.starting_zone == "town-irkkk" end, "murgol-lair", "ritch-tunnels"}
+		end),	
 	},
 	game_state = {
 		start_tier1_skip = 4,
