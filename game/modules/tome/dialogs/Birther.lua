@@ -1142,9 +1142,9 @@ end
 -- Display the player tile
 function _M:innerDisplay(x, y, nb_keyframes)
 	if self.actor.image then
-		self.actor:toScreen(self.tiles, x + self.iw - 64, y, 128, 128)
+		self.actor:toScreen(self.tiles, x + self.iw - 64, y, 64, 64)
 	elseif self.actor.image and self.actor.add_mos then
-		self.actor:toScreen(self.tiles, x + self.iw - 64, y - 64, 256, 128)
+		self.actor:toScreen(self.tiles, x + self.iw - 64, y - 64, 128, 64)
 	end
 
 	if self.descriptors_by_type.subclass then
@@ -1249,13 +1249,15 @@ function _M:setTile(f, w, h, last, nude)
 		for i, p in ipairs(ps) do self.actor:removeParticles(p) end
 		if self.actor.shader_auras then self.actor.shader_auras = {} end
 		self.replace_display = nil
-		if self.descriptors_by_type.subclass then
-			local d = self.birth_descriptor_def.subclass[self.descriptors_by_type.subclass]
-			if d and d.birth_example_particles then
-				local p = d.birth_example_particles
-				if type(p) == "table" then p = rng.table(p) end
-				p = util.getval(p, self.actor, self)
-				if type(p) == "string" then self.actor:addParticles(Particles.new(p, 1)) end
+		if not nude then
+			if self.descriptors_by_type.subclass then
+				local d = self.birth_descriptor_def.subclass[self.descriptors_by_type.subclass]
+				if d and d.birth_example_particles then
+					local p = d.birth_example_particles
+					if type(p) == "table" then p = rng.table(p) end
+					p = util.getval(p, self.actor, self)
+					if type(p) == "string" then self.actor:addParticles(Particles.new(p, 1)) end
+				end
 			end
 		end
 
