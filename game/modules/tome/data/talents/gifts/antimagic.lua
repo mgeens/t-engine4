@@ -28,7 +28,7 @@ newTalent{
 	mode = "passive",
 	points = 5,
 	getRegen = function(self, t) return 0.5 end,
-	getResist = function(self, t) return 5 + combatTalentPhysicalMindDamage(self, t, 15, 35) end,  -- This can crit
+	getResist = function(self, t) return 5 + combatTalentPhysicalMindDamage(self, t, 15, 30) end,  -- This can crit
 	on_absorb = function(self, t, damtype)
 		if not DamageType:get(damtype).antimagic_resolve then return end
 		local max = self:getTalentLevel(t) >= 3 and 3 or 1
@@ -65,11 +65,11 @@ newTalent{
 	require = gifts_req2,
 	points = 5,
 	equilibrium = 20,
-	cooldown = 10,
+	cooldown = 12,
 	tactical = { DISABLE = { silence = 4 } },
 	range = 6,
 	radius = function(self, t) return 3 end,
-	getduration = function(self, t) return math.floor(self:combatTalentLimit(t, 10, 3.5, 5.6)) end,  -- Limit <10
+	getduration = function(self, t) return 3 end,
 	getFloorDuration = function(self, t) return 6 end,
 	getDamage = function(self, t) return combatTalentPhysicalMindDamage(self, t, 1, 110) end,
 	getEquiRegen = function(self, t) return math.floor(self:combatTalentScale(t, 5, 20)) end,
@@ -175,7 +175,7 @@ newTalent{
 	require = gifts_req4,
 	points = 5,
 	equilibrium = -15,
-	cooldown = 10,
+	cooldown = 15,
 	range = 10,
 	tactical = { ATTACK = { ARCANE = 3 } },
 	direct_hit = true,
