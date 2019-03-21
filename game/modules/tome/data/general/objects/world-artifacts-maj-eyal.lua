@@ -862,7 +862,7 @@ newEntity{ base = "BASE_LEATHER_BELT",
 	use_power = {
 		name = function(self, who) return ("surround yourself with a magical shield (strength %d, based on Magic) for 10 turns"):format(self.use_power.shield(self, who)) end,
 		power = 20,
-		shield = function(self, who) return 100 + who:getMag(250) end,
+		shield = function(self, who) return 100 + who:getMag(250) * (100 + (who:attr("shield_factor") or 0)) / 100 end,
 		use = function(self, who)
 			game.logSeen(who, "%s invokes the memory of Neira!", who.name:capitalize())
 			who:setEffect(who.EFF_DAMAGE_SHIELD, 10, {power=self.use_power.shield(self, who)})
@@ -1103,7 +1103,7 @@ newEntity{ base = "BASE_AMULET", --Thanks Grayswandir!
 	},
 	max_power = 24, power_regen = 1,
 	use_power = {
-		name = function(self, who) return ("create a reflective shield (50%% reflection rate, %d strength, based on Magic) for 5 turns"):format(self.use_power.shield(self, who)) end,
+		name = function(self, who) return ("create a reflective shield (50%% reflection rate, %d strength, based on Magic) for 5 turns"):format(self.use_power.shield(self, who) * (100 + (who:attr("shield_factor") or 0)) / 100) end,
 		power = 24,
 		shield = function(self, who) return 150 + 2*who:getMag(100) end,
 		use = function(self, who)
