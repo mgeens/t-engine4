@@ -2672,7 +2672,7 @@ newEffect{
 	parameters = { },
 	activate = function(self, eff)
 		if not self.ai_state then return end
-		self:effectTemporaryValue(eff, {"ai_state","ai_move"}, "move_astar")
+		if self.ai_state and self.ai_state.ai_move and self.ai_state.ai_move ~= "move_astar_advanced" then self:effectTemporaryValue(eff, {"ai_state","ai_move"}, "move_astar") end  -- Not sure if theres a performance issue with giving everything astar_advanced so just make sure we don't overwrite it
 		self:setTarget(eff.src)
 	end,
 }
