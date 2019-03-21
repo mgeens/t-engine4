@@ -3294,7 +3294,7 @@ newEffect{
 			end
 			if dam > 0 and eff.leeching > 0 then
 				local src = eff.src.resolveSource and eff.src:resolveSource()
-				if src then src:heal(dam*eff.leeching/100, self) end
+				if src then src:heal(dam*eff.leeching/100, eff) end
 			end
 		end
 	end,
@@ -3908,7 +3908,7 @@ newEffect{
 	-- Damage each turn
 	on_timeout = function(self, eff)
 		if self:attr("purify_poison") then 
-			self:heal(eff.power, eff.src)
+			self:heal(eff.power, eff)
 		else 
 			local dam = DamageType:get(DamageType.NATURE).projector(eff.src, self.x, self.y, DamageType.NATURE, eff.power)
 			local src = eff.src.resolveSource and eff.src:resolveSource()
