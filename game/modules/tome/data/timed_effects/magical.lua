@@ -2564,10 +2564,13 @@ newEffect{
 	status = "beneficial",
 	parameters = { },
 	activate = function(self, eff)
+		local inc_mana = self:getMaxMana() * 0.33
 		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.ARCANE]=25})
-		self:effectTemporaryValue(eff, "max_mana", self:getMaxMana() * 0.33)
-		self:effectTemporaryValue(eff, "arcane_cooldown_divide", 3)
+		self:effectTemporaryValue(eff, "resists_pen", {[DamageType.ARCANE]=25})
 
+		self:effectTemporaryValue(eff, "max_mana", inc_mana)
+		self:effectTemporaryValue(eff, "arcane_cooldown_divide", 3)
+		self:incMana(inc_mana)
 		if not self.shader then
 			eff.set_shader = true
 			self.shader = "shadow_simulacrum"
@@ -2582,6 +2585,7 @@ newEffect{
 			self:removeAllMOs()
 			game.level.map:updateMap(self.x, self.y)
 		end
+		self.mana = math.min(self.mana, self.max_mana)
 	end,
 }
 
