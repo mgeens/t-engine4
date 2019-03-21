@@ -26,7 +26,6 @@
 #include "auxiliar.h"
 #include "types.h"
 #include "script.h"
-#include "display.h"
 #include "physfs.h"
 #include "physfsrwops.h"
 #include "SFMT.h"
@@ -2477,11 +2476,26 @@ static int sdl_set_window_pos(lua_State *L)
 	return 1;
 }
 
-extern void on_redraw();
 static int sdl_redraw_screen(lua_State *L)
 {
-	on_redraw();
+	redraw_now(redraw_type_normal);
 	return 0;
+}
+
+static int sdl_redraw_screen_for_screenshot(lua_State *L)
+{
+	bool for_savefile = lua_toboolean(L, 1);
+	if (for_savefile)
+		redraw_now(redraw_type_savefile_screenshot);
+	else
+		redraw_now(redraw_type_user_screenshot);
+	return 0;
+}
+
+static int redrawing_for_savefile_screenshot(lua_State *L)
+{
+	lua_pushboolean(L, (get_current_redraw_type() == redraw_type_savefile_screenshot));
+	return 1;
 }
 
 int mouse_cursor_s_ref = LUA_NOREF;
@@ -2978,17 +2992,32 @@ static int sdl_set_gamma(lua_State *L)
 	{
 		gamma_correction = lua_tonumber(L, 1);
 
-		Uint16 red_ramp[256];
-		Uint16 green_ramp[256];
-		Uint16 blue_ramp[256];
-
-		SDL_CalculateGammaRamp(gamma_correction, red_ramp);
-		SDL_memcpy(green_ramp, red_ramp, sizeof(red_ramp));
-		SDL_memcpy(blue_ramp, red_ramp, sizeof(red_ramp));
-		SDL_SetWindowGammaRamp(window, red_ramp, green_ramp, blue_ramp);
+		// SDL_SetWindowBrightness is sufficient for a simple gamma adjustment.
+		SDL_SetWindowBrightness(window, gamma_correction);
 	}
 	lua_pushnumber(L, gamma_correction);
 	return 1;
+}
+
+static void screenshot_apply_gamma(png_byte *image, unsigned long width, unsigned long height)
+{
+	// User screenshots (but not saved game screenshots) should have gamma applied.
+	if (gamma_correction != 1.0 && get_current_redraw_type() == redraw_type_user_screenshot)
+	{
+		Uint16 ramp16[256];
+		png_byte ramp8[256];
+		unsigned long i;
+
+		// This is sufficient for the simple gamma adjustment used above.
+		// If that changes, we may need to query the gamma ramp.
+		SDL_CalculateGammaRamp(gamma_correction, ramp16);
+		for (i = 0; i < 256; i++)
+			ramp8[i] = ramp16[i] / 256;
+
+		// Red, green and blue component are all the same for simple gamma.
+		for (i = 0; i < width * height * 3; i++)
+			image[i] = ramp8[image[i]];
+	}
 }
 
 static void png_write_data_fn(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -2996,6 +3025,7 @@ static void png_write_data_fn(png_structp png_ptr, png_bytep data, png_size_t le
 	luaL_Buffer *B = (luaL_Buffer*)png_get_io_ptr(png_ptr);
 	luaL_addlstring(B, data, length);
 }
+
 static void png_output_flush_fn(png_structp png_ptr)
 {
 }
@@ -3015,6 +3045,12 @@ static int sdl_get_png_screenshot(lua_State *L)
 	png_colorp palette;
 	png_byte *image;
 	png_bytep *row_pointers;
+	int aw, ah;
+
+	SDL_GetWindowSize(window, &aw, &ah);
+
+	/* Y coordinate must be reversed for OpenGL. */
+	y = ah - (y + height);
 
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -3063,6 +3099,7 @@ static int sdl_get_png_screenshot(lua_State *L)
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *)image);
+	screenshot_apply_gamma(image, width, height);
 
 	for (i = 0; i < height; i++)
 	{
@@ -3373,6 +3410,8 @@ static const struct luaL_Reg displaylib[] =
 	{"setTextBlended", set_text_aa},
 	{"getTextBlended", get_text_aa},
 	{"forceRedraw", sdl_redraw_screen},
+	{"forceRedrawForScreenshot", sdl_redraw_screen_for_screenshot},
+	{"redrawingForSavefileScreenshot", redrawing_for_savefile_screenshot},
 	{"size", sdl_screen_size},
 	{"windowPos", sdl_window_pos},
 	{"newFont", sdl_new_font},
