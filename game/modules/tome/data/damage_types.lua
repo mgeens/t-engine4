@@ -89,6 +89,17 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		return dam
 	end
 
+	if src:attr("darkest_light_mastery") and type == "LIGHT" then
+		local ndam = dam * src.darkest_light_mastery
+		dam = dam - ndam
+		local old = src.darkest_light_mastery
+		src.darkest_light_mastery = nil
+		add_dam = DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, ndam, state)
+		src.darkest_light_mastery = old
+		if dam <= 0 then return add_dam end
+	end
+		
+
 	local source_talent = src.__projecting_for and src.__projecting_for.project_type and (src.__projecting_for.project_type.talent_id or src.__projecting_for.project_type.talent) and src.getTalentFromId and src:getTalentFromId(src.__projecting_for.project_type.talent or src.__projecting_for.project_type.talent_id)
 
 	local terrain = game.level.map(x, y, Map.TERRAIN)

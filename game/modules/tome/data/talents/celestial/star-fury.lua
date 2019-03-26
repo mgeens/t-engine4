@@ -113,7 +113,7 @@ newTalent{
 	positive = -10,
 	tactical = { ATTACKAREA = {LIGHT = 1, DARKNESS = 1} },
 	range = 0,
-	radius = 2,
+	radius = 4,
 	direct_hit = true,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, selffire=false}
