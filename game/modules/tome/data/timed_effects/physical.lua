@@ -2330,7 +2330,7 @@ newEffect{
 				eff.properties.on_cs(self, eff, dam, type, src)
 			end
 		end
-
+		eff.did_block = true
 		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
 
 		return amt
