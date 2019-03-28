@@ -3608,7 +3608,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 	name = "Spellhunt Remnants", color = colors.GREY, image = "object/artifact/spellhunt_remnants.png",
 	unided_name = "heavily corroded voratun gauntlets",
 	desc = [[These once brilliant voratun gauntlets have fallen into a deep decay. Originally used in the spellhunt, they were often used to destroy arcane artifacts, curing the world of their influence.]],
-	special_desc = function(self) return "Drains arcane resources while worn." end,
+	special_desc = function(self) return "Can't be worn by those with arcane powers." end,
 --	material_level = 1, --Special: this artifact can appear anywhere and adjusts its material level to the zone
 	level_range = {1, nil}, 
 	rarity = 550, -- Extra rare to make it not ALWAYS appear.
@@ -3620,31 +3620,25 @@ newEntity{ base = "BASE_GAUNTLETS",
 			self.power_up(self, nil, mat_level)
 		end
 	end,
-	on_wear = function(self, who)
+	on_canwear = function(self, who)
 		if who:attr("has_arcane_knowledge") then
-			game.logPlayer(who, "#ORCHID#The %s begin draining your arcane resources as they are worn!", self:getName({do_color=true}))
+			game.logPlayer(who, "#ORCHID#Your arcane equipment or powers conflict with the gauntlets!#LAST#", self:getName({do_color=true}))
+			return true
 		end
 	end,
 	on_preaddobject = function(self, who, inven) -- generated in an actor's inventory
 		if not self.material_level then self.addedToLevel(self, game.level) end
 	end,
-	cost = 1000,
-	callbackOnAct = function(self, who) -- Burn the wearer's arcane resources while worn
-		if who:attr("has_arcane_knowledge") then
-			local burn = who:burnArcaneResources(self.material_level*2)
-			if burn > 0 then
-				game.logSeen(who, "#ORCHID#%s's %s drain %s magic!", who.name:capitalize(), self:getName({do_color=true}), who:his_her())
-				who:restStop("Antimagic Drain")
-				who:runStop("Antimagic Drain")
-			end
-		end
-	end,
 	wielder = {
 		combat_mindpower=4,
-		combat_mindcrit=1,
+		combat_mindcrit=3,
 		combat_spellresist=4,
 		combat_def=1,
 		combat_armor=2,
+		inc_stats = { [Stats.STAT_CUN] = 2, [Stats.STAT_WIL] = 2, },
+		inc_damage = { [DamageType.NATURE] = 5 },
+		resists_pen = { [DamageType.NATURE] = 5 },
+		max_life = 20,
 		combat = {
 			dam = 12,
 			apr = 4,
@@ -3653,7 +3647,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 			dammod = {dex=0.4, str=-0.6, cun=0.4,},
 			damrange = 0.3,
 			melee_project={[DamageType.RANDOM_SILENCE] = 10},
-			talent_on_hit = { [Talents.T_DESTROY_MAGIC] = {level=1, chance=100} },
+			talent_on_hit = {  },
 		},
 	},
 	power_up= function(self, who, level)
@@ -3670,10 +3664,14 @@ newEntity{ base = "BASE_GAUNTLETS",
 		self.desc = [[These once brilliant voratun gauntlets appear heavily decayed. Originally used in the spellhunt, they were often used to destroy arcane artifacts, ridding the world of their influence.]]
 		self.wielder={
 			combat_mindpower=6,
-			combat_mindcrit=2,
+			combat_mindcrit=6,
 			combat_spellresist=6,
 			combat_def=2,
 			combat_armor=3,
+			inc_stats = { [Stats.STAT_CUN] = 4, [Stats.STAT_WIL] = 4, },
+			inc_damage = { [DamageType.NATURE] = 10 },
+			resists_pen = { [DamageType.NATURE] = 10 },
+			max_life = 40,
 			combat = {
 				dam = 17,
 				apr = 8,
@@ -3682,7 +3680,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 				dammod = {dex=0.4, str=-0.6, cun=0.4,},
 				damrange = 0.3,
 				melee_project={[DamageType.RANDOM_SILENCE] = 12},
-				talent_on_hit = { [Talents.T_DESTROY_MAGIC] = {level=2, chance=100} },
+				talent_on_hit = { },
 			},
 		}
 		elseif level == 3 then -- LEVEL 3
@@ -3690,10 +3688,14 @@ newEntity{ base = "BASE_GAUNTLETS",
 		self.desc = [[These voratun gauntlets appear to have suffered considerable damage. Originally used in the spellhunt, they were often used to destroy arcane artifacts, ridding the world of their influence.]]
 		self.wielder={
 			combat_mindpower=8,
-			combat_mindcrit=3,
+			combat_mindcrit=9,
 			combat_spellresist=8,
 			combat_def=3,
 			combat_armor=4,
+			inc_stats = { [Stats.STAT_CUN] = 6, [Stats.STAT_WIL] = 6, },
+			inc_damage = { [DamageType.NATURE] = 15 },
+			resists_pen = { [DamageType.NATURE] = 15 },
+			max_life = 60,
 			combat = {
 				dam = 22,
 				apr = 12,
@@ -3702,7 +3704,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 				dammod = {dex=0.4, str=-0.6, cun=0.4,},
 				damrange = 0.3,
 				melee_project={[DamageType.RANDOM_SILENCE] = 15, [DamageType.ITEM_ANTIMAGIC_MANABURN] = 20,},
-				talent_on_hit = { [Talents.T_DESTROY_MAGIC] = {level=3, chance=100}, [Talents.T_MANA_CLASH] = {level=1, chance=5} },
+				talent_on_hit = { [Talents.T_MANA_CLASH] = {level=1, chance=5} },
 			},
 		}
 		elseif level == 4 then -- LEVEL 4
@@ -3710,10 +3712,14 @@ newEntity{ base = "BASE_GAUNTLETS",
 		self.desc = [[These voratun gauntlets shine brightly beneath a thin layer of wear. Originally used in the spellhunt, they were often used to destroy arcane artifacts, ridding the world of their influence.]]
 		self.wielder={
 			combat_mindpower=10,
-			combat_mindcrit=4,
+			combat_mindcrit=12,
 			combat_spellresist=10,
 			combat_def=4,
 			combat_armor=5,
+			inc_stats = { [Stats.STAT_CUN] = 8, [Stats.STAT_WIL] = 8, },
+			inc_damage = { [DamageType.NATURE] = 20 },
+			resists_pen = { [DamageType.NATURE] = 20 },
+			max_life = 80,
 			combat = {
 				dam = 27,
 				apr = 15,
@@ -3722,7 +3728,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 				dammod = {dex=0.4, str=-0.6, cun=0.4,},
 				damrange = 0.3,
 				melee_project={[DamageType.RANDOM_SILENCE] = 17, [DamageType.ITEM_ANTIMAGIC_MANABURN] = 35,},
-				talent_on_hit = { [Talents.T_DESTROY_MAGIC] = {level=4, chance=100}, [Talents.T_MANA_CLASH] = {level=2, chance=10} },
+				talent_on_hit = { [Talents.T_MANA_CLASH] = {level=2, chance=10} },
 			},
 		}
 		elseif level >= 5 then -- LEVEL 5
@@ -3730,10 +3736,14 @@ newEntity{ base = "BASE_GAUNTLETS",
 		self.desc = [[These brilliant voratun gauntlets shine with an almost otherworldly glow. Originally used in the spellhunt, they were often used to destroy arcane artifacts, ridding the world of their influence. Pride in the fulfillment of this ancient duty practically radiates from them.]]
 		self.wielder={
 			combat_mindpower=12,
-			combat_mindcrit=5,
+			combat_mindcrit=15,
 			combat_spellresist=15,
 			combat_def=6,
 			combat_armor=8,
+			inc_stats = { [Stats.STAT_CUN] = 10, [Stats.STAT_WIL] = 10, },
+			inc_damage = { [DamageType.NATURE] = 25 },
+			resists_pen = { [DamageType.NATURE] = 25 },
+			max_life = 100,
 			lite=1,
 			combat = {
 				dam = 33,
@@ -3743,7 +3753,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 				dammod = {dex=0.4, str=-0.6, cun=0.4,},
 				damrange = 0.3,
 				melee_project={[DamageType.RANDOM_SILENCE] = 20, [DamageType.ITEM_ANTIMAGIC_MANABURN] = 50,},
-				talent_on_hit = { [Talents.T_DESTROY_MAGIC] = {level=5, chance=100}, [Talents.T_MANA_CLASH] = {level=3, chance=15}, [Talents.T_AURA_OF_SILENCE] = {level=1, chance=10} },
+				talent_on_hit = { [Talents.T_MANA_CLASH] = {level=3, chance=15}, [Talents.T_AURA_OF_SILENCE] = {level=3, chance=15} },
 			},
 		}
 		self.use_power = {
