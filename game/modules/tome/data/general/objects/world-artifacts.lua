@@ -6801,10 +6801,6 @@ newEntity{ base = "BASE_SHIELD",
 	end,}
 }
 
--- No longer hits your own projectiles
--- Hopefully fixed LUA errors with DamageType require
--- Significant rescaling.  Base damage cut by 50%, crit by 5%.  The reason these hilariously bad numbers happened was derping and not accounting for the awesomeness of the 100% dex scaling.  APR is still extremely high.
--- Proc chance is now 100% up from 25%.  No matter how I test this--even at 100% and 500% global action speed--it is often a pain in the ass to get procs just to test.  This is supposed to be one of the main features of the item. 
 newEntity{ base = "BASE_KNIFE", --Shibari's #1
 	power_source = {nature=true},
 	unique = true,
@@ -6830,7 +6826,7 @@ newEntity{ base = "BASE_KNIFE", --Shibari's #1
 				local i = 0
 				local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
 				while p do
-					local DamageType = require "engine.DamageType" -- I don't entirely follow why this is necessary
+					local DamageType = require "engine.DamageType"
 					if p.src and p.src:reactionToward(who) >= 0 then return end -- Let's not destroy friendly projectiles
 					if p.name then 
 						game.logPlayer(who, "#GREEN#Lightning strikes the " .. p.name .. "!")
@@ -6844,7 +6840,7 @@ newEntity{ base = "BASE_KNIFE", --Shibari's #1
 					game.level.map:particleEmitter(x, y, 5, "ball_lightning_beam", {radius=5, tx=x, ty=y})
 				   
 					local tg = {type="ball", radius=5, friendlyfire=false} -- Let's not kill pets or escorts with uncontrolled AoE
-					local dam = 4*who:getDex() -- no more crit or base damage.  no real reason, just like it better.
+					local dam = 3*who:getDex()
 
 					who:project(tg, x, y, DamageType.LIGHTNING, dam)
 				   
