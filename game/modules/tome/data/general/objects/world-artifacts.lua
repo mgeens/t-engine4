@@ -4473,16 +4473,20 @@ newEntity{ base = "BASE_TOOL_MISC",
 	material_level = 5,
 	wielder = {
 		resists={[DamageType.BLIGHT] = 20, [DamageType.ARCANE] = 20},
-		on_melee_hit={[DamageType.SLIME] = 18},
+		on_melee_hit={[DamageType.ITEM_NATURE_SLOW] = 18},
 		combat_spellresist = 20,
 		talents_types_mastery = { ["wild-gift/antimagic"] = 0.1, ["wild-gift/fungus"] = 0.1},
 		inc_stats = {[Stats.STAT_WIL] = 10,},
 		combat_mindpower=8,
 	},
-	max_power = 35, power_regen = 1,
+	on_takeoff = function(self)
+		if self.summoned_totem then self.summoned_totem:die() end
+		self.summoned_totem = nil
+	end,
+	max_power = 50, power_regen = 1,
 	use_power = {
-		name = "call forth an immobile antimagic pillar for 15 turns.  (It spits slime, pulls in, stuns, and burns the arcane resources of your foes, while emitting an aura of silence against them within range 5, and will silence you for 5 turns when first summoned.)",
-		power = 35,
+		name = "call forth an immobile antimagic pillar for 10 turns.  (It spits slime, pulls in, stuns, and burns the arcane resources of your foes, while emitting an aura of silence against them within range 5, and will silence you for 5 turns when first summoned.)",
+		power = 50,
 		tactical = {ATTACK = {NATURE = 2},
 			CLOSEIN = 1.5,
 			DISABLE = function(self, t, aitarget)
@@ -4516,7 +4520,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 					dammod={wil=1.2}, physcrit = 10,
 					damtype=engine.DamageType.SLIME,
 				},
-				level_range = {25, nil}, exp_worth = 0,
+				level_range = {1, who.level}, exp_worth = 0,
 				silent_levelup = true,
 				combat_armor=50,
 				combat_armor_hardiness=70,
@@ -4524,6 +4528,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 				ai = "summoned", ai_real = "dumb_talented_simple", ai_state = { talent_in=1, },
 				never_move=1,
 				stats = { str=14, dex=18, mag=10, con=12, wil=20, cun=20, },
+				combat_mindpower = resolvers.levelup(1, 1, 3),  -- ~87 mindpower at L50 including stats
 				size_category = 5,
 				blind=1,
 				esp_all=1,
@@ -4554,20 +4559,24 @@ newEntity{ base = "BASE_TOOL_MISC",
 				
 				faction = who.faction,
 				summoner = who, summoner_gain_exp=true,
-				summon_time=15,
+				summon_time=10,
 			}
 
 			m:resolve()
 			who:logCombat(m, "#Source# uses %s to summon a natural guardian!", self:getName({do_color=true, no_add_name=true}))
+			m:forceLevelup(who.level)
+
 			game.zone:addEntity(game.level, m, "actor", x, y)
 			m.remove_from_party_on_death = true,
 			game.party:addMember(m, {
 				control=false,
 				type="summon",
 				title="Summon",
+				temporary_level = true,
 				orders = {target=true, leash=true, anchor=true, talents=true},
 			})
 			who:setEffect(who.EFF_SILENCED, 5, {})
+			self.summoned_totem = m
 			return {id=true, used=true}
 		end
 	},
