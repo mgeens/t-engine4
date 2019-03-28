@@ -4733,9 +4733,8 @@ newEntity{ base = "BASE_AMULET", --Thanks Grayswandir!
 		melee_project={[DamageType.RANDOM_CONFUSION] = 5},
 	},
 	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_INNER_DEMONS, level = 4, power = 30 },
+	talent_on_mind = { {chance=8, talent=Talents.T_SUNDER_MIND, level=1} },
 }
-
 
 newEntity{ base = "BASE_SHOT", --Thanks Grayswandir!
 	power_source = {psionic=true},
