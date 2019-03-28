@@ -4958,7 +4958,7 @@ newEntity{ base = "BASE_GLOVES", --Thanks SageAcrin /AND/ Edge2054!
 			physcrit = 6,
 			dammod = {dex=0.4, str=-0.6, cun=0.4, mag=0.2 },
 			convert_damage = {[DamageType.VOID] = 100,},
-			talent_on_hit = { [Talents.T_SHADOW_SIMULACRUM] = {level=1, chance=15}, [Talents.T_MIND_BLAST] = {level=1, chance=10}, [Talents.T_TURN_BACK_THE_CLOCK] = {level=1, chance=10} },
+			talent_on_hit = { [Talents.T_DUST_TO_DUST] = {level=1, chance=15}, [Talents.T_MIND_BLAST] = {level=1, chance=10}, [Talents.T_TURN_BACK_THE_CLOCK] = {level=1, chance=10} },
 		},
 	},
 	-- Change when void talents are done
