@@ -4234,12 +4234,12 @@ newEntity{ base = "BASE_ARROW", --Thanks Grayswandir!
 	combat = {
 		capacity = 0,
 		dam = 45,
-		apr = 30, --No armor can stop the void
+		apr = 120, --No armor can stop the void
 		physcrit = 6,
-		dammod = {dex=0.7, str=0.5, mag=0.1,},
+		dammod = {dex=0.7, str=0.5, mag=0.4,},
 		damtype = DamageType.VOID,
 		-- Redo these when void talents are added
-		talent_on_hit = { [Talents.T_SPATIAL_TETHER] = {level=1, chance=10}, [Talents.T_DIMENSIONAL_ANCHOR] = {level=1, chance=5} },
+		talent_on_hit = { [Talents.T_SPATIAL_TETHER] = {level=1, chance=15}, [Talents.T_DIMENSIONAL_ANCHOR] = {level=1, chance=15} },
 	},
 }
 
