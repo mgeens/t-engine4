@@ -1170,7 +1170,6 @@ newEntity{ base = "BASE_KNIFE", -- Thanks Grayswandir!
 	},
 }
 
--- Fix me
 newEntity{ base = "BASE_KNIFE", --Razakai's idea, slightly modified
 	power_source = {psionic=true},
 	unique = true,
@@ -1189,9 +1188,10 @@ newEntity{ base = "BASE_KNIFE", --Razakai's idea, slightly modified
 		apr = 9,
 		physcrit = 15,
 		dammod = {str=0.45, dex=0.55},
-		special_on_hit = {desc="deals physical damage equal to 3% of the target's missing health", fct=function(combat, who, target)
+		special_on_hit = {desc="deals 60 physical damage increased by 1% for each 1% life the target has lost", fct=function(combat, who, target)
 			local tg = {type="ball", range=10, radius=0, selffire=false}
-			who:project(tg, target.x, target.y, engine.DamageType.PHYSICAL, (target.max_life - target.life)*0.03)
+			local bonus = 1 + (1 - target.life / target.max_life)
+			who:project(tg, target.x, target.y, engine.DamageType.PHYSICAL, 60*bonus)
 		end},
 	},
 	wielder = {
