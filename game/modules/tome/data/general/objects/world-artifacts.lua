@@ -6641,8 +6641,9 @@ newEntity{ base = "BASE_LONGSWORD", --For whatever artists draws this: it's a ra
 	},
 	wielder = {
 		evasion=10,
-		combat_physcrit = 10,
-		combat_physspeed = 0.1,
+		combat_def = 40,
+		combat_physcrit = 20,
+		combat_physspeed = 0.2,
 	},
 }
 
