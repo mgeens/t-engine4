@@ -116,8 +116,8 @@ newEntity{
 	wielder = {
 		combat_spellpower = resolvers.mbonus_material(5, 3),
 		combat_def = resolvers.mbonus_material(15, 10),
-		damage_shield_penetrate = resolvers.mbonus_material(30, 10),
-		shield_factor=resolvers.mbonus_material(20, 5),
+		damage_shield_penetrate = resolvers.mbonus_material(20, 10),
+		shield_factor=resolvers.mbonus_material(15, 5),
 	},
 }
 
