@@ -958,14 +958,14 @@ newInscription{
 		if not (x and y) or not target or not self:canProject(tg, x, y) then return nil end
 
 		if self:reactionToward(target) < 0 then
-			target:removeEffectsSustainsFilter(function(o)
+			target:removeSustainsFilter(function(o)
 				if o.type == "magical" or o.is_spell then
 					if o.status and o.status == "detrimental" then return false end
 					return true
 				end
 				return false
 			end,
-			999)
+			4)
 		else
 			target:removeEffectsFilter({type="magical", status="detrimental"}, 999)
 		end
@@ -975,7 +975,7 @@ newInscription{
 	end,
 	info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		return ([[Activate the rune to remove all beneficial magical effects and sustains from an enemy target or all magical debuffs from you.]]):
+		return ([[Activate the rune to remove 4 beneficial magical sustains from an enemy target or all magical debuffs from you.]]):
 		format()
 	end,
 	short_info = function(self, t)
