@@ -438,23 +438,29 @@ uberTalent{
 		local chat = Chat.new("worldly-knowledge", {name="Worldly Knowledge"}, self)
 		chat:invoke()
 	end,
+	passives = function(self, t, tmptable)
+		self:talentTemporaryValue(tmptable, "unused_generics", 5)
+	end,
 	info = function(self, t)
-		return ([[Learn a new talent category from one of the below at 0.9 mastery, unlocked. Group 1 categories are available to anyone; Group 2 are available only to people without any spells or runes, and Group 3 are not available to followers of Zigur.
+		return ([[Gain 5 generic talent points and learn a new talent category from one of the below at 1.0 mastery, unlocked. Group 1 categories are available to anyone; Group 2 are available only to people without any spells or runes, and Group 3 are not available to followers of Zigur.
 		GROUP 1:
 		- Technique / Conditioning
 		- Cunning / Survival
+		- Wild Gift / Harmony
 		GROUP 2:
-		- Technique / Mobility
-		- Technique / Field Control
 		- Wild Gift / Call of the Wild
 		- Wild Gift / Mindstar Mastery
 		- Psionic / Dreaming
+		- Psionic / Augmented Mobility
+		- Psionic / Feedback
 		GROUP 3:
 		- Spell / Divination
 		- Spell / Staff Combat
 		- Spell / Stone Alchemy
+		- Corruption / Vile Life
+		- Corruption / Hexes
+		- Corruption / Curses
 		- Celestial / Chants
-		- Celestial / Light
 		- Chronomancy / Chronomancy]])
 		:format()
 	end,
