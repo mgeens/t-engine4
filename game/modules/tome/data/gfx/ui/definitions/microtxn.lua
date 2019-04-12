@@ -1,5 +1,5 @@
 -- ToME - Tales of Maj'Eyal
--- Copyright (C) 2009 - 2017 Nicolas Casalini
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -17,15 +17,13 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-return {
-	id = "BEARSCAPE",
-	name = "The Bearscape (server-wide)",
-	image = "/data/gfx/achievements/bearscape.png",
-	desc = [[The Bearscape is a level 15+ zone that spawns on the worldmap.
-This legendary place is said to be filled with powerful bears, all very hungry!
-Will you survive this place? Can you #{bold}#bear#{italic}# it?!
-#GREEN#Server-wide:#LAST# This event will trigger for your character and every other player currently playing.]],
-
-	price = 20,
-	multi_pruchase = true,
+microtxn = {
+	frame_shadow = {x=15, y=15, a=0.5},
+	frame_alpha = 1,
+	frame_darkness = 0.6,
+	frame_ox1 = -60,
+	frame_ox2 =  60,
+	frame_oy1 = -60,
+	frame_oy2 =  60,
+--	title_bar = {x=0, y=-17, w=4, h=25},
 }

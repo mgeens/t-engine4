@@ -41,6 +41,8 @@ function _M:init(mode)
 	if not mode then mode = core.steam and "steam" or "te4" end
 	self.mode = mode
 
+	self.ui = "microtxn"
+
 	self.cart = {}
 
 	self.base_title_text = game.__mod_info.long_name.." #GOLD#Online Store#LAST#"
@@ -117,6 +119,7 @@ function _M:init(mode)
 	elseif mode == "te4" then
 		uis[#uis+1] = {right=0, bottom=self.c_do_purchase, ui=self.c_coins_available}
 	end
+
 	self:loadUI(uis)
 
 	self:setupUI(false, false)
