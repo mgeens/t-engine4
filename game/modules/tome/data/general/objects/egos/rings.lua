@@ -87,7 +87,7 @@ newEntity{
 
 newEntity{
 	power_source = {arcane=true},
-	name = " of arcana(#REGEN#)", suffix=true, instant_resolve=true,
+	name = " of arcana (#REGEN#)", suffix=true, instant_resolve=true,
 	keywords = {arcana=true},
 	level_range = {1, 50},
 	rarity = 6,
