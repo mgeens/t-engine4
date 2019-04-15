@@ -95,8 +95,8 @@ newTalent{ short_name = "SKELETON_REASSEMBLE",
 		return true
 	end,
 	info = function(self, t)
-		return ([[Re-position some of your bones, healing yourself for %d.
-		At level 5, you will gain the ability to completely re-assemble your body should it be destroyed (can only be used once)]]):
+		return ([[Reposition some of your bones, healing yourself for %d.
+		At level 5, you will gain the ability to completely re-assemble your body should it be destroyed (can only be used once).]]):
 		format(t.getHeal(self, t))
 	end,
 }
