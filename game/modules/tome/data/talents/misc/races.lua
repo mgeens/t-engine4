@@ -537,13 +537,20 @@ newTalent{
 		return math.max(1, math.floor(self:combatScale(0.04*self:getCon() + self:getTalentLevel(t), 2.4, 1.4, 10, 9)))
 	end,
 	action = function(self, t)
-		local tg = {type="bolt", range=self:getTalentRange(t), nolock=true, simple_dir_request=true, talent=t}
+		local tg = {type="bolt", range=self:getTalentRange(t), nolock=true, talent=t, simple_dir_request=true}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		local _ _, x, y = self:canProject(tg, x, y)
+
 		local ox, oy = self.x, self.y
-		self:probabilityTravel(x, y, t.getRange(self, t), function(tx, ty) return game.level.map(tx, ty, Map.ACTOR) and true or false end)
-		if ox == self.x and oy == self.y then return nil end
+		local l = line.new(self.x, self.y, x, y)
+		local nextx, nexty = l()
+		if not nextx or not game.level.map:checkEntity(nextx, nexty, Map.TERRAIN, "block_move", self) then return end
+
+		self:probabilityTravel(x, y, t.getRange(self, t))
+
+		if ox == self.x and oy == self.y then return end
+
 		game:playSoundNear(self, "talents/earth")
 		return true
 	end,
