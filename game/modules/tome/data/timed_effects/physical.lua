@@ -2965,6 +2965,7 @@ newEffect {
 newEffect {
 	name = "SKIRMISHER_STUN_INCREASE",
 	desc = "Stun Lengthen",
+	long_desc = function(self, eff) return ([[This should not be shown, oops.]]) end,
 	type = "physical",
 	subtype = {stun = true},
 	status = "detrimental",
