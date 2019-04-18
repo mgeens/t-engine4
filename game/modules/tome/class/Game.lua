@@ -634,6 +634,7 @@ function _M:createFBOs()
 			timestop = Shader.new("main_fbo/timestop"),
 			line_grids = Shader.new("main_fbo/line_grids"),
 			gestures = Shader.new("main_fbo/gestures"),
+			sharpen = Shader.new("main_fbo/sharpen"),
 		}
 		self.posteffects_use = { self.fbo_shader.shad }
 		if not self.fbo_shader.shad then self.fbo = nil self.fbo_shader = nil end

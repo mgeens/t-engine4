@@ -509,6 +509,12 @@ function _M:updateMainShader()
 			pf.timestop.shad:paramNumber("tick_start", core.game.getTime())
 		end
 
+		-- Sharpen shader
+		if config.settings.tome.sharpen_display and config.settings.tome.sharpen_display > 1 then
+			effects[pf.sharpen.shad] = true
+			pf.sharpen.shad:paramNumber("sharpen_power", config.settings.tome.sharpen_display)
+		end
+
 		game.posteffects_use = table.keys(effects)
 		game.posteffects_use[#game.posteffects_use+1] = game.fbo_shader.shad
 	end
