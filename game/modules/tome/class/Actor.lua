@@ -4084,8 +4084,7 @@ function _M:getObjectModdableTile(slot)
 	return o
 end
 
---- Update tile for races that can handle it
-function _M:updateModdableTile()
+function _M:updateModdableTilePrepare()
 	local selfbase = self.replace_display or self
 	if not selfbase.moddable_tile or Map.tiles.no_moddable_tiles then
 		local add = selfbase.add_mos or {}
@@ -4120,9 +4119,15 @@ function _M:updateModdableTile()
 			self:removeAllMOs()
 			if self.x and game.level then game.level.map:updateMap(self.x, self.y) end
 		end
-		return
+		return false
 	end
 	self:removeAllMOs()
+	return true
+end
+
+--- Update tile for races that can handle it
+function _M:updateModdableTile()
+	if not self:updateModdableTilePrepare() then return end
 
 	local base = "player/"..self.moddable_tile:gsub("#sex#", self.female and "female" or "male").."/"
 
@@ -4148,11 +4153,15 @@ function _M:updateModdableTile()
 	if self.moddable_tile_tatoo then add[#add+1] = {image = base..self.moddable_tile_tatoo..".png", auto_tall=1} end
 
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, back=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
+			end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+			end
 		end
 	end
 
@@ -4176,18 +4185,23 @@ function _M:updateModdableTile()
 
 	i = self:getObjectModdableTile(self.INVEN_HANDS); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
 	i = self:getObjectModdableTile(self.INVEN_QUIVER); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
+
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
-			if i.moddable_tile_particle then
-				add[#add].particle = i.moddable_tile_particle[1]
-				add[#add].particle_args = i.moddable_tile_particle[2]
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, front=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
+				if i.moddable_tile_particle then
+					add[#add].particle = i.moddable_tile_particle[1]
+					add[#add].particle_args = i.moddable_tile_particle[2]
+				end
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
 			end
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			end
 		end
 	end
 
