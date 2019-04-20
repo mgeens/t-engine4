@@ -293,8 +293,10 @@ newTalent{
 			params.__tmpvals = nil
 			params.src = self
 			params.apply_power = self:combatSpellpower()
+			local dur = math.max(6, params.dur)
+
 			if target:canBe("disease") then
-				target:setEffect(disease.id, 6, params)
+				target:setEffect(disease.id, dur, params)
 			else
 				game.logSeen(target, "%s resists the disease!", target.name:capitalize())
 			end
