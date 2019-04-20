@@ -1764,7 +1764,7 @@ function _M:combatSpellpower(mod, add)
 		add = add + self:callTalent(self.T_SHADOW_CUNNING,"getSpellpower") * self:getCun() / 100
 	end
 	if self:hasEffect(self.EFF_BLOODLUST) then
-		add = add + self:hasEffect(self.EFF_BLOODLUST).power
+		add = add + self:hasEffect(self.EFF_BLOODLUST).spellpower * self:hasEffect(self.EFF_BLOODLUST).stacks
 	end
 
 	local am = 1

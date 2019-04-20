@@ -2614,11 +2614,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	-- Bloodlust!
-	if value > 0 and src and not (src == self) and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
-		src:setEffect(src.EFF_BLOODLUST, 1, {})
-	end
-
 	if value > 0 and self:knowTalent(self.T_RAMPAGE) then
 		local t = self:getTalentFromId(self.T_RAMPAGE)
 		t:onTakeHit(self, value / self.max_life)
