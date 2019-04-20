@@ -4261,6 +4261,7 @@ newEffect{
 	long_desc = function(self, eff) return ("The target is hexed.  Each time it uses an ability it takes %0.2f fire damage, and talent cooldowns are increased by %s plus 1 turn."):
 		format(eff.dam, eff.power and ("%d%%"):format((eff.power-1)*100) or "")
 	end,
+	charges = function(self, eff) return (tostring(math.floor((eff.power-1)*100)).."%") end,
 	type = "magical",
 	subtype = { hex=true, fire=true },
 	status = "detrimental",
@@ -4274,6 +4275,7 @@ newEffect{
 	name = "EMPATHIC_HEX", image = "talents/empathic_hex.png",
 	desc = "Empathic Hex",
 	long_desc = function(self, eff) return ("The target is hexed, creating an empathic bond with its victims. It takes %d%% feedback damage from all damage done."):format(eff.power) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
 	type = "magical",
 	subtype = { hex=true, dominate=true },
 	status = "detrimental",

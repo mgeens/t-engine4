@@ -2469,9 +2469,10 @@ newDamageType{
 		useImplicitCrit(src, state)
 		if _G.type(dam) == "number" then dam = {dam=dam, healfactor=0.4} end
 		local target = game.level.map(x, y, Map.ACTOR) -- Get the target first to make sure we heal even on kill
+		dam.source = dam.source or target
 		local realdam = DamageType:get(DamageType.BLIGHT).projector(src, x, y, DamageType.BLIGHT, dam.dam, state)
 		if target and realdam > 0 and not src:attr("dead") then
-			src:heal(realdam * dam.healfactor, target)
+			src:heal(realdam * dam.healfactor, dam.source)
 		end
 		return realdam
 	end,

@@ -738,7 +738,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Ruin
 	if hitted and not target.dead and self:knowTalent(self.T_RUIN) and self:isTalentActive(self.T_RUIN) then
 		local t = self:getTalentFromId(self.T_RUIN)
-		local dam = t.getDamage(self, t)
+		local dam = {dam=t.getDamage(self, t), healfactor=0.4, source=t}
 		DamageType:get(DamageType.DRAINLIFE).projector(self, target.x, target.y, DamageType.DRAINLIFE, dam)
 	end
 	
