@@ -103,6 +103,10 @@ newBirthDescriptor{
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000},
 		},
 	},
+	copy_add = {
+		life_regen = 1,
+		stamina_regen = 1,
+	},
 }
 
 newBirthDescriptor{

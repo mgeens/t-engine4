@@ -2339,28 +2339,6 @@ newEffect{
 }
 
 newEffect{
-	name = "INTIMIDATED",
-	desc = "Intimidated",
-	long_desc = function(self, eff) return ("The target's morale is weakened, reducing its attack power, mind power, and spellpower by %d."):format(eff.power) end,
-	type = "mental",
-	subtype = { fear=true },
-	status = "detrimental",
-	on_gain = function(self, err) return "#Target#'s morale has been lowered.", "+Intimidated" end,
-	on_lose = function(self, err) return "#Target# has regained its confidence.", "-Intimidated" end,
-	parameters = { power=1 },
-	activate = function(self, eff)
-		eff.damid = self:addTemporaryValue("combat_dam", -eff.power)
-		eff.spellid = self:addTemporaryValue("combat_spellpower", -eff.power)
-		eff.mindid = self:addTemporaryValue("combat_mindpower", -eff.power)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("combat_dam", eff.damid)
-		self:removeTemporaryValue("combat_spellpower", eff.spellid)
-		self:removeTemporaryValue("combat_mindpower", eff.mindid)
-	end,
-}
-
-newEffect{
 	name = "BRAINLOCKED",
 	desc = "Brainlocked",
 	long_desc = function(self, eff) return ("Renders a random talent unavailable. Talent cooldown is halved until the effect has worn off."):format() end,
