@@ -83,7 +83,6 @@ newBirthDescriptor{
 		["wild-gift/mindstar-mastery"]={false, 0.1},
 		["cunning/survival"]={true, 0},
 		["technique/combat-techniques-active"]={false, 0},
-		["technique/combat-techniques-passive"]={false, 0},
 		["technique/combat-training"]={true, 0},
 	},
 	talents = {

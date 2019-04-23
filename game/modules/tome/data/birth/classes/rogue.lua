@@ -93,6 +93,10 @@ newBirthDescriptor{
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000}
 		},
 	},
+	copy_add = {
+		life_regen = 1,
+		stamina_regen = 1,
+	},
 }
 
 newBirthDescriptor{
@@ -125,7 +129,6 @@ newBirthDescriptor{
 		["technique/dualweapon-attack"]={true, 0.0},
 		["technique/duelist"]={true, 0.0},
 		["technique/combat-techniques-active"]={false, 0.0},
-		["technique/combat-techniques-passive"]={false, 0.3},
 		["technique/combat-training"]={true, 0.0},
 		["technique/mobility"]={true, 0.3},
 		["cunning/stealth"]={true, 0.3},
@@ -156,6 +159,10 @@ newBirthDescriptor{
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000}
 		},
 	},
+	copy_add = {
+		life_regen = 1,
+		stamina_regen = 1,
+	},
 }
 
 newBirthDescriptor{
@@ -177,7 +184,6 @@ newBirthDescriptor{
 		["technique/dualweapon-attack"]={true, 0.2},
 		["technique/duelist"]={true, 0.2},
 		["technique/combat-techniques-active"]={true, 0.3},
-		["technique/combat-techniques-passive"]={true, 0.0},
 		["technique/combat-training"]={true, 0.3},
 		["technique/battle-tactics"]={false, 0.2},
 		["technique/mobility"]={true, 0.3},
@@ -211,6 +217,11 @@ newBirthDescriptor{
 			{type="armor", subtype="head", name="iron helm", autoreq=true, ego_chance=-1000},
 		},
 	},
+	copy_add = {
+		life_regen = 1,
+		stamina_regen = 1,
+	},
+
 }
 
 local shield_special = function(e) -- allows any object with shield combat
@@ -283,6 +294,7 @@ newBirthDescriptor{
 		end),
 	},
 	copy_add = {
-		life_rating = 0,
+		life_regen = 1,
+		stamina_regen = 1,
 	},
 }
