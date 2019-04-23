@@ -5549,6 +5549,10 @@ function _M:preUseTalent(ab, silent, fake)
 			if rng.percent(self:attr("spell_failure")) then
 				if not silent then game.logSeen(self, "%s's %s has been disrupted by #ORCHID#anti-magic forces#LAST#!", self.name:capitalize(), ab.name) end
 				if not util.getval(ab.no_energy, self, ab) then
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 					self:useEnergy()
 				else
 					self.turn_procs.forbid_instant_talents = self.turn_procs.forbid_instant_talents or {}
@@ -5595,6 +5599,10 @@ function _M:preUseTalent(ab, silent, fake)
 		if self:attr("confused") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
 			if rng.percent(util.bound(self:attr("confused"), 0, 50)) then
 				if not silent then game.logSeen(self, "%s is confused and fails to use %s.", self.name:capitalize(), ab.name) end
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 				self:useEnergy()
 				return false
 			end
@@ -5603,23 +5611,16 @@ function _M:preUseTalent(ab, silent, fake)
 		-- Failure chance?
 		if self:attr("talent_fail_chance") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") and not ab.innate then
 			if rng.percent(self:attr("talent_fail_chance")) then
+				-- Should this trigger callbackOnTalentDisturbed?
 				if not silent then game.logSeen(self, "%s fails to use %s.", self.name:capitalize(), ab.name) end
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 				self:useEnergy()
 				return false
 			end
 		end
-
-		-- old terrified effect, for prosperity
-		--[[
-		if self:attr("terrified") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
-			local eff = self:hasEffect(self.EFF_TERRIFIED)
-			if rng.percent(self:attr("terrified")) then
-				if not silent then game.logSeen(self, "%s is too terrified to use %s.", self.name:capitalize(), ab.name) end
-				self:useEnergy()
-				return false
-			end
-		end
-		]]
 		
 		-- Fumble
 		if self:attr("scoundrel_failure") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
@@ -5627,7 +5628,7 @@ function _M:preUseTalent(ab, silent, fake)
 			if rng.percent(self:attr("scoundrel_failure")) then
 				if not silent then game.logSeen(self, "%s fumbles and fails to use %s, injuring %s!", self.name:capitalize(), ab.name, self:his_her_self()) end
 				self:useEnergy()
-				self:fireTalentCheck("callbackOnTalentDisturbed", ab)
+				self:fireTalentCheck("callbackOnTalentDisturbed", ab, eff)
 				return false
 			end
 		end
