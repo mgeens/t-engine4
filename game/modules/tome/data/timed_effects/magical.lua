@@ -1413,30 +1413,19 @@ newEffect{
 	name = "DIVINE_GLYPHS", image = "talents/glyph_of_repulsion.png",
 	desc = "Divine Glyphs",
 	long_desc = function(self, eff)
-		pGlyph = math.min(eff.maxStacks, eff.paraStacks or 0)*4
-		fGlyph = math.min(eff.maxStacks, eff.fatigueStacks or 0)*4
-		eGlyph = math.min(eff.maxStacks, eff.explosionStacks or 0)*4
-		if pGlyph > 0 then paralysis = (" +%d%% light resistance and affinitity."):format(pGlyph) end else paralysis = "" end
-		if fGlyph > 0 then fatigue = (" +%d%% darkness resistance and affinitity."):format(fGlyph) end else fatigue = "" end
-		if eGlyph > 0 then explosion = (" +%d%% light and darkness damage."):format(eGlyph) end else explosion = "" end
-		return ("A divine glyph recently triggered.%s%s%s"):format(paralysis, fatigue, explosion)
+		return ("A divine glyph recently triggered, providing %d%% light and darkness affinity and resistence."):format(math.min(eff.maxStacks, eff.glyphstacks or 1)*5)
 	end,
 	type = "magical",
 	subtype = {light=true, darkness=true},
-	status = "detrimental",
+	status = "beneficial",
 	paramters ={},
 	activate = function(self, eff)
-		local pGlyph = math.min(eff.maxStacks, eff.paraStacks or 0)*4
-		local fGlyph = math.min(eff.maxStacks, eff.fatigueStacks or 0)*4
-		local eGlyph = math.min(eff.maxStacks, eff.explosionStacks or 0)*4
-		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=pGlyph, [DamageType.DARKNESS]=fGlyph})
-		self:effectTemporaryValue(eff, "resists", {[DamageType.LIGHT]=pGlyph, [DamageType.DARKNESS]=fGlyph})
-		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.LIGHT]=eGlyph, [DamageType.DARKNESS]=eGlyph})
+		local power = math.min(eff.maxStacks, eff.glyphstacks or 1)*5
+		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
+		self:effectTemporaryValue(eff, "resists", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
 	end,
 	on_merge = function(self, eff)
-		old_eff.paraStacks = old_eff.paraStacks + new_eff.paraStacks
-		old_eff.fatigueStacks = old_eff.fatigueStacks + new_eff.fatigueStacks
-		old_eff.explosionStacks = old_eff.explosionStacks + new_eff.explosionStacks
+		old_eff.glyphstacks = old_eff.glyphstacks + 1
 		old_eff.dur = new_eff.dur
 		return old_eff
 	end,
