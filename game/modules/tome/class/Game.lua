@@ -1979,6 +1979,9 @@ function _M:setupCommands()
 	-- Debug mode
 	self.key:addCommands{
 		[{"_d","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["mod.dialogs.Donation"] = nil
+			self:registerDialog(require("mod.dialogs.Donation").new())
+do return end
 			local g = self.level.map(self.player.x, self.player.y, Map.TERRAIN)
 			print(g.define_as, g.image, g.z)
 			for i, a in ipairs(g.add_mos or {}) do print(" => ", a.image) end
