@@ -1966,6 +1966,34 @@ function util.adjacentCoords(x, y, no_diagonals, no_cardinals)
 	return coords
 end
 
+--- Return the closest adjacent coordinate to the source coordinate from the target coordinate (use for gap closer positioning, etc)
+-- @param x x-coordinate of the source tile.
+-- @param y y-coordinate of the source tile.
+-- @param tx x-coordinate of the target tile.
+-- @param ty y-coordinate of the target tile.
+-- @param check_block Boolean for whether to check for block_move
+-- @param extra_check(x,y) Function to run on each grid and return true if that grid is invalid
+-- @return Table containing the x,y coordinate of the closest grid.
+function util.closestAdjacentCoord(x, y, tx, ty, check_block, extra_check)
+	local check_block = check_block or true
+	local coords = util.adjacentCoords(x, y)
+	local valid = {}
+	for _, coord in pairs(coords) do
+		if not (check_block and game.level.map:checkEntity(coord[1], coord[2], engine.Map.TERRAIN, "block_move")) and not (extra_check and extra_check(coord[1], coord[2])) then 
+			valid[#valid+1] = coord
+		end
+	end
+
+	if #valid == 0 then return end
+	local closest = valid[1]
+	for _, coord in pairs(valid) do
+		if core.fov.distance(closest[1], closest[2], tx, ty, true) > core.fov.distance(coord[1], coord[2], tx, ty, true) then
+			closest = coord
+		end
+	end
+
+	return closest
+end
 function util.coordAddDir(x, y, dir)
 	local dx, dy = util.dirToCoord(dir, x, y)
 	return x + dx, y + dy

@@ -1928,6 +1928,10 @@ function _M:tooltip(x, y, seen_by)
 		local eff = self:hasEffect(self.EFF_FROZEN)
 		ts:add({"color", 0, 255, 128}, ("Iceblock: %d"):format(eff.hp), {"color", "WHITE"}, true)
 	end
+	if game.player:knowTalent(self.T_VIM_POOL) then
+		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.3 + 1) * self.rank), {"color", "WHITE"}, true)
+	end
+
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
 
@@ -2611,11 +2615,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	-- Bloodlust!
-	if value > 0 and src and not (src == self) and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
-		src:setEffect(src.EFF_BLOODLUST, 1, {})
-	end
-
 	if value > 0 and self:knowTalent(self.T_RAMPAGE) then
 		local t = self:getTalentFromId(self.T_RAMPAGE)
 		t:onTakeHit(self, value / self.max_life)
@@ -3260,15 +3259,13 @@ function _M:die(src, death_note)
 	end
 
 	-- Increase vim
-	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) then src:incVim(1 + src:getWil() / 10) end
-	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
-	if src and death_note and death_note.source_talent and death_note.source_talent.vim and src.last_vim_turn ~= game.turn then
-		src.last_vim_turn = game.turn
-		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being refunded
-			src:incVim(util.getval(death_note.source_talent.vim, self, death_note.source_talent))
+	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) and src:reactionToward(self) <= 0 then
+		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being gained, otherwise it feels weird when you expect to spend life
+			src:incVim((src:getWil() * 0.3 + 1) * self.rank)
 		end)
 	end
-
+	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
+	
 	if src and ((src.resolveSource and src:resolveSource().player) or src.player) then
 		-- Achievements
 		local p = game.party:findMember{main=true}
@@ -5330,13 +5327,15 @@ end
 -- Overwrite incVim to set up Bloodcasting
 local previous_incVim = _M.incVim
 function _M:incVim(v)
-	if v < 0 and self:attr("bloodcasting") then
-		local mult = self:attr("bloodcasting") / 100
+	if v < 0 then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end
+
 		local cost = math.abs(v)
 		if self.vim - cost < 0 then
 			local damage = (cost - (self.vim or 0)) * mult
 			self:incVim(-self.vim or 0)
-			self.life = self.life - damage
+			self.life = self.life - damage  -- die_at life can't be used
 		else
 			return previous_incVim(self, v)
 		end
@@ -5348,8 +5347,10 @@ end
 -- Overwrite getVim to set up Bloodcasting
 local previous_getVim = _M.getVim
 function _M:getVim()
-	if self:attr("bloodcasting") and self.on_preuse_checking_resources then
-		return math.max(self.vim, self.life)
+	if self.on_preuse_checking_resources then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end		
+		return math.max(self.vim, self.life / mult)
 	else
 		return previous_getVim(self)
 	end
