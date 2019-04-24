@@ -143,7 +143,7 @@ newTalent{
 		local tgt = self.ai_target.actor
 		if self.stamina/self.max_stamina < 0.5 or tgt and core.fov.distance(self.x, self.y, tgt.x, tgt.y) < 10 and self:hasLOS(tgt.x, tgt.y) then return true end
 	end,
-	getAttackPower = function(self, t) return self:combatTalentStatDamage(t, "con", 5, 25) end,
+	getAttackPower = function(self, t) return self:combatTalentStatDamage(t, "con", 5, 35) end,
 	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
 	no_energy = true,
 	action = function(self, t)

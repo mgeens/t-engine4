@@ -176,6 +176,8 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 2,
+		life_regen = 1,
+		stamina_regen = 1,
 	},
 }
 
