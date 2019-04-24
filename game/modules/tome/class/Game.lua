@@ -1997,6 +1997,9 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+do return end
 			if self.zone.short_name ~= "test" then
 				self:changeLevel(1, "test")
 			else
@@ -2015,6 +2018,9 @@ do return end
 			print(pcall(f))
 		end end,
 		[{"_f","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
+do return end
 			local m = game.zone:makeEntityByName(game.level, "actor", "NPC_HUMANOID_KROG")
 			local x, y = util.findFreeGrid(game.player.x, game.player.y, 20, true, {[Map.ACTOR]=true})
 			if m and x then

@@ -35,6 +35,7 @@ require "mod.class.interface.Combat"
 require "mod.class.interface.Archery"
 require "mod.class.interface.ActorInscriptions"
 require "mod.class.interface.ActorObjectUse"
+local Particles = require "engine.Particles"
 local Faction = require "engine.Faction"
 local Dialog = require "engine.ui.Dialog"
 local Map = require "engine.Map"
@@ -4129,6 +4130,24 @@ end
 function _M:updateModdableTile()
 	if not self:updateModdableTilePrepare() then return end
 
+	if self.shimmer_particles_active then
+		for _, p in ipairs(self.shimmer_particles_active) do self:removeParticles(p) end
+		self.shimmer_particles_active = nil
+	end
+
+	if self.moddable_tile_base_shimmer_particle then
+		self.shimmer_particles_active = self.shimmer_particles_active or {}
+		for _, def in ipairs(self.moddable_tile_base_shimmer_particle) do
+			local args = table.clone(def.args, true)
+			if def.spot then
+				args.x, args.y = self:attachementSpot(def.spot, true)
+				if args.x and args.y and def.spot_offset then args.x, args.y = args.x + def.spot_offset.x, args.y + def.spot_offset.y end
+			end
+			local p = self:addParticles(Particles.new(def.name, 1, args, def.shader))
+			table.insert(self.shimmer_particles_active, p)
+		end
+	end
+
 	local base = "player/"..self.moddable_tile:gsub("#sex#", self.female and "female" or "male").."/"
 
 	self.image = base..(self.moddable_tile_shadow or "base_shadow_01.png")
@@ -4145,8 +4164,13 @@ function _M:updateModdableTile()
 			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
 		end
 	end
+	if self.moddable_tile_base_shimmer_aura then
+		for _, def in ipairs(self.moddable_tile_base_shimmer_aura) do
+			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
+		end
+	end
 
-	local basebody = self.moddable_tile_base or "base_01.png"
+	local basebody = self.moddable_tile_base_shimmer or self.moddable_tile_base or "base_01.png"
 	if self.moddable_tile_base_alter then basebody = self:moddable_tile_base_alter(basebody) end
 	add[#add+1] = {image = base..basebody, auto_tall=1}
 
