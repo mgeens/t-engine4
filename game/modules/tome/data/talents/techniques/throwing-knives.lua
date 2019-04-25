@@ -99,7 +99,7 @@ newTalent{
 	points = 5,
 	require = {
 		stat = { dex=function(level) return 12 + (level-1) * 2 end },
-		level = function(level) return 0 + (level-1) * 8  end,
+		level = function(level) return 0 + (level-1) * 4  end,
 	},
 	on_learn = function(self, t)
 		venomous_throw_check(self)
