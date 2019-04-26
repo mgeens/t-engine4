@@ -25,7 +25,7 @@ local Chat = require "engine.Chat"
 local Map = require "engine.Map"
 local Level = require "engine.Level"
 
----------- Item specific 
+---------- Item specific
 newEffect{
 	name = "ITEM_NUMBING_DARKNESS", image = "effects/bane_blinded.png",
 	desc = "Numbing Darkness",
@@ -324,7 +324,7 @@ newEffect{
 		eff.penaltyid = self:addTemporaryValue("invisible_damage_penalty", eff.reduction)
 		eff.damid = self:addTemporaryValue("resists", {all = eff.resist})
 		eff.moveid = self:addTemporaryValue("movement_speed", eff.move / 100)
-		
+
 		if not self.shader then
 			eff.set_shader = true
 			self.shader = "invis_edge"
@@ -694,7 +694,7 @@ newEffect{
 		if core.shader.active(4) then
 			self:removeParticles(eff.particle)
 			eff.particle = self:addParticles(Particles.new("shader_shield", 1, {size_factor=1.3, img="runicshield"}, {type="runicshield", shieldIntensity=0.14, ellipsoidalFactor=1.2, time_factor=4000, bubbleColor={0.5, 1, 0.2, 1.0}, auraColor={0.4, 1, 0.2, 1}}))
-		end		
+		end
 	end,
 	damage_feedback = function(self, eff, src, value)
 		if eff.particle and eff.particle._shader and eff.particle._shader.shad and src and src.x and src.y then
@@ -799,7 +799,7 @@ newEffect{
 				ac = table.clone(eff.color) ac[4] = 1
 			end
 			eff.particle = self:addParticles(Particles.new("shader_shield", 1, {size_factor=1.3, img=eff.aegis_image or "runicshield"}, {type="runicshield", shieldIntensity=0.14, ellipsoidalFactor=1.2, time_factor=5000, bubbleColor=bc, auraColor=ac}))
-		end		
+		end
 	end,
 	damage_feedback = function(self, eff, src, value)
 		if eff.particle and eff.particle._shader and eff.particle._shader.shad and src and src.x and src.y then
@@ -1204,7 +1204,7 @@ newEffect{
 		-- Check for visible monsters, only see LOS actors, so telepathy wont prevent it
 		core.fov.calc_circle(self.x, self.y, game.level.map.w, game.level.map.h, 20, function(_, x, y) return game.level.map:opaque(x, y) end, function(_, x, y)
 			local actor = game.level.map(x, y, game.level.map.ACTOR)
-			if actor and actor ~= self then 
+			if actor and actor ~= self then
 				if actor.summoner and actor.summoner == self then
 					seen = false
 				else
@@ -1271,7 +1271,7 @@ newEffect{
 		eff.finaldam = eff.finaldam + (cb.value * eff.rate)
 		return true
 	end,
-	
+
 	on_die = function(self, eff)
 		local tg = {type="ball", radius=4, selffire=false, x=self.x, y=self.y}
 		eff.src:project(tg, self.x, self.y, DamageType.ACID, eff.finaldam, {type="acid"})
@@ -1434,6 +1434,22 @@ newEffect{
 newEffect{
 	name = "SUNBURST", image = "talents/sunburst.png",
 	desc = "Sunburst",
+	long_desc = function(self, eff)
+		return ("Light damage has been increased by %d to %d. Light penetration has been increased by %d to %d."):format(eff.damInc, eff.damVal, eff.penInc, eff.penVal])
+	end,
+	type = "magical",
+	subtype = {light=true, darkness=true},
+	status = "beneficial",
+	paramters ={},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.LIGHT]=eff.damInc})
+		self:effectTemporaryValue(eff, "resists_pen", {[DamageType.LIGHT]=eff.penInc})
+	end,
+}
+
+newEffect{
+	name = "SUNBURST_DL", image = "talents/sunburst.png",
+	desc = "Sunburst_DL",
 	long_desc = function(self, eff)
 		if eff.src:hasEffect(eff.src.EFF_DARKEST_LIGHT) then darklight = "darkness" else darklight = "light" end
 		return ("The target is taking %d %s damage every turn and has %d%% of their damage converted to %s."):format(eff.dotDam, darklight, eff.conversion, darklight) end,
@@ -1841,13 +1857,13 @@ newEffect{
 	on_merge = function(self, old_eff, new_eff)
 		-- remove the old value
 		self:removeTemporaryValue("movement_speed", old_eff.tmpid)
-		
+
 		-- add a charge
 		old_eff.charges = math.min(old_eff.charges + 1, new_eff.max_charges)
-		
-		-- and apply the current values	
+
+		-- and apply the current values
 		old_eff.tmpid = self:addTemporaryValue("movement_speed", old_eff.speed * old_eff.charges)
-		
+
 		old_eff.dur = new_eff.dur
 		return old_eff
 	end,
@@ -1874,15 +1890,15 @@ newEffect{
 		self:removeTemporaryValue("combat_physspeed", old_eff.physid)
 		self:removeTemporaryValue("combat_spellspeed", old_eff.spellid)
 		self:removeTemporaryValue("combat_mindspeed", old_eff.mindid)
-		
+
 		-- add a charge
 		old_eff.charges = math.min(old_eff.charges + 1, new_eff.max_charges)
-		
-		-- and apply the current values	
+
+		-- and apply the current values
 		old_eff.physid = self:addTemporaryValue("combat_physspeed", old_eff.speed * old_eff.charges)
 		old_eff.spellid = self:addTemporaryValue("combat_spellspeed", old_eff.speed * old_eff.charges)
 		old_eff.mindid = self:addTemporaryValue("combat_mindspeed", old_eff.speed * old_eff.charges)
-		
+
 		old_eff.dur = new_eff.dur
 		return old_eff
 	end,
@@ -2030,10 +2046,10 @@ newEffect{
 		self:removeTemporaryValue("combat_physresist", old_eff.physid)
 		self:removeTemporaryValue("combat_spellresist", old_eff.spellid)
 		self:removeTemporaryValue("combat_mentalresist", old_eff.mentalid)
-		
+
 		-- add some spin
 		old_eff.spin = math.min(old_eff.spin + 1, new_eff.max_spin)
-	
+
 		-- and apply the current values
 		old_eff.defid = self:addTemporaryValue("combat_def", old_eff.save_bonus * old_eff.spin)
 		old_eff.physid = self:addTemporaryValue("combat_physresist", old_eff.save_bonus * old_eff.spin)
@@ -2041,7 +2057,7 @@ newEffect{
 		old_eff.mentalid = self:addTemporaryValue("combat_mentalresist", old_eff.save_bonus * old_eff.spin)
 
 		old_eff.dur = new_eff.dur
-		
+
 		return old_eff
 	end,
 	activate = function(self, eff)
@@ -2050,7 +2066,7 @@ newEffect{
 		eff.physid = self:addTemporaryValue("combat_physresist", eff.save_bonus * eff.spin)
 		eff.spellid = self:addTemporaryValue("combat_spellresist", eff.save_bonus * eff.spin)
 		eff.mentalid = self:addTemporaryValue("combat_mentalresist", eff.save_bonus * eff.spin)
-		
+
 		if core.shader.allow("adv") then
 			eff.particle1, eff.particle2 = self:addParticles3D("volumetric", {kind="conic_cylinder", radius=1.4, base_rotation=180, growSpeed=0.004, img="squares_x3_01"})
 		else
@@ -2720,8 +2736,8 @@ newEffect{
 				if not target:attr("ignore_irresistible_sun") then
 					local ox, oy = target.x, target.y
 					target:pull(self.x, self.y, 1)
-					if target.x ~= ox or target.y ~= oy then 
-						game.logSeen(target, "%s is pulled in!", target.name:capitalize()) 
+					if target.x ~= ox or target.y ~= oy then
+						game.logSeen(target, "%s is pulled in!", target.name:capitalize())
 					end
 
 					if self:reactionToward(target) < 0 then
@@ -3472,13 +3488,13 @@ newEffect{
 		-- Displace Damage?
 		local t = eff.talent
 		if dam > 0 and src ~= self and not state.no_reflect then
-		
+
 			-- Spin Fate?
 			if self.turn_procs and self:knowTalent(self.T_SPIN_FATE) and not self.turn_procs.spin_webs then
 				self.turn_procs.spin_webs = true
 				self:callTalent(self.T_SPIN_FATE, "doSpin")
 			end
-		
+
 			-- find available targets
 			local tgts = {}
 			local grids = core.fov.circle_grids(self.x, self.y, 10, true)
@@ -3500,7 +3516,7 @@ newEffect{
 				game:delayedLogDamage(src, self, 0, ("%s(%d webs of fate)#LAST#"):format(DamageType:get(type).text_color or "#aaaaaa#", displace), false)
 			end
 		end
-		
+
 		return {dam=dam}
 	end,
 	activate = function(self, eff)
@@ -3523,7 +3539,7 @@ newEffect{
 		if spin then
 			chance = chance * (1 + spin.spin/3)
 		end
-		return ("The target has a %d%% chance of increasing the duration of one detrimental status effects on targets it damages by one."):format(chance) 
+		return ("The target has a %d%% chance of increasing the duration of one detrimental status effects on targets it damages by one."):format(chance)
 	end,
 	type = "magical",
 	subtype = { focus=true },
@@ -3533,14 +3549,14 @@ newEffect{
 	on_lose = function(self, err) return nil, "-Seal Fate" end,
 	callbackOnDealDamage = function(self, eff, dam, target)
 		if dam <=0 then return end
-		
+
 		-- Spin Fate?
 		if self.turn_procs and self:knowTalent(self.T_SPIN_FATE) and not self.turn_procs.spin_seal then
 			self.turn_procs.spin_seal = true
 			self:callTalent(self.T_SPIN_FATE, "doSpin")
 		end
-	
-	
+
+
 		if self.turn_procs and target.tmp then
 			if self.turn_procs.seal_fate and self.turn_procs.seal_fate >= eff.procs then return end
 			local chance = eff.chance
@@ -3548,7 +3564,7 @@ newEffect{
 			if spin then
 				chance = chance * (1 + spin.spin/3)
 			end
-			
+
 			if rng.percent(chance) then
 				-- Grab a random effect
 				local eff_ids = target:effectsFilter({status="detrimental", ignore_crosstier=true}, 1)
@@ -3556,10 +3572,10 @@ newEffect{
 					local eff = target:hasEffect(eff_id)
 					eff.dur = eff.dur +1
 				end
-			
+
 				self.turn_procs.seal_fate = (self.turn_procs.seal_fate or 0) + 1
 			end
-			
+
 		end
 	end,
 	activate = function(self, eff)
@@ -3670,13 +3686,13 @@ newEffect{
 	end,
 	callbackOnHit = function(self, eff, cb, src)
 		if cb.value <= 0 then return cb.value end
-		
+
 		-- Kill it!!
 		if not self.dead and not self:isTalentActive(self.T_REALITY_SMEARING) and self:canBe("instakill") and self.life > 0 and self.life < self.max_life * 0.2 then
 			game.logSeen(self, "%s has been removed from the timeline!", self.name:capitalize())
 			self:die(src)
 		end
-		
+
 		return cb.value
 	end,
 	on_timeout = function(self, eff)
@@ -3881,7 +3897,7 @@ newEffect{
 newEffect{
 	name = "WARDEN_S_FOCUS", image = "talents/warden_s_focus.png",
 	desc = "Warden's Focus",
-	long_desc = function(self, eff) 
+	long_desc = function(self, eff)
 		return ("Focused on %s, +%d%% critical damage and +%d%% critical hit chance against this target."):format(eff.target.name, eff.power, eff.power)
 	end,
 	type = "magical",
@@ -3905,7 +3921,7 @@ newEffect{
 			self:removeEffect(self.EFF_WARDEN_S_FOCUS)
 		end
 	end,
-	activate = function(self, eff)	
+	activate = function(self, eff)
 	end,
 	deactivate = function(self, eff)
 	end,
@@ -3929,10 +3945,10 @@ newEffect{
 		self:removeTemporaryValue("combat_dam", old_eff.physid)
 		self:removeTemporaryValue("combat_spellpower", old_eff.spellid)
 		self:removeTemporaryValue("combat_mindpower", old_eff.mentalid)
-		
+
 		-- add some spin
 		old_eff.spin = math.min(old_eff.spin + 1, new_eff.max_spin)
-	
+
 		-- and apply the current values
 		old_eff.atkid = self:addTemporaryValue("combat_atk", old_eff.power_bonus * old_eff.spin)
 		old_eff.physid = self:addTemporaryValue("combat_dam", old_eff.power_bonus * old_eff.spin)
@@ -3940,7 +3956,7 @@ newEffect{
 		old_eff.mentalid = self:addTemporaryValue("combat_mindpower", old_eff.power_bonus * old_eff.spin)
 
 		old_eff.dur = new_eff.dur
-		
+
 		return old_eff
 	end,
 	activate = function(self, eff)
@@ -3981,7 +3997,7 @@ newEffect{
 newEffect{
 	name = "BEN_TETHER", image = "talents/spatial_tether.png",
 	desc = "Spatial Tether",
-	long_desc = function(self, eff) 
+	long_desc = function(self, eff)
 		local chance = eff.chance * core.fov.distance(self.x, self.y, eff.x, eff.y)
 		return ("The target has been tethered to the location and has a %d%% chance of being teleported back, creating an explosion for %0.2f physical and %0.2f temporal warp damage at both ends of the teleport."):format(chance, eff.dam/2, eff.dam/2)
 	end,
@@ -4000,7 +4016,7 @@ newEffect{
 newEffect{
 	name = "DET_TETHER", image = "talents/spatial_tether.png",
 	desc = "Spatial Tether",
-	long_desc = function(self, eff) 
+	long_desc = function(self, eff)
 		local chance = eff.chance * core.fov.distance(self.x, self.y, eff.x, eff.y)
 		return ("The target has been tethered to the location and has a %d%% chance of being teleported back, creating an explosion for %0.2f physical and %0.2f temporal warp damage at both ends of the teleport."):format(chance, eff.dam/2, eff.dam/2)
 	end,
@@ -4149,7 +4165,7 @@ newEffect{
 		if core.shader.active(4) then
 			self:removeParticles(eff.particle)
 			eff.particle = self:addParticles(Particles.new("shader_shield", 1, {size_factor=1.3, img="runicshield_stonewarden"}, {type="runicshield", shieldIntensity=0.2, oscillationSpeed=4, ellipsoidalFactor=1.3, time_factor=5000, auraColor={0x61/255, 0xff/255, 0x6a/255, 1}}))
-		end		
+		end
 	end,
 	damage_feedback = function(self, eff, src, value)
 		if eff.particle and eff.particle._shader and eff.particle._shader.shad and src and src.x and src.y then

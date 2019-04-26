@@ -17,13 +17,15 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+local DamageType = require "engine.DamageType"
+
 newTalent{
 	name = "Searing Light",
 	type = {"celestial/sunlight", 1},
 	require = divi_req1,
 	random_ego = "attack",
 	points = 5,
-	cooldown = 6,
+	cooldown = 4,
 	positive = -16,
 	range = 7,
 	tactical = { ATTACK = {LIGHT = 2} },
@@ -67,7 +69,7 @@ newTalent{
 	require = divi_req2,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 22,
+	cooldown = 20,
 	positive = -15,
 	tactical = { DISABLE = 2,
 		ATTACKAREA = function(self, t, aitarget)
@@ -115,8 +117,8 @@ newTalent{
 	require = divi_req3,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 7,
-	positive = -20,
+	cooldown = 5,
+	positive = 15,
 	tactical = { ATTACK = {FIRE = 2}  },
 	range = 7,
 	direct_hit = true,
@@ -131,7 +133,7 @@ newTalent{
 		if not x or not y then return nil end
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project(tg, x, y, DamageType.LIGHT, dam)
-		self:project(tg, x, y, DamageType.FIREBURN, dam)
+		self:project(tg, x, y, DamageType.FIREBURN, dam, initial=0)
 		local _ _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
@@ -140,11 +142,52 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[Call forth the Sun to summon a fiery beam, burning all targets in a line for %0.2f fire damage.
+		return ([[Call forth the Sun to summon a fiery beam, dealing %d light damage and burning all targets in a line for %d fire damage over 3 turns.
 		The damage done will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.FIRE, damage))
+		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.FIRE, damage))
 	end,
 }
+
+newTalent{
+	name = "Sunburst",
+	type = {"celestial/sunlight", 4},
+	require = divi_req4,
+	points = 5,
+	random_ego = "attack",
+	cooldown = 15,
+	positive = 20,
+	tactical = { ATTACKAREA = {LIGHT = 2} },
+	range = 0,
+	radius = 6,
+	direct_hit = true,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
+	end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 200) end,
+	getDuration = function(self, t) return 6 end,
+	getPower = function(self, t) return self:combatTalentLimit(t, 1.5, 0.3, 1) end,
+	action = function(self, t)
+		local damVal = math.max((self.inc_damage.LIGHT, self.inc_damage.DARKNESS * t.getPower(self, t))
+		local damInc = damVal - self.inc_damage.LIGHT
+		local penVal = math.max(self.resists_pen.LIGHT, self.resists_pen.DARKNESS * t.getPower(self, t))
+		local penInc = penVal - self.resists_pen.LIGHT
+		self:setEffect(EFF_SUNBURST, t.getDuration(self, t), {damVal=damVal, damInc=damInc, penVal=penVal, penInc=penInc} --all these params for eff tt
+
+		local tg = self:getTalentTarget(t)
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+
+			DamageType:get(DamageType.LIGHT).projector(self, px, py, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
+		end)
+		return true
+	end,
+	info = function(self, t)
+		return ([[Release a furious burst of sunlight, setting your light damage and penetration to %d%% of your darkness damage and penetration for %d turns, if doing so would increase their values.
+		The burst of sunlight will deal %d light damage to all within radius %d.]]):format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), self:getTalentRadius(t))
+	end,
+}
+
 
 newTalent{
 	name = "Sunburst",
@@ -164,20 +207,20 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 200) end,
 	getDotDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 50) end,
 	getConversion = function(self, t) return math.min(100, self:combatTalentScale(t, 15, 100)) end,
-	
+
 	getDuration = function(self, t) return 6 end,
-	
+
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		self:project(tg, self.x, self.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target then return end
-			
+
 			DamageType:get(DamageType.LIGHT).projector(self, px, py, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
-			
+
 			if not target:hasEffect(target.EFF_SUNBURST) then target:setEffect(target.EFF_SUNBURST, t.getDuration(self, t), {src=self, dotDam=t.getDotDamage(self, t), conversion=t.getConversion(self, t)}) end
 		end)
-		
+
 		if self:hasEffect(self.EFF_DARKEST_LIGHT) then
 			game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y})
 		else

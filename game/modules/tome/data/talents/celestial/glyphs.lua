@@ -36,12 +36,12 @@ newTalent{
 	trapPower = function(self, t) return math.max(1,self:combatScale(self:getTalentLevel(t) * self:getMag(15, true), 0, 0, 75, 75)) end,
 	getGlyphDam = function(self, t) return self:combatTalentSpellDamage(t, 20, 200) end,
 	getDetDur = function(self, t) return self:combatTalentLimit(t, 8, 3, 7) end,
-	
+
 	on_crit = function(self, t)
 		if self:getPositive() < 5 or self:getNegative() < 5 then return nil end
 		if self.turn_procs.glyphs then return nil end
 		if not rng.percent(100) then return nil end
-		
+
 -- find a target
 		local tgts = {}
 		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
@@ -64,9 +64,9 @@ newTalent{
 		self.turn_procs.glyphs = 1 --as late as possible, but before any crits to prevent stack overflow
 		local dam = self:spellCrit(t.getGlyphDam(self, t))
 		local detDur = t.getDetDur(self, t)
-		
+
 ----------------------------------------------------------------
--- START Define Glyph Traps START
+-- START - Define Glyph Traps - START
 ----------------------------------------------------------------
 para_glyph = Trap.new{
 	name = "glyph of paralysis",
@@ -75,8 +75,6 @@ para_glyph = Trap.new{
 	faction = self.faction,
 	dam = dam,
 	detDur = detDur,
---	agdam = agdam,
---	agDetDur = agDetDur,
 	desc = function(self)
 		return ([[Deals %d light damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam))
 	end,
@@ -87,8 +85,6 @@ para_glyph = Trap.new{
 	triggered = function(self, x, y, who)
 		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
 		game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
-		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKKNOCKBACK, self.dam, {type="light"})
-		game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
 			self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
@@ -100,7 +96,7 @@ para_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-		
+
 		return true
 	end,
 	temporary = t.getDuration(self, t),
@@ -137,9 +133,7 @@ fatigue_glyph = Trap.new{
 		return false
 	end,
 	triggered = function(self, x, y, who)
-		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
-		game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
-		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKKNOCKBACK, self.dam, {type="light"})
+		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam, {type="light"})
 		game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
@@ -152,7 +146,7 @@ fatigue_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-		
+
 		return true
 	end,
 	temporary = t.getDuration(self, t),
@@ -192,17 +186,10 @@ explosion_glyph = Trap.new{
 		return false
 	end,
 	triggered = function(self, x, y, who)
---		if who then
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
 			game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKKNOCKBACK, self.dam, {type="light"})
 			game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
---		else
---			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.agdam, {type="light"})
---			game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
---			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKKNOCKBACK, self.agdam, {type="light"})
---			game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
---		end
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
 			self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
@@ -214,7 +201,7 @@ explosion_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-			
+
 		return true
 	end,
 	temporary = t.getDuration(self, t),
@@ -237,24 +224,18 @@ explosion_glyph = Trap.new{
 	summoner_gain_exp = true,
 }
 ----------------------------------------------------------------
--- END Define Glyph Traps END
+-- END - Define Glyph Traps - END
 ----------------------------------------------------------------
-		
+
 --build a table of glyphs
 		local glyphs = {}
 		if not self.turn_procs.glyph_para then
-			--table.insert(glyphs, para_glyph)
-			--glyphs = glyphs[#glyphs+1]
 			glyphs[#glyphs+1] = para_glyph
 		end
 		if not self.turn_procs.glyph_fatigue then
-			--table.insert(glyphs, fatigue_glyph)
-			--glyphs = glyphs[#glyphs+1]
 			glyphs[#glyphs+1] = fatigue_glyph
 		end
 		if not self.turn_procs.glyph_explosion then
-			--table.insert(glyphs, explosion_glyph)
-			--glyphs = glyphs[#glyphs+1]
 			glyphs[#glyphs+1] = explosion_glyph
 		end
 		if #glyphs < 1 then return nil end
@@ -284,21 +265,21 @@ explosion_glyph = Trap.new{
 		]]
 --get a random glyph from table
 		local trap = rng.tableRemove(glyphs)
-		
+
 --set cooldown
 		--self.turn_procs.glyphs = 1
 		if trap == para_glyph then self.turn_procs.glyph_para = t.getGlyphCD(self, t)
 		elseif trap == fatigue_glyph then self.turn_procs.glyph_fatigue = t.getGlyphCD(self, t)
 		elseif trap == explosion_glyph then self.turn_procs.glyph_explosion = t.getGlyphCD(self, t)
 		end
-		
+
 ---put a glyph on each glyphgrid
 		for i = 1, 9 do
 			local spot = i == 1 and {x=x, y=y} or rng.tableRemove(glyphgrids)
 			if not spot then break end
 
 
-			
+
 --place glyph
 			trap:identify(true)
 			trap:resolve() trap:resolve(nil, true)
@@ -306,32 +287,32 @@ explosion_glyph = Trap.new{
 			game.level:addEntity(trap)
 			game.zone:addEntity(game.level, trap, "trap", spot.x, spot.y)
 			game.level.map:particleEmitter(spot.x, spot.y, 1, "summon")
-			
+
 --trigger glyphs
 --			if self:knowTalent(self.T_AGRESSIVE_BINDING) then
 --				trap:trigger(spot.x, spot.y)
 --			end
-			
+
 		end
-		
+
 --cost resources
 		self:incNegative(-5)
 		self:incPositive(-5)
 
-			
+
 
 	end,
-	
+
 	info = function(self, t)
 		return ([[When you crit have a 50%% chance to bind glyphs in radius 1 centred on a random target in range 7.
 		Glyphs are hidden traps (%d detection and disarm power) lasting for %d turns.
 		This can only happen once per turn and each glyph can only be bound every %d turns.
 		Glyph damage will scale with spellpower and detection and disarm powers scale with magic.
-		
+
 		Avalable glyphs are:
-		Glyph of Paralysis - 
-		Glyph of Fatigue - 
-		Glyph of Explosion - 
+		Glyph of Paralysis -
+		Glyph of Fatigue -
+		Glyph of Explosion -
 		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t))
 	end,
 }
@@ -395,9 +376,21 @@ newTalent{
 		if twilightdam == false then
 			self:project(tg, x, y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)), {type="light"})
 			twilightdam = true
+
+			if core.shader.active(4) then
+				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+			end
+
 		else
 			self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)), {type="dark"})
 			twilightdam = false
+
+			if core.shader.active(4) then
+				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+			end
+
 		end
 		--count casts and cd at limit
 		consecutive_twilights = (consecutive_twilights or 0) + 1
