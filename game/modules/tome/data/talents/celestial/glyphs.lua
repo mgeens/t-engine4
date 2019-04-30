@@ -50,12 +50,10 @@ newTalent{
 	trapPower = function(self, t) return math.max(1,self:combatScale(self:getTalentLevel(t) * self:getMag(15, true), 0, 0, 75, 75)) end,
 	getGlyphDam = function(self, t) return self:combatTalentSpellDamage(t, 20, 200) end,
 	getDetDur = function(self, t) return self:combatTalentLimit(t, 8, 3, 7) end,
-
 	on_crit = function(self, t)
 		if self:getPositive() < 5 or self:getNegative() < 5 then return nil end
 		if self.turn_procs.glyphs then return nil end
 		if not rng.percent(100) then return nil end
-
 -- find a target
 		local tgts = {}
 		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
@@ -66,7 +64,6 @@ newTalent{
 			end
 		end end
 		if #tgts < 1 then return nil end
-
 --target glyphs
 		local tg = self:getTalentTarget(t)
 		local target = rng.tableRemove(tgts)
@@ -231,7 +228,6 @@ explosion_glyph = Trap.new{
 ----------------------------------------------------------------
 -- END - Define Glyph Traps - END
 ----------------------------------------------------------------
-
 --build a table of glyphs
 		local glyphs = {}
 		if not self.turn_procs.glyph_para then
@@ -270,46 +266,42 @@ explosion_glyph = Trap.new{
 		]]
 --get a random glyph from table
 		local trap = rng.tableRemove(glyphs)
-
---set cooldown
-		--self.turn_procs.glyphs = 1
+--set cooldowns
 		if trap == para_glyph then self.turn_procs.glyph_para = t.getGlyphCD(self, t)
 		elseif trap == fatigue_glyph then self.turn_procs.glyph_fatigue = t.getGlyphCD(self, t)
 		elseif trap == explosion_glyph then self.turn_procs.glyph_explosion = t.getGlyphCD(self, t)
 		end
-
----put a glyph on each glyphgrid
+---place a glyph on each glyphgrid
 		for i = 1, 9 do
 			local spot = i == 1 and {x=x, y=y} or rng.tableRemove(glyphgrids)
 			if not spot then break end
-
-
-
---place glyph
 			trap:identify(true)
 			trap:resolve() trap:resolve(nil, true)
 			trap:setKnown(self, true)
 			game.level:addEntity(trap)
 			game.zone:addEntity(game.level, trap, "trap", spot.x, spot.y)
 			game.level.map:particleEmitter(spot.x, spot.y, 1, "summon")
-
---trigger glyphs
---			if self:knowTalent(self.T_AGRESSIVE_BINDING) then
---				trap:trigger(spot.x, spot.y)
---			end
-
 		end
-
 --cost resources
 		self:incNegative(-5)
 		self:incPositive(-5)
-
-
-
 	end,
-
+	activate = function(self, t)
+		local ret = {}
+		if core.shader.active() then
+			particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+			particle1.toback = true
+			particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+		end
+		return ret
+	end,
+	deactivate = function(self, t, p)
+		if p.particle1 then self:removeParticles(p.particle1) end
+		if p.particle2 then self:removeParticles(p.particle2) end
+		return true
+	end,
 	info = function(self, t)
-		return ([[When you crit have a 50%% chance to bind glyphs in radius 1 centred on a random target in range 7.
+		return ([[When one of your spells goes critical, you bind glyphs in radius 1 centred on a random target in range 7.
 		Glyphs are hidden traps (%d detection and disarm power) lasting for %d turns.
 		This can only happen once per turn and each glyph can only be bound every %d turns.
 		Glyph damage will scale with spellpower and detection and disarm powers scale with magic.
