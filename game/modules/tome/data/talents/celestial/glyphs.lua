@@ -34,17 +34,17 @@ newTalent{
 	getDuration = function(self, t)
 		if self:knowTalent(self.T_PERSISTENT_GLYPHS) then
 			local pg = self:getTalentFromId(self.T_PERSISTENT_GLYPHS)
-			return self:combatTalentSpellDamage(t, 3, 6) + pg.getPersistentDuration(self, pg)
+			return self:combatTalentLimit(t, 10, 3, 6) + pg.getPersistentDuration(self, pg)
 		else
-			return self:combatTalentSpellDamage(t, 3, 6)
+			return self:combatTalentLimit(t, 10, 3, 6)
 		end
 	end,
 	getGlyphCD = function(self, t)
 		if self:knowTalent(self.T_PERSISTENT_GLYPHS) then
 			local pg = self:getTalentFromId(self.T_PERSISTENT_GLYPHS)
-			return 9 - pg.getPersistentCooldown(self, pg)
+			return math.min(2, 10 - pg.getPersistentCooldown(self, pg))
 		else
-			return 9
+			return 10
 		end
 	end,
 	trapPower = function(self, t) return math.max(1,self:combatScale(self:getTalentLevel(t) * self:getMag(15, true), 0, 0, 75, 75)) end,
@@ -314,8 +314,8 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	mode = "passive",
-	getPersistentDuration = function(self, t) return self:combatTalentLimit(t, 6, 1, 5) end,
-	getPersistentCooldown = function(self, t) return self:combatTalentLimit(t, 4, 1, 3) end,
+	getPersistentDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 8, 1, 6)) end,
+	getPersistentCooldown = function(self, t) return math.floor(self:combatTalentLimit(t, 6, 1, 4)) end,
 	info = function(self, t)
 		return ([[Your glyph binding becomes more permanent and less taxing, increasing glyph duration by %d turns and reducing their cooldowns by %d turns.
 		This will be reflected in the Glyphs talent tooltip.]]):format(t.getPersistentDuration(self, t), t.getPersistentCooldown(self, t))
