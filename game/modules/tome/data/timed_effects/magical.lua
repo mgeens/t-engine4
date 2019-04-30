@@ -1497,6 +1497,9 @@ newEffect{
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("silence_immune", eff.silence)
 	end,
+	on_timeout = function(self, eff)
+		if self:hasEffect(self.EFF_SURGING_CIRCLES) then self:incPositive(1) end
+	end,
 }
 
 newEffect{
@@ -1509,9 +1512,18 @@ newEffect{
 	parameters = {power = 1},
 	activate = function(self, eff)
 		eff.defense = self:addTemporaryValue("combat_def", eff.power)
+		eff.physsave = self:addTemporaryValue("combat_physresist", eff.power)
+		eff.spellsave = self:addTemporaryValue("combat_spellresist", eff.power)
+		eff.mentalsave = self:addTemporaryValue("combat_mentalresist", eff.power)
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("combat_def", eff.defense)
+		self:removeTemporaryValue("combat_physresist", eff.physsave)
+		self:removeTemporaryValue("combat_spellresist", eff.spellsave)
+		self:removeTemporaryValue("combat_mentalresist", eff.mentalsave)
+	end,
+	on_timeout = function(self, eff)
+		if self:hasEffect(self.EFF_SURGING_CIRCLES) then self:incNegative(1) end
 	end,
 }
 
@@ -1544,6 +1556,9 @@ newEffect{
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("slow_projectiles", eff.ward)
+	end,
+	on_timeout = function(self, eff)
+		if self:hasEffect(self.EFF_SURGING_CIRCLES) then self:incPositive(0.5) self:incNegative(0.5) end
 	end,
 }
 

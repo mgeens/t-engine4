@@ -24,7 +24,7 @@ newTalent{
 	require = divi_req_high1,
 	points = 5,
 	cooldown = 20,
-	negative = 10,
+	negative = 20,
 	no_energy = true,
 	tactical = { DEFEND = 1, ATTACKAREA = {DARKNESS = 1} },
 	tactical_imp = { SELF = {DEFEND = 1}, ATTACKAREA = {DARKNESS = 1} }, -- debugging transitional
@@ -52,63 +52,19 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle increases your Defense by %d, and deals %0.2f darkness damage per turn to everyone else with in its radius. The circle lasts %d turns.
+		return ([[Creates a circle of radius %d at your feet; the circle increases your defense and all saves by %d while dealing %0.2f darkness damage per turn to everyone else with in its radius. The circle lasts %d turns.
 		The damage will increase with your Spellpower.]]):
 		format(radius, damage, (damDesc (self, DamageType.DARKNESS, damage)), duration)
 	end,
 }
 
 newTalent{
-	name = "Circle of Blazing Light",
+	name = "Circle of Sanctity",
 	type = {"celestial/circles", 2},
 	require = divi_req_high2,
 	points = 5,
 	cooldown = 20,
-	positive = 10,
-	no_energy = true,
-	tactical = { ATTACKAREA = {FIRE = 0.5, LIGHT = 0.5} },
-	tactical_imp = { SELF = {POSITIVE = 0.5}, ATTACKAREA = {FIRE = 0.5, LIGHT = 0.5} }, -- debugging transitional
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 2, 15) end,
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
-	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
-	target = function(self, t) -- for AI only
-		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
-	end,
-	action = function(self, t)
-		local radius = self:getTalentRadius(t)
-		local tg = {type="ball", range=0, selffire=true, radius=radius, talent=t}
-		self:project(tg, self.x, self.y, DamageType.LITE, 1)
-		-- Add a lasting map effect
-		game.level.map:addEffect(self,
-			self.x, self.y, self:spellCrit(t.getDuration(self, t)),
-			DamageType.BLAZINGLIGHT, self:spellCrit(t.getDamage(self, t)),
-			radius,
-			5, nil,
-			MapEffect.new{zdepth=6, overlay_particle={zdepth=6, only_one=true, type="circle", args={appear=8, img="sun_circle", radius=self:getTalentRadius(t)}}, color_br=255, color_bg=255, color_bb=255, effect_shader="shader_images/sunlight_effect.png"},
-			nil, true --self:spellFriendlyFire(true)
-		)
-		game:playSoundNear(self, "talents/arcane")
-		return true
-	end,
-	info = function(self, t)
-		local damage = t.getDamage(self, t)
-		local duration = t.getDuration(self, t)
-		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle lights up affected tiles, increases your positive energy by %d each turn, and deals %0.2f light damage and %0.2f fire damage per turn to everyone else within its radius.  The circle lasts %d turns.
-		The damage will increase with your Spellpower.]]):
-		format(radius, 1 + (damage / 4), (damDesc (self, DamageType.LIGHT, damage)), (damDesc (self, DamageType.FIRE, damage)), duration)
-	end,
-}
-
-newTalent{
-	name = "Circle of Sanctity",
-	type = {"celestial/circles", 3},
-	require = divi_req_high3,
-	points = 5,
-	cooldown = 20,
-	positive = 10,
-	negative = 10,
+	positive = 20,
 	no_energy = true,
 	on_pre_use_ai = function(self, t) return not self:hasEffect(self.EFF_SANCTITY) end,
 	tactical = {
@@ -150,15 +106,16 @@ newTalent{
 	target = function(self, t) -- for AI only
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire = false}
 	end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 4, 30) end,
 	action = function(self, t)
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			self.x, self.y, self:spellCrit(t.getDuration(self, t)),
-			DamageType.SANCTITY, 1,
+			DamageType.SANCTITY, self:spellCrit(t.getDamage(self, t)),
 			self:getTalentRadius(t),
 			5, nil,
 			MapEffect.new{zdepth=6, overlay_particle={zdepth=6, only_one=true, type="circle", args={appear=8, img="sun_circle", radius=self:getTalentRadius(t)}}, color_br=255, color_bg=255, color_bb=255, effect_shader="shader_images/sunlight_effect.png"},
-			nil, 
+			nil,
 			true --self:spellFriendlyFire(true)
 		)
 		game:playSoundNear(self, "talents/arcane")
@@ -167,15 +124,15 @@ newTalent{
 	info = function(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle protects you from silence effects while you remain in its radius, and silences everyone else who enters. The circle lasts %d turns.]]):
-		format(radius, duration)
+		return ([[Creates a circle of radius %d at your feet; the circle protects you from silence effects while you remain in its radius while silencing and dealing %d light damage to everyone else who enters. The circle lasts %d turns.]]):
+		format(radius, damDesc(self, DamageType.LIGHT, damage), duration)
 	end,
 }
 
 newTalent{
 	name = "Circle of Warding",
-	type = {"celestial/circles", 4},
-	require = divi_req_high4,
+	type = {"celestial/circles", 3},
+	require = divi_req_high3,
 	points = 5,
 	cooldown = 20,
 	positive = 10,
@@ -207,9 +164,45 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle slows incoming projectiles by %d%%, and attempts to push all creatures other than yourself out of its radius, inflicting %0.2f light damage and %0.2f darkness damage per turn as it does so.  The circle lasts %d turns.
+		return ([[Creates a circle of radius %d at your feet; the circle slows incoming projectiles by %d%% and attempts to push all creatures other than yourself out of its radius, inflicting %0.2f light damage and %0.2f darkness damage per turn as it does so.  The circle lasts %d turns.
 		The effects will increase with your Spellpower.]]):
 		format(radius, damage*5, (damDesc (self, DamageType.LIGHT, damage)), (damDesc (self, DamageType.DARKNESS, damage)), duration)
 	end,
 }
 
+newTalent={
+	name = "Celestial Surge",
+	type = {"celestial/circles", 4},
+	require = divi_req_high4,
+	points = 5,
+	cooldown = 20,
+	positive = 15,
+	negative = 15,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 50, 150) end,
+	getSlow = function(self, t) return math.max(50, self:combatTalentSepllDamage(t, 10, 40)) end,
+	getDuration = function(self, t) return self:combatTalentLimit(t, 15, 1, 10) end,
+	action = function(self, t)
+		local dur = t.getDuration(self, t)
+		self:setEffect(self.EFF_SURGING_CIRCLES, dur)
+		local dam = self:spellCrit(t.getDamage(self, t))
+		for i, e in ipairs(game.level.map.effects) do
+			if e.x and e.y and game.level.map(x, y, Map.ACTOR) and e.src ==self then
+				if e.damtype == DamageType.SHIFTINGSHADOWS or e.damtype == DamageType.SANCTITY or e.damtype == DamageType.WARDING or e.damtype == DamageType.BLAZINGLIGHT then
+					local tg = {type="hit", range=100, talent=t, friendlyfire=false}
+					local power = t.getSlow(self, t) / 100
+					self:project(tg, e,x, e.y, DamageType.LIGHT, dam)
+					self:project(tg, e.x, e.y, DamageType.DARKNESS, dam)
+					self:project(tg, e.x, e.y, DamageType.SLOW, power)
+				end
+			end
+		end
+		return true
+	end,
+	info = function(self, t)
+		return ([[Conjure a surge of celestial power through your circles. Any foe standing within one of your circles will be slowed by %d%% and take %d light and %d darkness damage.
+		Residual power from the surge will emanate from your circles for %d turns; each circle you stand in will increase your celestial resources.
+		Shifting Shadows: +1 negative.
+		Sanctity: +1 postive.
+		Warding: +0.5 postive and negative.]]):format(t.getSlow(self, t), t.getDamage(self, t), t.getDuration(self, t))
+	end,
+}

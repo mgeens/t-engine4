@@ -2916,8 +2916,10 @@ newDamageType{
 			if target == src then
 				target:setEffect(target.EFF_SANCTITY, 1, {power=dam, no_ct_effect=true})
 			elseif target:canBe("silence") then
+				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				target:setEffect(target.EFF_SILENCED, 2, {apply_power=src:combatSpellpower(), min_dur=1}, true)
 			else
+				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				game.logSeen(target, "%s resists the silence!", target.name:capitalize())
 			end
 		end
