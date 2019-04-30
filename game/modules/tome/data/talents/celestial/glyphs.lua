@@ -1,11 +1,23 @@
+-- ToME - Tales of Maj'Eyal
+-- Copyright (C) 2009 - 2018 Nicolas Casalini
+--
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+--
+-- Nicolas Casalini "DarkGod"
+-- darkgod@te4.org
+
 local Trap = require "mod.class.Trap"
-
-
-
-
-
-
-
 
 newTalent{
 	name = "Glyphs",
@@ -13,7 +25,9 @@ newTalent{
 	require = divi_req_high1,
 	random_ego = "attack",
 	points = 5,
-	mode = "passive",
+	mode = "sustained",
+	sustain_positive = 5,
+	sustain_negative = 5
 	range = function(self, t) return 7 end,
 	radius = function(self, t) return 1 end,
 	target = function(self, t) return {type="ball", radius=self:getTalentRadius(t), range=self:getTalentRange(t), talent=t} end,
@@ -96,7 +110,6 @@ para_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-
 		return true
 	end,
 	temporary = t.getDuration(self, t),
@@ -116,8 +129,6 @@ para_glyph = Trap.new{
 	summoner = self,
 	summoner_gain_exp = true,
 }
-
-
 
 fatigue_glyph = Trap.new{
 	name = "glyph of fatigue",
@@ -146,7 +157,6 @@ fatigue_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-
 		return true
 	end,
 	temporary = t.getDuration(self, t),
@@ -166,10 +176,6 @@ fatigue_glyph = Trap.new{
 	summoner = self,
 	summoner_gain_exp = true,
 }
-
-
-
-
 
 explosion_glyph = Trap.new{
 	name = "glyph of explosion",
@@ -201,7 +207,6 @@ explosion_glyph = Trap.new{
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
 			end
 		end
-
 		return true
 	end,
 	temporary = t.getDuration(self, t),
