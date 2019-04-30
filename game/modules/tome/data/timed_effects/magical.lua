@@ -1388,7 +1388,7 @@ newEffect{
 }
 
 newEffect{
-	name = "DIVINE_GLYPHS", image = "talents/glyph_of_repulsion.png",
+	name = "DIVINE_GLYPHS", image = "talents/glyph_of_explosion.png",
 	desc = "Divine Glyphs",
 	long_desc = function(self, eff)
 		return ("A divine glyph recently triggered, providing %d%% light and darkness affinity and resistence."):format(math.min(eff.maxStacks, eff.glyphstacks or 1)*5)
@@ -1406,6 +1406,36 @@ newEffect{
 		old_eff.glyphstacks = old_eff.glyphstacks + 1
 		old_eff.dur = new_eff.dur
 		return old_eff
+	end,
+}
+
+newEffect{
+	name = "STARLIGHT_FATIGUE", image = "talents/glyph_of_fatigue.png",
+	desc = "Fatiguing Starlight",
+	long_desc = function(self, eff)
+		return ("Inflicted with a fatiguing starlight, taking %d darkness damage and increasing the cooldown of a cooling-down talent by 1 whenever they act"):format(eff.src:damDesc("DARKNESS", eff.dam))
+	end,
+	type = "magical",
+	subtype = {darkness = true},
+	status = "detrimental",
+	paramters = {},
+	activate = function(self, t)
+		if core.shader.active() then
+			eff.particles = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.1, a=0.6, radius=0.8, img="darkest_light"}))
+		end
+	end,
+	deactivate = function(self, t)
+		if eff.particles then self:removeParticles(eff.particles) end
+	end,
+	callbackOnActEnd = function(self, t)
+		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dam)
+		local tids = {}
+		for tid, lev in pairs(self.talents) do
+			local t = self:getTalentFromId(tid)
+			if t and self.talents_cd[tid] and not t.fixed_cooldown then tids[#tids+1] = t end
+			local t2 = rng.tableRemove(tids)
+			if t2 then self.talents_cd[t2.id] = self.talents_cd[t2.id] + 1 end
+		end
 	end,
 }
 

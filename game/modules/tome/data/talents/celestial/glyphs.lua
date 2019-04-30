@@ -50,6 +50,9 @@ newTalent{
 	trapPower = function(self, t) return math.max(1,self:combatScale(self:getTalentLevel(t) * self:getMag(15, true), 0, 0, 75, 75)) end,
 	getGlyphDam = function(self, t) return self:combatTalentSpellDamage(t, 20, 200) end,
 	getDetDur = function(self, t) return self:combatTalentLimit(t, 8, 3, 7) end,
+	getBlindDur = function(self, t) return self:combatTalentLimit(t, 7, 1, 4.5) end,
+	getFatigueDur = function(self, t) return self:combatTalentLimit(t, 14, 1, 8) end,
+	getFatigueDam = function(self, t) return self:combatTalentSpellDamage(t, 1, 80) end,
 	on_crit = function(self, t)
 		if self:getPositive() < 5 or self:getNegative() < 5 then return nil end
 		if self.turn_procs.glyphs then return nil end
@@ -75,19 +78,22 @@ newTalent{
 		self.turn_procs.glyphs = 1 --as late as possible, but before any crits to prevent stack overflow
 		local dam = self:spellCrit(t.getGlyphDam(self, t))
 		local detDur = t.getDetDur(self, t)
+		local blindDur = t.getBlindDur(self, t)
+		local fatigueDur = t.getFatigueDur(self, t)
+		local fatigueDam = self:spellCrit(t.getFatigueDam(self, t))
 
 ----------------------------------------------------------------
 -- START - Define Glyph Traps - START
 ----------------------------------------------------------------
 para_glyph = Trap.new{
-	name = "glyph of paralysis",
+	name = "glyph of sunlight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
 	faction = self.faction,
 	dam = dam,
-	detDur = detDur,
+	blindDur = blindDur,
 	desc = function(self)
-		return ([[Deals %d light damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam))
+		return ([[Deals %d light damage and blinds for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), self.blindDur)
 	end,
 	canTrigger = function(self, x, y, who)
 		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
@@ -95,6 +101,9 @@ para_glyph = Trap.new{
 	end,
 	triggered = function(self, x, y, who)
 		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
+		if who:canBe("blind") then
+			who:setEffect(who.EFF_BLINDED, self.blindDur, {})
+		end
 		game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
@@ -128,20 +137,21 @@ para_glyph = Trap.new{
 }
 
 fatigue_glyph = Trap.new{
-	name = "glyph of fatigue",
+	name = "glyph of starlight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
 	faction = self.faction,
-	dam = dam,
+	fatigueDur = fatigueDur,
+	fatigueDam = fatigueDam,
 	desc = function(self)
-		return ([[Deals %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam))
+		return ([[Inflicts a fatiguing darkness, dealing %d darkness damage and icnreasing the cooldown of a cooling-down talent by 1 upon every action for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam), self.fatigueDur)
 	end,
 	canTrigger = function(self, x, y, who)
 		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
 		return false
 	end,
 	triggered = function(self, x, y, who)
-		self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam, {type="light"})
+		who:setEffect(who.EFF_STARLIGHT_FATIGUE, self.fatigueDur, {dam=fatigueDam, src=self})
 		game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
@@ -175,14 +185,14 @@ fatigue_glyph = Trap.new{
 }
 
 explosion_glyph = Trap.new{
-	name = "glyph of explosion",
+	name = "glyph of twilight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_repulsion_01_64.png",
 	faction = self.faction,
 	dam = dam,
 --	agdam = agdam,
 	desc = function(self)
-		return ([[Explodes (radius 1), knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam))
+		return ([[Explodes, knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam))
 	end,
 	canTrigger = function(self, x, y, who)
 		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
@@ -301,16 +311,21 @@ explosion_glyph = Trap.new{
 		return true
 	end,
 	info = function(self, t)
-		return ([[When one of your spells goes critical, you bind glyphs in radius 1 centred on a random target in range 7.
+		local dam = t.getGlyphDam(self, t)
+		local detDur = t.getDetDur(self, t)
+		local blindDur = t.getBlindDur(self, t)
+		local fatigueDur = t.getFatigueDur(self, t)
+		local fatigueDam = t.getFatigueDam(self, t)
+		return ([[When one of your spells goes critical, you bind glyphs in radius 1 centred on a random target in range 7 at the cost of 5 positive and 5 negative.
 		Glyphs are hidden traps (%d detection and disarm power) lasting for %d turns.
 		This can only happen once per turn and each glyph can only be bound every %d turns.
 		Glyph damage will scale with spellpower and detection and disarm powers scale with magic.
 
 		Avalable glyphs are:
-		Glyph of Paralysis -
-		Glyph of Fatigue -
-		Glyph of Explosion -
-		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t))
+		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %d light damage and blinding for %d turns.
+		Glyph of Fatigue - Bind starlight into a glyph. When triggered it will release a fatiguing darkness. For %d turns, every action the foe makes will increase the cooldown of a cooling-down talent by 1 and cause it to take %d darkness damage.
+		Glyph of Explosion - Bind twilight into a glyph. When triggered it will release a burst of twilight, knocking back and dealing %d light and %d darkness damage.
+		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), blindDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), damDesc(self, DamageType.LIGHT, dam), damDesc(self, DamageType.DARKNESS, dam))
 	end,
 }
 
