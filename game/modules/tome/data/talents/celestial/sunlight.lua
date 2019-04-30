@@ -133,7 +133,7 @@ newTalent{
 		if not x or not y then return nil end
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project(tg, x, y, DamageType.LIGHT, dam)
-		self:project(tg, x, y, DamageType.FIREBURN, dam, initial=0)
+		self:project(tg, x, y, DamageType.FIREBURN, dam, {initial=0})
 		local _ _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
@@ -167,11 +167,11 @@ newTalent{
 	getDuration = function(self, t) return 6 end,
 	getPower = function(self, t) return self:combatTalentLimit(t, 1.5, 0.3, 1) end,
 	action = function(self, t)
-		local damVal = math.max((self.inc_damage.LIGHT, self.inc_damage.DARKNESS * t.getPower(self, t))
+		local damVal = math.max(self.inc_damage.LIGHT, self.inc_damage.DARKNESS * t.getPower(self, t))
 		local damInc = damVal - self.inc_damage.LIGHT
 		local penVal = math.max(self.resists_pen.LIGHT, self.resists_pen.DARKNESS * t.getPower(self, t))
 		local penInc = penVal - self.resists_pen.LIGHT
-		self:setEffect(EFF_SUNBURST, t.getDuration(self, t), {damVal=damVal, damInc=damInc, penVal=penVal, penInc=penInc} --all these params for eff tt
+		self:setEffect(EFF_SUNBURST, t.getDuration(self, t), {damVal=damVal, damInc=damInc, penVal=penVal, penInc=penInc}) --all these params for eff tt
 
 		local tg = self:getTalentTarget(t)
 		self:project(tg, self.x, self.y, function(px, py)
