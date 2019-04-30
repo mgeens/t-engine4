@@ -250,30 +250,6 @@ explosion_glyph = Trap.new{
 			glyphs[#glyphs+1] = explosion_glyph
 		end
 		if #glyphs < 1 then return nil end
---[[
-		-- find a target
-		local tgts = {}
-		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
-		for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
-			local a = game.level.map(x, y, Map.ACTOR)
-			if a and self:reactionToward(a) < 0 then
-				tgts[#tgts+1] = a
-			end
-		end end
-		if #tgts < 1 then return nil end
-
---target glyphs
-		local tg = self:getTalentTarget(t)
-		local target = rng.tableRemove(tgts)
-		local glyphgrids = {}
-		if not self:canProject(tg, target.x, target.y) then return end
-		self:project(tg, target.x, target.y, function(px, py)
-			if not ((px == x and py == y) or game.level.map:checkEntity(px, py, Map.TERRAIN, "block_move") or game.level.map(px, py, Map.TRAP)) then glyphgrids[#glyphgrids+1] = {x=px, y=py} end
-		end)
-		self.turn_procs.glyphs = 1
-		local dam = self:spellCrit(t.getGlyphDam(self, t))
-		local detDur = t.getDetDur(self, t)
-		]]
 --get a random glyph from table
 		local trap = rng.tableRemove(glyphs)
 --set cooldowns
