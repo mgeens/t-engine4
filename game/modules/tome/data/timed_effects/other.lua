@@ -152,7 +152,7 @@ newEffect{
 }
 
 newEffect{
-	name = "SURGING_CIRCLES", image = "talents/circle_alignment.png",
+	name = "SURGING_CIRCLES", image = "talents/celestial_surge.png",
 	desc = "Circle Surge",
 	long_desc = function(self, eff) return "Residual power from the surge is emanating from the circles.
 		Shifting Shadows: +1 negative.
