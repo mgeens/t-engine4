@@ -1438,14 +1438,13 @@ newEffect{
 	activate = function(self, eff)
 		self:effectTemporaryValue(eff, "darklight", eff.conversion)
 		if core.shader.active() then
-			eff.particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
-			eff.particle1.toback = true
-			eff.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+			eff.particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.5, a=0.4, radius=0.8, img="healdark"}))
+			eff.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.5, a=0.4, radius=0.6, img="healcelestial"}))
 		end
 	end,
 	deactivate = function(self, t)
-		self:removeParticles(eff.particle1)
-		self:removeParticles(eff.particle2)
+		if eff.particle1 then self:removeParticles(eff.particle1) end
+		if eff.particle2 then self:removeParticles(eff.particle2) end
 	end,
 	on_timeout = function(self, t)
 		DamageType:get(DamageType.LIGHT).projector(eff.src, self.x, self.y, DamageType.LIGHT, eff.dotDam)
