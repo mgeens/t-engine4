@@ -98,7 +98,17 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		src.darkest_light_mastery = old
 		if dam <= 0 then return add_dam end
 	end
-		
+
+	if src:attr("darklight") then
+		local ndam = dam * src.darklight / 2
+		dam = dam - ndam*2
+		local old = src.darklight
+		src.darklight = nil
+		dam = dam + DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.LIGHT, ndam, state)
+		dam = dam + DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, ndam, state)
+		src.darklight = old
+		return dam
+	end
 
 	local source_talent = src.__projecting_for and src.__projecting_for.project_type and (src.__projecting_for.project_type.talent_id or src.__projecting_for.project_type.talent) and src.getTalentFromId and src:getTalentFromId(src.__projecting_for.project_type.talent or src.__projecting_for.project_type.talent_id)
 

@@ -138,20 +138,36 @@ newTalent{
 	type = {"celestial/eclipse", 4},
 	require = divi_req4,
 	points = 5,
-	cooldown = 25,
-	tactical = { BUFF = 2 },
+	random_ego = "attack",
+	cooldown = 15,
 	positive = 15,
-	negative = -15,
-	getDuration = function(self, t) return self:combatTalentSpellDamage(t, 5, 12) end,
-	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.15, 1)) end,
+	negative = 15,
+	tactical = { ATTACKAREA = {LIGHT = 2} },
+	range = 0,
+	radius = 7,
+	direct_hit = true,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
+	end,
+	getDotDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 50) end,
+	getConversion = function(self, t) return math.min(100, self:combatTalentScale(t, 15, 100)) end,
+	getDuration = function(self, t) return 6 end,
 	action = function(self, t)
-		self:setEffect(self.EFF_DARKEST_LIGHT, t.getDuration(self, t), {conversion=t.getConversion(self, t)})
-		game:playSoundNear(self, "talents/flame")
+		local tg = self:getTalentTarget(t)
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target then return end
+			target:setEffect(target.EFF_DARKLIGHT, t.getDuration(self, t), {src=self, dotDam=t.getDotDamage(self, t), conversion=t.getConversion(self, t)}) end
+		end)
+		game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y})
+		game:playSoundNear(self, "talents/fireflash")
 		return true
 	end,
 	info = function(self, t)
-		return ([[Call upon the power of the moon to darken the sun's light.
-		For %d turns, %d%% of your light damage is converted to darkness damage and you may use positive in place of negative to cast spells if you don't have enough negative.]]):
-		format(t.getDuration(self, t), t.getConversion(self, t) * 100)
+		local radius = self:getTalentRadius(t)
+		local dotDamage = t.getDotDamage(self, t)
+		local conversion = t.getConversion(self, t)
+		local duration = t.getDuration(self, t)
+		return ([[Call upon eclipse light to shroud your foes in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(damDesc(self, DamageType.LIGHT, dotDamage), damDesc(self, DamageType.DARKNESS, dotDamage), conversion*100, duration)
 	end,
 }

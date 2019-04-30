@@ -1388,28 +1388,6 @@ newEffect{
 }
 
 newEffect{
-	name = "DARKEST_LIGHT", image = "talents/darkest_light.png",
-	desc = "Darkest Light",
-	long_desc = function(self, eff) return ("%d%% of the target's light damage is being converted to darkness damage and they may suplement positive for negative."):format(eff.conversion * 100) end,
-	type = "magical",
-	subtype = { darkness=true, light=true},
-	status = "beneficial",
-	parameters = {},
-	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "darkest_light_mastery", eff.conversion)
-		if core.shader.active() then
-			eff.particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
-			eff.particle1.toback = true
-			eff.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
-		end
-	end,
-	deactivate = function(self, eff)
-		self:removeParticles(eff.particle1)
-		self:removeParticles(eff.particle2)
-	end,
-}
-
-newEffect{
 	name = "DIVINE_GLYPHS", image = "talents/glyph_of_repulsion.png",
 	desc = "Divine Glyphs",
 	long_desc = function(self, eff)
@@ -1435,7 +1413,7 @@ newEffect{
 	name = "SUNBURST", image = "talents/sunburst.png",
 	desc = "Sunburst",
 	long_desc = function(self, eff)
-		return ("Light damage has been increased by %d to %d. Light penetration has been increased by %d to %d."):format(eff.damInc, eff.damVal, eff.penInc, eff.penVal])
+		return ("Light damage has been increased by %d to %d. Light penetration has been increased by %d to %d."):format(eff.damInc, eff.damVal, eff.penInc, eff.penVal)
 	end,
 	type = "magical",
 	subtype = {light=true, darkness=true},
@@ -1448,39 +1426,30 @@ newEffect{
 }
 
 newEffect{
-	name = "SUNBURST_DL", image = "talents/sunburst.png",
-	desc = "Sunburst_DL",
+	name = "DARKLIGHT", image = "talents/darkest_light.png"
+	desc = "Shrouded in Darklight",
 	long_desc = function(self, eff)
-		if eff.src:hasEffect(eff.src.EFF_DARKEST_LIGHT) then darklight = "darkness" else darklight = "light" end
-		return ("The target is taking %d %s damage every turn and has %d%% of their damage converted to %s."):format(eff.dotDam, darklight, eff.conversion, darklight) end,
-	type = "magical",
+		return ("%d%% of the targets damage is being split between light and darkness and they are taking %d light and %d darkness damage each turn."):format(eff.conversion * 100, eff.src:damDesc("LIGHT", eff.dotDam), eff.src:damDesc("DARKNESS", eff.dotDam))
+	end,
+	type = "magical"
 	subtype = {light=true, darkness=true},
 	status = "detrimental",
-	parameters = {},
+	paramters = {},
 	activate = function(self, eff)
-		if eff.src:hasEffect(eff.src.EFF_DARKEST_LIGHT) then
-			self:effectTemporaryValue(eff, "all_damage_convert", DamageType.DARKNESS)
-			self:effectTemporaryValue(eff, "all_damage_convert_percent", eff.conversion)
-			if core.shader.active() then
-				eff.particle = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.5, a=0.4, radius=0.8, img="healdark"}))
-			end
-		else
-			self:effectTemporaryValue(eff, "all_damage_convert", DamageType.LIGHT)
-			self:effectTemporaryValue(eff, "all_damage_convert_percent", eff.conversion)
-			if core.shader.active() then
-				eff.particle = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.5, a=0.4, radius=0.8, img="healcelestial"}))
-			end
+		self:effectTemporaryValue(eff, "darklight", eff.conversion)
+		if core.shader.active() then
+			eff.particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+			eff.particle1.toback = true
+			eff.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
 		end
 	end,
-	deactivate = function(self, eff)
-		self:removeParticles(eff.particle)
+	deactivate = function(self, t)
+		self:removeParticles(eff.particle1)
+		self:removeParticles(eff.particle2)
 	end,
-	on_timeout = function(self, eff)
-		if eff.src:hasEffect(eff.src.EFF_DARKEST_LIGHT) then
-			DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dotDam)
-		else
-			DamageType:get(DamageType.LIGHT).projector(eff.src, self.x, self.y, DamageType.LIGHT, eff.dotDam)
-		end
+	on_timeout = function(self, t)
+		DamageType:get(DamageType.LIGHT).projector(eff.src, self.x, self.y, DamageType.LIGHT, eff.dotDam)
+		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dotDam)
 	end,
 }
 
