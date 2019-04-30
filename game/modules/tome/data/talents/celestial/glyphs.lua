@@ -27,7 +27,7 @@ newTalent{
 	points = 5,
 	mode = "sustained",
 	sustain_positive = 5,
-	sustain_negative = 5
+	sustain_negative = 5,
 	range = function(self, t) return 7 end,
 	radius = function(self, t) return 1 end,
 	target = function(self, t) return {type="ball", radius=self:getTalentRadius(t), range=self:getTalentRange(t), talent=t} end,

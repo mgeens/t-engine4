@@ -1426,12 +1426,12 @@ newEffect{
 }
 
 newEffect{
-	name = "DARKLIGHT", image = "talents/darkest_light.png"
+	name = "DARKLIGHT", image = "talents/darkest_light.png",
 	desc = "Shrouded in Darklight",
 	long_desc = function(self, eff)
 		return ("%d%% of the targets damage is being split between light and darkness and they are taking %d light and %d darkness damage each turn."):format(eff.conversion * 100, eff.src:damDesc("LIGHT", eff.dotDam), eff.src:damDesc("DARKNESS", eff.dotDam))
 	end,
-	type = "magical"
+	type = "magical",
 	subtype = {light=true, darkness=true},
 	status = "detrimental",
 	paramters = {},

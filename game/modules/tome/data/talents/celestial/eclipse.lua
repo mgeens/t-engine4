@@ -157,7 +157,7 @@ newTalent{
 		self:project(tg, self.x, self.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target then return end
-			target:setEffect(target.EFF_DARKLIGHT, t.getDuration(self, t), {src=self, dotDam=t.getDotDamage(self, t), conversion=t.getConversion(self, t)}) end
+			target:setEffect(target.EFF_DARKLIGHT, t.getDuration(self, t), {src=self, dotDam=t.getDotDamage(self, t), conversion=t.getConversion(self, t)})
 		end)
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y})
 		game:playSoundNear(self, "talents/fireflash")
