@@ -186,7 +186,7 @@ newTalent{
 		self:setEffect(self.EFF_SURGING_CIRCLES, dur)
 		local dam = self:spellCrit(t.getDamage(self, t))
 		for i, e in ipairs(game.level.map.effects) do
-			if e.x and e.y and game.level.map(x, y, Map.ACTOR) and e.src ==self then
+			if e.x and e.y and game.level.map(e.x, e.y, Map.ACTOR) and e.src ==self then
 				if e.damtype == DamageType.SHIFTINGSHADOWS or e.damtype == DamageType.SANCTITY or e.damtype == DamageType.WARDING or e.damtype == DamageType.BLAZINGLIGHT then
 					local tg = {type="hit", range=100, talent=t, friendlyfire=false}
 					local power = t.getSlow(self, t) / 100
