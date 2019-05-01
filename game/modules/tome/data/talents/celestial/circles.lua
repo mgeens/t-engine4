@@ -29,9 +29,9 @@ newTalent{
 	tactical = { DEFEND = 1, ATTACKAREA = {DARKNESS = 1} },
 	tactical_imp = { SELF = {DEFEND = 1}, ATTACKAREA = {DARKNESS = 1} }, -- debugging transitional
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 4, 30) end,
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDuration = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 4, 8))) end,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
+	radius = function(self, t) return math.min(5, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t) -- for AI only
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
 	end,
@@ -100,9 +100,9 @@ newTalent{
 				if target:attr("has_arcane_knowledge") then return 2 end
 			end}
 	},
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDuration = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 4, 8))) end,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
+	radius = function(self, t) return math.min(5, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t) -- for AI only
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire = false}
 	end,
@@ -140,9 +140,9 @@ newTalent{
 	no_energy = true,
 	tactical = { DEFEND = 0.5, ESCAPE = 1, ATTACKAREA = {LIGHT = 0.5, DARKNESS = 0.5} },
 	tactical_imp = { SELF = {DEFEND = 0.5}, ESCAPE = {knockback = 1}, ATTACKAREA = {LIGHT = 0.5, DARKNESS = 0.5} }, -- debugging transitional
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDuration = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 4, 8))) end,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
+	radius = function(self, t) return math.min(5, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t) -- for AI only
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
 	end,
