@@ -124,6 +124,7 @@ newTalent{
 	info = function(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
+		local damage = t.getDamage(self, t)
 		return ([[Creates a circle of radius %d at your feet; the circle protects you from silence effects while you remain in its radius while silencing and dealing %d light damage to everyone else who enters. The circle lasts %d turns.]]):
 		format(radius, damDesc(self, DamageType.LIGHT, damage), duration)
 	end,
@@ -179,20 +180,20 @@ newTalent{
 	positive = 15,
 	negative = 15,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 50, 150) end,
-	getSlow = function(self, t) return math.max(50, self:combatTalentSepllDamage(t, 10, 40)) end,
+	getSlow = function(self, t) return math.max(50, self:combatTalentSpellDamage(t, 10, 40)) end,
 	getDuration = function(self, t) return self:combatTalentLimit(t, 15, 1, 10) end,
 	action = function(self, t)
 		local dur = t.getDuration(self, t)
-		self:setEffect(self.EFF_SURGING_CIRCLES, dur)
+		self:setEffect(self.EFF_SURGING_CIRCLES, dur, {})
 		local dam = self:spellCrit(t.getDamage(self, t))
 		for i, e in ipairs(game.level.map.effects) do
-			if e.x and e.y and game.level.map(e.x, e.y, Map.ACTOR) and e.src ==self then
+			if e.x and e.y and game.level.map(e.x, e.y, Map.ACTOR) and e.src == self then
 				if e.damtype == DamageType.SHIFTINGSHADOWS or e.damtype == DamageType.SANCTITY or e.damtype == DamageType.WARDING or e.damtype == DamageType.BLAZINGLIGHT then
-					local tg = {type="hit", range=100, talent=t, friendlyfire=false}
+					local tg = {type="ball", radius=e.radius, talent=t, friendlyfire=false}
 					local power = t.getSlow(self, t) / 100
-					self:project(tg, e,x, e.y, DamageType.LIGHT, dam)
-					self:project(tg, e.x, e.y, DamageType.DARKNESS, dam)
-					self:project(tg, e.x, e.y, DamageType.SLOW, power)
+					e.src:project(tg, e.x, e.y, DamageType.LIGHT, dam)
+					e.src:project(tg, e.x, e.y, DamageType.DARKNESS, dam)
+					e.src:project(tg, e.x, e.y, DamageType.SLOW, power)
 				end
 			end
 		end
@@ -203,6 +204,6 @@ newTalent{
 		Residual power from the surge will emanate from your circles for %d turns; each circle you stand in will increase your celestial resources.
 		Shifting Shadows: +1 negative.
 		Sanctity: +1 postive.
-		Warding: +0.5 postive and negative.]]):format(t.getSlow(self, t), t.getDamage(self, t), t.getDuration(self, t))
+		Warding: +0.5 postive and negative.]]):format(t.getSlow(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t)), t.getDuration(self, t))
 	end,
 }
