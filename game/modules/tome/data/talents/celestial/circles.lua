@@ -170,7 +170,7 @@ newTalent{
 	end,
 }
 
-newTalent={
+newTalent{
 	name = "Celestial Surge",
 	type = {"celestial/circles", 4},
 	require = divi_req_high4,
