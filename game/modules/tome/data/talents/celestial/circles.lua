@@ -179,7 +179,7 @@ newTalent{
 	cooldown = 20,
 	positive = 15,
 	negative = 15,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 50, 150) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 75) end,
 	getSlow = function(self, t) return math.max(50, self:combatTalentSpellDamage(t, 10, 40)) end,
 	getDuration = function(self, t) return self:combatTalentLimit(t, 15, 1, 10) end,
 	action = function(self, t)
