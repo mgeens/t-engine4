@@ -74,7 +74,13 @@ function _M:init(mode)
 		direct_draw=function(item, x, y, get_size)
 			if get_size then return 132 end
 			item.img:toScreen(nil, x+2, y+2, 128, 128)
-			if self.cart[item.id_purchasable] and item.nb_purchase > 0 then in_cart_icon:toScreen(nil, x+2, y+2, 128, 128) end
+			if self.cart[item.id_purchasable] and item.nb_purchase > 0 then
+				in_cart_icon:toScreen(nil, x+2, y+2, 128, 128)
+				if item.nb_purchase > 1 and item.p_txt then
+					item.p_txt._tex:toScreenFull(x + 106 - item.p_txt.w / 2 + 2, y + 106 - item.p_txt.h / 2 + 2, item.p_txt.w, item.p_txt.h, item.p_txt._tex_w, item.p_txt._tex_h, 0, 0, 0, 1)
+					item.p_txt._tex:toScreenFull(x + 106 - item.p_txt.w / 2, y + 106 - item.p_txt.h / 2, item.p_txt.w, item.p_txt.h, item.p_txt._tex_w, item.p_txt._tex_h)
+				end
+			end
 			item.txt:display(x+10+130, y+2 + (128 - item.txt.h) / 2, 0)
 		end,
 	list=self.list, all_clicks=true, fct=function(item, _, button) self:use(item, button) end, select=function(item, sel) self:onSelectItem(item) end}
@@ -153,6 +159,29 @@ function _M:init(mode)
 	self:checks()
 
 	self:generateList()
+
+	if not config.settings.tome.mtxn_explain_seen then game:onTickEnd(function()
+		game:saveSettings("tome.mtxn_explain_seen", ("tome.mtxn_explain_seen = true\n"):format())
+		config.settings.tome.mtxn_explain_seen = true
+
+		Dialog:forceNextDialogUI("microtxn")
+		self:simpleLongPopup("Online Store", [[Welcome!
+
+I am #{italic}##ANTIQUE_WHITE#DarkGod#LAST##{normal}#, the creator of the game and before you go on your merry way I wish to take a few seconds of your time to explain why there are microtransactions in the game.
+
+Before you run off in terror let me put it plainly: I am very #{bold}#firmly #CRIMSON#against#LAST# pay2win#{normal}# things so rest assured I will not add this kind of stuff.
+
+So why put microtransactions? Tales of Maj'Eyal is a cheap/free game and has no subscription required to play. It is my baby and I love it; I plan to work on it for many years to come (as I do since 2009!) but for it to be viable I must ensure a steady stream of income as this is sadly the state of the world we live in.
+
+As for what kind of purchases are/will be available:
+- #GOLD#Cosmetics#LAST#: in addition to the existing racial cosmetics & item shimmers available in the game you can get new packs of purely cosmetic items & skins to look even more dapper!
+- #GOLD#Pay2DIE#LAST#: Tired of your character? End it with style!
+- #GOLD#Vault space#LAST#: For those that donated they can turn all those "useless" donations into even more online vault slots.
+- #GOLD#Community events#LAST#: A few online events are automatically and randomly triggered by the server. With those options you can force one of them to trigger; bonus point they trigger for the whole server so everybody online benefits from them each time!
+
+I hope I've convinced you of my non-evil intentions (ironic for a DarkGod I know ;)). I must say feel dirty even doing microtransactions even as benign as those but I want to find all the ways I can to ensure the game's future.
+Thanks, and have fun!]], math.min(900, game.w))
+	end) end
 end
 
 function _M:unload()
@@ -245,6 +274,14 @@ function _M:updateCart()
 			recap_qty = item.nb_purchase,
 			item = item,
 		}
+
+		if item.nb_purchase > 1 then
+			local str = tostring(item.nb_purchase)
+			local gen = self.font:draw(str, str:toTString():maxWidth(self.font), 255, 255, 255)
+			if gen and gen[1] then item.p_txt = gen[1] table.print(gen[1]) end
+		else
+			item.p_txt = nil
+		end
 	end end
 	table.sort(self.recap, "sort_name")
 	self.recap[#self.recap+1] = {

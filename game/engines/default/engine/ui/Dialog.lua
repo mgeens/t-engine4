@@ -349,6 +349,10 @@ function _M:webPopup(url)
 	return d
 end
 
+function _M:forceNextDialogUI(ui)
+	_M.force_ui_inside = ui
+	_M.force_ui_inside_once = true
+end
 
 title_shadow = true
 
@@ -356,6 +360,10 @@ function _M:init(title, w, h, x, y, alpha, font, showup, skin)
 	if self.force_ui_inside then
 		self._lastui = self.ui
 		Base:changeDefault(self.force_ui_inside)
+		if _M.force_ui_inside_once then
+			_M.force_ui_inside_once = nil
+			_M.force_ui_inside = nil
+		end
 	end
 
 	self.title = title

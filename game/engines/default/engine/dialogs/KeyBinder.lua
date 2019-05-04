@@ -205,7 +205,7 @@ function _M:generateList(key_source, force_all)
 	local tree = {}
 	local groups = {}
 	for _, k in ipairs(l) do
-		if not k.only_on_cheat or config.settings.cheat then
+		if (not k.only_on_cheat or config.settings.cheat) and (not k.check or k.check()) then
 			local item = {
 				k = k,
 				name = tstring{{"font","italic"}, {"color","AQUAMARINE"}, k.name, {"font","normal"}},

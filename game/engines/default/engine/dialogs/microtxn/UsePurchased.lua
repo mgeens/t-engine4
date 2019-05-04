@@ -91,6 +91,7 @@ Make sure you have #GOLD##{bold}#Allow online events#WHITE##{normal}# in the #GO
 		return
 	end
 
+	Dialog:forceNextDialogUI("microtxn")
 	Dialog:yesnoPopup(item.name, ("You are about to use a charge of this option. You currently have %d charges remaining."):format(item.nb_available), function(ret) if ret then
 		local popup = Dialog:simplePopup(item.name, "Please wait while contacting the server...", nil, true)
 		profile:registerTemporaryEventHandler("MicroTxnUseActionable", function(e)

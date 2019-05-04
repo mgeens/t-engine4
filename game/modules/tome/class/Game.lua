@@ -1979,9 +1979,6 @@ function _M:setupCommands()
 	-- Debug mode
 	self.key:addCommands{
 		[{"_d","ctrl"}] = function() if config.settings.cheat then
-			package.loaded["mod.dialogs.Donation"] = nil
-			self:registerDialog(require("mod.dialogs.Donation").new())
-do return end
 			local g = self.level.map(self.player.x, self.player.y, Map.TERRAIN)
 			print(g.define_as, g.image, g.z)
 			for i, a in ipairs(g.add_mos or {}) do print(" => ", a.image) end
@@ -2000,8 +1997,8 @@ do return end
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
-			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
-			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+			package.loaded["mod.dialogs.Donation"] = nil
+			self:registerDialog(require("mod.dialogs.Donation").new())
 do return end
 			if self.zone.short_name ~= "test" then
 				self:changeLevel(1, "test")
@@ -2021,9 +2018,6 @@ do return end
 			print(pcall(f))
 		end end,
 		[{"_f","ctrl"}] = function() if config.settings.cheat then
-			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
-			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
-do return end
 			local m = game.zone:makeEntityByName(game.level, "actor", "NPC_HUMANOID_KROG")
 			local x, y = util.findFreeGrid(game.player.x, game.player.y, 20, true, {[Map.ACTOR]=true})
 			if m and x then
@@ -2419,7 +2413,19 @@ do return end
 				self.log("Movement Mode: #LIGHT_RED#Passive#LAST#.")
 				game_or_player.bump_attack_disabled = true
 			end
-		end
+		end,
+
+		MTXN_PURCHASE = function()
+			if not profile:canMTXN() then return end
+			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+		end,
+
+		MTXN_USE = function()
+			if not profile:canMTXN() then return end
+			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
+		end,
 	}
 	-- add key bindings for targeting mode
 	self.targetmode_key:addBinds{

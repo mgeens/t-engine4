@@ -1053,6 +1053,10 @@ function _M:isDonator(s)
 	if not self.auth or not tonumber(self.auth.donated) or tonumber(self.auth.donated) < s then return false else return true end
 end
 
+function _M:canMTXN()
+	return self:isDonator()
+end
+
 function _M:allowDLC(dlc)
 	-- if core.steam then if core.steam.checkDLC(dlc[2]) then return true end end
 	-- if self.auth and self.auth.dlcs and self.auth.dlcs[dlc[1]] then return true end
