@@ -31,6 +31,8 @@ local Map = require "engine.Map"
 
 module(..., package.seeall, class.inherit(Dialog))
 
+_M.force_ui_inside = "microtxn"
+
 function _M:init(source)
 	self.donation_source = source or "ingame"
 	Dialog.init(self, "Donations", 600, 300)

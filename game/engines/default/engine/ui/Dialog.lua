@@ -353,6 +353,11 @@ end
 title_shadow = true
 
 function _M:init(title, w, h, x, y, alpha, font, showup, skin)
+	if self.force_ui_inside then
+		self._lastui = self.ui
+		Base:changeDefault(self.force_ui_inside)
+	end
+
 	self.title = title
 	self.alpha = self.alpha or 255
 	if showup ~= nil then
@@ -407,9 +412,11 @@ function _M:init(title, w, h, x, y, alpha, font, showup, skin)
 		self.frame.title_y = conf.title_bar.y
 		self.frame.title_w = conf.title_bar.w
 		self.frame.title_h = conf.title_bar.h
-		self.frame.b7 = self.frame.b7:gsub("dialogframe", "title_dialogframe")
-		self.frame.b8 = self.frame.b8:gsub("dialogframe", "title_dialogframe")
-		self.frame.b9 = self.frame.b9:gsub("dialogframe", "title_dialogframe")
+		if not conf.title_bar.no_gfx then
+			self.frame.b7 = self.frame.b7:gsub("dialogframe", "title_dialogframe")
+			self.frame.b8 = self.frame.b8:gsub("dialogframe", "title_dialogframe")
+			self.frame.b9 = self.frame.b9:gsub("dialogframe", "title_dialogframe")
+		end
 	end
 
 	self.uis = {}
@@ -501,6 +508,11 @@ function _M:generate()
 		_RIGHT = function() self:moveFocus(1) end,
 	}
 	self.key:addBind("SCREENSHOT", function() if type(game) == "table" and game.key then game.key:triggerVirtual("SCREENSHOT") end end)
+
+	if self._lastui then
+		Base:changeDefault(self._lastui)
+		self._lastui = nil
+	end
 end
 
 function _M:updateTitle(title)

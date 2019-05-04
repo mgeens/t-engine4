@@ -27,6 +27,8 @@ local Button = require "engine.ui.Button"
 
 module(..., package.seeall, class.inherit(Dialog))
 
+_M.force_ui_inside = "microtxn"
+
 function _M:init(mode)
 	if not mode then mode = core.steam and "steam" or "te4" end
 	self.mode = mode
