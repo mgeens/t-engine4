@@ -52,7 +52,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle increases your Defense by %d, and deals %0.2f darkness damage per turn to everyone else with in its radius. The circle lasts %d turns.
+		return ([[Creates a circle of radius %d at your feet; the circle increases your Defense by %d and deals %0.2f darkness damage per turn to everyone else within its radius. The circle lasts %d turns.
 		The damage will increase with your Spellpower.]]):
 		format(radius, damage, (damDesc (self, DamageType.DARKNESS, damage)), duration)
 	end,
@@ -167,7 +167,7 @@ newTalent{
 	info = function(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle protects you from silence effects while you remain in its radius, and silences everyone else who enters. The circle lasts %d turns.]]):
+		return ([[Creates a circle of radius %d at your feet; the circle protects you from silence effects while you remain within its radius and silences everyone else who enters. The circle lasts %d turns.]]):
 		format(radius, duration)
 	end,
 }
@@ -207,7 +207,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle slows incoming projectiles by %d%%, and attempts to push all creatures other than yourself out of its radius, inflicting %0.2f light damage and %0.2f darkness damage per turn as it does so.  The circle lasts %d turns.
+		return ([[Creates a circle of radius %d at your feet; the circle slows incoming projectiles by %d%% and attempts to push all creatures other than yourself out of its radius, inflicting %0.2f light damage and %0.2f darkness damage per turn as it does so.  The circle lasts %d turns.
 		The effects will increase with your Spellpower.]]):
 		format(radius, damage*5, (damDesc (self, DamageType.LIGHT, damage)), (damDesc (self, DamageType.DARKNESS, damage)), duration)
 	end,

@@ -73,7 +73,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Curses your target, decreasing all damage they do by %d%% for 10 turns.
+		return ([[Curses your target, decreasing all damage it does by %d%% for 10 turns.
 		The effects will improve with your Spellpower.]]):format(t.imppower(self,t))
 	end,
 }
