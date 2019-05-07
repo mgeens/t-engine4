@@ -4147,3 +4147,30 @@ newEffect{
 		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed)
 	end,
 }
+
+newEffect{
+	name = "FORGONE_VISION", image = "effects/blinded.png",
+	desc = "Blinded",
+	long_desc = function(self, eff) return "The target is blinded, unable to see anything." end,
+	type = "other",
+	subtype = {},
+	status = "detrimental",
+	parameters = {power = 2},
+	on_lose = function(self, err) return "#Target# recovers sight.", "-Blind" end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("blind", 1)
+		eff.blind = self:addTemporaryValue("blind_immune", eff.power) --Lets the player control blinds for the duration--
+		if game.level then
+			self:resetCanSeeCache()
+			if self.player then for uid, e in pairs(game.level.entities) do if e.x then game.level.map:updateMap(e.x, e.y) end end game.level.map.changed = true end
+		end
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("blind", eff.tmpid)
+		self:removeTemporaryValue("blind_immune", eff.blind)
+		if game.level then
+			self:resetCanSeeCache()
+			if self.player then for uid, e in pairs(game.level.entities) do if e.x then game.level.map:updateMap(e.x, e.y) end end game.level.map.changed = true end
+		end
+	end,
+}
