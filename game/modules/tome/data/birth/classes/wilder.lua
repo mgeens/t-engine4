@@ -84,6 +84,7 @@ newBirthDescriptor{
 		["cunning/survival"]={true, 0.0},
 		["technique/combat-techniques-active"]={false, 0.0},
 		["technique/combat-training"]={true, 0.0},
+		["technique/combat-techniques-passive"]={false, 0},
 	},
 	talents = {
 		[ActorTalents.T_WAR_HOUND] = 1,
@@ -102,10 +103,6 @@ newBirthDescriptor{
 			{type="weapon", subtype="mindstar", name="mossy mindstar", autoreq=true, ego_chance=-1000},
 			{type="armor", subtype="light", name="rough leather armour", autoreq=true, ego_chance=-1000},
 		},
-	},
-	copy_add = {
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 
@@ -176,8 +173,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 2,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 

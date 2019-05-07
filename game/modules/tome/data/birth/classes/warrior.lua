@@ -66,6 +66,7 @@ newBirthDescriptor{
 		["technique/2hweapon-assault"]={true, 0.3},
 		["technique/strength-of-the-berserker"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0.3},
+		["technique/combat-techniques-passive"]={true, 0.3},
 		["technique/combat-training"]={true, 0.3},
 		["technique/conditioning"]={true, 0.3},
 		["technique/superiority"]={false, 0.3},
@@ -100,8 +101,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 3,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 
@@ -134,6 +133,7 @@ newBirthDescriptor{
 		["technique/shield-offense"]={true, 0.3},
 		["technique/shield-defense"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0.3},
+		["technique/combat-techniques-passive"]={true, 0.3},
 		["technique/combat-training"]={true, 0.3},
 		["technique/conditioning"]={true, 0.3},
 		["technique/superiority"]={false, 0.3},
@@ -176,8 +176,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 6,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 
@@ -205,6 +203,7 @@ newBirthDescriptor{
 		["technique/marksmanship"]={true, 0.3},
 		["technique/reflexes"]={true, 0.3},
 		["technique/combat-techniques-active"]={true, 0.0},
+		["technique/combat-techniques-passive"]={true, 0.0},
 		--["technique/munitions"]={false, 0.3},  Disabled pending major revision
 		["technique/sniper"]={false, 0.3},
 		["technique/agility"]={false, 0.3},
@@ -253,10 +252,6 @@ newBirthDescriptor{
 			e.auto_shoot_talent = e.T_SHOOT
 		end),
 	},
-	copy_add = {
-		life_regen = 1,
-		stamina_regen = 1,
-	},
 }
 
 newBirthDescriptor{
@@ -284,6 +279,7 @@ newBirthDescriptor{
 		["spell/enhancement"]={true, 0.3},
 		["technique/superiority"]={false, 0.3},
 		["technique/combat-techniques-active"]={true, 0.0},
+		["technique/combat-techniques-passive"]={false, 0.0},
 		["technique/combat-training"]={true, 0.0},
 		["technique/magical-combat"]={true, 0.3},
 		["technique/shield-offense"]={false, 0.0},
@@ -334,8 +330,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 2,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 
@@ -364,6 +358,7 @@ newBirthDescriptor{
 		["cunning/survival"]={true, 0.0},
 		["technique/combat-training"]={true, 0.0},
 		["technique/combat-techniques-active"]={true, 0.3},
+		["technique/combat-techniques-passive"]={true, 0.0},
 		["technique/pugilism"]={true, 0.3},
 		["technique/finishing-moves"]={true, 0.3},
 		["technique/grappling"]={false, 0.3},
@@ -393,8 +388,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 2,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 

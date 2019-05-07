@@ -78,6 +78,7 @@ newBirthDescriptor{
 		["technique/combat-techniques-active"]={false, 0.0},
 		["technique/combat-training"]={true, 0.0},
 		["cunning/survival"]={false, 0.0},
+		["technique/combat-techniques-passive"]={true, 0.0},
 		["celestial/sun"]={true, 0.3},
 		["celestial/chants"]={true, 0.3},
 		["celestial/combat"]={true, 0.3},
@@ -125,8 +126,6 @@ newBirthDescriptor{
 	},
 	copy_add = {
 		life_rating = 2,
-		life_regen = 1,
-		stamina_regen = 1,
 	},
 }
 
