@@ -4173,4 +4173,9 @@ newEffect{
 			if self.player then for uid, e in pairs(game.level.entities) do if e.x then game.level.map:updateMap(e.x, e.y) end end game.level.map.changed = true end
 		end
 	end,
+	callbackOnTakeoff = function(self, eff, o)
+		if o.name and o.name == "Yaldan Baoth" then
+			self:removeEffect(self.EFF_FORGONE_VISION)
+		end
+	end,
 }
