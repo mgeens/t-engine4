@@ -7220,22 +7220,33 @@ newEntity{ base = "BASE_HELM",
 	cost = 700,
 	material_level = 4,
 	wielder = {
-		combat_armor = 6,
+		combat_armor = 10,
 		fatigue = 4,
 		resist_unseen = 25,
 		sight = -2,
-		inc_stats = { [Stats.STAT_WIL] = 10, [Stats.STAT_CON] = 7, },
+		lite = -2,
+		inc_stats = { [Stats.STAT_STR] = 10, [Stats.STAT_CON] = 10, },
 		inc_damage={
-			[DamageType.LIGHT] = 10,
+			[DamageType.LIGHT] = 15,
 		},
 		resists={
-			[DamageType.LIGHT] = 10,
-			[DamageType.DARKNESS] = 15,
+			[DamageType.LIGHT] = 15,
+			[DamageType.DARKNESS] = 25,
 		},
 		resists_cap={
 			[DamageType.DARKNESS] = 10,
 		},
 		blind_fight = 1,
+	},
+	max_power = 25, power_regen = 1,
+	use_power = {
+		name = function(self, who) return ("lower the helmet's visor, blinding yourself (and protecting from other blinds) for 6 turns."):format(self.use_power.range) end,
+		power = 25,
+		use = function(self, who)
+			who:setEffect(who.EFF_FORGONE_VISION, 6, {power = 2})
+			game.logSeen(who, "%s forgoes their vision!", who.name:capitalize())
+			return {id=true, used=true}
+		end
 	},
 }
 
