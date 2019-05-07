@@ -739,28 +739,29 @@ newEntity{ base = "BASE_HELM",
 	name = "Helm of the Dwarven Emperors", image = "object/artifact/helm_of_the_dwarven_emperors.png",
 	unided_name = "shining helm",
 	desc = [[A Dwarven helm embedded with a single diamond that can banish all underground shadows.]],
-	level_range = {20, 28},
+	level_range = {16, 28},
 	rarity = 240,
 	cost = 700,
 	material_level = 2,
 	wielder = {
-		lite = 1,
+		lite = 6,
 		combat_armor = 6,
 		fatigue = 4,
 		blind_immune = 0.3,
 		confusion_immune = 0.3,
 		inc_stats = { [Stats.STAT_WIL] = 3, [Stats.STAT_MAG] = 4, },
+		resists={ [DamageType.DARKNESS] = 10, },
 		inc_damage={
-			[DamageType.LIGHT] = 8,
+			[DamageType.LIGHT] = 10,
 		},
 	},
-	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_SUN_FLARE, level = 3, power = 30 },
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Dwarf" then
 			local Stats = require "engine.interface.ActorStats"
 
-			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CUN] = 5, [Stats.STAT_MAG] = 5, [Stats.STAT_WIL] = 5, })
+			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CON] = 10, [Stats.STAT_MAG] = 6, [Stats.STAT_WIL] = 7})
+			self:specialWearAdd({"wielder","blind_immune"}, 0.3)
+			self:specialWearAdd({"wielder","confusion_immune"}, 0.3)
 			game.logPlayer(who, "#LIGHT_BLUE#The legacy of Dwarven Emperors grants you their wisdom.")
 		end
 	end,
