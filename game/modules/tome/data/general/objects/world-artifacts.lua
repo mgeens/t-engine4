@@ -280,7 +280,7 @@ newEntity{ base = "BASE_AMULET",
 	name = "Feathersteel Amulet", color = colors.WHITE, image = "object/artifact/feathersteel_amulet.png",
 	unided_name = "light amulet",
 	desc = [[The weight of the world seems a little lighter with this amulet around your neck.]],
-	level_range = {5, 15},
+	level_range = {5, 20},
 	rarity = 200,
 	cost = 90,
 	material_level = 2,
@@ -288,7 +288,7 @@ newEntity{ base = "BASE_AMULET",
 		max_encumber = 20,
 		fatigue = -20,
 		avoid_pressure_traps = 1,
-		movement_speed = 0.2,
+		movement_speed = 0.25, --ghoul movespeed breakpoint!--
 	},
 }
 
