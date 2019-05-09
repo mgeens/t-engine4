@@ -1379,9 +1379,9 @@ newEntity{ base = "BASE_DIGGER",
 	material_level = 1,
 	digspeed = 12,
 	wielder = {
-		inc_damage = { [DamageType.BLIGHT] = 4 },
-		on_melee_hit = {[DamageType.BLIGHT] = 15},
-		combat_apr = 5,
+		inc_damage = { [DamageType.BLIGHT] = 5 },
+		on_melee_hit = {[DamageType. DRAINLIFE] = 10},
+		combat_apr = 15,
 	},
 }
 
