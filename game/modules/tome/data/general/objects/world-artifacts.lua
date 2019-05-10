@@ -4011,7 +4011,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 	material_level = 1,
 	wielder = {
 		combat_def = 12,
-		combat_spellpower = 4,
+		combat_spellpower = 5,
 		
 		inc_damage={[DamageType.COLD] = 10},
 		resists={[DamageType.COLD] = 15},
@@ -4020,7 +4020,9 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 		
 		movement_speed=0.15,
 		talents_types_mastery = {
- 			["spell/water"] = 0.1,
+			["spell/water"] = 0.2,
+			["spell/ice"] = 0.2,
+			["spell/frost-alchemy"] = 0.2,
  		},
 	},
 }
