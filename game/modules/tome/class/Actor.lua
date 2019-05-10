@@ -35,6 +35,7 @@ require "mod.class.interface.Combat"
 require "mod.class.interface.Archery"
 require "mod.class.interface.ActorInscriptions"
 require "mod.class.interface.ActorObjectUse"
+local Particles = require "engine.Particles"
 local Faction = require "engine.Faction"
 local Dialog = require "engine.ui.Dialog"
 local Map = require "engine.Map"
@@ -1927,6 +1928,10 @@ function _M:tooltip(x, y, seen_by)
 		local eff = self:hasEffect(self.EFF_FROZEN)
 		ts:add({"color", 0, 255, 128}, ("Iceblock: %d"):format(eff.hp), {"color", "WHITE"}, true)
 	end
+	if game.player:knowTalent(self.T_VIM_POOL) then
+		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.3 + 1) * self.rank), {"color", "WHITE"}, true)
+	end
+
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
 
@@ -2610,11 +2615,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	-- Bloodlust!
-	if value > 0 and src and not (src == self) and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
-		src:setEffect(src.EFF_BLOODLUST, 1, {})
-	end
-
 	if value > 0 and self:knowTalent(self.T_RAMPAGE) then
 		local t = self:getTalentFromId(self.T_RAMPAGE)
 		t:onTakeHit(self, value / self.max_life)
@@ -3259,15 +3259,13 @@ function _M:die(src, death_note)
 	end
 
 	-- Increase vim
-	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) then src:incVim(1 + src:getWil() / 10) end
-	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
-	if src and death_note and death_note.source_talent and death_note.source_talent.vim and src.last_vim_turn ~= game.turn then
-		src.last_vim_turn = game.turn
-		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being refunded
-			src:incVim(util.getval(death_note.source_talent.vim, self, death_note.source_talent))
+	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) and src:reactionToward(self) <= 0 then
+		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being gained, otherwise it feels weird when you expect to spend life
+			src:incVim((src:getWil() * 0.3 + 1) * self.rank)
 		end)
 	end
-
+	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
+	
 	if src and ((src.resolveSource and src:resolveSource().player) or src.player) then
 		-- Achievements
 		local p = game.party:findMember{main=true}
@@ -4084,8 +4082,7 @@ function _M:getObjectModdableTile(slot)
 	return o
 end
 
---- Update tile for races that can handle it
-function _M:updateModdableTile()
+function _M:updateModdableTilePrepare()
 	local selfbase = self.replace_display or self
 	if not selfbase.moddable_tile or Map.tiles.no_moddable_tiles then
 		local add = selfbase.add_mos or {}
@@ -4120,9 +4117,33 @@ function _M:updateModdableTile()
 			self:removeAllMOs()
 			if self.x and game.level then game.level.map:updateMap(self.x, self.y) end
 		end
-		return
+		return false
 	end
 	self:removeAllMOs()
+	return true
+end
+
+--- Update tile for races that can handle it
+function _M:updateModdableTile()
+	if not self:updateModdableTilePrepare() then return end
+
+	if self.shimmer_particles_active then
+		for _, p in ipairs(self.shimmer_particles_active) do self:removeParticles(p) end
+		self.shimmer_particles_active = nil
+	end
+
+	if self.moddable_tile_base_shimmer_particle then
+		self.shimmer_particles_active = self.shimmer_particles_active or {}
+		for _, def in ipairs(self.moddable_tile_base_shimmer_particle) do
+			local args = table.clone(def.args, true)
+			if def.spot then
+				args.x, args.y = self:attachementSpot(def.spot, true)
+				if args.x and args.y and def.spot_offset then args.x, args.y = args.x + def.spot_offset.x, args.y + def.spot_offset.y end
+			end
+			local p = self:addParticles(Particles.new(def.name, 1, args, def.shader))
+			table.insert(self.shimmer_particles_active, p)
+		end
+	end
 
 	local base = "player/"..self.moddable_tile:gsub("#sex#", self.female and "female" or "male").."/"
 
@@ -4140,19 +4161,28 @@ function _M:updateModdableTile()
 			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
 		end
 	end
+	if self.moddable_tile_base_shimmer_aura then
+		for _, def in ipairs(self.moddable_tile_base_shimmer_aura) do
+			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
+		end
+	end
 
-	local basebody = self.moddable_tile_base or "base_01.png"
+	local basebody = self.moddable_tile_base_shimmer or self.moddable_tile_base or "base_01.png"
 	if self.moddable_tile_base_alter then basebody = self:moddable_tile_base_alter(basebody) end
 	add[#add+1] = {image = base..basebody, auto_tall=1}
 
 	if self.moddable_tile_tatoo then add[#add+1] = {image = base..self.moddable_tile_tatoo..".png", auto_tall=1} end
 
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, back=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
+			end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+			end
 		end
 	end
 
@@ -4176,18 +4206,23 @@ function _M:updateModdableTile()
 
 	i = self:getObjectModdableTile(self.INVEN_HANDS); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
 	i = self:getObjectModdableTile(self.INVEN_QUIVER); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
+
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
-			if i.moddable_tile_particle then
-				add[#add].particle = i.moddable_tile_particle[1]
-				add[#add].particle_args = i.moddable_tile_particle[2]
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, front=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
+				if i.moddable_tile_particle then
+					add[#add].particle = i.moddable_tile_particle[1]
+					add[#add].particle_args = i.moddable_tile_particle[2]
+				end
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
 			end
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			end
 		end
 	end
 
@@ -5292,13 +5327,15 @@ end
 -- Overwrite incVim to set up Bloodcasting
 local previous_incVim = _M.incVim
 function _M:incVim(v)
-	if v < 0 and self:attr("bloodcasting") then
-		local mult = self:attr("bloodcasting") / 100
+	if v < 0 then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end
+
 		local cost = math.abs(v)
 		if self.vim - cost < 0 then
 			local damage = (cost - (self.vim or 0)) * mult
 			self:incVim(-self.vim or 0)
-			self.life = self.life - damage
+			self.life = self.life - damage  -- die_at life can't be used
 		else
 			return previous_incVim(self, v)
 		end
@@ -5310,8 +5347,10 @@ end
 -- Overwrite getVim to set up Bloodcasting
 local previous_getVim = _M.getVim
 function _M:getVim()
-	if self:attr("bloodcasting") and self.on_preuse_checking_resources then
-		return math.max(self.vim, self.life)
+	if self.on_preuse_checking_resources then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end		
+		return math.max(self.vim, self.life / mult)
 	else
 		return previous_getVim(self)
 	end

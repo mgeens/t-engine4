@@ -1003,47 +1003,21 @@ newEffect{
 newEffect{
 	name = "BLOODLUST", image = "talents/bloodlust.png",
 	desc = "Bloodlust",
-	long_desc = function(self, eff) return ("The target is in a magical frenzy, improving spellpower by %d."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is in a magical frenzy, improving spellpower by %d."):format(eff.spellpower * eff.stacks) end,
 	type = "magical",
 	subtype = { frenzy=true },
 	status = "beneficial",
-	charges = function(self, eff) return math.floor(eff.power) end,
-	parameters = { power=1 },
-	on_timeout = function(self, eff)
-		if eff.refresh_turn + 10 < game.turn then -- Decay only if it's not refreshed
-			eff.power = math.max(0, eff.power*(100-eff.decay)/100)
-		end
-	end,
+	charges = function(self, eff) return math.floor(eff.spellpower * eff.stacks) end,
+	parameters = { spellpower=1, stacks=1, max_stacks=1 },
 	on_merge = function(self, old_eff, new_eff)
-		local dur = new_eff.dur
-		local max_turn, maxDur = self:callTalent(self.T_BLOODLUST, "getParams")
-		local maxSP = max_turn * 6 -- max total sp
-		local power = new_eff.power
-
-		if old_eff.last_turn + 10 <= game.turn then -- clear limits every game turn (10 ticks)
-			old_eff.used_this_turn = 0
-			old_eff.last_turn = game.turn
-		end
-		if old_eff.used_this_turn >= max_turn then
-			dur = 0
-			power = 0
-		else
-			power = math.min(max_turn-old_eff.used_this_turn, power)
-			old_eff.power = math.min(old_eff.power + power, maxSP)
-			old_eff.used_this_turn = old_eff.used_this_turn + power
-		end
-
-		old_eff.decay = 100/maxDur
-		old_eff.dur = math.min(old_eff.dur + dur, maxDur)
-		old_eff.refresh_turn = game.turn
+		old_eff.dur = new_eff.dur
+		old_eff.stacks = old_eff.stacks + 1
+		old_eff.max_stacks = new_eff.max_stacks
+		old_eff.stacks = math.min(old_eff.max_stacks, old_eff.stacks)
 		return old_eff
 	end,
 	activate = function(self, eff)
-		eff.last_turn = game.turn
-		local SPbonus, maxDur = self:callTalent(self.T_BLOODLUST, "getParams")
-		eff.used_this_turn = eff.power
-		eff.decay = 100/maxDur
-		eff.refresh_turn = game.turn
+		eff.stacks = 1
 	end,
 	deactivate = function(self, eff)
 	end,
@@ -4261,6 +4235,7 @@ newEffect{
 	long_desc = function(self, eff) return ("The target is hexed.  Each time it uses an ability it takes %0.2f fire damage, and talent cooldowns are increased by %s plus 1 turn."):
 		format(eff.dam, eff.power and ("%d%%"):format((eff.power-1)*100) or "")
 	end,
+	charges = function(self, eff) return (tostring(math.floor((eff.power-1)*100)).."%") end,
 	type = "magical",
 	subtype = { hex=true, fire=true },
 	status = "detrimental",
@@ -4274,6 +4249,7 @@ newEffect{
 	name = "EMPATHIC_HEX", image = "talents/empathic_hex.png",
 	desc = "Empathic Hex",
 	long_desc = function(self, eff) return ("The target is hexed, creating an empathic bond with its victims. It takes %d%% feedback damage from all damage done."):format(eff.power) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
 	type = "magical",
 	subtype = { hex=true, dominate=true },
 	status = "detrimental",

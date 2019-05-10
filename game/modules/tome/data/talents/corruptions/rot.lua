@@ -66,7 +66,7 @@ carrionworm = function(self, target, duration, x, y)
 			desc = [[A worm spawned from a damaged horror.  Destroying it may have consequences.]],
 			autolevel = "none",
 			ai = "summoned", ai_real = "tactical",
-			ai_state = { ai_move="move_complex", talent_in=1, ally_compassion=10 },
+			ai_state = { ai_move="move_complex", talent_in=1, ally_compassion=10, ai_target="target_closest", },
 			ai_tactic = resolvers.tactic"melee",
 			stats = { str=10, dex=15, mag=3, con=3 },
 			level_range = {1, self.level}, exp_worth = 0,

@@ -32,7 +32,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Improves your ghoulish body, increasing Strength and Constitution by %d.
-		Your body also becomes incredibly resilient to damage, you can never take a blow that deals more than %d%% of your maximum life.]])
+		Your body also becomes incredibly resilient to damage; you can never take a blow that deals more than %d%% of your maximum life.]])
 		:format(t.statBonus(self, t), t.getMaxDamage(self, t))
 	end,
 }
@@ -131,10 +131,9 @@ newTalent{
 	info = function(self, t)
 		local dam = 10 + self:combatTalentStatDamage(t, "con", 10, 60)
 		return ([[Vomit on the ground around you, healing any undead in the area and damaging anyone else.
-		Lasts %d turns, and deals %d blight damage or heals %d life.
-		Creatures standing in the retch also have %d%% chance to remove a physical effect each turn.
-		When you stand in your own retch your racial -20%% global speed is cancelled.
-		Undeads will be stripped from a detrimental effect while others will be stripped from a beneficial effect.]]):format(t.getduration(self, t), damDesc(self, DamageType.BLIGHT, dam), dam * 1.5, t.getPurgeChance(self, t))
+		Lasts %d turns and deals %d blight damage or heals %d life.
+		Creatures standing in the retch also have %d%% chance to remove a physical effect each turn; undeads will be stripped from a detrimental effect while others will be stripped from a beneficial effect.
+		When you stand in your own retch your racial -20%% global speed is cancelled.]]):format(t.getduration(self, t), damDesc(self, DamageType.BLIGHT, dam), dam * 1.5, t.getPurgeChance(self, t))
 	end,
 }
 

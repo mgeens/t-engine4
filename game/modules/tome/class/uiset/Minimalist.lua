@@ -129,6 +129,9 @@ local pf_money_x, pf_money_y = 0, 0
 local pf_exp_cur_x, pf_exp_cur_y = 0, 0
 local pf_name_x, pf_name_y = 0, 0
 local pf_level_x, pf_level_y = 0, 0
+local pf_mtx = {imageLoader("playerframe/mtx_coin_button.png"):glTexture()}
+local pf_mtx_sel = {imageLoader("playerframe/mtx_coin_button_sel.png"):glTexture()}
+local pf_mtx_x, pf_mtx_y = 0, 0
 
 local mm_bg_x, mm_bg_y = 0, 0
 local mm_bg = {imageLoader("minimap/back.png"):glTexture()}
@@ -174,6 +177,8 @@ _M:bindHook("UISet:Minimalist:Load", function(self, data)
 	data.alterlocal("pf_money_y", -2)
 	data.alterlocal("pf_exp_cur_x", 7)
 	data.alterlocal("pf_exp_cur_y", -1)
+	data.alterlocal("pf_mtx_x", 5)
+	data.alterlocal("pf_mtx_y", -15)
 	data.alterlocal("mm_bg_x", -5)
 	data.alterlocal("mm_bg_y", -3)
 end)
@@ -1564,6 +1569,10 @@ function _M:displayPlayer(scale, bx, by)
 		pf_encumber[1]:toScreenFull(162, 38, pf_encumber[6], pf_encumber[7], pf_encumber[2], pf_encumber[3], 1, 1, 1, glow / 255)
 	end
 
+	if profile:canMTXN() then
+		pf_mtx[1]:toScreenFull(298 + pf_mtx_x, 6 + pf_mtx_y, pf_mtx[6], pf_mtx[7], pf_mtx[2], pf_mtx[3], 1, 1, 1, 1)
+	end
+
 	if not self.locked then
 		move_handle[1]:toScreenFull(self.mhandle_pos.player.x, self.mhandle_pos.player.y, move_handle[6], move_handle[7], move_handle[2], move_handle[3])
 	end
@@ -1587,6 +1596,10 @@ function _M:displayPlayer(scale, bx, by)
 			elseif bx >= 269 and bx <= 269 + pf_levelup[6] and by >= 78 and by <= 78 + pf_levelup[7] and (player.unused_stats > 0 or player.unused_talents > 0 or player.unused_generics > 0 or player.unused_talents_types > 0) then
 				game.tooltip_x, game.tooltip_y = 1, 1; game:tooltipDisplayAtMap(game.w, game.h, "Click to assign stats and talents!")
 				if event == "button" and button == "left" then game.key:triggerVirtual("LEVELUP") end
+			-- MTX
+			elseif bx >= 298 + pf_mtx_x and bx <= 298 + pf_mtx_x + pf_mtx[6] and by >= 6 + pf_mtx_y and by <= 6 + pf_mtx_y + pf_mtx[7] and profile:canMTXN() then
+				game.tooltip_x, game.tooltip_y = 1, 1; game:tooltipDisplayAtMap(game.w, game.h, "Show available cosmetic & fun microtransation")
+				if event == "button" and button == "left" then game.key:triggerVirtual("MTXN_PURCHASE") end
 			-- Move handle
 			elseif not self.locked and bx >= self.mhandle_pos.player.x and bx <= self.mhandle_pos.player.x + move_handle[6] and by >= self.mhandle_pos.player.y and by <= self.mhandle_pos.player.y + move_handle[7] then
 				self:uiMoveResize("player", button, mx, my, xrel, yrel, bx, by, event)

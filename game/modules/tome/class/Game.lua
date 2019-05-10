@@ -634,6 +634,7 @@ function _M:createFBOs()
 			timestop = Shader.new("main_fbo/timestop"),
 			line_grids = Shader.new("main_fbo/line_grids"),
 			gestures = Shader.new("main_fbo/gestures"),
+			sharpen = Shader.new("main_fbo/sharpen"),
 		}
 		self.posteffects_use = { self.fbo_shader.shad }
 		if not self.fbo_shader.shad then self.fbo = nil self.fbo_shader = nil end
@@ -1996,6 +1997,9 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["mod.dialogs.Donation"] = nil
+			self:registerDialog(require("mod.dialogs.Donation").new())
+do return end
 			if self.zone.short_name ~= "test" then
 				self:changeLevel(1, "test")
 			else
@@ -2409,7 +2413,19 @@ do return end
 				self.log("Movement Mode: #LIGHT_RED#Passive#LAST#.")
 				game_or_player.bump_attack_disabled = true
 			end
-		end
+		end,
+
+		MTXN_PURCHASE = function()
+			if not profile:canMTXN() then return end
+			package.loaded["engine.dialogs.microtxn.ShowPurchasable"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.ShowPurchasable").new())
+		end,
+
+		MTXN_USE = function()
+			if not profile:canMTXN() then return end
+			package.loaded["engine.dialogs.microtxn.UsePurchased"] = nil
+			self:registerDialog(require("engine.dialogs.microtxn.UsePurchased").new())
+		end,
 	}
 	-- add key bindings for targeting mode
 	self.targetmode_key:addBinds{
