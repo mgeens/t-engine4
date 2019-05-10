@@ -415,6 +415,9 @@ newEntity{ base = "BASE_LITE",
 	wielder = {
 		lite = -1000,
 		infravision = 7,
+		inc_stats = {
+			[Stats.STAT_MAG] = 5,
+		},
 		resists_cap = { [DamageType.LIGHT] = 10 },
 		resists = { [DamageType.LIGHT] = 30 },
 		inc_damage={
@@ -422,10 +425,11 @@ newEntity{ base = "BASE_LITE",
 			[DamageType.BLIGHT] = 10,
 		},
 		talents_types_mastery = { 
-			["corruption/blight"] = 0.2,
-			["cursed/darkness"] = 0.2
+			["corruption/blight"] = 0.3,
+			["cursed/darkness"] = 0.3
 		},
 		combat_spellpower = 10,
+		combat_spellcrit = 10,
 	},
 
 	max_power = 15, power_regen = 1,
@@ -4053,9 +4057,9 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 		
 		movement_speed=0.15,
 		talents_types_mastery = {
-			["spell/water"] = 0.2,
-			["spell/ice"] = 0.2,
-			["spell/frost-alchemy"] = 0.2,
+			["spell/water"] = 0.3,
+			["spell/ice"] = 0.3,
+			["spell/frost-alchemy"] = 0.3, --more!
  		},
 	},
 }
