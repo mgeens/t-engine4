@@ -430,6 +430,32 @@ newEntity{ base = "BASE_LITE",
 
 	max_power = 15, power_regen = 1,
 	use_talent = { id = Talents.T_BLOOD_GRASP, level = 3, power = 10 },
+	special_desc = function(self) return "Unlights the tile you stand on every turn."
+	end,
+	on_wear = function(self, who)
+		self.worn_by = who
+	end,
+	on_takeoff = function(self, who)
+		self.worn_by = nil
+	end,
+	act = function(self)
+		local Map = require "engine.Map"
+		local Entity = require("engine.Entity")
+		self:useEnergy()
+		self:regenPower()
+
+		local who=self.worn_by --Make sure you can actually act!
+		if not self.worn_by then return end
+		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by = nil return end
+		if self.worn_by:attr("dead") then return end
+
+		who:project({type="hit"}, who.x, who.y, function(px, py)
+			local g = engine.Entity.new{name="darkness", show_tooltip=true, always_remember=false, unlit=2}
+			game.level.map(px, py, Map.TERRAIN+1, g)
+			game.level.map.remembers(px, py, false)
+			game.level.map.lites(px, py, false)
+		end, nil)
+	end,
 }
 
 newEntity{
@@ -2897,8 +2923,8 @@ newEntity{ base = "BASE_KNIFE",
 		resists_pen = {[DamageType.DARKNESS] = 10,},
 		inc_damage = {[DamageType.DARKNESS] = 5,},
 	},
-	max_power = 10, power_regen = 1,
-	use_talent = { id = Talents.T_INVOKE_DARKNESS, level = 2, power = 8 },
+	max_power = 20, power_regen = 1,
+	use_talent = { id = Talents.T_INVOKE_DARKNESS, level = 3, power = 20 },
 }
 
 newEntity{ base = "BASE_LEATHER_BELT",
