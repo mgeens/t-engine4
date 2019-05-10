@@ -414,11 +414,18 @@ newEntity{ base = "BASE_LITE",
 
 	wielder = {
 		lite = -1000,
-		infravision = 6,
+		infravision = 7,
 		resists_cap = { [DamageType.LIGHT] = 10 },
 		resists = { [DamageType.LIGHT] = 30 },
-		talents_types_mastery = { ["cunning/stealth"] = 0.1 },
-		combat_dam = 7,
+		inc_damage={
+			[DamageType.DARKNESS] = 20,
+			[DamageType.BLIGHT] = 10,
+		},
+		talents_types_mastery = { 
+			["corruption/blight"] = 0.2,
+			["cursed/darkness"] = 0.2
+		},
+		combat_spellpower = 10,
 	},
 
 	max_power = 15, power_regen = 1,
