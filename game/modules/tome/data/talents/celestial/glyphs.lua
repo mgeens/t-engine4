@@ -34,8 +34,8 @@ newTalent{
 	trapPower = function(self, t) return math.max(1,self:combatScale(self:getTalentLevel(t) * self:getMag(15, true), 0, 0, 75, 75)) end,
 	getGlyphCD = function(self, t) return 20 - self:combatTalentLimit(t, 15, 1, 13) end,
 	getDuration = function(self, t)
-		if self:knowTalent(self.T_PERSISTENT_GLYPHS) then
-			local pg = self:getTalentFromId(self.T_PERSISTENT_GLYPHS)
+		if self:knowTalent(self.T_GLYPHS_OF_FURY) then
+			local pg = self:getTalentFromId(self.T_GLYPHS_OF_FURY)
 			return self:combatTalentLimit(t, 6, 2, 5) + pg.getPersistentDuration(self, pg)
 		else
 			return self:combatTalentLimit(t, 6, 2, 5)
@@ -123,6 +123,8 @@ para_glyph = Trap.new{
 	x = tx, y = ty,
 	disarm_power = math.floor(t.trapPower(self,t)),
 	detect_power = math.floor(t.trapPower(self,t)),
+	inc_damage = table.clone(self.inc_damage or {}, true),
+	resists_pen = table.clone(self.resists_pen or {}, true),
 	canAct = false,
 	energy = {value=0},
 	act = function(self)
@@ -175,6 +177,8 @@ fatigue_glyph = Trap.new{
 	x = tx, y = ty,
 	disarm_power = math.floor(t.trapPower(self,t)),
 	detect_power = math.floor(t.trapPower(self,t)),
+	inc_damage = table.clone(self.inc_damage or {}, true),
+	resists_pen = table.clone(self.resists_pen or {}, true),
 	canAct = false,
 	energy = {value=0},
 	act = function(self)
@@ -362,7 +366,7 @@ newTalent{
 	require = divi_req_high4,
 	points = 5,
 	random_ego = "attack",
-	cooldown = function(self, t) return 6 + (consecutive_twilights or 0) * 2 end,
+	cooldown = function(self, t) return 6 + (self.consecutive_twilights or 0) * 2 end,
 	negative = 7,
 	positive = 7,
 	tactical = { ATTACKAREA = {LIGHT = 1, DARKNESS = 1} },
@@ -392,7 +396,7 @@ newTalent{
 		--count casts and cd at limit
 		self.consecutive_twilights = (self.consecutive_twilights or 0) + 1
 		if self.consecutive_twilights < t.getConsecutiveTurns(self, t) then
-			self.turn_procs.twilightsurge = 1
+			self.twilightproc = 1
 		else
 			self:startTalentCooldown(t)
 			self.consecutive_twilights = 0
@@ -400,14 +404,16 @@ newTalent{
 		return true, {ignore_cd=true}
 	end,
 	--cd if not used consecutively
-	callbackOnActEnd = function(self, t)
+	callbackOnAct = function(self, t)
 		self.consecutive_twilights = self.consecutive_twilights or 0
+		self.twilightproc = self.twilightproc or 0
 		if self.consecutive_twilights > 0 then
-			if not self.turn_procs.twilightsurge then
+			if self.twilightproc == 0 then
 				self:startTalentCooldown(t)
 				self.consecutive_twilights = 0
 			end
 		end
+		self.twilightproc = 0
 	end,
 	info = function(self, t)
 		local dam = t.getDamage(self, t)

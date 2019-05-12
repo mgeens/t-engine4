@@ -1403,7 +1403,7 @@ newEffect{
 		self:effectTemporaryValue(eff, "resists", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
 	end,
 	on_merge = function(self, old_eff, new_eff)
-		old_eff.glyphstacks = old_eff.glyphstacks + 1
+		old_eff.glyphstacks = (old_eff.glyphstacks or 0) + 1
 		old_eff.dur = new_eff.dur
 		return old_eff
 	end,
@@ -1419,7 +1419,7 @@ newEffect{
 	subtype = {darkness = true},
 	status = "detrimental",
 	paramters = {},
-	callbackOnActEnd = function(self, t)
+	callbackOnAct = function(self, eff)
 		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dam)
 		local tids = {}
 		for tid, lev in pairs(self.talents) do
