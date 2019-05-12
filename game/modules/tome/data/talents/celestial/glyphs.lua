@@ -99,7 +99,7 @@ para_glyph = Trap.new{
 		return false
 	end,
 	triggered = function(self, x, y, who)
-		if dam > 0 then
+		if self.dam then
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
 		end
 		if who:canBe("blind") then
@@ -152,10 +152,10 @@ fatigue_glyph = Trap.new{
 		return false
 	end,
 	triggered = function(self, x, y, who)
-		if dam > 0 then
+		if self.dam then
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam, {type="light"})
 		end
-		who:setEffect(who.EFF_STARLIGHT_FATIGUE, self.fatigueDur, {dam=fatigueDam, src=self})
+		who:setEffect(who.EFF_STARLIGHT_FATIGUE, self.fatigueDur, {dam=self.fatigueDam, src=self})
 		game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
 --divine glyphs buff
 		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
@@ -195,7 +195,6 @@ explosion_glyph = Trap.new{
 	faction = self.faction,
 	dam = dam,
 	dist=dist,
---	agdam = agdam,
 	desc = function(self)
 		return ([[Explodes, knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam/2), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam/2))
 	end,
@@ -204,15 +203,15 @@ explosion_glyph = Trap.new{
 		return false
 	end,
 	triggered = function(self, x, y, who)
-		if dam > 0 then
+		if self.dam then
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
-			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
+			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam/2, {type="light"})
 		end
 		if who.canBe("knockback") then
 			local ox, oy = self.x, self.y
 			local dir = util.getDir(who.x, who.y, who.old_x, who.old_y)
 			self.x, self.y = util.coordAddDir(self.x, self.y, dir)
-			who:knockback(self.x, self.y, dist)
+			who:knockback(self.x, self.y, self.dist)
 			self.x, self.y = ox, oy
 		end
 --divine glyphs buff
@@ -330,7 +329,7 @@ newTalent{
 	getTriggerDam = function(self, t) return self:combatTalentSpellDamage(t, 20, 200) end,
 	info = function(self, t)
 		local dam = t.getTriggerDam(self, t)
-		return ([[Your glyphs are imbued with celestial fury; they last %d turns longer and when they trigger they will unleash this fury, dealing damage.
+		return ([[Your glyphs are imbued with celestial fury; they last %d turns longer and when triggered they will deal damage.
 		Glyph of Sunlight: Deals %d light damage.
 		Glyph of Starlight: Deals %d darkness damage.
 		Glyph of Twilight: Deals %d light and %d darkness damage.]]):format(t.getPersistentDuration(self, t), damDesc(self, DamageType.LIGHT, dam), damDesc(self, DamageType.DARKNESS, dam), damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))

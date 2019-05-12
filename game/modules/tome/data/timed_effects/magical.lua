@@ -1402,7 +1402,7 @@ newEffect{
 		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
 		self:effectTemporaryValue(eff, "resists", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
 	end,
-	on_merge = function(self, eff)
+	on_merge = function(self, old_eff, new_eff)
 		old_eff.glyphstacks = old_eff.glyphstacks + 1
 		old_eff.dur = new_eff.dur
 		return old_eff
@@ -1413,20 +1413,12 @@ newEffect{
 	name = "STARLIGHT_FATIGUE", image = "talents/glyph_of_fatigue.png",
 	desc = "Fatiguing Starlight",
 	long_desc = function(self, eff)
-		return ("Inflicted with a fatiguing starlight, taking %d darkness damage and increasing the cooldown of a cooling-down talent by 1 whenever they act"):format(eff.src:damDesc("DARKNESS", eff.dam))
+		return ("Inflicted with a fatiguing starlight, taking %d darkness damage and increasing the cooldown of a cooling-down talent by 1 whenever they act"):format(eff.src.summoner:damDesc(DamageType.DARKNESS, eff.dam))
 	end,
 	type = "magical",
 	subtype = {darkness = true},
 	status = "detrimental",
 	paramters = {},
-	activate = function(self, t)
-		if core.shader.active() then
-			eff.particles = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.1, a=0.6, radius=0.8, img="darkest_light"}))
-		end
-	end,
-	deactivate = function(self, t)
-		if eff.particles then self:removeParticles(eff.particles) end
-	end,
 	callbackOnActEnd = function(self, t)
 		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dam)
 		local tids = {}
@@ -1459,7 +1451,7 @@ newEffect{
 	name = "DARKLIGHT", image = "talents/darkest_light.png",
 	desc = "Shrouded in Darklight",
 	long_desc = function(self, eff)
-		return ("%d%% of the targets damage is being split between light and darkness and they are taking %d light and %d darkness damage each turn."):format(eff.conversion * 100, eff.src:damDesc("LIGHT", eff.dotDam), eff.src:damDesc("DARKNESS", eff.dotDam))
+		return ("%d%% of the targets damage is being split between light and darkness and they are taking %d light and %d darkness damage each turn."):format(eff.conversion * 100, eff.src:damDesc(DamageType.LIGHT, eff.dotDam), eff.src:damDesc(DamageType.DARKNESS, eff.dotDam))
 	end,
 	type = "magical",
 	subtype = {light=true, darkness=true},
