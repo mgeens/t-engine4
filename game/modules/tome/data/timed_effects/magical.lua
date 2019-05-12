@@ -1472,11 +1472,11 @@ newEffect{
 			eff.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0.5, a=0.4, radius=0.6, img="healcelestial"}))
 		end
 	end,
-	deactivate = function(self, t)
+	deactivate = function(self, eff)
 		if eff.particle1 then self:removeParticles(eff.particle1) end
 		if eff.particle2 then self:removeParticles(eff.particle2) end
 	end,
-	on_timeout = function(self, t)
+	on_timeout = function(self, eff)
 		DamageType:get(DamageType.LIGHT).projector(eff.src, self.x, self.y, DamageType.LIGHT, eff.dotDam)
 		DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.dotDam)
 	end,

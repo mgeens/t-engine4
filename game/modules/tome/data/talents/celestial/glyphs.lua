@@ -381,44 +381,47 @@ newTalent{
 	getConsecutiveTurns = function(self, t) return self:combatTalentLimit(t, 15, 4, 10) end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
-		local x, y = self:getTarget(tg)
+		local x, y, target = self:getTarget(tg)
 		if not x or not y then return nil end
 		--alternate between damage types
-		local twilightdam = twilightdam or false
-		if twilightdam == false then
-			self:project(tg, x, y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)), {type="light"})
-			twilightdam = true
+		self.twilightdam = self.twilightdam or false
+		if self.twilightdam == false then
+			self:project(tg, x, y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
+			self.twilightdam = true
 
-			if core.shader.active(4) then
-				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+			if target and core.shader.active(4) then
+				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
 			end
 
 		else
-			self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)), {type="dark"})
-			twilightdam = false
+			self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
+			self.twilightdam = false
 
-			if core.shader.active(4) then
-				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-				tg:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+			if target and core.shader.active(4) then
+				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
+				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
 			end
 
 		end
 		--count casts and cd at limit
-		consecutive_twilights = (consecutive_twilights or 0) + 1
-		if consecutive_twilights < t.getConsecutiveTurns(self, t) then
+		self.consecutive_twilights = (self.consecutive_twilights or 0) + 1
+		if self.consecutive_twilights < t.getConsecutiveTurns(self, t) then
 			self.turn_procs.twilightsurge = 1
 		else
 			self:startTalentCooldown(t)
-			consecutive_twilights = 0
+			self.consecutive_twilights = 0
 		end
 		return true, {ignore_cd=true}
 	end,
 	--cd if not used consecutively
 	callbackOnActEnd = function(self, t)
-		if consecutive_twilights > 0 and not self.turn_procs.twilightsurge then
-			self:startTalentCooldown(t)
-			consecutive_twilights = 0
+		self.consecutive_twilights = self.consecutive_twilights or 0
+		if self.consecutive_twilights > 0 then
+			if not self.turn_procs.twilightsurge then
+				self:startTalentCooldown(t)
+				self.consecutive_twilights = 0
+			end
 		end
 	end,
 	info = function(self, t)

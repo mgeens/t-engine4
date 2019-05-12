@@ -150,7 +150,7 @@ newTalent{
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
 	end,
 	getDotDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 50) end,
-	getConversion = function(self, t) return math.min(100, self:combatTalentScale(t, 15, 100)) end,
+	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.05, 1)) end,
 	getDuration = function(self, t) return 6 end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -165,9 +165,9 @@ newTalent{
 	end,
 	info = function(self, t)
 		local radius = self:getTalentRadius(t)
-		local dotDamage = t.getDotDamage(self, t)
+		local dotDam = t.getDotDamage(self, t)
 		local conversion = t.getConversion(self, t)
 		local duration = t.getDuration(self, t)
-		return ([[Call upon eclipse light to shroud your foes in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(damDesc(self, DamageType.LIGHT, dotDamage), damDesc(self, DamageType.DARKNESS, dotDamage), conversion*100, duration)
+		return ([[Call upon eclipse light to shroud your foes in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(damDesc(self, DamageType.LIGHT, dotDam), damDesc(self, DamageType.DARKNESS, dotDam), conversion*100, duration)
 	end,
 }
