@@ -142,10 +142,11 @@ fatigue_glyph = Trap.new{
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
 	faction = self.faction,
+	dam = dam,
 	fatigueDur = fatigueDur,
 	fatigueDam = fatigueDam,
 	desc = function(self)
-		return ([[Inflicts a fatiguing darkness, dealing %d darkness damage and icnreasing the cooldown of a cooling-down talent by 1 upon every action for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam), self.fatigueDur)
+		return ([[Deals %d darkness damage and inflicts a fatiguing darkness, dealing %d darkness damage and increasing the cooldown of a cooling-down talent by 1 upon every action for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.fatigueDam), self.fatigueDur)
 	end,
 	canTrigger = function(self, x, y, who)
 		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
@@ -207,7 +208,7 @@ explosion_glyph = Trap.new{
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
 			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam/2, {type="light"})
 		end
-		if who.canBe("knockback") then
+		if who:canBe("knockback") then
 			local ox, oy = self.x, self.y
 			local dir = util.getDir(who.x, who.y, who.old_x, who.old_y)
 			self.x, self.y = util.coordAddDir(self.x, self.y, dir)
