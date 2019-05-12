@@ -372,7 +372,7 @@ newTalent{
 	getConsecutiveTurns = function(self, t) return self:combatTalentLimit(t, 15, 4, 10) end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
-		local x, y, target = self:getTarget(tg)
+		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		--alternate between damage types
 		self.twilightdam = self.twilightdam or false
@@ -380,19 +380,13 @@ newTalent{
 			self:project(tg, x, y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
 			self.twilightdam = true
 
-			if target and core.shader.active(4) then
-				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healcelestial", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-			end
+			game.level.map:particleEmitter(x, y, 1, "circle", {base_rot=0, oversize=0.8, a=130, limit_life=5, appear=5, speed=0, img="healcelestial", radius=0})
 
 		else
 			self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
 			self.twilightdam = false
 
-			if target and core.shader.active(4) then
-				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=true, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=false,size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=1.0, beamColor1={0xd8/255, 0xff/255, 0x21/255, 1}, beamColor2={0xf7/255, 0xff/255, 0x9e/255, 1}, circleDescendSpeed=3}))
-			end
+			game.level.map:particleEmitter(x, y, 1, "circle", {base_rot=0, oversize=0.8, a=130, limit_life=5, appear=5, speed=0, img="healdark", radius=0})
 
 		end
 		--count casts and cd at limit
