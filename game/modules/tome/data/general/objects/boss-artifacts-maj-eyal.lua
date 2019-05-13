@@ -419,7 +419,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	},
 
 	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_CALL_LIGHTNING, level=2, power = 18 },
+	use_talent = { id = Talents.T_CALL_LIGHTNING, level=2, power = 20 },
 	talent_on_wild_gift = { {chance=10, talent=Talents.T_CALL_LIGHTNING, level=2} },
 }
 
@@ -442,11 +442,11 @@ newEntity{ base = "BASE_RING",
 		talent_cd_reduction={
 			[Talents.T_SHADOWSTEP]=1,
 		},
-		inc_damage={ [DamageType.PHYSICAL] = 5, },
+		inc_damage={ [DamageType.DARKNESS] = 10, },
 	},
 
 	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_DARK_TENDRILS, level=2, power = 40 },
+	use_talent = { id = Talents.T_SHADOWSTEP level=2, power = 50 },
 }
 
 newEntity{ base = "BASE_HELM",
@@ -1622,9 +1622,9 @@ It has been kept somewhat intact with layers of salt and clay, but in spite of t
 		if who.descriptor and who.descriptor.race == "Halfling" then
 			local Stats = require "engine.interface.ActorStats"
 			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_LCK] = -10}) -- Overcomes the +5 Bonus and adds a -5 penalty
-			self:specialWearAdd({"wielder","combat_physresist"}, -5)
-			self:specialWearAdd({"wielder","combat_mentalresist"}, -5)
-			self:specialWearAdd({"wielder","combat_spellresist"}, -5)
+			self:specialWearAdd({"wielder","combat_physresist"}, -10)
+			self:specialWearAdd({"wielder","combat_mentalresist"}, -10)
+			self:specialWearAdd({"wielder","combat_spellresist"}, -10)
 			game.logPlayer(who, "#LIGHT_RED#You feel uneasy carrying %s.", self:getName())
 		end
 	end,
