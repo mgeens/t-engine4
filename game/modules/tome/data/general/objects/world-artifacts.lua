@@ -2672,10 +2672,10 @@ newEntity{ base = "BASE_MINDSTAR",
 		combat_mindcrit = 4,
 		life_regen = 2,
 		healing_factor = 0.2,
-		talents_types_mastery = { ["wild-gift/fungus"] = 0.2,},
+		talents_types_mastery = { ["wild-gift/fungus"] = 0.3,},
 	},
-	max_power = 60, power_regen = 1,
-	use_talent = { id = Talents.T_BLOOM_HEAL, level = 1, power = 60 },
+	max_power = 40, power_regen = 1,
+	use_talent = { id = Talents.T_BLOOM_HEAL, level = 1, power = 40 },
 }
 
 newEntity{ base = "BASE_STAFF",
@@ -2738,76 +2738,39 @@ newEntity{ base = "BASE_MINDSTAR",
 		dammod = {wil=0.5, cun=0.1, str=0.2},
 		damtype=DamageType.PHYSICAL,
 		convert_damage = {
-			[DamageType.COLD] = 18,
-			[DamageType.FIRE] = 18,
-			[DamageType.ACID] = 18,
-			[DamageType.LIGHTNING] = 18,
+			[DamageType.COLD] = 20,
+			[DamageType.FIRE] = 20,
+			[DamageType.ACID] = 20,
+			[DamageType.LIGHTNING] = 20,
+			[DamageType.PHYSICAL] = 20,
 		},
 	},
 	wielder = {
-		combat_mindpower = 8,
-		combat_dam = 8,
-		combat_mindcrit = 4,
-		combat_physcrit = 4,
+		combat_mindpower = 10,
+		combat_dam = 10,
+		combat_mindcrit = 5,
+		combat_physcrit = 5,
 		inc_damage={
-			[DamageType.PHYSICAL] 	= 8,
-			[DamageType.FIRE] 	= 8,
-			[DamageType.COLD] 	= 8,
-			[DamageType.LIGHTNING] 	= 8,
-			[DamageType.ACID] 	= 8,
+			[DamageType.PHYSICAL] 	= 12,
+			[DamageType.FIRE] 	= 12,
+			[DamageType.COLD] 	= 12,
+			[DamageType.LIGHTNING] 	= 12,
+			[DamageType.ACID] 	= 12,
 		},
 		resists={
-			[DamageType.PHYSICAL] 	= 8,
-			[DamageType.FIRE] 	= 8,
-			[DamageType.COLD] 	= 8,
-			[DamageType.ACID] 	= 8,
-			[DamageType.LIGHTNING] 	= 8,
+			[DamageType.PHYSICAL] 	= 10,
+			[DamageType.FIRE] 	= 10,
+			[DamageType.COLD] 	= 10,
+			[DamageType.ACID] 	= 10,
+			[DamageType.LIGHTNING] 	= 10,
 		},
 		talents_types_mastery = {
-			["wild-gift/sand-drake"] = 0.1,
-			["wild-gift/fire-drake"] = 0.1,
-			["wild-gift/cold-drake"] = 0.1,
-			["wild-gift/storm-drake"] = 0.1,
-			["wild-gift/venom-drake"] = 0.1,
+			["wild-gift/sand-drake"] = 0.3,
+			["wild-gift/fire-drake"] = 0.3,
+			["wild-gift/cold-drake"] = 0.3,
+			["wild-gift/storm-drake"] = 0.3,
+			["wild-gift/venom-drake"] = 0.3,
 		}
-	},
-	ms_set_wyrm = true,
-	set_list = {
-		multiple = true,
-		harmonious = {{"ms_set_harmonious", true, inven_id = other_hand,},},
-		wyrm = {{"ms_set_drake", true, inven_id = other_hand,},},},
-	set_desc = {
-		wyrm = "The natural wyrm seeks an element.",
-	},
-	on_set_complete = {
-		multiple = true,
-		harmonious = function(self, who, inven_id)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
-			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "harmonious")
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "harmonious")
-		end,
-		wyrm = function(self, who, inven_id)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
-			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "wyrm")
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "wyrm")
-		end,
-	},
-	on_set_broken = {
-		multiple = true,
-		harmonious = function(self, who, inven_id, set_objects)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#SLATE#The link between the mindstars is broken.")
-			end
-		end,
-		wyrm = function(self, who, inven_id, set_objects)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#SLATE#The link between the mindstars is broken.")
-			end
-		end,
 	},
 	on_wear = function(self, who)
 		self.worn_by = who
