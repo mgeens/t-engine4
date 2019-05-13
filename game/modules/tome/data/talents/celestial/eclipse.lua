@@ -150,7 +150,7 @@ newTalent{
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
 	end,
 	getDotDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 50) end,
-	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.05, 1)) end,
+	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.1, 0.7)) end,
 	getDuration = function(self, t) return 6 end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)

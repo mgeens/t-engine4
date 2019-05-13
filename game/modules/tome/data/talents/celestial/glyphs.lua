@@ -84,7 +84,7 @@ newTalent{
 ----------------------------------------------------------------
 -- START - Define Glyph Traps - START
 ----------------------------------------------------------------
-para_glyph = Trap.new{
+sun_glyph = Trap.new{
 	name = "glyph of sunlight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
@@ -139,7 +139,7 @@ para_glyph = Trap.new{
 	summoner_gain_exp = true,
 }
 
-fatigue_glyph = Trap.new{
+star_glyph = Trap.new{
 	name = "glyph of starlight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
@@ -193,7 +193,7 @@ fatigue_glyph = Trap.new{
 	summoner_gain_exp = true,
 }
 
-explosion_glyph = Trap.new{
+twi_glyph = Trap.new{
 	name = "glyph of twilight",
 	type = "elemental", id_by_type=true, unided_name = "trap",
 	display = '^', color=colors.GOLD, image = "trap/trap_glyph_repulsion_01_64.png",
@@ -256,22 +256,22 @@ explosion_glyph = Trap.new{
 ----------------------------------------------------------------
 --build a table of glyphs
 		local glyphs = {}
-		if not self.turn_procs.glyph_para then
-			glyphs[#glyphs+1] = para_glyph
+		if (self.sun_glyph_cd or 0) == 0 then
+			glyphs[#glyphs+1] = sun_glyph
 		end
-		if not self.turn_procs.glyph_fatigue then
-			glyphs[#glyphs+1] = fatigue_glyph
+		if (self.star_glyph_cd or 0) == 0 then
+			glyphs[#glyphs+1] = star_glyph
 		end
-		if not self.turn_procs.glyph_explosion then
-			glyphs[#glyphs+1] = explosion_glyph
+		if (self.twi_glyph_cd or 0) == 0 then
+			glyphs[#glyphs+1] = twi_glyph
 		end
 		if #glyphs < 1 then return nil end
 --get a random glyph from table
 		local trap = rng.tableRemove(glyphs)
 --set cooldowns
-		if trap == para_glyph then self.turn_procs.glyph_para = t.getGlyphCD(self, t)
-		elseif trap == fatigue_glyph then self.turn_procs.glyph_fatigue = t.getGlyphCD(self, t)
-		elseif trap == explosion_glyph then self.turn_procs.glyph_explosion = t.getGlyphCD(self, t)
+		if trap == sun_glyph then self.sun_glyph_cd = t.getGlyphCD(self, t)
+		elseif trap == star_glyph then self.star_glyph_cd = t.getGlyphCD(self, t)
+		elseif trap == twi_glyph then self.twi_glyph_cd = t.getGlyphCD(self, t)
 		end
 ---place a glyph on each glyphgrid
 		for i = 1, 9 do
@@ -301,6 +301,20 @@ explosion_glyph = Trap.new{
 		if p.particle1 then self:removeParticles(p.particle1) end
 		if p.particle2 then self:removeParticles(p.particle2) end
 		return true
+	end,
+	callbackOnAct = function(self, t)
+		if self.sun_glyph_cd and self.sun_glyph_cd > 0 then
+			self.sun_glyph_cd = math.max(0, self.sun_glyph_cd - 1)
+--			if self.sun_glyph_cd == 0 then self.sun_glyph_cd = false end
+		end
+		if self.star_glyph_cd and self.star_glyph_cd > 0 then
+			self.star_glyph_cd = math.max(0, self.star_glyph_cd - 1)
+--			if self.star_glyph_cd == 0 then self.star_glyph_cd = false end
+		end
+		if self.twi_glyph_cd and self.twi_glyph_cd > 0 then
+			self.twi_glyph_cd = math.max(0, self.twi_glyph_cd - 1)
+--			if self.twi_glyph_cd == 0 then self.twi_glyph_cd = false end
+		end
 	end,
 	info = function(self, t)
 		local dam = t.getGlyphDam(self, t)
@@ -352,7 +366,7 @@ newTalent{
 	points = 5,
 	mode = "passive",
 	getMaxStacks = function(self, t) return self:combatTalentLimit(t, 6, 2, 5) end,
-	getTurns = function(self, t) return self:combatTalentLimit(t, 14, 1, 12) end,
+	getTurns = function(self, t) return self:combatTalentLimit(t, 14, 1, 12.8) end,
 	info = function(self, t)
 		return ([[Up to 3 times pers turn when one of your glyphs triggers you feel a surge of celestial power, increasing your darkness and light resistence and affinity by 5%% for %d turns, stacking up to %d times.]]):format(t.getTurns(self, t), t.getMaxStacks(self, t))
 	end,
@@ -371,6 +385,9 @@ newTalent{
 	positive = 7,
 	tactical = { ATTACKAREA = {LIGHT = 1, DARKNESS = 1} },
 	range = 7,
+	on_pre_use = function(self, t, silent)
+		return self:isTalentActive(self.T_GLYPHS)
+	end,
 	direct_hit = true,
 	getDamage =  function(self, t) return self:combatTalentSpellDamage(t, 10, 170) end,
 	getConsecutiveTurns = function(self, t) return self:combatTalentLimit(t, 15, 4, 10) end,

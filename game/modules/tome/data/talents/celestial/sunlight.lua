@@ -165,7 +165,7 @@ newTalent{
 	end,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 200) end,
 	getDuration = function(self, t) return 6 end,
-	getPower = function(self, t) return self:combatTalentLimit(t, 1.5, 0.3, 1) end,
+	getPower = function(self, t) return self:combatTalentLimit(t, 1.5, 0.2, 1) end,
 	action = function(self, t)
 		self.inc_damage.LIGHT, self.resists_pen.LIGHT, self.inc_damage.DARKNESS, self.resists_pen.DARKNESS = self.inc_damage.LIGHT or 0, self.resists_pen.LIGHT or 0, self.inc_damage.DARKNESS or 0, self.resists_pen.DARKNESS or 0
 		local damVal = math.max(self.inc_damage.LIGHT, self.inc_damage.DARKNESS * t.getPower(self, t))

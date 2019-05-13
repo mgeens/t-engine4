@@ -428,7 +428,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 			atk = atk + effPredator.typeAttackChange
 		end
 	end
-	
+
 	local dam, apr, armor = force_dam or self:combatDamage(weapon), self:combatAPR(weapon), target:combatArmor()
 	print("[ATTACK] to ", target.name, "dam/apr/atk/mult ::", dam, apr, atk, mult, "vs. armor/def", armor, def)
 
@@ -469,7 +469,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 			repelled = true
 		end
 	end
-	
+
 	if target:knowTalent(target.T_BLADE_WARD) and target:hasDualWeapon() then
 		local chance = target:callTalent(target.T_BLADE_WARD, "getChance")
 		if rng.percent(chance) then
@@ -477,7 +477,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 			repelled = true
 		end
 	end
-	
+
 	if target:isTalentActive(target.T_INTUITIVE_SHOTS) then
 		local chance = target:callTalent(target.T_INTUITIVE_SHOTS, "getChance")
 		repelled = target:callTalent(target.T_INTUITIVE_SHOTS, "proc", self)
@@ -489,7 +489,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		target:setEffect(target.EFF_STONE_SKIN, 5, {power=target:attr("auto_stoneskin")})
 		repelled = true
 	end
-	
+
 	if repelled then
 		self:logCombat(target, "#Target# repels an attack from #Source#.")
 	elseif self:checkEvasion(target) then
@@ -497,13 +497,13 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		self:logCombat(target, "#Target# evades #Source#.")
 	elseif self.turn_procs.auto_melee_hit or (self:checkHit(atk, def) and (self:canSee(target) or self:attr("blind_fight") or target:attr("blind_fighted") or rng.chance(3))) then
 		local pres = util.bound(target:combatArmorHardiness() / 100, 0, 1)
-		
+
 		-- Apply weapon damage range
 		-- By doing this first, variable damage is more "smooth" against high armor
 		local damrange = self:combatDamageRange(weapon)
 		dam = rng.range(dam, dam * damrange)
 		print("[ATTACK] HIT:: damrange", damrange, "==> dam/apr::", dam, apr, "vs. armor/hardiness", armor, pres)
-		
+
 		local eff = target.knowTalent and target:hasEffect(target.EFF_PARRY)
 		-- check if target deflects the blow (deflected blows cannot crit)
 		if eff then
@@ -533,7 +533,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		armor = math.max(0, armor - apr)
 		dam = math.max(dam * pres - armor, 0) + (dam * (1 - pres))
 		print("[ATTACK] after armor", dam)
-		
+
 		if deflect == 0 then dam, crit = self:physicalCrit(dam, weapon, target, atk, def) end
 		print("[ATTACK] after crit", dam)
 		dam = dam * mult
@@ -747,7 +747,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 		local dam = t.getDamage(self, t)
 		DamageType:get(DamageType.DRAINLIFE).projector(self, target.x, target.y, DamageType.DRAINLIFE, dam)
 	end
-	
+
 	-- Temporal Cast
 	if hitted and self:knowTalent(self.T_WEAPON_FOLDING) and self:isTalentActive(self.T_WEAPON_FOLDING) then
 		self:callTalent(self.T_WEAPON_FOLDING, "doWeaponFolding", target)
@@ -888,7 +888,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 					end
 				end
 			end
-		end 
+		end
 	end
 	-- Acid splash
 	if hitted and not target.dead and target:knowTalent(target.T_ACID_BLOOD) then
@@ -1249,7 +1249,7 @@ function _M:combatDefenseBase(fake)
 			mult = mult + self:callTalent(self.T_MOBILE_DEFENCE,"getDef")
 		end
 	end
-	
+
 	return math.max(0, d * mult + add) -- Add bonuses last to avoid compounding defense multipliers from talents
 end
 
@@ -1632,13 +1632,13 @@ function _M:getDammod(combat)
 	if combat.talented == 'knife' and self:knowTalent('T_LETHALITY') then sub('str', 'cun') end
 	if combat.talented and self:knowTalent('T_STRENGTH_OF_PURPOSE') then sub('str', 'mag') end
 	if self:attr 'use_psi_combat' then
-		if dammod['str'] then 
+		if dammod['str'] then
 			dammod['str'] = (dammod['str'] or 0) * (0.6 + self:callTalent(self.T_RESONANT_FOCUS, "bonus")/100)
 			sub('str', 'wil')
 		end
-		if dammod['dex'] then 
+		if dammod['dex'] then
 			dammod['dex'] = (dammod['dex'] or 0) * (0.6 + self:callTalent(self.T_RESONANT_FOCUS, "bonus")/100)
-			sub('dex', 'cun') 
+			sub('dex', 'cun')
 		end
 	end
 
@@ -1912,7 +1912,7 @@ function _M:physicalCrit(dam, weapon, target, atk, def, add_chance, crit_power_a
 			crit_power_add = crit_power_add + (eff.power/100)
 		end
 	end
-	
+
 	if target then
 		chance = chance - target:combatCritReduction()
 	end
@@ -2002,7 +2002,7 @@ function _M:spellCrit(dam, add_chance, crit_power_add)
 			t.on_crit(self, t)
 		end
 
-		if self:knowTalent(self.T_GLYPHS) then
+		if self:isTalentActive(self.T_GLYPHS) then
 			local t = self:getTalentFromId(self.T_GLYPHS)
 			t.on_crit(self, t)
 		end
@@ -2508,7 +2508,7 @@ function _M:hasDualWeapon(type, offtype, quickset)
 	local maininv, offinv = self:getInven(quickset and "QS_MAINHAND" or "MAINHAND"), self:getInven(quickset and "QS_OFFHAND" or "OFFHAND")
 	local weapon, offweapon = maininv and maininv[1], offinv and offinv[1]
 	if not offweapon and weapon and weapon.double_weapon then offweapon = weapon end
-	
+
 	if not (weapon and weapon.combat and not weapon.archery) or not (offweapon and offweapon.combat and not offweapon.archery) then
 		return nil
 	end
@@ -2608,8 +2608,8 @@ function _M:buildCombo()
 			power = 2
 			sta = sta + sta
 		end
-		if p>=5 or (power==2 and p>=4) then 
-			sta = sta + sta 
+		if p>=5 or (power==2 and p>=4) then
+			sta = sta + sta
 		end
 		self:incStamina(sta)
 	end
