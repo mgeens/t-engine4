@@ -99,12 +99,6 @@ newEntity{ theme={mental=true}, name="psi on hit", points = 1, rarity = 16, leve
 	wielder = { psi_regen_when_hit = resolvers.randartmax(.04, 2), },
 }
 
-----------------------------------------------------------------
--- Misc
-----------------------------------------------------------------
-newEntity{ theme={mental=true}, name="summon heal", points = 1, rarity = 16, level_range = {1, 50},
-	wielder = { heal_on_nature_summon  = resolvers.randartmax(10, 50), },
-}
 
 ----------------------------------------------------------------
 -- Physical Themes
