@@ -343,11 +343,12 @@ newEntity{ base = "BASE_LITE",
 	encumber = 1,
 	rarity = 100,
 	desc = [[A small crystal phial that captured Sunlight during the Summertide.]],
+	special_desc = function(self) return "When attacking in melee, deals 15 light damage and lights tiles in radius 1." end,
 	cost = 200,
 
 	max_power = 15, power_regen = 1,
 	use_power = {
-		name = function(self, who) return ("call light (%d power, based on Willpower)"):format(self.use_power.litepower(self, who)) end,
+		name = function(self, who) return ("call light, dispelling darkness and lighting tiles in radius 20.(%d power, based on Willpower)"):format(self.use_power.litepower(self, who)) end,
 		power = 10,
 		litepower = function(self, who) return who:combatStatScale("wil", 50, 150) end,
 		use = function(self, who)
@@ -360,9 +361,9 @@ newEntity{ base = "BASE_LITE",
 	wielder = {
 		lite = 5,
 		healing_factor = 0.1,
-		melee_project= {[DamageType.LITE_LIGHT] = 15},
 		inc_damage = {[DamageType.LIGHT]=10},
 		resists = {[DamageType.LIGHT]=30},
+		melee_project={[DamageType.LITE_LIGHT_BURST] = 15}
 	},
 }
 
@@ -5547,7 +5548,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		resists={[DamageType.NATURE] = 25},
 		resists_pen={[DamageType.NATURE] = 10},
 		on_melee_hit={[DamageType.SLIME] = 35},
-		talents_types_mastery = { ["wild-gift/moss"] = 0.1,},
+		talents_types_mastery = { ["wild-gift/moss"] = 0.3,},
 	},
 }
 
