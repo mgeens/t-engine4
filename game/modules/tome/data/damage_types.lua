@@ -4154,16 +4154,16 @@ newDamageType{
 
 ---new lite light burst for summertide phial
 newDamageType{
-    name = "#YELLOW#Lite Light#LAST# Burst (radius 1)", type = "LITE_LIGHT_BURST", --text_color = "#YELLOW#",
-    projector = function(src, x, y, type, dam, state)
-        state = initState(state)
-        useImplicitCrit(src, state)
-        src:project({type="ball", selffire=true, x=x, y=y, radius=1, range=0}, x, y, function(bx, by) -- selffire to lite our tile, reaction check will prevent damage
-            DamageType:get(DamageType.LITE).projector(src, bx, by, DamageType.LITE, 1, state) -- lite the tiles
-            local actor = game.level.map(bx, by, Map.ACTOR)
-            if actor and src:reactionToward(actor) < 0 then -- only deal damage to hostiles
-                DamageType:get(DamageType.LIGHT).projector(src, bx, by, DamageType.LIGHT, dam, state)
-            end
-        end)
-    end,
+	name = "#YELLOW#Lite Light#LAST# Burst (radius 1)", type = "LITE_LIGHT_BURST", --text_color = "#YELLOW#",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		src:project({type="ball", selffire=true, x=x, y=y, radius=1, range=0}, x, y, function(bx, by) -- selffire to lite our tile, reaction check will prevent damage
+			DamageType:get(DamageType.LITE).projector(src, bx, by, DamageType.LITE, 1, state) -- lite the tiles
+			local actor = game.level.map(bx, by, Map.ACTOR)
+			if actor and src:reactionToward(actor) < 0 then -- only deal damage to hostiles
+				DamageType:get(DamageType.LIGHT).projector(src, bx, by, DamageType.LIGHT, dam, state)
+			end
+		end)
+	end,
 }
