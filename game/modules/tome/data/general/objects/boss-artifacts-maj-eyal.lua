@@ -994,9 +994,7 @@ newEntity{ base = "BASE_SHIELD",
 		lifesteal = 8,
 	},
 	wielder = {
-		combat_armor = 5,
-		combat_def = 15,
-		combat_def_ranged = 15,
+		combat_armor = 15,
 		inc_stats = { [Stats.STAT_CON] = 10, },
 		fatigue = 19,
 		resists = { 
