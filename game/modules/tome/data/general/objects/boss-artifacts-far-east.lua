@@ -341,15 +341,15 @@ newEntity{ base = "BASE_LONGBOW",
 	},
 	wielder = {
 		combat_spellpower=20,
-		inc_stats = { [Stats.STAT_MAG] = 7, [Stats.STAT_DEX] = 5},
+		inc_stats = { [Stats.STAT_MAG] = 10, [Stats.STAT_DEX] = 10},
 		combat_def_ranged = 15,
 		ranged_project = {[DamageType.LIGHTNING] = 75},
 		talents_types_mastery = {
-			["spell/air"] = 0.2,
-			["spell/storm"] = 0.1,
+			["spell/air"] = 0.3,
+			["spell/storm"] = 0.3,
 		},
 		inc_damage={
-			[DamageType.LIGHTNING] = 20,
+			[DamageType.LIGHTNING] = 25,
 		},
 		resists={
 			[DamageType.LIGHTNING] = 20,
