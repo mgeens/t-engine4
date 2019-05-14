@@ -85,7 +85,7 @@ newTalent{
 -- START - Define Glyph Traps - START
 ----------------------------------------------------------------
 local function makeSunGlyph()
-	sun_glyph = Trap.new{
+	local sun_glyph = Trap.new{
 		name = "glyph of sunlight",
 		type = "elemental", id_by_type=true, unided_name = "trap",
 		display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
