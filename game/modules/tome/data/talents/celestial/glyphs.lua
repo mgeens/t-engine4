@@ -84,204 +84,217 @@ newTalent{
 ----------------------------------------------------------------
 -- START - Define Glyph Traps - START
 ----------------------------------------------------------------
-sun_glyph = Trap.new{
-	name = "glyph of sunlight",
-	type = "elemental", id_by_type=true, unided_name = "trap",
-	display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
-	faction = self.faction,
-	dam = dam,
-	blindDur = blindDur,
-	desc = function(self)
-		return ([[Deals %d light damage and blinds for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), self.blindDur)
-	end,
-	canTrigger = function(self, x, y, who)
-		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
-		return false
-	end,
-	triggered = function(self, x, y, who)
-		if self.dam then
-			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
-		end
-		if who:canBe("blind") then
-			who:setEffect(who.EFF_BLINDED, self.blindDur, {})
-		end
-		game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
---divine glyphs buff
-		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
-			self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
-			if self.summoner.turn_procs.divine_glyphs < 3 then
-				local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
-				local maxStacks = dg.getMaxStacks(self.summoner, dg)
-				local dur = dg.getTurns(self.summoner, dg)
-				self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
-				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+local function makeSunGlyph()
+	sun_glyph = Trap.new{
+		name = "glyph of sunlight",
+		type = "elemental", id_by_type=true, unided_name = "trap",
+		display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
+		faction = self.faction,
+		dam = dam,
+		blindDur = blindDur,
+		desc = function(self)
+			return ([[Deals %d light damage and blinds for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), self.blindDur)
+		end,
+		canTrigger = function(self, x, y, who)
+			if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
+			return false
+		end,
+		triggered = function(self, x, y, who)
+			if self.dam then
+				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
 			end
-		end
-		return true
-	end,
-	temporary = t.getDuration(self, t),
-	x = tx, y = ty,
-	disarm_power = math.floor(t.trapPower(self,t)),
-	detect_power = math.floor(t.trapPower(self,t)),
-	inc_damage = table.clone(self.inc_damage or {}, true),
-	resists_pen = table.clone(self.resists_pen or {}, true),
-	canAct = false,
-	energy = {value=0},
-	act = function(self)
-		self:useEnergy()
-		self.temporary = self.temporary - 1
-		if self.temporary <= 0 then
-			if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
-			game.level:removeEntity(self)
-		end
-	end,
-	summoner = self,
-	summoner_gain_exp = true,
-}
+			if who:canBe("blind") then
+				who:setEffect(who.EFF_BLINDED, self.blindDur, {})
+			end
+			game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
+	--divine glyphs buff
+			if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
+				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
+				if self.summoner.turn_procs.divine_glyphs < 3 then
+					local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
+					local maxStacks = dg.getMaxStacks(self.summoner, dg)
+					local dur = dg.getTurns(self.summoner, dg)
+					self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
+					self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+				end
+			end
+			return true
+		end,
+		temporary = t.getDuration(self, t),
+		x = tx, y = ty,
+		disarm_power = math.floor(t.trapPower(self,t)),
+		detect_power = math.floor(t.trapPower(self,t)),
+		inc_damage = table.clone(self.inc_damage or {}, true),
+		resists_pen = table.clone(self.resists_pen or {}, true),
+		canAct = false,
+		energy = {value=0},
+		act = function(self)
+			self:useEnergy()
+			self.temporary = self.temporary - 1
+			if self.temporary <= 0 then
+				if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
+				game.level:removeEntity(self)
+			end
+		end,
+		summoner = self,
+		summoner_gain_exp = true,
+	}
+	return sun_glyph
+end
+local function makeStarGlyph()
+	local star_glyph = Trap.new{
+		name = "glyph of starlight",
+		type = "elemental", id_by_type=true, unided_name = "trap",
+		display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
+		faction = self.faction,
+		dam = dam,
+		fatigueDur = fatigueDur,
+		fatigueDam = fatigueDam,
+		desc = function(self)
+			return ([[Deals %d darkness damage and inflicts a fatiguing darkness, dealing %d darkness damage and increasing the cooldown of a cooling-down talent by 1 upon every action for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.fatigueDam), self.fatigueDur)
+		end,
+		canTrigger = function(self, x, y, who)
+			if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
+			return false
+		end,
+		triggered = function(self, x, y, who)
+			if self.dam then
+				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam, {type="light"})
+			end
+			who:setEffect(who.EFF_STARLIGHT_FATIGUE, self.fatigueDur, {dam=self.fatigueDam, src=self})
+			game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
+	--divine glyphs buff
+			if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
+				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
+				if self.summoner.turn_procs.divine_glyphs < 3 then
+					local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
+					local maxStacks = dg.getMaxStacks(self.summoner, dg)
+					local dur = dg.getTurns(self.summoner, dg)
+					self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
+					self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+				end
+			end
+			return true
+		end,
+		temporary = t.getDuration(self, t),
+		x = tx, y = ty,
+		disarm_power = math.floor(t.trapPower(self,t)),
+		detect_power = math.floor(t.trapPower(self,t)),
+		inc_damage = table.clone(self.inc_damage or {}, true),
+		resists_pen = table.clone(self.resists_pen or {}, true),
+		canAct = false,
+		energy = {value=0},
+		act = function(self)
+			self:useEnergy()
+			self.temporary = self.temporary - 1
+			if self.temporary <= 0 then
+				if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
+				game.level:removeEntity(self)
+			end
+		end,
+		summoner = self,
+		summoner_gain_exp = true,
+	}
+	return star_glyph
+end
 
-star_glyph = Trap.new{
-	name = "glyph of starlight",
-	type = "elemental", id_by_type=true, unided_name = "trap",
-	display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
-	faction = self.faction,
-	dam = dam,
-	fatigueDur = fatigueDur,
-	fatigueDam = fatigueDam,
-	desc = function(self)
-		return ([[Deals %d darkness damage and inflicts a fatiguing darkness, dealing %d darkness damage and increasing the cooldown of a cooling-down talent by 1 upon every action for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.fatigueDam), self.fatigueDur)
-	end,
-	canTrigger = function(self, x, y, who)
-		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
-		return false
-	end,
-	triggered = function(self, x, y, who)
-		if self.dam then
-			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam, {type="light"})
-		end
-		who:setEffect(who.EFF_STARLIGHT_FATIGUE, self.fatigueDur, {dam=self.fatigueDam, src=self})
-		game.level.map:particleEmitter(x, y, 0, "shadow_flash", {radius=0, x=x, y=y})
---divine glyphs buff
-		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
-			self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
-			if self.summoner.turn_procs.divine_glyphs < 3 then
-				local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
-				local maxStacks = dg.getMaxStacks(self.summoner, dg)
-				local dur = dg.getTurns(self.summoner, dg)
-				self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
-				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+local function makeTwilightGlyph()
+	local twi_glyph = Trap.new{
+		name = "glyph of twilight",
+		type = "elemental", id_by_type=true, unided_name = "trap",
+		display = '^', color=colors.GOLD, image = "trap/trap_glyph_repulsion_01_64.png",
+		faction = self.faction,
+		dam = dam,
+		dist=dist,
+		desc = function(self)
+			return ([[Explodes, knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam/2), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam/2))
+		end,
+		canTrigger = function(self, x, y, who)
+			if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
+			return false
+		end,
+		triggered = function(self, x, y, who)
+			if self.dam then
+				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
+				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam/2, {type="light"})
 			end
-		end
-		return true
-	end,
-	temporary = t.getDuration(self, t),
-	x = tx, y = ty,
-	disarm_power = math.floor(t.trapPower(self,t)),
-	detect_power = math.floor(t.trapPower(self,t)),
-	inc_damage = table.clone(self.inc_damage or {}, true),
-	resists_pen = table.clone(self.resists_pen or {}, true),
-	canAct = false,
-	energy = {value=0},
-	act = function(self)
-		self:useEnergy()
-		self.temporary = self.temporary - 1
-		if self.temporary <= 0 then
-			if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
-			game.level:removeEntity(self)
-		end
-	end,
-	summoner = self,
-	summoner_gain_exp = true,
-}
-
-twi_glyph = Trap.new{
-	name = "glyph of twilight",
-	type = "elemental", id_by_type=true, unided_name = "trap",
-	display = '^', color=colors.GOLD, image = "trap/trap_glyph_repulsion_01_64.png",
-	faction = self.faction,
-	dam = dam,
-	dist=dist,
-	desc = function(self)
-		return ([[Explodes, knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam/2), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam/2))
-	end,
-	canTrigger = function(self, x, y, who)
-		if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
-		return false
-	end,
-	triggered = function(self, x, y, who)
-		if self.dam then
-			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
-			self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam/2, {type="light"})
-		end
-		if who:canBe("knockback") then
-			local ox, oy = self.x, self.y
-			local dir = util.getDir(who.x, who.y, who.old_x, who.old_y)
-			self.x, self.y = util.coordAddDir(self.x, self.y, dir)
-			who:knockback(self.x, self.y, self.dist)
-			self.x, self.y = ox, oy
-		end
---divine glyphs buff
-		if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
-			self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
-			if self.summoner.turn_procs.divine_glyphs < 3 then
-				local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
-				local maxStacks = dg.getMaxStacks(self.summoner, dg)
-				local dur = dg.getTurns(self.summoner, dg)
-				self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
-				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+			if who:canBe("knockback") then
+				local ox, oy = self.x, self.y
+				local dir = util.getDir(who.x, who.y, who.old_x, who.old_y)
+				self.x, self.y = util.coordAddDir(self.x, self.y, dir)
+				who:knockback(self.x, self.y, self.dist)
+				self.x, self.y = ox, oy
 			end
-		end
-		return true
-	end,
-	temporary = t.getDuration(self, t),
-	x = tx, y = ty,
-	disarm_power = math.floor(t.trapPower(self,t) * 0.8),
-	detect_power = math.floor(t.trapPower(self,t) * 0.8),
-	inc_damage = table.clone(self.inc_damage or {}, true),
-	resists_pen = table.clone(self.resists_pen or {}, true),
-	canAct = false,
-	energy = {value=0},
-	act = function(self)
-		self:useEnergy()
-		self.temporary = self.temporary - 1
-		if self.temporary <= 0 then
-			if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
-			game.level:removeEntity(self)
-		end
-	end,
-	summoner = self,
-	summoner_gain_exp = true,
-}
+	--divine glyphs buff
+			if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
+				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
+				if self.summoner.turn_procs.divine_glyphs < 3 then
+					local dg = self.summoner:getTalentFromId(self.summoner.T_DIVINE_GLYPHS)
+					local maxStacks = dg.getMaxStacks(self.summoner, dg)
+					local dur = dg.getTurns(self.summoner, dg)
+					self.summoner:setEffect(self.summoner.EFF_DIVINE_GLYPHS, dur, {maxStacks=maxStacks})
+					self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs + 1
+				end
+			end
+			return true
+		end,
+		temporary = t.getDuration(self, t),
+		x = tx, y = ty,
+		disarm_power = math.floor(t.trapPower(self,t) * 0.8),
+		detect_power = math.floor(t.trapPower(self,t) * 0.8),
+		inc_damage = table.clone(self.inc_damage or {}, true),
+		resists_pen = table.clone(self.resists_pen or {}, true),
+		canAct = false,
+		energy = {value=0},
+		act = function(self)
+			self:useEnergy()
+			self.temporary = self.temporary - 1
+			if self.temporary <= 0 then
+				if game.level.map(self.x, self.y, engine.Map.TRAP) == self then game.level.map:remove(self.x, self.y, engine.Map.TRAP) end
+				game.level:removeEntity(self)
+			end
+		end,
+		summoner = self,
+		summoner_gain_exp = true,
+	}
+	return twi_glyph
+end
 ----------------------------------------------------------------
 -- END - Define Glyph Traps - END
 ----------------------------------------------------------------
 --build a table of glyphs
 		local glyphs = {}
 		if (self.sun_glyph_cd or 0) == 0 then
-			glyphs[#glyphs+1] = sun_glyph
+			glyphs[#glyphs+1] = "sun"
 		end
 		if (self.star_glyph_cd or 0) == 0 then
-			glyphs[#glyphs+1] = star_glyph
+			glyphs[#glyphs+1] = "star"
 		end
 		if (self.twi_glyph_cd or 0) == 0 then
-			glyphs[#glyphs+1] = twi_glyph
+			glyphs[#glyphs+1] = "twilight"
 		end
 		if #glyphs < 1 then return nil end
 --get a random glyph from table
 		local trap = rng.tableRemove(glyphs)
 --set cooldowns
-		if trap == sun_glyph then self.sun_glyph_cd = t.getGlyphCD(self, t)
-		elseif trap == star_glyph then self.star_glyph_cd = t.getGlyphCD(self, t)
-		elseif trap == twi_glyph then self.twi_glyph_cd = t.getGlyphCD(self, t)
+		if trap == "sun" then self.sun_glyph_cd = t.getGlyphCD(self, t)
+		elseif trap == "star" then self.star_glyph_cd = t.getGlyphCD(self, t)
+		elseif trap == "twilight" then self.twi_glyph_cd = t.getGlyphCD(self, t)
 		end
 ---place a glyph on each glyphgrid
 		for i = 1, 9 do
 			local spot = i == 1 and {x=x, y=y} or rng.tableRemove(glyphgrids)
 			if not spot then break end
-			trap:identify(true)
-			trap:resolve() trap:resolve(nil, true)
-			trap:setKnown(self, true)
-			game.level:addEntity(trap)
-			game.zone:addEntity(game.level, trap, "trap", spot.x, spot.y)
+			local trap2
+			if trap == "sun" then trap2 = makeSunGlyph()
+			elseif trap == "star" then trap2 = makeStarGlyph()
+			elseif trap == "twilight" then trap2 = makeTwilightGlyph()
+			end
+			trap2:identify(true)
+			trap2:resolve() trap2:resolve(nil, true)
+			trap2:setKnown(self, true)
+			game.level:addEntity(trap2)
+			game.zone:addEntity(game.level, trap2, "trap", spot.x, spot.y)
 			game.level.map:particleEmitter(spot.x, spot.y, 1, "summon")
 		end
 --cost resources
