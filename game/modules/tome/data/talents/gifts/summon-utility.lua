@@ -343,19 +343,29 @@ newTalent{
 	name = "Summon Control",
 	type = {"wild-gift/summon-utility", 4},
 	require = gifts_req4,
-	mode = "passive",
 	points = 5,
+	equilibrium = 7,
+	cooldown = 20,
 	no_npc_use = true,
-	-- Effects implemented in setupsummon function in data\talents\gifts\gifts.lua
-	lifetime = function(self,t)	return math.floor(self:combatTalentScale(t, 5, 17, "log", 0, 4)) end,
-	DamReduc = function(self,t)
-		return self:combatLimit(self:getCun(7, true) * self:getTalentLevelRaw(t), 100, 0, 0, 35, 35) --Limit < 100%
+	requires_target = true,
+	range = 10,
+	direct_hit = true,
+	getRad = function(self, t) return self:combatTalentScale(t, 3, 7) end,
+	getDur = function(self, t) return self:combatTalentScale(t, 3, 8) end,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y, target = self:getTargetLimited(tg)
+		if not target or target == self then return nil 
+
+		else
+			target:setEffect(target.EFF_SUMMON_CONTROL, t.getDur(self, t), {range=t.getRad(self,t), src=self})
+		end
+
+		game:playSoundNear(self, "talents/spell_generic")
+		return true
 	end,
 	info = function(self, t)
-		return ([[Allows you to take direct control of any of your summons.
-		The summons will appear on the interface; a simple click on them will let you switch control.
-		You can also press control+tab to switch.
-		When taking control, your summon has its lifetime increased by %d turns, and it takes %d%% less damage.
-		The damage reduction is based on your Cunning.]]):format(t.lifetime(self,t), t.DamReduc(self,t))
+		return ([[Allows you to control all summons in a radius %d to target a creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
 	end,
 }
