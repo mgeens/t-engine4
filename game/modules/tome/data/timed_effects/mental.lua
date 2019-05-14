@@ -69,35 +69,21 @@ newEffect{
 newEffect{
 	name = "SUMMON_CONTROL", image = "talents/summon_control.png",
 	desc = "Summon Control",
-	long_desc = function(self, eff) return ("The target has been marked as the focus for all summons within %d radius."):format(eff.range) end,
+	long_desc = function(self, eff) return ("Reduces damage received by %d%% and increases summon time by %d."):format(eff.res, eff.incdur) end,
 	type = "mental",
 	subtype = { focus=true },
-	status = "detrimental",
-	parameters = { },
-	on_gain = function(self, err) return "Summons flock towards #Target#.", true end,
-	on_lose = function(self, err) return "#Target# is no longer being targeted by summons.", true end,
-	on_timeout = function(self, eff)
-
-			self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
-			if target.summoner == eff.src then
-				target:setTarget(self)
-			end
-			end)
-
-	end,
+	status = "beneficial",
+	parameters = { res=10, incdur=10 },
 	activate = function(self, eff)
-			self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
-			if target.summoner == eff.src then
-				target:setTarget(self)
-			end
-			end)
-
+		eff.resid = self:addTemporaryValue("resists", {all=eff.res})
+		eff.durid = self:addTemporaryValue("summon_time", eff.incdur)
 	end,
 	deactivate = function(self, eff)
+		self:removeTemporaryValue("resists", eff.resid)
+		self:removeTemporaryValue("summon_time", eff.durid)
+	end,
+	on_timeout = function(self, eff)
+		eff.dur = self.summon_time
 	end,
 }
 
