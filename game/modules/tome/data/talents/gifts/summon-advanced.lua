@@ -64,22 +64,27 @@ newTalent{
 	mode = "passive",
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 1.3, 3.7, "log")) end,
 	effectDuration = function(self, t) return math.floor(self:combatTalentScale(t, 5, 9)) end,
+	poisonDamage = function(self, t) return self:combatTalentMindDamage(t, 10, 60) end,
 	nbEscorts = function(self, t) return math.max(1,math.floor(self:combatTalentScale(t, 0.3, 2.7, "log"))) end,
+	resReduction = function(self, t) return self:combatTalentMindDamage(t, 15, 70) end,
+	amtHealing = function(self, t) return 30 + self:combatTalentMindDamage(t, 10, 350) end,
+	slowStrength = function(self, t) return self:combatLimit(self:combatTalentMindDamage(t, 5, 500), 1, 0.1, 0, 0.47 , 369) end, -- Limit speed loss to <100% 
+	knockbackDist = function(self, t) return 1+self:getTalentLevelRaw(t) end,
 	info = function(self, t)
 		local radius = self:getTalentRadius(t)
 		return ([[While Master Summoner is active, when a creature you summon appears in the world, it will trigger a wild effect:
-		- Ritch Flamespitter: Reduce fire resistance of all foes in a radius
-		- Hydra: Generates a cloud of lingering poison
-		- Rimebark: Reduce cold resistance of all foes in a radius
+		- Ritch Flamespitter: Reduce fire resistance of all foes in a radius by %d%%
+		- Hydra: Generates a cloud of lingering poison dealing %d nature damage per turn
+		- Rimebark: Reduce cold resistance of all foes in a radius by %d%%
 		- Fire Drake: Appears with %d fire drake hatchling(s)
-		- War Hound: Reduce physical resistance of all foes in a radius
-		- Jelly: Reduce nature resistance of all foes in a radius
-		- Minotaur: Reduces movement speed of all foes in a radius
+		- War Hound: Reduce physical resistance of all foes in a radius by %d%%
+		- Jelly: Reduce nature resistance of all foes in a radius by %d%%
+		- Minotaur: Reduces movement speed of all foes in a radius by %d%%
 		- Stone Golem: Dazes all foes in a radius
-		- Turtle: Heals all friendly targets in a radius
-		- Spider: The spider is so hideous that foes around it are repelled
+		- Turtle: Heals all friendly targets in a radius %d HP
+		- Spider: Repels all foes %d tiles
 		Radius for effects is %d, and the duration of each lasting effect is %d turns.
-		The effects improve with your Willpower.]]):format(t.nbEscorts(self, t), radius, t.effectDuration(self, t))
+		The effects improve with your Willpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t), t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
 	end,
 }
 
