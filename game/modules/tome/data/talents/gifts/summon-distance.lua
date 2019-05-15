@@ -240,7 +240,8 @@ newTalent{
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local duration = self:callTalent(self.T_GRAND_ARRIVAL, "effectDuration")
-		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_FIRE_RESIST, dur=duration, p={power=self:combatTalentMindDamage(t, 15, 70)}})
+		local reduction = self:callTalent(self.T_GRAND_ARRIVAL, "resReduction")
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_FIRE_RESIST, dur=duration, p={power=reduction}})
 		game.level.map:particleEmitter(m.x, m.y, tg.radius, "ball_fire", {radius=tg.radius})
 	end,
 	incStats = function(self, t, fake)
@@ -344,9 +345,10 @@ newTalent{
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
+		local poisonDmg = self:callTalent(self.T_GRAND_ARRIVAL, "poisonDamage")
 		game.level.map:addEffect(self,
 			m.x, m.y, self:callTalent(self.T_GRAND_ARRIVAL,"effectDuration"),
-			DamageType.POISON, {dam=self:combatTalentMindDamage(t, 10, 60), apply_power=self:combatMindpower()},
+			DamageType.POISON, {dam=poisonDmg, apply_power=self:combatMindpower()},
 			self:getTalentRadius(t),
 			5, nil,
 			MapEffect.new{color_br=255, color_bg=255, color_bb=255, effect_shader="shader_images/poison_effect.png"},
@@ -456,7 +458,8 @@ newTalent{
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local duration = self:callTalent(self.T_GRAND_ARRIVAL,"effectDuration")
-		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=self:combatTalentMindDamage(t, 15, 70)}}, {type="flame"})
+		local reduction = self:callTalent(self.T_GRAND_ARRIVAL,"resReduction")
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=reduction}}, {type="flame"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
 	incStats = function(self, t,fake)

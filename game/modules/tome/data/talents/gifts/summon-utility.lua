@@ -127,11 +127,12 @@ newTalent{
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y, ignore_nullify_all_friendlyfire=true}
+		local healing = self:callTalent(self.T_GRAND_ARRIVAL,"amtHealing")
 		self:project(tg, m.x, m.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target or self:reactionToward(target) < 0 then return end
 			target:attr("allow_on_heal", 1)
-			target:heal(30 + self:combatTalentMindDamage(t, 10, 350), m)
+			target:heal(healing, m)
 			target:attr("allow_on_heal", -1)
 			if core.shader.active(4) then
 				target:addParticles(Particles.new("shader_shield_temp", 1, {toback=true,size_factor=1.5, y=-0.3, img="healgreen", life=25}, {type="healing", time_factor=2000, beamsCount=20, noup=2.0}))
@@ -237,7 +238,8 @@ newTalent{
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t, x=m.x, y=m.y}
-		self:project(tg, m.x, m.y, DamageType.FEARKNOCKBACK, {dist=1+self:getTalentLevelRaw(t), x=m.x, y=m.y}, {type="acid"})
+		local knockback = self:callTalent(self.T_GRAND_ARRIVAL,"knockbackDist")
+		self:project(tg, m.x, m.y, DamageType.FEARKNOCKBACK, {dist=knockback, x=m.x, y=m.y}, {type="acid"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
 	incStats = function(self, t,fake)
@@ -343,19 +345,29 @@ newTalent{
 	name = "Summon Control",
 	type = {"wild-gift/summon-utility", 4},
 	require = gifts_req4,
-	mode = "passive",
 	points = 5,
+	equilibrium = 7,
+	cooldown = 20,
 	no_npc_use = true,
-	-- Effects implemented in setupsummon function in data\talents\gifts\gifts.lua
-	lifetime = function(self,t)	return math.floor(self:combatTalentScale(t, 5, 17, "log", 0, 4)) end,
-	DamReduc = function(self,t)
-		return self:combatLimit(self:getCun(7, true) * self:getTalentLevelRaw(t), 100, 0, 0, 35, 35) --Limit < 100%
+	requires_target = true,
+	range = 10,
+	direct_hit = true,
+	getRad = function(self, t) return self:combatTalentScale(t, 3, 7) end,
+	getDur = function(self, t) return self:combatTalentScale(t, 3, 8) end,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y, target = self:getTargetLimited(tg)
+		if not target or target == self then return nil 
+
+		else
+			target:setEffect(target.EFF_SUMMON_CONTROL, t.getDur(self, t), {range=t.getRad(self,t), src=self})
+		end
+
+		game:playSoundNear(self, "talents/spell_generic")
+		return true
 	end,
 	info = function(self, t)
-		return ([[Allows you to take direct control of any of your summons.
-		The summons will appear on the interface; a simple click on them will let you switch control.
-		You can also press control+tab to switch.
-		When taking control, your summon has its lifetime increased by %d turns, and it takes %d%% less damage.
-		The damage reduction is based on your Cunning.]]):format(t.lifetime(self,t), t.DamReduc(self,t))
+		return ([[Allows you to control all summons in a radius %d to target a creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
 	end,
 }
