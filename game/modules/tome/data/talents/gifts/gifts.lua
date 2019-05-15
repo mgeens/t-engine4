@@ -142,7 +142,7 @@ function setupSummon(self, m, x, y, no_control)
 	m:attr("confusion_immune", self:attr("confusion_immune"))
 	m:attr("numbed", self:attr("numbed"))
 	if game.party:hasMember(self) then
-		local can_control = not no_control and self:knowTalent(self.T_SUMMON_CONTROL)
+
 
 		m.remove_from_party_on_death = true
 		game.party:addMember(m, {
@@ -150,15 +150,7 @@ function setupSummon(self, m, x, y, no_control)
 			type="summon",
 			title="Summon",
 			orders = {target=true, leash=true, anchor=true, talents=true},
-			on_control = function(self)
-				local summoner = self.summoner
-				self:setEffect(self.EFF_SUMMON_CONTROL, 1000, {incdur=summoner:callTalent(summoner.T_SUMMON_CONTROL, "lifetime"), res=summoner:callTalent(summoner.T_SUMMON_CONTROL, "DamReduc")})
-				self:hotkeyAutoTalents()
-			end,
-			on_uncontrol = function(self)
-				self:removeEffect(self.EFF_SUMMON_CONTROL)
-			end,
-		})
+		}) 
 	end
 	m:resolve() m:resolve(nil, true)
 	m:forceLevelup(self.level)
