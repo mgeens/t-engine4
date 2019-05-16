@@ -18,6 +18,61 @@
 -- darkgod@te4.org
 
 newTalent{
+	name = "Jelly Spread", short_name = "JELLY_PBAOE",
+	type = {"wild-gift/other",1},
+	points = 5,
+	equilibrium = 10,
+	message = "@source@ oozes over the ground!!",
+	cooldown = 15,
+	tactical = { ATTACKAREA = { SLIME = 4} },
+	range = 0,
+	radius = 1,
+	target = function(self, t)
+		return {type="ball", range=0, radius=1, selffire=false}
+	end,
+	getDamage = function(self, t) return self:combatTalentStatDamage(t, "con", 40, 140) end,
+	getDuration = function(self, t) return 4 end,
+	action = function(self, t)
+		-- Add a lasting map effect
+		game.level.map:addEffect(self,
+			self.x, self.y, t.getDuration(self, t),
+			DamageType.NATURE, t.getDamage(self, t),
+			1,
+			5, nil,
+			MapEffect.new{color_br=25, color_bg=140, color_bb=40, effect_shader="shader_images/retch_effect.png"},
+				function(e, update_shape_only)
+					if not update_shape_only then e.radius = e.radius end
+					return true
+				end,
+			false,
+			false
+		)
+		game:playSoundNear(self, "talents/slime")
+		return true
+	end,
+	info = function(self, t)
+		local damage = t.getDamage(self, t)
+		local duration = t.getDuration(self, t)
+		return ([[Ooze over the floor, spreading caustic jelly in a radius of 1 lasting %d turns and dealing %d nature damage per turn to hostile creatures caught within.]]):format(duration, damDesc(self, DamageType.NATURE, damage))
+	end,
+}
+
+newTalent{
+	name = "Mitotic Split", short_name = "JELLY_MITOTIC_SPLIT",
+	type = {"wild-gift/other",1},
+	mode = "passive",
+	points = 5,
+	getDamage = function(self,t) return self:combatTalentLimit(t, 5, 20, 8) end,
+	getChance = function(self,t) return self:combatTalentLimit(t, 85, 50, 75) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "clone_on_hit", {min_dam_pct=t.getDamage(self,t), chance=t.getChance(self,t)})
+	end,
+	info = function(self, t)
+		return ([[%d%% chance to split upon taking a single hit dealing at least %d%% of your maximum life.]]):format(t.getChance(self, t), t.getDamage(self, t))
+	end,
+}
+	
+newTalent{
 	name = "War Hound",
 	type = {"wild-gift/summon-melee", 1},
 	require = gifts_req1,
@@ -192,8 +247,9 @@ newTalent{
 
 			combat_armor = 1, combat_def = 1,
 			never_move = 1,
+			resolvers.talents{ [Talents.T_JELLY_PBAOE]=self:getTalentLevelRaw(t) },
 
-			combat = { dam=8, atk=15, apr=5, damtype=DamageType.ACID, dammod={str=0.7} },
+			combat = { dam=8, atk=15, apr=5, damtype=DamageType.NATURE, dammod={str=0.7} },
 
 			wild_gift_detonate = t.id,
 
@@ -212,7 +268,7 @@ newTalent{
 		}
 		if self:attr("wild_summon") and rng.percent(self:attr("wild_summon")) then
 			m.name = m.name.." (wild summon)"
-			m[#m+1] = resolvers.talents{ [self.T_SWALLOW]=self:getTalentLevelRaw(t) }
+			m[#m+1] = resolvers.talents{ [self.T_JELLY_MITOTIC_SPLIT]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
 		game:playSoundNear(self, "talents/spell_generic")
