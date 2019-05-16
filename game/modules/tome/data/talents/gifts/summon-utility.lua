@@ -347,8 +347,9 @@ newTalent{
 	require = gifts_req4,
 	points = 5,
 	equilibrium = 7,
-	cooldown = 20,
+	cooldown = 10,
 	no_npc_use = true,
+	no_energy = true,
 	requires_target = true,
 	range = 10,
 	direct_hit = true,
@@ -368,6 +369,6 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Allows you to control all summons in a radius %d to target a creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
+		return ([[Draw focus on a creature, signalling to all of your summons within %d tiles of it to shift aggression towards the marked creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
 	end,
 }
