@@ -41,6 +41,32 @@ newTalent{ short_name = "RITCH_FLAMESPITTER_BOLT",
 	end,
 }
 
+newTalent{ short_name = "WILD_RITCH_FLAMESPITTER_BOLT",
+	name = "Flamespit",
+	type = {"wild-gift/other",1},
+	points = 5,
+	equilibrium = 2,
+	message = "@Source@ spits flames!",
+	range = 10,
+	reflectable = true,
+	requires_target = true,
+	direct_hit = true,
+	tactical = { ATTACK = { FIRE = 2 } },
+	action = function(self, t)
+		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		self:project(tg, x, y, DamageType.FIRE, self:mindCrit(self:combatTalentMindDamage(t, 8, 120)), {type="flame"})
+		game:playSoundNear(self, "talents/fire")
+		return true
+	end,
+	info = function(self, t)
+		return ([[Spits a bolt of fire, doing %0.2f fire damage.
+		The damage will increase with your Mindpower.]]):format(damDesc(self, DamageType.FIRE, self:combatTalentMindDamage(t, 8, 120)))
+	end,
+}
+
+--No longer on summons but is still used by ants
 newTalent{
 	name = "Flame Fury", image = "talents/blastwave.png",
 	type = {"wild-gift/other",1},
@@ -93,10 +119,42 @@ newTalent{
 		self:project(tg, x, y, DamageType.ACID, self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 430)))
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_acid", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		game:playSoundNear(self, "talents/breath")
+		
+		self:startTalentCooldown(self.T_ACID_SPIT_HYDRA, 8)
 		return true
 	end,
 	info = function(self, t)
 		return ([[Breathe acid on your foes, doing %0.2f damage.
+		The damage will increase with your Willpower.]]):format(damDesc(self, DamageType.ACID, self:combatTalentStatDamage(t, "wil", 30, 430)))
+	end,
+}
+
+newTalent{
+	name = "Acid Spit", short_name = "ACID_SPIT_HYDRA",
+	type = {"wild-gift/other",1},
+	require = gifts_req1,
+	points = 5,
+	equilibrium = 10,
+	cooldown = 8,
+	message = "@Source@ spits acid!",
+	tactical = { ATTACK = { ACID = 2 } },
+	range = 5,
+	requires_target = true,
+	target = function(self, t)
+		return {type="bolt", range=self:getTalentRange(t), talent=t}
+	end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		self:project(tg, x, y, DamageType.ACID, self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 430)), {type="acid"})
+		game:playSoundNear(self, "talents/breath")
+		
+		self:startTalentCooldown(self.T_ACID_BREATH, 8)
+		return true
+	end,
+	info = function(self, t)
+		return ([[Spit acid on a foe, doing %0.2f damage.
 		The damage will increase with your Willpower.]]):format(damDesc(self, DamageType.ACID, self:combatTalentStatDamage(t, "wil", 30, 430)))
 	end,
 }
@@ -126,10 +184,47 @@ newTalent{
 		else game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_lightning", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		end
 		game:playSoundNear(self, "talents/lightning")
+		
+		self:startTalentCooldown(self.T_LIGHTNING_SPIT_HYDRA, 8)
 		return true
 	end,
 	info = function(self, t)
 		return ([[Breathe lightning on your foes, doing %d to %d damage.
+		The damage will increase with your Willpower.]]):
+		format(
+			damDesc(self, DamageType.LIGHTNING, (self:combatTalentStatDamage(t, "wil", 30, 500)) / 3),
+			damDesc(self, DamageType.LIGHTNING, self:combatTalentStatDamage(t, "wil", 30, 500))
+		)
+	end,
+}
+
+newTalent{
+	name = "Lightning Spit", short_name = "LIGHTNING_SPIT_HYDRA", image = "talents/lightning_breath.png",
+	type = {"wild-gift/other",1},
+	require = gifts_req1,
+	points = 5,
+	equilibrium = 10,
+	cooldown = 8,
+	message = "@Source@ spits lightning!",
+	tactical = { ATTACK = { LIGHTNING = 2 } },
+	range = 5,
+	requires_target = true,
+	target = function(self, t)
+		return {type="bolt", range=self:getTalentRange(t), talent=t}
+	end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		local dam = self:combatTalentStatDamage(t, "wil", 30, 500)
+		self:project(tg, x, y, DamageType.LIGHTNING, self:mindCrit(rng.avg(dam / 3, dam, 3)), {type="lightning_explosion"})
+		game:playSoundNear(self, "talents/lightning")
+		
+		self:startTalentCooldown(self.T_LIGHTNING_BREATH_HYDRA, 8)
+		return true
+	end,
+	info = function(self, t)
+		return ([[Spit lightning on your foe, doing %d to %d damage.
 		The damage will increase with your Willpower.]]):
 		format(
 			damDesc(self, DamageType.LIGHTNING, (self:combatTalentStatDamage(t, "wil", 30, 500)) / 3),
@@ -160,10 +255,42 @@ newTalent{
 		self:project(tg, x, y, DamageType.POISON, {dam=self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 460)), apply_power=self:combatMindpower()})
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_slime", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		game:playSoundNear(self, "talents/breath")
+		
+		self:startTalentCooldown(self.T_POISON_SPIT_HYDRA, 8)
 		return true
 	end,
 	info = function(self, t)
 		return ([[Breathe poison on your foes, doing %d damage over a few turns.
+		The damage will increase with your Willpower.]]):format(damDesc(self, DamageType.NATURE, self:combatTalentStatDamage(t, "wil", 30, 460)))
+	end,
+}
+
+newTalent{
+	name = "Poison Spit", short_name = "POISON_SPIT_HYDRA",
+	type = {"wild-gift/other",1},
+	require = gifts_req1,
+	points = 5,
+	equilibrium = 10,
+	cooldown = 8,
+	message = "@Source@ spits poison!",
+	tactical = { ATTACK = { NATURE = 1, poison = 1 } },
+	range = 5,
+	requires_target = true,
+	target = function(self, t)
+		return {type="bolt", range=self:getTalentRange(t), talent=t}
+	end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+		self:project(tg, x, y, DamageType.POISON, {dam=self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 460)), apply_power=self:combatMindpower(), {type="slime"}})
+		game:playSoundNear(self, "talents/breath")
+		
+		self:startTalentCooldown(self.T_POISON_BREATH, 8)
+		return true
+	end,
+	info = function(self, t)
+		return ([[Spit poison on your foes, doing %d damage over a few turns.
 		The damage will increase with your Willpower.]]):format(damDesc(self, DamageType.NATURE, self:combatTalentStatDamage(t, "wil", 30, 460)))
 	end,
 }
@@ -211,6 +338,49 @@ newTalent{
 }
 
 newTalent{
+	name = "Winter's Fury", short_name="WILD_WINTER_S_FURY",
+	type = {"wild-gift/other",1},
+	require = gifts_req4,
+	points = 5,
+	equilibrium = 10,
+	cooldown = 4,
+	tactical = { ATTACKAREA = { COLD = 2 }, DISABLE = { stun = 1 } },
+	range = 0,
+	radius = 3,
+	target = function(self, t)
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
+	end,
+	getDamage = function(self, t) return self:combatTalentStatDamage(t, "wil", 30, 120) end,
+	getDuration = function(self, t) return 4 end,
+	action = function(self, t)
+		-- Add a lasting map effect
+		game.level.map:addEffect(self,
+			self.x, self.y, t.getDuration(self, t),
+			DamageType.ICE, t.getDamage(self,t),
+			3,
+			5, nil,
+			{type="icestorm", only_one=true},
+			function(e)
+				e.x = e.src.x
+				e.y = e.src.y
+				return true
+			end,
+			false,
+			false --param for friendlyfire 
+		)
+		game:playSoundNear(self, "talents/ice")
+		return true
+	end,
+	info = function(self, t)
+		local damage = t.getDamage(self, t)
+		local duration = t.getDuration(self, t)
+		return ([[A furious yet well controlled ice storm rages around the user doing %0.2f cold damage in a radius of 3 to hostile targets each turn for %d turns.
+		It has 25%% chance to freeze damaged targets.
+		The damage and duration will increase with your Willpower.]]):format(damDesc(self, DamageType.COLD, damage), duration)
+	end,
+}
+
+newTalent{
 	name = "Ritch Flamespitter",
 	type = {"wild-gift/summon-distance", 1},
 	require = gifts_req1,
@@ -240,8 +410,7 @@ newTalent{
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local duration = self:callTalent(self.T_GRAND_ARRIVAL, "effectDuration")
-		local reduction = self:callTalent(self.T_GRAND_ARRIVAL, "resReduction")
-		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_FIRE_RESIST, dur=duration, p={power=reduction}})
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_FIRE_RESIST, dur=duration, p={power=self:combatTalentMindDamage(t, 15, 70)}})
 		game.level.map:particleEmitter(m.x, m.y, tg.radius, "ball_fire", {radius=tg.radius})
 	end,
 	incStats = function(self, t, fake)
@@ -301,7 +470,7 @@ newTalent{
 		}
 		if self:attr("wild_summon") and rng.percent(self:attr("wild_summon")) then
 			m.name = m.name.." (wild summon)"
-			m[#m+1] = resolvers.talents{ [self.T_FLAME_FURY]=self:getTalentLevelRaw(t) }
+			m[#m] = resolvers.talents{ [self.T_WILD_RITCH_FLAMESPITTER_BOLT]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
 		game:playSoundNear(self, "talents/spell_generic")
@@ -345,10 +514,9 @@ newTalent{
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local poisonDmg = self:callTalent(self.T_GRAND_ARRIVAL, "poisonDamage")
 		game.level.map:addEffect(self,
 			m.x, m.y, self:callTalent(self.T_GRAND_ARRIVAL,"effectDuration"),
-			DamageType.POISON, {dam=poisonDmg, apply_power=self:combatMindpower()},
+			DamageType.POISON, {dam=self:combatTalentMindDamage(t, 10, 60), apply_power=self:combatMindpower()},
 			self:getTalentRadius(t),
 			5, nil,
 			MapEffect.new{color_br=255, color_bg=255, color_bb=255, effect_shader="shader_images/poison_effect.png"},
@@ -413,7 +581,9 @@ newTalent{
 		}
 		if self:attr("wild_summon") and rng.percent(self:attr("wild_summon")) then
 			m.name = m.name.." (wild summon)"
-			m[#m+1] = resolvers.talents{ [self.T_DISENGAGE]=self:getTalentLevelRaw(t) }
+			m[#m+1] = resolvers.talents{ [self.T_LIGHTNING_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
+			m[#m+1] = resolvers.talents{ [self.T_ACID_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
+			m[#m+1] = resolvers.talents{ [self.T_POISON_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
 		game:playSoundNear(self, "talents/spell_generic")
@@ -458,8 +628,7 @@ newTalent{
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local duration = self:callTalent(self.T_GRAND_ARRIVAL,"effectDuration")
-		local reduction = self:callTalent(self.T_GRAND_ARRIVAL,"resReduction")
-		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=reduction}}, {type="flame"})
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=self:combatTalentMindDamage(t, 15, 70)}}, {type="flame"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
 	incStats = function(self, t,fake)
@@ -520,7 +689,7 @@ newTalent{
 		}
 		if self:attr("wild_summon") and rng.percent(self:attr("wild_summon")) then
 			m.name = m.name.." (wild summon)"
-			m[#m+1] = resolvers.talents{ [self.T_RESOLVE]=self:getTalentLevelRaw(t) }
+			m[#m] = resolvers.talents{ [self.T_WILD_WINTER_S_FURY]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
 		game:playSoundNear(self, "talents/spell_generic")
