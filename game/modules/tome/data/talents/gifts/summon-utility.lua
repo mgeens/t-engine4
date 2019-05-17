@@ -334,7 +334,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local reduc = t.getReduc(self, t)
-		return ([[You focus yourself on nature, allowing you to summon creatures much faster (%d%% of a normal summon time) and with no chance to fail from high equilibrium for %d turns.
+		return ([[You focus yourself on nature, allowing you to summon natural creatures much faster (%d%% of a normal summon time) and with no chance to fail from high equilibrium for %d turns.
 		When activating this power, a random summoning talent will come off cooldown.
 		Each time you summon, the duration of the frantic summoning effect will reduce by 1.]]):
 		format(100 - reduc, t.getDuration(self, t))
