@@ -162,7 +162,7 @@ function setupSummon(self, m, x, y, no_control)
 	m.ai_tactic.escape = 0
 
 	local p = self:hasEffect(self.EFF_FRANTIC_SUMMONING)
-	if p then
+	if p and m.wild_gift_summon and not m.wild_gift_summon_ignore_cap then
 		p.dur = p.dur - 1
 		if p.dur <= 0 then self:removeEffect(self.EFF_FRANTIC_SUMMONING) end
 	end
