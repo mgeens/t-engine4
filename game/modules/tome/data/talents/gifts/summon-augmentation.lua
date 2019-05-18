@@ -119,9 +119,10 @@ newTalent{
 	require = gifts_req3,
 	mode = "passive",
 	points = 5,
-	incCon = function(self, t) return math.floor(self:combatTalentScale(t, 2, 10, 0.75)) end,
+	incLife = function(self, t) return self:combatTalentLimit(t, 1, 0.05, 0.20) end,
+	incDur = function(self, t) return math.floor(self:combatTalentLimit(t, 6, 1, 2.8)) end,
 	info = function(self, t)
-		return ([[Improves all your summons' Constitution by %d, and adds %0.1f effective talent levels to your summon talents to determine your summons' lifetime.]]):format(t.incCon(self, t), self:getTalentLevel(t))
+		return ([[Increases all your summons' max life by %0.1f%% and extends your summons' maximum lifetime by %d turns.]]):format(100*t.incLife(self, t), t.incDur(self,t))
 	end,
 }
 
