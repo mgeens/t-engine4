@@ -97,7 +97,7 @@ newTalent{
 	getChance = function(self, t) return math.min(100, 30 + self:getTalentLevel(t) * 15) end,
 	getReduction = function(self, t) return math.floor(self:combatTalentLimit(t, 5, 1, 3.1)) end, -- Limit < 5
 	info = function(self, t)
-		return ([[While Master Summoner is active, each new summon will reduce the remaining cooldown of Rage, Detonate and Wild Summon.
+		return ([[While Master Summoner is active, each new summon will reduce the remaining cooldown of Summon Control, Detonate and Wild Summon.
 		%d%% chance to reduce them by %d.]]):format(t.getChance(self, t), t.getReduction(self, t))
 	end,
 }

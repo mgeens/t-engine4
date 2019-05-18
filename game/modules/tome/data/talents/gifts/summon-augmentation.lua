@@ -21,21 +21,21 @@ newTalent{
 	name = "Rage",
 	type = {"wild-gift/summon-augmentation", 1},
 	require = gifts_req1,
+	mode = "passive",
 	points = 5,
-	equilibrium = 5,
-	cooldown = 15,
-	range = 10,
-	np_npc_use = true,
-	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t, first_target="friend"}
-		local tx, ty, target = self:getTarget(tg)
-		if not tx or not ty or not target or not target.summoner or target.summoner ~= self or not target.wild_gift_summon then return nil end
-		target:setEffect(target.EFF_ALL_STAT, 10, {power=self:mindCrit(self:combatTalentMindDamage(t, 10, 100))/4})
-		game:playSoundNear(self, "talents/spell_generic")
-		return true
+	radius = 5,
+	incStats = function(self, t) return self:combatTalentMindDamage(t, 10, 100)/4 end,
+	callbackOnSummonDeath = function(self, t, summon, src, death_note)
+	if summon.summoner ~= self or not summon.wild_gift_summon then return end
+		local tg = {type="ball", range=0, radius=self:getTalentRadius(t), selffire = false, talent=t}
+		summon:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target or target.summoner ~= self or not target.wild_gift_summon then return end
+			target:setEffect(target.EFF_ALL_STAT, 5, {power=t.incStats(self,t)})
+		end)
 	end,
 	info = function(self, t)
-		return ([[Induces a killing rage in one of your summons, increasing all its stats by %d for 10 turns.]]):format(self:combatTalentMindDamage(t, 10, 100)/4)
+		return ([[Induces a killing rage in all your summons within a radius of 5 when a summon is killed, increasing all their stats by %d for 5 turns.]]):format(t.incStats(self, t))
 	end,
 }
 
