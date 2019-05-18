@@ -244,9 +244,9 @@ newTalent{
 		end, nil, {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
-		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t, x=m.x, y=m.y}
-		local knockback = self:callTalent(self.T_GRAND_ARRIVAL,"knockbackDist")
-		self:project(tg, m.x, m.y, DamageType.FEARKNOCKBACK, {dist=knockback, x=m.x, y=m.y}, {type="acid"})
+		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
+		local duration = self:callTalent(self.T_GRAND_ARRIVAL,"effectDuration")
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_PINNED, check_immune="pin", dur=duration, p={}}, {type="slime"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
