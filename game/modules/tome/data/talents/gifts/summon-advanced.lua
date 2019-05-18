@@ -73,7 +73,7 @@ newTalent{
 		local radius = self:getTalentRadius(t)
 		return ([[While Master Summoner is active, when a creature you summon appears in the world, it will trigger a wild effect:
 		- Ritch Flamespitter: Reduce fire resistance of all foes in a radius by %d%%
-		- Hydra: Generates a cloud of lingering poison dealing %d nature damage per turn
+		- Hydra: Generates a cloud of lingering poison, poisoning all foes caught within for %0.1f nature damage per turn (cumulative)
 		- Rimebark: Reduce cold resistance of all foes in a radius by %d%%
 		- Fire Drake: Appears with %d fire drake hatchling(s)
 		- War Hound: Reduce physical resistance of all foes in a radius by %d%%
@@ -83,7 +83,7 @@ newTalent{
 		- Turtle: Heals all friendly targets in a radius %d HP
 		- Spider: Pins all foes in a radius
 		Radius for effects is %d, and the duration of each lasting effect is %d turns.
-		The effects improve with your Willpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t), t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
+		The effects improve with your Willpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t) / 6, t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
 	end,
 }
 
