@@ -67,6 +67,14 @@ newTalent{
 		end
 	end,
 --]]
+	explodeDamage = function(self,t) return self:combatTalentMindDamage(t, 30, 250) end,
+	explodeBleed = function(self,t) return self:combatTalentMindDamage(t, 30, 350) end,
+	explodeBurn = function(self,t) return self:combatTalentMindDamage(t, 30, 300) end,
+	explodeFire = function(self,t) return self:combatTalentMindDamage(t, 10, 70) end,
+	knockbackDamage = function(self,t) return self:combatTalentMindDamage(t, 30, 150) end,
+	knockbackDist = function(self,t) return 4 end,
+	shellShiedling = function(self,t) return self:combatTalentMindDamage(t, 10, 35) end,
+	explodePin = function(self,t) return 3 end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t, first_target="friend"}
 		local tx, ty, target = self:getTarget(tg)
@@ -97,19 +105,19 @@ newTalent{
 	info = function(self, t)
 		local radius = self:getTalentRadius(t)
 		return ([[Destroys one of your summons, making it detonate in radius of %d.
-		- Ritch Flamespitter: Explodes into a fireball
-		- Hydra: Explodes into a ball of lightning, acid or poison
-		- Rimebark: Explodes into an iceball
-		- Fire Drake: Generates a cloud of fire
-		- War Hound: Explodes into a ball of physical damage
-		- Jelly: Explodes into a ball of slowing slime
-		- Minotaur: Explodes into a sharp ball, cutting all creatures
-		- Stone Golem: Knocks back all creatures
-		- Turtle: Grants a small shell shield to all friendly creatures
-		- Spider: Pins all foes around
+		- Ritch Flamespitter: Explodes into a fireball dealing %d damage
+		- Hydra: Explodes into a ball of %d lightning, acid or poison damage, chosen at random
+		- Rimebark: Explodes into an iceball dealing %d ice damage, possibly freezing damaged foes
+		- Fire Drake: Explodes into a cloud of lingering fire, dealing %d damage per turn
+		- War Hound: Explodes into a ball dealing %d physical damage
+		- Jelly: Explodes into a ball of slowing slime, dealing %d nature damage and slowing foes by 15%%
+		- Minotaur: Explodes into a sharp ball, cutting all creatures for %0.1f bleeding damage per turn for 6 turns
+		- Stone Golem: Knocks back all creatures %d tiles and deals %d physical damage
+		- Turtle: Grants a small shell shield to all friendly creatures, granting %d%% all resist
+		- Spider: Pins all foes around for %d turns
 		In addition, a random summon will come off cooldown.
 		Hostile effects will not hit you or your other summons.
-		The effects improve with your Willpower.]]):format(radius)
+		The effects improve with your mindpower, and can crit.]]):format(radius, t.explodeBurn(self,t), t.explodeDamage(self,t), t.explodeBurn(self,t), t.explodeFire(self,t), t.explodeDamage(self, t), t.explodeDamage(self,t), t.explodeBleed(self,t) / 6, t.knockbackDist(self,t), t.knockbackDamage(self,t), t.shellShiedling(self,t), t.explodePin(self,t))
 	end,
 }
 
