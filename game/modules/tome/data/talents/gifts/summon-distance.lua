@@ -419,10 +419,10 @@ newTalent{
 		return{ 
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			cun=15 + (fake and mp or self:mindCrit(mp)) * 1.7 * self:combatTalentScale(t, 0.2, 1, 0.75),
-			con=10 + self:callTalent(self.T_RESILIENCE, "incCon")
+			con=10
 		}
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	action = function(self, t)
 		local tg = {type="bolt", nowarning=true, range=self:getTalentRange(t), nolock=true, talent=t}
 		local tx, ty, target = self:getTarget(tg)
@@ -474,6 +474,13 @@ newTalent{
 			m[#m] = resolvers.talents{ [self.T_WILD_RITCH_FLAMESPITTER_BOLT]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
+		
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -525,13 +532,13 @@ newTalent{
 			nil, false, false
 		)
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
 		return{ 
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 1.6 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			str = 18,
-			con=10 + self:combatTalentScale(t, 2, 10, 0.75) + self:callTalent(self.T_RESILIENCE, "incCon")
+			con=10 + self:combatTalentScale(t, 2, 10, 0.75)
 		}
 	end,
 	action = function(self, t)
@@ -588,6 +595,13 @@ newTalent{
 			m[#m+1] = resolvers.talents{ [self.T_POISON_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
+		
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -634,13 +648,13 @@ newTalent{
   		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=reduction}}, {type="flame"})
 		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_LOWER_COLD_RESIST, dur=duration, p={power=self:combatTalentMindDamage(t, 15, 70)}}, {type="flame"})
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
 		return{ 
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			cun=15 + (fake and mp or self:mindCrit(mp)) * 1.6 * self:combatTalentScale(t, 0.2, 1, 0.75),
-			con=10 + self:callTalent(self.T_RESILIENCE, "incCon")
+			con=10
 		}
 	end,
 	action = function(self, t)
@@ -696,6 +710,13 @@ newTalent{
 			m[#m] = resolvers.talents{ [self.T_WILD_WINTER_S_FURY]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
+		
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -778,15 +799,21 @@ newTalent{
 				ai_target = {actor=m.ai_target.actor}
 			}
 			setupSummon(self, mh, x, y)
+			
+			if self:knowTalent(self.T_RESILIENCE) then
+				local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+				m.max_life = m.max_life * incLife
+				m.life = m.max_life
+			end
 		end
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 2, 0, 7, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 2, 0, 7, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
 		return{ 
 			str=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 38,
-			con=20 + (fake and mp or self:mindCrit(mp)) * 1.5 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:callTalent(self.T_RESILIENCE, "incCon"),
+			con=20 + (fake and mp or self:mindCrit(mp)) * 1.5 * self:combatTalentScale(t, 0.2, 1, 0.75)
 		}
 	end,
 	action = function(self, t)
@@ -843,6 +870,12 @@ newTalent{
 			m[#m+1] = resolvers.talents{ [self.T_AURA_OF_SILENCE]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
 
 		game:playSoundNear(self, "talents/spell_generic")
 		return true

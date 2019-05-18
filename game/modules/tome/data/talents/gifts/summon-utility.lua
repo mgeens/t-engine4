@@ -116,13 +116,13 @@ newTalent{
 			target:setEffect(target.EFF_SHELL_SHIELD, 4, {power=self:mindCrit(self:combatTalentMindDamage(t, 10, 35))})
 		end, nil, {type="flame"})
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
 		return{ 
-			con=15 + (fake and mp or self:mindCrit(mp)) * 2.1 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:callTalent(self.T_RESILIENCE, "incCon"),
+			con=15 + (fake and mp or self:mindCrit(mp)) * 2.1 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 18,
-			dex=10 + self:combatTalentScale(t, 2, 10, 0.75),
+			dex=10 + self:combatTalentScale(t, 2, 10, 0.75)
 		}
 	end,
 	on_arrival = function(self, t, m)
@@ -191,6 +191,13 @@ newTalent{
 			m[#m+1] = resolvers.talents{ [self.T_BATTLE_CALL]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
+			
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -241,14 +248,14 @@ newTalent{
 		local knockback = self:callTalent(self.T_GRAND_ARRIVAL,"knockbackDist")
 		self:project(tg, m.x, m.y, DamageType.FEARKNOCKBACK, {dist=knockback, x=m.x, y=m.y}, {type="acid"})
 	end,
-	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getTalentLevel(self.T_RESILIENCE), 5, 0, 10, 5)) end,
+	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
 		return{ 
 			dex=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 18,
 			str=10 + self:combatTalentScale(t, 2, 10, 0.75),
-			con=10 + self:callTalent(self.T_RESILIENCE, "incCon")
+			con=10
 		}
 	end,
 	action = function(self, t)
@@ -302,6 +309,13 @@ newTalent{
 			m[#m+1] = resolvers.inscription("INFUSION:_INSIDIOUS_POISON", {cooldown=12, range=6, heal_factor=60, power=self:getTalentLevel(t) * 60})
 		end
 		setupSummon(self, m, x, y)
+		
+		if self:knowTalent(self.T_RESILIENCE) then
+			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
+			m.max_life = m.max_life * incLife
+			m.life = m.max_life
+		end
+		
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
