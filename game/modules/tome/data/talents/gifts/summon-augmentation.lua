@@ -117,7 +117,7 @@ newTalent{
 		- Spider: Pins all foes around for %d turns
 		In addition, a random summon will come off cooldown.
 		Hostile effects will not hit you or your other summons.
-		The effects improve with your mindpower, and can crit.]]):format(radius, t.explodeBurn(self,t), t.explodeDamage(self,t), t.explodeBurn(self,t), t.explodeFire(self,t), t.explodeDamage(self, t), t.explodeDamage(self,t), t.explodeBleed(self,t) / 6, t.knockbackDist(self,t), t.knockbackDamage(self,t), t.shellShiedling(self,t), t.explodePin(self,t))
+		The effects improve with your mindpower, and can crit.]]):format(radius, t.explodeBurn(self,t), t.explodeDamage(self,t), t.explodeBurn(self,t), t.explodeFire(self,t), t.explodeDamage(self, t), t.explodeDamage(self,t), t.explodeBleed(self,t) / 6, t.knockbackDist(self,t), t.knockbackDamage(self,t), t.shellShielding(self,t), t.explodePin(self,t))
 	end,
 }
 
