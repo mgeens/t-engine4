@@ -176,7 +176,7 @@ function setupSummon(self, m, x, y, no_control)
 
 	if m.wild_gift_detonate and self:isTalentActive(self.T_MASTER_SUMMONER) and self:knowTalent(self.T_NATURE_CYCLE) then
 		local t = self:getTalentFromId(self.T_NATURE_CYCLE)
-		for _, tid in ipairs{self.T_RAGE, self.T_DETONATE, self.T_WILD_SUMMON} do
+		for _, tid in ipairs{self.T_SUMMON_CONTROL, self.T_DETONATE, self.T_WILD_SUMMON} do
 			if self.talents_cd[tid] and rng.percent(t.getChance(self, t)) then
 				self.talents_cd[tid] = self.talents_cd[tid] - t.getReduction(self, t)
 				if self.talents_cd[tid] <= 0 then self.talents_cd[tid] = nil end
