@@ -73,7 +73,7 @@ newTalent{
 	explodeFire = function(self,t) return self:combatTalentMindDamage(t, 10, 70) end,
 	knockbackDamage = function(self,t) return self:combatTalentMindDamage(t, 30, 150) end,
 	knockbackDist = function(self,t) return 4 end,
-	shellShiedling = function(self,t) return self:combatTalentMindDamage(t, 10, 35) end,
+	shellShielding = function(self,t) return self:combatTalentMindDamage(t, 10, 35) end,
 	explodePin = function(self,t) return 3 end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t, first_target="friend"}
