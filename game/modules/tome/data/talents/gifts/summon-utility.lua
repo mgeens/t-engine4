@@ -110,10 +110,11 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y, ignore_nullify_all_friendlyfire=true}
+		local shellShielding = self:callTalent(self.T_DETONATE,"shellShielding")
 		self:project(tg, m.x, m.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target or self:reactionToward(target) < 0 then return end
-			target:setEffect(target.EFF_SHELL_SHIELD, 4, {power=self:mindCrit(self:combatTalentMindDamage(t, 10, 35))})
+			target:setEffect(target.EFF_SHELL_SHIELD, 4, {power=self:mindCrit(shellShielding)})
 		end, nil, {type="flame"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
@@ -234,12 +235,13 @@ newTalent{
 	end,
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
+		local explodePin = self:callTalent(self.T_DETONATE,"explodePin")
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		self:project(tg, m.x, m.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target or self:reactionToward(target) >= 0 then return end
 			if target:canBe("pin") then
-				target:setEffect(target.EFF_PINNED, 3, {apply_power=self:mindCrit(self:combatMindpower())})
+				target:setEffect(target.EFF_PINNED, explodePin, {apply_power=self:mindCrit(self:combatMindpower())})
 			end
 		end, nil, {type="flame"})
 	end,
