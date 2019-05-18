@@ -69,7 +69,6 @@ newTalent{
 	resReduction = function(self, t) return self:combatTalentMindDamage(t, 15, 70) end,
 	amtHealing = function(self, t) return 30 + self:combatTalentMindDamage(t, 10, 350) end,
 	slowStrength = function(self, t) return self:combatLimit(self:combatTalentMindDamage(t, 5, 500), 1, 0.1, 0, 0.47 , 369) end, -- Limit speed loss to <100% 
-	knockbackDist = function(self, t) return 1+self:getTalentLevelRaw(t) end,
 	info = function(self, t)
 		local radius = self:getTalentRadius(t)
 		return ([[While Master Summoner is active, when a creature you summon appears in the world, it will trigger a wild effect:
@@ -82,7 +81,7 @@ newTalent{
 		- Minotaur: Reduces movement speed of all foes in a radius by %d%%
 		- Stone Golem: Dazes all foes in a radius
 		- Turtle: Heals all friendly targets in a radius %d HP
-		- Spider: Repels all foes %d tiles
+		- Spider: Pins all foes in a radius
 		Radius for effects is %d, and the duration of each lasting effect is %d turns.
 		The effects improve with your Willpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t), t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
 	end,
