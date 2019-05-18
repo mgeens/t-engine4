@@ -26,7 +26,7 @@ newTalent{
 	radius = 5,
 	incStats = function(self, t) return self:combatTalentMindDamage(t, 10, 100)/4 end,
 	callbackOnSummonDeath = function(self, t, summon, src, death_note)
-	if summon.summoner ~= self or not summon.wild_gift_summon then return end
+	if summon.summoner ~= self or not summon.wild_gift_summon or summon.summon_time <= 0 then return end
 		local tg = {type="ball", range=0, radius=self:getTalentRadius(t), selffire = false, talent=t}
 		summon:project(tg, self.x, self.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
