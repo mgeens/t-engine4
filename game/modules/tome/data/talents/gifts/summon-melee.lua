@@ -97,8 +97,8 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeDamage")
-		self:project(tg, m.x, m.y, DamageType.PHYSICAL, self:mindCrit(explodeDamage), {type="flame"})
+		local explodeBleed = self:callTalent(self.T_DETONATE, "explodeBleed")
+		self:project(tg, m.x, m.y, DamageType.BLEED, self:mindCrit(explodeBleed), {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
@@ -205,8 +205,9 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_DETONATE, "explodeDamage")
-		self:project(tg, m.x, m.y, DamageType.SLIME, self:mindCrit(explodeDamage), {type="flame"})
+		local explodeDamage = self:callTalent(self.T_DETONATE, "explodeSecondary")
+		local jellySlow = self:callTalent(self.T_DETONATE, "jellySlow")
+		self:project(tg, m.x, m.y, DamageType.SLIME, {dam=self:mindCrit(explodeDamage), power=jellySlow}, {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
@@ -324,8 +325,8 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeBleed = self:callTalent(self.T_DETONATE, "explodeBleed")
-		self:project(tg, m.x, m.y, DamageType.BLEED, self:mindCrit(explodeBleed), {type="flame"})
+		local confusePower = self:callTalent(self.T_DETONATE,"minotaurConfuse")
+		self:project(tg, m.x, m.y, DamageType.TEMP_EFFECT, {foes=true, eff=self.EFF_CONFUSED, check_immune="confusion", dur=5, p={minotaurConfuse}}, {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
@@ -437,9 +438,8 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local distance = self:callTalent(self.T_DETONATE, "knockbackDist")
-		local knockbackDamage = self:callTalent(self.T_DETONATE, "knockbackDamage")
-		self:project(tg, m.x, m.y, DamageType.PHYSKNOCKBACK, {dam=self:mindCrit(knockbackDamage), dist=dist}, {type="flame"})
+		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeDamage")
+		self:project(tg, m.x, m.y, DamageType.PHYSICAL, self:mindCrit(explodeDamage), {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
