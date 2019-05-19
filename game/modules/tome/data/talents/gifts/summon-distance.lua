@@ -487,7 +487,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local incStats = t.incStats(self, t, true)
-		return ([[Summon a Ritch Flamespitter for %d turns to burn your foes to death. Flamespitters are really weak in melee and die easily, but they can burn your foes from afar.
+		return ([[Summon a Ritch Flamespitter for %d turns to burn your foes to death. Flamespitters are weak in melee and die easily, but they can burn your foes from afar.
 		It will get %d Willpower, %d Cunning and %d Constitution.
 		Your summons inherit some of your stats: increased damage%%, resistance penetration %%, stun/pin/confusion/blindness resistance, armour penetration.
 		Their Willpower and Cunning will increase with your Mindpower.]])
@@ -886,7 +886,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local incStats = t.incStats(self, t, true)
-		return ([[Summon a Fire Drake for %d turns to burn and crush your foes to death. Fire Drakes are behemoths that can burn your foes from afar with their fiery breath.
+		return ([[Summon a Fire Drake for %d turns to burn and crush your foes to death. Fire Drakes are behemoths that can burn foes from afar with their fiery breath.
 		It will get %d Strength, %d Constitution and 38 Willpower.
 		Your summons inherit some of your stats: increased damage%%, stun/pin/confusion/blindness resistance, armour penetration.
 		Their Strength and Constitution will increase with your Mindpower.]])

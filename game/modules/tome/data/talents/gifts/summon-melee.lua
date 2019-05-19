@@ -407,7 +407,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local incStats = t.incStats(self, t, true)
-		return ([[Summon a Minotaur for %d turns to attack your foes. Minotaurs cannot stay summoned for long, but they deal a lot of damage.
+		return ([[Summon a Minotaur for %d turns to attack your foes. Minotaurs cannot stay summoned for long, but they deal high damage.
 		It will get %d Strength, %d Constitution and %d Dexterity.
 		Your summons inherit some of your stats: increased damage%%, stun/pin/confusion/blindness resistance, armour penetration.
 		The minotaur's Strength and Dexterity will increase with your Mindpower.]])
