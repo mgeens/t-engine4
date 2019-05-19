@@ -45,7 +45,7 @@ newTalent{
 	require = gifts_req2,
 	points = 5,
 	equilibrium = 5,
-	cooldown = 25,
+	cooldown = 18,
 	range = 10,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8, 0.5, 0, 0, true)) end,
 	requires_target = true,
