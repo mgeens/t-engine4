@@ -83,7 +83,7 @@ newTalent{
 		- Turtle: Heals all friendly targets in a radius %d HP
 		- Spider: Pins all foes in a radius
 		Radius for effects is %d, and the duration of each lasting effect is %d turns.
-		The effects improve with your Willpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t) / 6, t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
+		The effects improve with your mindpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t) / 6, t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), t.knockbackDist(self,t), radius, t.effectDuration(self, t))
 	end,
 }
 
