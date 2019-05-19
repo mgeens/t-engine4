@@ -404,8 +404,8 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeBurn = self:callTalent(self.T_DETONATE,"explodeBurn")
-		self:project(tg, m.x, m.y, DamageType.FIREBURN, self:mindCrit(explodeBurn))
+		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeSecondary")
+		self:project(tg, m.x, m.y, DamageType.FLAMESHOCK, self:mindCrit(explodeDamage))
 		game.level.map:particleEmitter(m.x, m.y, tg.radius, "ball_fire", {radius=tg.radius})
 	end,
 	on_arrival = function(self, t, m)
@@ -519,7 +519,7 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_RESILIENCE,"explodeDamage")
+		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeDamage")
 		self:project(tg, m.x, m.y, rng.table{DamageType.LIGHTNING,DamageType.ACID,DamageType.POISON}, self:mindCrit(explodeDamage), {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
@@ -641,7 +641,7 @@ newTalent{
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_RESILIENCE,"explodeBurn")
+		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeSecondary")
 		self:project(tg, m.x, m.y, DamageType.ICE, self:mindCrit(explodeDamage), {type="freeze"})
 	end,
 	on_arrival = function(self, t, m)

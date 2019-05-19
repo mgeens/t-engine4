@@ -235,15 +235,9 @@ newTalent{
 	end,
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
-		local explodePin = self:callTalent(self.T_DETONATE,"explodePin")
-		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		self:project(tg, m.x, m.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target or self:reactionToward(target) >= 0 then return end
-			if target:canBe("pin") then
-				target:setEffect(target.EFF_PINNED, explodePin, {apply_power=self:mindCrit(self:combatMindpower())})
-			end
-		end, nil, {type="flame"})
+		local knockbackDist = self:callTalent(self.T_DETONATE,"spiderKnockback")
+		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t, x=m.x, y=m.y}
+		self:project(tg, m.x, m.y, DamageType.FEARKNOCKBACK, {dist=knockbackDist, x=m.x, y=m.y}, {type="acid"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
