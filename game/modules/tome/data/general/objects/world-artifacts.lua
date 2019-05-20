@@ -7205,7 +7205,7 @@ newEntity{ base = "BASE_GREATMAUL",
 		physcrit = 0,
 		dammod = {str=1.2},
 		crushing_blow=1,
-		special_on_hit = {
+		special_on_hit = { --thanks nsrr!--
 			desc=function(self, who, special)
 				local damage = special.damage(self, who)
 				local s = ("Sends a tremor through the ground which causes jagged rocks to errupt in a beam of length 5, dealing %d Physical damage (equal to your Strength, up to 150) and causing targets hit to bleed for an additional 50 damage over 5 turns. Bleeding can stack."):format(damage)
