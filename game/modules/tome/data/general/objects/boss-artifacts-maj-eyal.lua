@@ -446,7 +446,7 @@ newEntity{ base = "BASE_RING",
 	},
 
 	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_SHADOWSTEP level=2, power = 50 },
+	use_talent = { id = Talents.T_SHADOWSTEP, level=2, power = 50 },
 }
 
 newEntity{ base = "BASE_HELM",
