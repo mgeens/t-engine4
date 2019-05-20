@@ -7205,6 +7205,41 @@ newEntity{ base = "BASE_GREATMAUL",
 		physcrit = 0,
 		dammod = {str=1.2},
 		crushing_blow=1,
+		special_on_hit = {
+			desc=function(self, who, special)
+				local damage = special.damage(self, who)
+				local s = ("Sends a tremor through the ground which causes jagged rocks to errupt in a beam of length 5, dealing %d Physical damage (equal to your Strength, up to 150) and causing targets hit to bleed for an additional 50 damage over 5 turns. Bleeding can stack."):format(damage)
+				return s
+			end,
+			damage = function(self, who)
+				return who:getStr()
+			end,
+			fct=function(self, who, target, dam, special)
+				local damage = special.damage(self, who)
+				local l = who:lineFOV(target.x, target.y)
+				l:set_corner_block()
+				local lx, ly, is_corner_blocked = l:step(true)
+				local target_x, target_y = lx, ly
+				-- Check for terrain and friendly actors
+				while lx and ly and not is_corner_blocked and core.fov.distance(who.x, who.y, lx, ly) <= 5 do -- projects to maximum range
+					local actor = game.level.map(lx, ly, engine.Map.ACTOR)
+					if actor and (who:reactionToward(actor) >= 0) then
+						break
+					elseif game.level.map:checkEntity(lx, ly, engine.Map.TERRAIN, "block_move") then
+						target_x, target_y = lx, ly
+						break
+					end
+					target_x, target_y = lx, ly
+					lx, ly = l:step(true)
+				end
+				local tg = {type="beam", range=5, selffire=false}
+				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "earth_beam", {tx=target_x-who.x, ty=target_y-who.y})
+				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "shadow_beam", {tx=target_x-who.x, ty=target_y-who.y})
+				local grids1 = who:project(tg, target_x, target_y, engine.DamageType.PHYSICAL, damage)
+				local grids2 = who:project(tg, target_x, target_y, engine.DamageType.BLEED, 50)
+				game:playSoundNear(who, "talents/earth")
+			end,
+		},
 
 	},
 	wielder = {
