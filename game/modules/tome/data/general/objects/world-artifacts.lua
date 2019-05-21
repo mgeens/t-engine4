@@ -7212,7 +7212,7 @@ newEntity{ base = "BASE_GREATMAUL",
 				return s
 			end,
 			damage = function(self, who)
-				return who:getStr()
+				return math.min (150, who:getStr())
 			end,
 			fct=function(self, who, target, dam, special)
 				local damage = special.damage(self, who)
