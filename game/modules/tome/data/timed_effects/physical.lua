@@ -3533,7 +3533,7 @@ newEffect{
 newEffect{
 	name = "STONE_VINE",
 	desc = "Stone Vine",
-	long_desc = function(self, eff) return ("A living stone vine holds the target in place, inflicting %0.1f Physical%s damage per turn."):format(eff.dam, eff.arcanedam and (" and %0.1f Arcane"):format(eff.arcanedam) or "") end,
+	long_desc = function(self, eff) return ("A living stone vine holds the target in place, inflicting %0.1f Nature%s damage per turn."):format(eff.dam, eff.arcanedam and (" and %0.1f Arcane"):format(eff.arcanedam) or "") end,
 	type = "physical",
 	subtype = { earth=true, pin=true },
 	status = "detrimental",
@@ -3562,7 +3562,7 @@ newEffect{
 		if severed then
 			return true
 		else
-			DamageType:get(DamageType.PHYSICAL).projector(src, self.x, self.y, DamageType.PHYSICAL, eff.dam)
+			DamageType:get(DamageType.NATURE).projector(src, self.x, self.y, DamageType.NATURE, eff.dam)
 			
 			if eff.arcanedam and src:knowTalent(src.T_ELDRITCH_VINES) then
 				src:incEquilibrium(-src:callTalent(src.T_ELDRITCH_VINES, "getEquilibrium"))
