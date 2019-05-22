@@ -443,7 +443,6 @@ newEffect{
 		-- Time shield ends, setup a restoration field if needed
 		if eff.power - self.time_shield_absorb > 0 then
 			local val = (eff.power - self.time_shield_absorb) / eff.dot_dur / 2
-			if self:attr("shield_factor") then val = val * (100 + self:attr("shield_factor")) / 100 end
 			print("Time shield restoration field", eff.power - self.time_shield_absorb, val)
 			self:setEffect(self.EFF_TIME_DOT, eff.dot_dur, {power=val})
 		end
