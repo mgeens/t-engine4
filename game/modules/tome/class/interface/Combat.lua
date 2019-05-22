@@ -819,9 +819,8 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 		end
 		if rng.percent(chance) then
 			local t = self:getTalentFromId(self.T_ARCANE_DESTRUCTION)
-			local typ = rng.table{{DamageType.FIRE,"ball_fire"}, {DamageType.LIGHTNING,"ball_lightning_beam"}, {DamageType.ARCANE,"ball_arcane"}}
-			self:project({type="ball", radius=self:getTalentRadius(t), friendlyfire=false}, target.x, target.y, typ[1], self:combatSpellpower() * 2 * t.getDamMult(self, t))
-			game.level.map:particleEmitter(target.x, target.y, self:getTalentRadius(t), typ[2], {radius=2, tx=target.x, ty=target.y})
+			self:project({type="ball", radius=self:getTalentRadius(t), friendlyfire=false}, target.x, target.y, DamageType.ARCANE, t.getDamage(self, t))
+			game.level.map:particleEmitter(target.x, target.y, self:getTalentRadius(t), "ball_arcane", {radius=2, tx=target.x, ty=target.y})
 		end
 	end
 
