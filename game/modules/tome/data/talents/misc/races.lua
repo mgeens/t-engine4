@@ -876,8 +876,12 @@ newTalent{
 		if not x or not y then return nil end
 		if not target or target.dead or target == self then return end
 		if game.party:hasMember(target) then return end
+		if target.instakill_immune >= 1 then 			
+			game.logSeen(target, "%s is immune to instakill and mind control effects!", target.name:capitalize())
+			return
+		end
 		if target.rank > 3 and ((target.life / target.max_life) >= 0.8) then
-			game.logSeen(target, "%s must be below 70%% of their max life to be controlled!", target.name:capitalize())
+			game.logSeen(target, "%s must be below 80%% of their max life to be controlled!", target.name:capitalize())
 			return
 		end
 		self:project(tg, x, y, function(px, py)
