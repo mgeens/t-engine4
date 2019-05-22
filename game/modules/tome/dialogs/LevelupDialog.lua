@@ -341,6 +341,7 @@ function _M:checkDeps(simple, ignore_special)
 end
 
 function _M:isUnlearnable(t, limit)
+	if config.settings.cheat then return 9999 end
 	if not self.actor.last_learnt_talents then return end
 	if self.on_birth and self.actor:knowTalent(t.id) and not t.no_unlearn_last then return 1 end -- On birth we can reset any talents except a very few
 	local list = self.actor.last_learnt_talents[t.generic and "generic" or "class"]
