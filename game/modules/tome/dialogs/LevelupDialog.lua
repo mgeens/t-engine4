@@ -435,7 +435,7 @@ function _M:learnType(tt, v)
 			self.talent_types_learned[tt][1] = true
 		else
 			self.actor.__increased_talent_types[tt] = (self.actor.__increased_talent_types[tt] or 0) + 1
-			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt) + 0.2)
+			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt, true) + 0.2)
 			self.talent_types_learned[tt][2] = true
 		end
 		self:triggerHook{"PlayerLevelup:addTalentType", actor=self.actor, tt=tt}
@@ -457,7 +457,7 @@ function _M:learnType(tt, v)
 
 		if (self.actor.__increased_talent_types[tt] or 0) > 0 then
 			self.actor.__increased_talent_types[tt] = (self.actor.__increased_talent_types[tt] or 0) - 1
-			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt) - 0.2)
+			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt, true) - 0.2)
 			self.actor.unused_talents_types = self.actor.unused_talents_types + 1
 			self.new_talents_changed = true
 			self.talent_types_learned[tt][2] = nil
