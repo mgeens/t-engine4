@@ -350,7 +350,7 @@ function _M:isUnlearnable(t, limit)
 	if limit then min = math.max(1, #list - (max - 1)) end
 	for i = #list, min, -1 do
 		if list[i] == t.id then
-			if not game.state.birth.force_town_respec or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
+			if not game.state.birth.force_town_respec or not self.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
 				return i
 			else
 				return nil, i
@@ -391,7 +391,7 @@ function _M:learnTalent(t_id, v)
 		if not self:isUnlearnable(t, true) and self.actor_dup:getTalentLevelRaw(t_id) >= self.actor:getTalentLevelRaw(t_id) then
 			local _, could = self:isUnlearnable(t, true)
 			if could then
-				self:subtleMessage("Impossible here", "You could unlearn this talent in a quiet place, like a #{bold}#town#{normal}#.", {r=200, g=200, b=255})
+				self:subtleMessage("Impossible here", "You must be out of combat or in a quiet place like a #{bold}#town#{normal}# to unlearn this talent.", {r=200, g=200, b=255})
 			else
 				self:subtleMessage("Impossible", "You cannot unlearn this talent!", subtleMessageErrorColor)
 			end
