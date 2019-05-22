@@ -466,6 +466,7 @@ function _M:activate()
 
 	self.buff_font = core.display.newFont(font_mono, size_mono * 2, true)
 	self.buff_font_small = core.display.newFont(font_mono, size_mono * 1.4, true)
+	self.buff_font_smallmed = core.display.newFont(font_mono, size_mono * 1.2, true)
 	self.buff_font_smaller = core.display.newFont(font_mono, size_mono * 1, true)
 
 	self.hotkeys_display_text = HotkeysDisplay.new(nil, self.places.hotkeys.x, self.places.hotkeys.y, self.places.hotkeys.w, self.places.hotkeys.h, nil, font_mono, size_mono)
@@ -1162,7 +1163,8 @@ function _M:handleEffect(player, eff_id, e, p, x, y, hs, bx, by, is_first, scale
 			txt.fw, txt.fh = font:size(dur)
 		end
 		if e.charges then
-			local font = e.decrease > 0 and self.buff_font_small or self.buff_font
+			local font = e.decrease > 0 and self.buff_font_smallmed or self.buff_font
+
 			txt2 = font:draw(charges, 40, colors.WHITE.r, colors.WHITE.g, colors.WHITE.b, true)[1]
 			txt2.fw, txt2.fh = font:size(charges)
 			dur = dur..":"..charges
@@ -1239,9 +1241,9 @@ function _M:handleEffect(player, eff_id, e, p, x, y, hs, bx, by, is_first, scale
 					shader:uniOutlineSize(1, 1)
 					shader:uniTextSize(txt2._tex_w, txt2._tex_h)
 				else
-					txt2._tex:toScreenFull(x+4+2, y+4+2 + (32 - txt2.fh)/2+5, txt2.w, txt2.h, txt2._tex_w, txt2._tex_h, 0, 0, 0, 0.7)
+					txt2._tex:toScreenFull(x+4+1, y+4+6 + (32 - txt2.fh)/2+5, txt2.w, txt2.h, txt2._tex_w, txt2._tex_h, 0, 0, 0, 0.7)
 				end
-				txt2._tex:toScreenFull(x+4, y+4 + (32 - txt2.fh)/2+5, txt2.w, txt2.h, txt2._tex_w, txt2._tex_h, 0, 1, 0, 1)
+				txt2._tex:toScreenFull(x+3, y+8 + (32 - txt2.fh)/2+5, txt2.w, txt2.h, txt2._tex_w, txt2._tex_h, 0, 1, 0, 1)
 			end
 
 			if shader and (txt or txt2) then shader:use(false) end
