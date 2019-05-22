@@ -180,7 +180,7 @@ local subtleMessageOtherColor = {r=255, g=215, b=0}
 
 function _M:finish()
 	local ok, dep_miss = self:checkDeps(true, true)
-	if not ok then
+	if not ok and not config.settings.cheat then
 		self:simpleLongPopup("Impossible", "You cannot learn this talent(s): "..dep_miss, game.w * 0.4)
 		return nil
 	end
