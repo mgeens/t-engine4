@@ -150,33 +150,53 @@ newTalent{
 	type = {"spell/enhancement", 4},
 	require = spells_req4,
 	points = 5,
-	mode = "sustained",
+	mode = "passive",
 	cooldown = 10,
-	sustain_mana = 75,
-	tactical = { BUFF = 2 },
-	getStatIncrease = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 2, 10)) end,
-	activate = function(self, t)
-		game:playSoundNear(self, "talents/spell_generic")
-		local power = t.getStatIncrease(self, t)
-		return {
-			stats = self:addTemporaryValue("inc_stats", {
+	getStatIncrease = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 4, 14)) end,
+	getShield = function(self, t) return math.floor(self:combatTalentSpellDamage(t, 1, 200)) end,
+	callbackOnAct = function(self, t)
+		if self.resting then return end  -- Infinite resting bugs can happen otherwise
+		local old_stamina = self.stamina
+		local old_mana = self.mana
+		self:updateTalentPassives(t) 
+		self.stamina = old_stamina
+		self.mana = old_mana
+	end,
+	callbackOnActEnd = function(self, t)
+		if self.resting then return end
+		local old_stamina = self.stamina
+		local old_mana = self.mana
+		self:updateTalentPassives(t) 
+		self.stamina = old_stamina
+		self.mana = old_mana
+	end,
+	callbackOnTakeDamage = function(self, t, src, x, y, type, dam, state)
+		if self:isTalentCoolingDown(t) then return end
+		self:startTalentCooldown(t)
+
+		self:setEffect(self.EFF_DAMAGE_SHIELD, 2, {power=t.getShield(self, t)})
+
+		return {dam = dam}
+	end,
+	passives = function(self, t, p)
+		game:onTickEnd(function()  -- Without this problems can happen during NPC generation with max_life still being a table, presumably as a result of the Con
+			local power = t.getStatIncrease(self, t)
+			self:talentTemporaryValue(p, "inc_stats", {
 				[self.STAT_STR] = power,
 				[self.STAT_DEX] = power,
 				[self.STAT_MAG] = power,
 				[self.STAT_WIL] = power,
 				[self.STAT_CUN] = power,
 				[self.STAT_CON] = power,
-			}),
-		}
-	end,
-	deactivate = function(self, t, p)
-		self:removeTemporaryValue("inc_stats", p.stats)
-		return true
+			})
+		end)
 	end,
 	info = function(self, t)
 		local statinc = t.getStatIncrease(self, t)
+		local absorb = t.getShield(self, t) * (100 + (self:attr("shield_factor") or 0)) / 100
 		return ([[You concentrate on your inner self, increasing all your stats by %d.
-		The stat increase will improve with your Spellpower.]]):
-		format(statinc)
+		Additionally, you gain a shield absorbing %d damage before you take damage every %d turns.
+		The stat increase and shield will improve with your Spellpower.]]):
+		format(statinc, absorb, self:getTalentCooldown(t) )
 	end,
 }
