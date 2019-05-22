@@ -198,7 +198,7 @@ newEntity{ base = "BASE_INFUSION",
 
 	inscription_kind = "movement",
 	inscription_data = {
-		cooldown = resolvers.rngrange(10, 18),  -- High variance because this is the only really important stat
+		cooldown = resolvers.rngrange(9, 18),  -- High variance because this is the only really important stat
 		speed = resolvers.mbonus_level(500, 400, function(e, v) return v * 0.001 end),
 		use_stat_mod = 3,
 	},
@@ -311,7 +311,7 @@ newEntity{ base = "BASE_RUNE",
 	material_level = 1,
 	inscription_kind = "movement",
 	inscription_data = {
-		cooldown = resolvers.rngrange(10, 18),
+		cooldown = resolvers.rngrange(13, 20),
 		range = resolvers.mbonus_level(4, 2, function(e, v) return v * 0.06 end),
 		power = resolvers.mbonus_level(20, 10, function(e, v) return v * 1 end),
 		use_stat_mod = 0.04, -- +4 range at 100 stat
