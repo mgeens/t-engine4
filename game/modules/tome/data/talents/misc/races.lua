@@ -258,7 +258,7 @@ newTalent{
 			local nb = 0
 			for eff_id, p in pairs(self.tmp) do
 				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then nb = nb + 1 end
+				if e.type ~= "other" and e.status == "detrimental" then nb = nb + 1 end
 			end
 			return nb
 		end,
