@@ -1590,7 +1590,8 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 				post = function(b, data)
 					-- Drop
 					for i = 1, data.nb_rares do -- generate rares as weak (1 ego) randarts with more and stronger powers
-						local fil = {lev=lev, egos=1, greater_egos_bias = 0, power_points_factor = 3, nb_themes_add = 1, nb_powers_add = 2, forbid_power_source=b.not_power_source,
+						local bonus = 1.5 + lev / 25  -- Scale power point bonus with level to account for egos gaining a lot of power per level relative
+						local fil = {lev=lev, egos=1, greater_egos_bias = 0, power_points_factor = bonus, nb_themes_add = 1, nb_powers_add = 2, forbid_power_source=b.not_power_source,
 							base_filter = {no_tome_drops=true, ego_filter={keep_egos=true, ego_chance=-1000}, 
 							special=function(e)
 								return (not e.unique and e.randart_able) and (not e.material_level or e.material_level >= 1) and true or false
