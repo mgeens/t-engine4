@@ -57,8 +57,8 @@ newEffect{
 	subtype = { darkness=true,}, no_ct_effect = true,
 	status = "detrimental",
 	parameters = {power=10, reduce=5},
-	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Poison" end,
-	on_lose = function(self, err) return "#Target# regains their energy.", "-Darkness" end,
+	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Darkness" end,
+	on_lose = function(self, err) return "#Target# regains their energy.", "-Numbing Darkness" end,
 	on_timeout = function(self, eff)
 
 	end,
