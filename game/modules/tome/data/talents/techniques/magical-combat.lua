@@ -33,7 +33,6 @@ newTalent{
 		local talent = self:getTalentFromId(proc)
 		if not talent or not talent.allow_for_arcane_combat then return false end
 		if not self:knowTalent(talent) then return false end
-		if self:isTalentCoolingDown(talent) then return false end
 		if not self:attr("force_talent_ignore_ressources") then
 			-- Check all possible resource types and see if the talent has an associated cost
 			for _, res_def in ipairs(self.resources_def) do
@@ -68,8 +67,6 @@ newTalent{
 		end
 		
 		if rng.percent(chance) then
-			local fatigue = (100 + 2 * self:combatFatigue()) / 100
-			local mana = self:getMana() - 1
 			local spells = {}
 			-- Load previously selected spell
 			local p = self:isTalentActive(t.id)
@@ -107,7 +104,7 @@ newTalent{
 				end
 				print("[ARCANE COMBAT] autocast ",self:getTalentFromId(tid).name)
 				local old_cd = self:isTalentCoolingDown(self:getTalentFromId(tid))
-				self:forceUseTalent(tid, {ignore_energy=true, force_target={x=target_x, y=target_y, __no_self=true}})
+				self:forceUseTalent(tid, {ignore_energy=true, ignore_cooldown=true, force_target={x=target_x, y=target_y, __no_self=true}})
 				-- Do not setup a cooldown
 				if not old_cd then
 					self.talents_cd[tid] = nil
@@ -156,7 +153,7 @@ newTalent{
 			end
 		end
 		return ([[Allows you to use melee weapons to focus your spells, granting a %d%% chance per melee attack to cast an offensive spell as a free action on the target.
-		Delivering the spell this way will not trigger a spell cooldown, but only works if the spell is not already cooling down.
+		Delivering the spell this way will not trigger a spell cooldown.
 		You may select an allowed spell to trigger this way, or choose to have one randomly selected for each attack.
 		While dual wielding or using a shield, the chance is reduced to 50%% for both weapons.
 		The chance increases with your Cunning.
