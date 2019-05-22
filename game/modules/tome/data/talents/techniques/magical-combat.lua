@@ -216,16 +216,16 @@ newTalent{
 	points = 5,
 	require = techs_req4,
 	radius = function(self, t) return self:getTalentLevel(t) < 5 and 1 or 2 end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 80) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 100) end,
 	getSPMult = function(self, t) return self:combatTalentScale(t, 1/7, 5/7) end,
 	info = function(self, t)
-		return ([[Raw magical damage channels through the caster's weapon, increasing raw Physical Power by %0.2f of your Magic (current bonus: %d).
+		return ([[Raw magical damage channels through the caster's weapon, increasing raw Physical Power by %d%% of your Magic (current bonus: %d).
 		Each time you crit with a melee blow, you will unleash a radius %d ball of arcane damage, doing %0.2f.
 		The bonus scales with your Spellpower and talent level.
 		If you are using a shield this will only occur 50%% of the time.
 		If you are dual wielding this will only occur 50%% of the time.
 		At level 5 the ball becomes radius 2.
 		]]):
-		format(t.getSPMult(self, t), self:getMag() * t.getSPMult(self, t), self:getTalentRadius(t), damDesc(self, DamageType.FIRE, t.getDamage(self, t)) )
+		format(t.getSPMult(self, t)*100, self:getMag() * t.getSPMult(self, t), self:getTalentRadius(t), damDesc(self, DamageType.ARCANE, t.getDamage(self, t)) )
 	end,
 }
