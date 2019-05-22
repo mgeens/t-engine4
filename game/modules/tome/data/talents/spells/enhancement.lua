@@ -17,10 +17,51 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+-- MH only, so this favors 2H
+newTalent{
+	name = "Arcane Strike",
+	short_name = "EARTHEN_BARRIER",
+	image = "talents/mana_strike_3.png",
+	type = {"spell/enhancement", 1},
+	points = 5,
+	cooldown = 4,
+	range = 1,
+	stamina = 20,
+	require = spells_req1,
+	tactical = { ATTACK = 0.2 },
+	is_melee = true,
+	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a weapon to use this talent.") end return false end return true end,
+	requires_target = true,
+	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
+	getMana = function(self, t) return self:combatTalentSpellDamage(t, 10, 60) end,
+	getDamage = function (self, t) return self:combatTalentWeaponDamage(t, 0.6, 1.0) end,
+	action = function(self, t)
+		local tg = self:getTalentTarget(t)
+		local x, y, target = self:getTargetLimited(tg)
+		if not x or not y or not target then return end
+
+		local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat
+		local hit = false
+		for i = 1,2 do
+			if self:attackTargetWith(target, weapon, DamageType.ARCANE, t.getDamage(self, t)) or hit then hit = true end
+		end
+
+		if hit then self:incMana(t.getMana(self, t)) end
+
+		return true
+	end,
+	info = function(self, t)
+		return ([[Strike twice with your mainhand weapon dealing %d%% Arcane damage.
+		If either of these attacks hit you gain %d mana.
+		The mana gain will increase with your Spellpower.]]):
+		format(t.getDamage(self, t)*100, t.getMana(self, t))
+	end,
+}
+
 newTalent{
 	name = "Fiery Hands",
-	type = {"spell/enhancement",1},
-	require = spells_req1,
+	type = {"spell/enhancement", 2},
+	require = spells_req2,
 	points = 5,
 	mode = "sustained",
 	cooldown = 10,
@@ -58,30 +99,6 @@ newTalent{
 		Each hit will also regenerate %0.2f stamina.
 		The effects will increase with your Spellpower.]]):
 		format(damDesc(self, DamageType.FIRE, firedamage), firedamageinc, self:getTalentLevel(t) / 3)
-	end,
-}
-
-newTalent{
-	name = "Earthen Barrier",
-	type = {"spell/enhancement", 2},
-	points = 5,
-	random_ego = "utility",
-	cooldown = 25,
-	mana = 45,
-	require = spells_req2,
-	range = 10,
-	tactical = { DEFEND = 2 },
-	getPhysicalReduction = function(self, t) return self:combatTalentSpellDamage(t, 10, 60) end,
-	action = function(self, t)
-		game:playSoundNear(self, "talents/spell_generic")
-		self:setEffect(self.EFF_EARTHEN_BARRIER, 10, {power=t.getPhysicalReduction(self, t)})
-		return true
-	end,
-	info = function(self, t)
-		local reduction = t.getPhysicalReduction(self, t)
-		return ([[Hardens your skin with the power of earth, reducing physical damage taken by %d%% for 10 turns.
-		Damage reduction will increase with your Spellpower.]]):
-		format(reduction)
 	end,
 }
 
