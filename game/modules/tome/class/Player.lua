@@ -923,7 +923,7 @@ function _M:automaticTalents()
 		if cd <= turns_used and t.mode ~= "sustained" then
 			game.logPlayer(self, "Automatic use of talent %s #DARK_RED#skipped#LAST#: cooldown too low (%d).", self:getTalentDisplayName(t), cd)
 		elseif (t.mode ~= "sustained" or not self.sustain_talents[tid]) and not self.talents_cd[tid] and self:preUseTalent(t, true, true) and (not t.auto_use_check or t.auto_use_check(self, t)) then
-			if (c == 1) or (c == 2 and #spotted <= 0) or (c == 3 and #spotted > 0) then
+			if (c == 1) or (c == 2 and #spotted <= 0) or (c == 3 and #spotted > 0) or (c == 5 and not self.in_combat) then
 				if c ~= 2 then
 					uses[#uses+1] = {name=t.name, turns_used=turns_used, cd=cd, fct=function() self:useTalent(tid) end}
 				else

@@ -6603,6 +6603,7 @@ function _M:checkSetTalentAuto(tid, v, opt)
 		end
 		if opt == 3 then list[#list+1] = "- will only trigger if enemies are visible" end
 		if opt == 4 then list[#list+1] = "- will only trigger if enemies are visible and adjacent" end
+		if opt == 5 then list[#list+1] = "- will only trigger if you are not in combat" end
 
 		if #list == 0 then
 			doit()
