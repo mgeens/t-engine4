@@ -37,7 +37,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:project(tg, x, y, DamageType.PHYSICAL, t.getdamage(self,t))
+		self:project(tg, x, y, DamageType.PHYSICAL, self:physicalCrit(t.getdamage(self,t)))
 		if self:getTalentLevel(t) >= 5 then
 			self:project(tg, x, y, function(px, py)
 				local proj = game.level.map(px, py, Map.PROJECTILE)

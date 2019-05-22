@@ -634,7 +634,7 @@ newTalent{
 		self:project(tg, x, y, function(px, py)
 			local target = game.level.map(px, py, engine.Map.ACTOR)
 			if not target then return nil end
-			self:project(tg, x, y, DamageType.PHYSICAL, t.getDamage(self,t))
+			self:project(tg, x, y, DamageType.PHYSICAL, self:physicalCrit(t.getDamage(self,t)))
 			if target:checkClassification("living") and (self:knowTalent(self.T_DART_LAUNCHER_MASTERY) or target:canBe("sleep") and target:canBe("poison")) then
 				target:setEffect(target.EFF_SEDATED, 4, {src=self, power=t.getSleepPower(self,t), slow=slow, insomnia=20, no_ct_effect=true, apply_power=self:combatAttack()})
 				game.level.map:particleEmitter(target.x, target.y, 1, "generic_charge", {rm=180, rM=200, gm=100, gM=120, bm=30, bM=50, am=70, aM=180})
