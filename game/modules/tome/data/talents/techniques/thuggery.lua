@@ -122,6 +122,7 @@ newTalent{
 	cooldown = 30,
 	sustain_stamina = 40,
 	drain_stamina = 6,
+	remove_on_zero = true,
 	no_energy = true,
 	require = techs_req4,
 	range = 1,

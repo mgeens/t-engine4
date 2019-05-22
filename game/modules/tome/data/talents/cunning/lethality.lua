@@ -93,6 +93,7 @@ newTalent{
 	sustain_stamina = 30,
 	tactical = { BUFF = 2 },
 	drain_stamina = 4,
+	remove_on_zero = true,
 	no_break_stealth = true,
 	no_energy = true,
 	getSpeed = function(self, t) return self:combatTalentScale(t, 0.10, 0.30, 0.75) end,

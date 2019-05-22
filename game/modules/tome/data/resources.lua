@@ -66,14 +66,12 @@ ActorResource:defineResource("Air", "air", nil, "air_regen", "Air capacity in yo
 ActorResource:defineResource("Stamina", "stamina", ActorTalents.T_STAMINA_POOL, "stamina_regen", "Stamina represents your physical fatigue.  Most physical abilities consume it.", nil, nil, {
 	color = "#ffcc80#",
 	cost_factor = function(self, t, check) return (check and self:hasEffect(self.EFF_ADRENALINE_SURGE)) and 0 or (100 + self:combatFatigue()) / 100 end,
-	depleted_unsustain = true,
 	wait_on_rest = true,
 	randomboss_enhanced = true,
 })
 ActorResource:defineResource("Mana", "mana", ActorTalents.T_MANA_POOL, "mana_regen", "Mana represents your reserve of magical energies. Most spells cast consume mana and each sustained spell reduces your maximum mana.", nil, nil, {
 	color = "#7fffd4#",
 	cost_factor = function(self, t) return (100 + 2 * self:combatFatigue()) / 100 end,
-	depleted_unsustain = true,
 	wait_on_rest = true,
 	randomboss_enhanced = true,
 })
@@ -98,7 +96,7 @@ ActorResource:defineResource("Equilibrium", "equilibrium", ActorTalents.T_EQUILI
 			end
 		},
 		-- find a talent to restore equilibrium (simple AIs)
-		aiResourceAction = function(act, res_def, t_filter, t_list) 
+		aiResourceAction = function(act, res_def, t_filter, t_list)
 			if act:getEquilibrium() > act:getMinEquilibrium() then
 				local tid = act:aiGetResourceTalent(res_def, t_filter, t_list)
 				if tid then

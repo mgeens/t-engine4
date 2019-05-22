@@ -659,16 +659,13 @@ function _M:act()
 		for res, res_def in ipairs(_M.resources_def) do
 			if (t.remove_on_zero == nil and res_def.depleted_unsustain) or (t.remove_on_zero ~= nil and util.getval(t.remove_on_zero, self, t)) then
 				if t[res_def.sustain_prop] then
-					if res == self.RS_STAMINA and self:hasEffect(self.EFF_ADRENALINE_SURGE) then
+					if res_def.invert_values then
+						if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
+							deact = true break
+						end
 					else
-						if res_def.invert_values then
-							if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
-								deact = true break
-							end
-						else
-							if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
-								deact = true break
-							end
+						if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
+							deact = true break
 						end
 					end
 				end
