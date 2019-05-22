@@ -2322,8 +2322,8 @@ newEffect{
 newEffect{
 	name = "SPELLSURGE", image = "talents/gather_the_threads.png",
 	desc = "Spellsurge",
-	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):
-	format(eff.cur_power or eff.power) end,
+	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):format(eff.cur_power or eff.power) end,
+	charges = function(self, eff) return math.floor(eff.cur_power or eff.power) end,
 	type = "magical",
 	subtype = { arcane=true },
 	status = "beneficial",
