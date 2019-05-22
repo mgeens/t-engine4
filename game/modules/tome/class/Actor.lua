@@ -4875,8 +4875,9 @@ function _M:searchAllInventories(o, fct)
 end
 
 local oldGetTalentTypeMastery = _M.getTalentTypeMastery
-function _M:getTalentTypeMastery(tt)
+function _M:getTalentTypeMastery(tt, only_base)
 	local mastery = oldGetTalentTypeMastery(self, tt)
+	if only_base then return mastery end
 	local def = self:getTalentTypeFrom(tt)
 	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[def.category] or 0
 	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
