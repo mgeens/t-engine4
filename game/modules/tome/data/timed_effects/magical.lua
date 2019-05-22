@@ -26,27 +26,7 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 
 ---------- Item specific 
-newEffect{
-	name = "ITEM_NUMBING_DARKNESS", image = "effects/bane_blinded.png",
-	desc = "Numbing Darkness",
-	long_desc = function(self, eff) return ("The target is losing hope, all damage it does is reduced by %d%%."):format(eff.reduce) end,
-	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
-	type = "magical",
-	subtype = { darkness=true,}, no_ct_effect = true,
-	status = "detrimental",
-	parameters = {power=10, reduce=5},
-	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Poison" end,
-	on_lose = function(self, err) return "#Target# regains their energy.", "-Darkness" end,
-	on_timeout = function(self, eff)
 
-	end,
-	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("numbed", eff.reduce)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("numbed", eff.tmpid)
-	end,
-}
 
 -- Use a word other than disease because diseases are associated with damage
 -- Add dummy power/dam parameters to try to stay in line with other diseases for subtype checks
