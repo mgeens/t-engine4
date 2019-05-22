@@ -2246,7 +2246,7 @@ function _M:combatGetResist(type)
 	end
 
 	local a = math.min((self.resists.all or 0) / 100,1) -- Prevent large numbers from inverting the resist formulas
-	local b = math.min((self.resists[type] or 0) / 100,1)
+	local b = (type == "all") and 0 or math.min((self.resists[type] or 0) / 100,1)
 	local r = util.bound(100 * (1 - (1 - a) * (1 - b)), -100, (self.resists_cap.all or 0) + (self.resists_cap[type] or 0))
 	return r * power / 100
 end
