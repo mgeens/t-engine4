@@ -22,7 +22,6 @@ uberTalent{
 	cooldown = 15,
 	no_energy = true,
 	requires_target = true,
-	range = 10,
 	fixed_cooldown = true,
 	tactical = { DEFEND = 1}, -- instant talent
 	action = function(self, t)

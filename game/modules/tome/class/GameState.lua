@@ -2476,11 +2476,11 @@ function _M:applyRandomClassNew(b, data, instant)
 			if data.descriptor_choices and data.descriptor_choices.subclass and data.descriptor_choices.subclass[class.name] then mclass = data break end
 		end
 		if not mclass then
-			print("[applyRandomClass] ### ABORTING ###", b.uid, b.name, "No main class type for", class.name)
+			print("[applyRandomClassNew] ### ABORTING ###", b.uid, b.name, "No main class type for", class.name)
 			return
 		end
 
-		print("[applyRandomClass]", b.uid, b.name, "Adding class", class.name, mclass.name, "level_rate", level_rate)
+		print("[applyRandomClassNew]", b.uid, b.name, "Adding class", class.name, mclass.name, "level_rate", level_rate)
 
 		-- Add starting equipment and update filters as needed
 		local apply_resolvers = function(k, resolver)
@@ -2579,7 +2579,7 @@ function _M:applyRandomClassNew(b, data, instant)
 	
 	-- apply random classes
 	local to_apply = data.nb_classes or 1.5 -- 1.5 is one primary class and one secondary class @ 50% stats/talents
-	print("[applyRandomClass] applying", to_apply, "classes at", data.level_rate, "%%")
+	print("[applyRandomClassNew] applying", to_apply, "classes at", data.level_rate, "%%")
 	while to_apply > 0 do
 		local c = rng.tableRemove(list)
 		if not c then break end --repeat attempts until list is exhausted

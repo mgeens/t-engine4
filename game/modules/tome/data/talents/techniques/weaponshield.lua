@@ -148,11 +148,12 @@ newTalent{
 	is_special_melee = true,
 	range = 1,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
-	on_pre_use = function(self, t, silent) if not self:hasShield() then if not silent then game.logPlayer(self, "You require a weapon and a shield to use this talent.") end return false end return true end,
+	on_pre_use = function(self, t, silent) if not (self:hasShield() and self:hasMHWeapon() ) then if not silent then game.logPlayer(self, "You require a weapon and a shield to use this talent.") end return false end return true end,
 	action = function(self, t)
 		local shield, shield_combat = self:hasShield()
-		if not shield then
-			game.logPlayer(self, "You cannot use Assault without a shield!")
+		local weapon = self:hasMHWeapon() 
+		if not shield or not weapon then
+			game.logPlayer(self, "You cannot use Assault without a mainhand weapon and shield!")
 			return nil
 		end
 
@@ -166,7 +167,6 @@ newTalent{
 		-- Second & third attack with weapon
 		if hit then
 			self.turn_procs.auto_phys_crit = true
-			local weapon = self:hasMHWeapon().combat
 			self:attackTargetWith(target, weapon, nil, self:combatTalentWeaponDamage(t, 0.8, 1.3))
 			self:attackTargetWith(target, weapon, nil, self:combatTalentWeaponDamage(t, 0.8, 1.3))
 			self.turn_procs.auto_phys_crit = nil

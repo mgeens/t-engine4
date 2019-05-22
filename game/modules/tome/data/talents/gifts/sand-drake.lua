@@ -86,7 +86,8 @@ return ([[Attack the target for %d%% Nature weapon damage.
 		The target may save against your physical power to prevent this attempt.
 		Levels in Swallow raise your Physical and Mental critical rate by %d%%.
 		Each point in sand drake talents increase your physical resistance by 0.5%%.
-
+		This talent will also attack with your shield, if you have one equipped.
+		
 		Max life threshold at your current size:
 		Tiny:  %d%%
 		Small:  %d%%

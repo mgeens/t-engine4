@@ -153,12 +153,11 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Spin around, extending your weapon and damaging all targets around you for %d%% weapon damage.
-		At level 3 all damage done will also make the targets bleed for an additional %d%% damage over 5 turns]]):format(100 * self:combatTalentWeaponDamage(t, 1.4, 2.1), t.getBleed(self, t) * 100)
+		return ([[Spin around, extending your weapon in radius %d and damaging all targets around you for %d%% weapon damage.
+		At level 3 all damage done will also make the targets bleed for an additional %d%% damage over 5 turns]]):format(self:getTalentRadius(t), 100 * self:combatTalentWeaponDamage(t, 1.4, 2.1), t.getBleed(self, t) * 100)
 	end,
 }
 
--- Technique talent reduction
 newTalent{
 	name = "Execution",
 	type = {"technique/2hweapon-assault", 4},

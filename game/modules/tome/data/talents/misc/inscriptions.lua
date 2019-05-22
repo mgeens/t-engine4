@@ -221,7 +221,7 @@ newInscription{
 	end,
 	short_info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		return ([[speed %d; cd %d]]):format(data.speed + data.inc_stat, data.cooldown)
+		return ([[speed %d%%; cd %d]]):format(data.speed + data.inc_stat, data.cooldown)
 	end,
 }
 
