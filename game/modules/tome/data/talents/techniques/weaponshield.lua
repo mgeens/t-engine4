@@ -151,7 +151,7 @@ newTalent{
 	on_pre_use = function(self, t, silent) if not (self:hasShield() and self:hasMHWeapon() ) then if not silent then game.logPlayer(self, "You require a weapon and a shield to use this talent.") end return false end return true end,
 	action = function(self, t)
 		local shield, shield_combat = self:hasShield()
-		local weapon = self:hasMHWeapon() 
+		local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat
 		if not shield or not weapon then
 			game.logPlayer(self, "You cannot use Assault without a mainhand weapon and shield!")
 			return nil
