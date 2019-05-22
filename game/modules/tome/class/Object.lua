@@ -1105,12 +1105,12 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 		nil, nil,
 		function(k, v) return not DamageType.dam_def[k].tdesc end)
 
-	compare_table_fields(combat, compare_with, field, "burst_on_hit", "%+d", "Burst (radius 1) on hit: ", function(item)
+	compare_table_fields(combat, compare_with, field, "burst_on_hit", "%+d", "Damage (radius 1) on hit: ", function(item)
 			local col = (DamageType.dam_def[item] and DamageType.dam_def[item].text_color or "#WHITE#"):toTString()
 			return col[2], (" %s"):format(DamageType.dam_def[item].name),{"color","LAST"}
 		end)
 
-	compare_table_fields(combat, compare_with, field, "burst_on_crit", "%+d", "Burst (radius 2) on crit: ", function(item)
+	compare_table_fields(combat, compare_with, field, "burst_on_crit", "%+d", "Damage (radius 2) on crit: ", function(item)
 			local col = (DamageType.dam_def[item] and DamageType.dam_def[item].text_color or "#WHITE#"):toTString()
 			return col[2], (" %s"):format(DamageType.dam_def[item].name),{"color","LAST"}
 		end)
