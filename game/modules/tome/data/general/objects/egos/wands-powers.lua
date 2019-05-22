@@ -51,12 +51,13 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 10,
 
-	charm_power_def = {add=10, max=400, floor=true},
+	charm_power_def = {add=0, max=800, floor=true},
 	resolvers.charm(function(self, who)
 		local dam = who:damDesc(engine.DamageType.LIGHTNING, self.use_power.damage(self, who))
 		local radius = self.use_power.radius
 		local duration = 5
-		return ("create a radius %d storm for %d turns. Each turn, creatures within take %d lightning damage and will be dazed for 1 turn"):format(radius, duration, math.floor(dam / duration))
+		return ("create a radius %d storm for %d turns. Each turn, creatures within take %d lightning damage and will be dazed for 1 turn (%d total damage)"):
+			format(radius, duration, math.floor(dam / duration), math.floor(dam))
 	end,
 	15,
 	function(self, who)
@@ -101,7 +102,7 @@ newEntity{
 		}
 	end),
 
-	charm_power_def = {add=30, max=800, floor=true},
+	charm_power_def = {add=0, max=1000, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("fire a magical bolt dealing %d %s damage"):format(dam, self.elem[3] )
@@ -134,7 +135,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=100, max=800, floor=true},
+	charm_power_def = {add=0, max=600, floor=true},
 	resolvers.charm(
 		function(self, who) 
 			local shield = self.use_power.shield(self, who) * (100 + (who:attr("shield_factor") or 0)) / 100
