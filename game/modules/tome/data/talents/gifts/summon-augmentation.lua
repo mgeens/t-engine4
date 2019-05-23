@@ -109,14 +109,14 @@ newTalent{
 		local radius = self:getTalentRadius(t)
 		return ([[Destroys one of your summons, making it detonate in radius of %d.
 		- Ritch Flamespitter: Explodes into a fireball dealing %d damage, flameshocking damaged foes
-		- Hydra: Grants %d%% lightning, acid, and nature affinity as well as %d life regen per turn to all friendly creatures
+		- Hydra: Grants %d%% lightning, acid, and nature affinity as well as %d life regen per turn to all friendly creatures for 7 turns
 		- Rimebark: Explodes into an iceball dealing %d ice damage, possibly freezing damaged foes
 		- Fire Drake: Explodes into a cloud of lingering fire, dealing %d damage per turn
 		- War Hound: Explodes into a sharp ball, cutting all creatures for %0.1f bleeding damage per turn for 6 turns
 		- Jelly: Explodes into a ball of slowing slime, dealing %d nature damage and slowing foes by %0.1f%%
 		- Minotaur: Confuses foes at %d%% power for 5 turns
-		- Stone Golem: Grants %d armour and %d%% armour hardiness to all friendly creatures
-		- Turtle: Grants a small shell shield to all friendly creatures, granting %d%% all resist
+		- Stone Golem: Grants %d armour and %d%% armour hardiness to all friendly creatures for 5 turns
+		- Turtle: Grants a small shell shield to all friendly creatures, granting %d%% all resist for 5 turns
 		- Spider: Knocks back all foes %d tiles
 		In addition, a random summon will come off cooldown.
 		Hostile effects will not hit you or your other summons.

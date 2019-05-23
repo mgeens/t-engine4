@@ -114,7 +114,7 @@ newTalent{
 		self:project(tg, m.x, m.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target or self:reactionToward(target) < 0 then return end
-			target:setEffect(target.EFF_SHELL_SHIELD, 4, {power=self:mindCrit(shellShielding)})
+			target:setEffect(target.EFF_SHELL_SHIELD, 5, {power=self:mindCrit(shellShielding)})
 		end, nil, {type="flame"})
 	end,
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
