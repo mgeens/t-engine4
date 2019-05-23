@@ -352,7 +352,8 @@ newTalent{
 }
 
 newTalent{
-	name = "Summon Control",
+	name = "Pheromones",
+	short_name = "SUMMON_CONTROL", --Backwards compatibility
 	type = {"wild-gift/summon-utility", 4},
 	require = gifts_req4,
 	points = 5,
@@ -379,6 +380,6 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Draw focus on a creature, signalling to all of your summons within %d tiles of it to shift aggression towards the marked creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
+		return ([[Mark a creature with pheromones, signalling to all of your summons within %d tiles of it to shift aggression towards the marked creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
 	end,
 }

@@ -67,8 +67,8 @@ newEffect{
 }
 
 newEffect{
-	name = "SUMMON_CONTROL", image = "talents/summon_control.png",
-	desc = "Summon Control",
+	name = "SUMMON_CONTROL", image = "talents/summon_control.png", --Backwards compatibility
+	desc = "Pheromones",
 	long_desc = function(self, eff) return ("The target has been marked as the focus for all summons within %d radius."):format(eff.range) end,
 	type = "mental",
 	subtype = { focus=true },
