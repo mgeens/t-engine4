@@ -518,9 +518,14 @@ newTalent{
 	end,
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
-		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeDamage")
-		self:project(tg, m.x, m.y, rng.table{DamageType.LIGHTNING,DamageType.ACID,DamageType.POISON}, self:mindCrit(explodeDamage), {type="flame"})
+		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y, ignore_nullify_all_friendlyfire=true}
+		local hydraAffinity = self:callTalent(self.T_DETONATE,"hydraAffinity")
+		local hydraRegen = self:callTalent(self.T_DETONATE,"hydraRegen")
+		self:project(tg, m.x, m.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target or self:reactionToward(target) < 0 then return end
+			target:setEffect(target.EFF_SERPENTINE_NATURE, 4, {power=hydraAffinity, regen=hydraRegen})
+		end, nil, {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
