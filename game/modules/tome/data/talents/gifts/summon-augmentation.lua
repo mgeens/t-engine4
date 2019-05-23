@@ -69,7 +69,7 @@ newTalent{
 --]]
 	explodeDamage = function(self,t) return self:combatTalentMindDamage(t, 100, 400) end,
 	explodeBleed = function(self,t) return self:combatTalentMindDamage(t, 50, 500) end,
-	explodeBurn = function(self,t) return self:combatTalentMindDamage(t, 30, 250) end,
+	explodeSecondary = function(self,t) return self:combatTalentMindDamage(t, 30, 250) end,
 	explodeFire = function(self,t) return self:combatTalentMindDamage(t, 30, 120) end,
 	hydraAffinity = function(self,t) return self:combatTalentLimit(t, 50, 15, 40) end,
 	hydraRegen = function(self,t) return self:combatTalentMindDamage (t, 8, 40) end,
