@@ -126,12 +126,12 @@ newTalent{
 		Wild creatures have one more talent/power than the base versions:
 		- Ritch Flamespitter: Can fly in the air, spitting its Flamespit past creatures in the path of its target
 		- Hydra: Can concentrate its breath into spits when allies would be caught in a breath, instead spitting a bolt
-		- Rimebark: Can better control its icestorm, no longer damaging or freezing allies caught within
+		- Rimebark: Can grab foes, pulling them into range of its ice storm
 		- Fire Drake: Can emit a powerful roar to silence its foes
 		- War Hound: Can rage, inreasing its critical chance and gaining armour penetration
 		- Jelly: Can split into an additional jelly upon taking a large hit (jellies formed by splitting do not count against your summon cap)
 		- Minotaur: Can rush toward its target
-		- Stone Golem: Can deal a small area of effect damage with melee blows
+		- Stone Golem: Can disarm its foes
 		- Turtle: Can force all foes in a radius into melee range
 		- Spider: Can project an insidious poison at its foes, reducing their healing
 		This talent requires Master Summoner to be active to be used.

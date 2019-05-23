@@ -338,45 +338,42 @@ newTalent{
 }
 
 newTalent{
-	name = "Winter's Fury", short_name="WILD_WINTER_S_FURY",
-	type = {"wild-gift/other",1},
+	name = "Winter's Grasp",
+	type = {"wild-gift/other", 1},
 	require = gifts_req4,
 	points = 5,
-	equilibrium = 10,
-	cooldown = 4,
-	tactical = { ATTACKAREA = { COLD = 2 }, DISABLE = { stun = 1 } },
-	range = 0,
-	radius = 3,
-	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false}
-	end,
-	getDamage = function(self, t) return self:combatTalentStatDamage(t, "wil", 30, 120) end,
-	getDuration = function(self, t) return 4 end,
+	equilibrium = 7,
+	cooldown = 5,
+	range = 10,
+	tactical = { ATTACK = {COLD = 1}, DISABLE = {slow = 1}, CLOSEIN = 2 },
+	requires_target = true,
+	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), talent=t} end,
 	action = function(self, t)
-		-- Add a lasting map effect
-		game.level.map:addEffect(self,
-			self.x, self.y, t.getDuration(self, t),
-			DamageType.ICE, t.getDamage(self,t),
-			3,
-			5, nil,
-			{type="icestorm", only_one=true},
-			function(e)
-				e.x = e.src.x
-				e.y = e.src.y
-				return true
-			end,
-			false,
-			false --param for friendlyfire 
-		)
+		local tg = self:getTalentTarget(t)
+		local x, y = self:getTarget(tg)
+		if not x or not y then return nil end
+
+		local dam = self:mindCrit(self:combatTalentMindDamage(t, 5, 140))
+
+		self:project(tg, x, y, function(px, py)
+			local target = game.level.map(px, py, engine.Map.ACTOR)
+			if not target then return end
+
+			target:pull(self.x, self.y, tg.range)
+
+			DamageType:get(DamageType.COLD).projector(self, target.x, target.y, DamageType.COLD, dam)
+			target:setEffect(target.EFF_SLOW_MOVE, t.getDuration(self, t), {apply_power=self:combatSpellpower(), power=0.5})
+		end)
 		game:playSoundNear(self, "talents/ice")
+
 		return true
 	end,
 	info = function(self, t)
-		local damage = t.getDamage(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[A furious yet well controlled ice storm rages around the user doing %0.2f cold damage in a radius of 3 to hostile targets each turn for %d turns.
-		It has 25%% chance to freeze damaged targets.
-		The damage and duration will increase with your Willpower.]]):format(damDesc(self, DamageType.COLD, damage), duration)
+		return ([[Grab a target and pull it next to you, covering it with frost while reducing its movement speed by 50%% for %d turns.
+		The ice will also deal %0.2f cold damage.
+		The damage and chance to slow will increase with your Spellpower.]]):
+		format(t.getDuration(self, t), damDesc(self, DamageType.COLD, self:combatTalentMindDamage(t, 5, 140)))
 	end,
 }
 
@@ -715,7 +712,7 @@ newTalent{
 		}
 		if self:attr("wild_summon") and rng.percent(self:attr("wild_summon")) then
 			m.name = m.name.." (wild summon)"
-			m[#m] = resolvers.talents{ [self.T_WILD_WINTER_S_FURY]=self:getTalentLevelRaw(t) }
+			m[#m+1] = resolvers.talents{ [self.T_WINTER_S_GRASP]=self:getTalentLevelRaw(t) }
 		end
 		setupSummon(self, m, x, y)
 		
