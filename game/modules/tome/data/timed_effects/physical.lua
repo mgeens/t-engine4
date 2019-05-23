@@ -860,6 +860,24 @@ newEffect{
 }
 
 newEffect{
+	name = "SERPENTINE_NATURE", image = "talents/hydra.png",
+	desc = "Serpentine Nature",
+	long_desc = function(self, eff) return ("The target takes on the properties of the hydra, gaining %d%% affinity to cold, acid, and nature damage and regenerating %d life per turn."):format(eff.power, eff.regen) end,
+	type = "physical",
+	subtype = { nature=true },
+	status = "beneficial",
+	parameters = { power=15, regen=10 },
+	activate = function(self, eff)
+		eff.pid = self:addTemporaryValue("damage_affinity", {NATURE=eff.power, ACID=eff.power, COLD=eff.power})
+		eff.regenid = self:addTemporaryValue("life_regen", eff.regen)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("damage_affinity", eff.pid)
+		self:removeTemporaryValue("life_regen", eff.regenid)
+	end,
+}
+
+newEffect{
 	name = "PAIN_SUPPRESSION", image = "talents/infusion__wild.png",
 	desc = "Pain Suppression",
 	long_desc = function(self, eff) return ("The target ignores pain, reducing all damage taken by %d%%."):format(eff.power) end,

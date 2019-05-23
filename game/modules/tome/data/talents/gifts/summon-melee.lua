@@ -207,7 +207,7 @@ newTalent{
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local explodeDamage = self:callTalent(self.T_DETONATE, "explodeSecondary")
 		local jellySlow = self:callTalent(self.T_DETONATE, "jellySlow")
-		self:project(tg, m.x, m.y, DamageType.SLIME, {dam=self:mindCrit(explodeDamage), power=jellySlow}, {type="flame"})
+		self:project(tg, m.x, m.y, DamageType.SLIME, {dam=self:mindCrit(explodeDamage), power=jellySlow}, {type="slime"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
@@ -437,9 +437,14 @@ newTalent{
 	end,
 	on_pre_use_ai = aiSummonPreUse,
 	on_detonate = function(self, t, m)
-		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
-		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeDamage")
-		self:project(tg, m.x, m.y, DamageType.PHYSICAL, self:mindCrit(explodeDamage), {type="flame"})
+		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y, ignore_nullify_all_friendlyfire=true}
+		local golemArmour = self:callTalent(self.T_DETONATE,"golemArmour")
+		local golemHardiness = self:callTalent(self.T_DETONATE,"golemHardiness")
+		self:project(tg, m.x, m.y, function(px, py)
+			local target = game.level.map(px, py, Map.ACTOR)
+			if not target or self:reactionToward(target) < 0 then return end
+			target:setEffect(target.EFF_THORNY_SKIN, 4, {ac=golemArmour, hard=golemHardiness})
+		end, nil, {type="flame"})
 	end,
 	on_arrival = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}

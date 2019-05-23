@@ -45,7 +45,7 @@ newTalent{
 	require = gifts_req2,
 	points = 5,
 	equilibrium = 5,
-	cooldown = 18,
+	cooldown = 25,
 	range = 10,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8, 0.5, 0, 0, true)) end,
 	requires_target = true,
@@ -68,13 +68,17 @@ newTalent{
 	end,
 --]]
 	explodeDamage = function(self,t) return self:combatTalentMindDamage(t, 100, 400) end,
-	explodeSecondary = function(self,t) return self:combatTalentMindDamage(t, 30, 300) end,
 	explodeBleed = function(self,t) return self:combatTalentMindDamage(t, 50, 500) end,
+	explodeBurn = function(self,t) return self:combatTalentMindDamage(t, 30, 250) end,
 	explodeFire = function(self,t) return self:combatTalentMindDamage(t, 30, 120) end,
-	jellySlow = function(self,t) return self:combatTalentLimit(t,0.60,0.15,0.35) end,
+	hydraAffinity = function(self,t) return self:combatTalentLimit(t, 50, 15, 40) end,
+	hydraRegen = function(self,t) return self:combatTalentMindDamage (t, 8, 40) end,
+	jellySlow = function(self,t) return self:combatTalentLimit(t, 0.60, 0.10, 0.35) end,
 	minotaurConfuse = function(self,t) return self:combatTalentLimit(t, 50, 15, 35) end,
+	golemArmour = function(self,t) return self:combatTalentLimit(t, 100, 15, 50) end,
+	golemHardiness = function(self,t) return 15 + self:getTalentLevelRaw(t)*10 end,
 	shellShielding = function(self,t) return self:combatTalentMindDamage(t, 10, 35) end,
-	spiderKnockback = function(self,t) return 1+math.floor(self:getTalentLevel(t)) end,
+	spiderKnockback = function(self,t) return 1 + math.floor(self:getTalentLevel(t)) end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t, first_target="friend"}
 		local tx, ty, target = self:getTarget(tg)
@@ -106,18 +110,18 @@ newTalent{
 		local radius = self:getTalentRadius(t)
 		return ([[Destroys one of your summons, making it detonate in radius of %d.
 		- Ritch Flamespitter: Explodes into a fireball dealing %d damage, flameshocking damaged foes
-		- Hydra: Explodes into a ball of %d lightning, acid or poison damage, chosen at random
+		- Hydra: Grants %d%% lightning, acid, and nature affinity as well as %d life regen per turn to all friendly creatures
 		- Rimebark: Explodes into an iceball dealing %d ice damage, possibly freezing damaged foes
 		- Fire Drake: Explodes into a cloud of lingering fire, dealing %d damage per turn
 		- War Hound: Explodes into a sharp ball, cutting all creatures for %0.1f bleeding damage per turn for 6 turns
 		- Jelly: Explodes into a ball of slowing slime, dealing %d nature damage and slowing foes by %0.1f%%
 		- Minotaur: Confuses foes at %d%% power for 5 turns
-		- Stone Golem: Explodes into a ball dealing %d physical damage
+		- Stone Golem: Grants %d armour and %d%% armour hardiness to all friendly creatures
 		- Turtle: Grants a small shell shield to all friendly creatures, granting %d%% all resist
 		- Spider: Knocks back all foes %d tiles
 		In addition, a random summon will come off cooldown.
 		Hostile effects will not hit you or your other summons.
-		The effects improve with your mindpower, and can crit.]]):format(radius, t.explodeSecondary(self,t), t.explodeDamage(self,t), t.explodeSecondary(self,t), t.explodeFire(self,t), t.explodeBleed(self,t) / 6, t.explodeSecondary(self,t), t.jellySlow(self,t) * 100, t.minotaurConfuse(self,t), t.explodeDamage(self,t), t.shellShielding(self,t), t.spiderKnockback(self,t))
+		The effects improve with your mindpower, and can crit.]]):format(radius, t.explodeBurn(self,t), t.hydraAffinity(self,t), t.hydraRegen(self,t), t.explodeBurn(self,t), t.explodeFire(self,t), t.explodeBleed(self,t) / 6, t.explodeBurn(self,t), t.jellySlow(self,t) * 100, t.minotaurConfuse(self,t), t.golemArmour(self,t), t.golemHardiness(self,t), t.shellShielding(self,t), t.spiderKnockback(self,t)) 
 	end,
 }
 
