@@ -363,7 +363,7 @@ newTalent{
 			target:pull(self.x, self.y, tg.range)
 
 			DamageType:get(DamageType.COLD).projector(self, target.x, target.y, DamageType.COLD, dam)
-			target:setEffect(target.EFF_SLOW_MOVE, t.getDuration(self, t), {apply_power=self:combatSpellpower(), power=0.5})
+			target:setEffect(target.EFF_SLOW_MOVE, t.getDuration(self, t), {apply_power=self:combatMindpower(), power=0.5})
 		end)
 		game:playSoundNear(self, "talents/ice")
 
@@ -372,7 +372,7 @@ newTalent{
 	info = function(self, t)
 		return ([[Grab a target and pull it next to you, covering it with frost while reducing its movement speed by 50%% for %d turns.
 		The ice will also deal %0.2f cold damage.
-		The damage and chance to slow will increase with your Spellpower.]]):
+		The damage and chance to slow will increase with your Mindpower.]]):
 		format(t.getDuration(self, t), damDesc(self, DamageType.COLD, self:combatTalentMindDamage(t, 5, 140)))
 	end,
 }
