@@ -1700,7 +1700,7 @@ function _M:reactionToward(target, no_reflection)
 	local rsrc, rtarget = self, target
 	while rsrc.summoner do rsrc = rsrc.summoner end
 	while rtarget.summoner do rtarget = rtarget.summoner end
-	if rsrc == target and self ~= target and target:attr("encased_in_ice") then return -50 end  -- summons shouldn't hate each other and shouldn't hate summoner more than enemies
+	if rsrc == target and self ~= target and target:attr("encased_in_ice") and not target.isMySummoner then return -50 end  -- summons shouldn't hate each other more than enemies and shouldn't hate thier summoner
 
 	-- Neverending hatred
 	if rtarget.attr and rtarget:attr("hated_by_everybody") and rtarget ~= rsrc then return -100 end
