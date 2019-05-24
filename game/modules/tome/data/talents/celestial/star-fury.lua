@@ -80,7 +80,7 @@ newTalent{
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, t.getDuration(self, t),
-			DamageType.DARKNESS, t.getDamageOnSpot(self, t),
+			DamageType.DARKNESS, self:spellCrit(t.getDamageOnSpot(self, t)),
 			self:getTalentRadius(t),
 			5, nil,
 			{type="shadow_zone", overlay_particle={zdepth=6, only_one=true, type="circle", args={oversize=0.7, a=60, appear=8, speed=-0.5, img="moon_circle", radius=self:getTalentRadius(t)}}},
