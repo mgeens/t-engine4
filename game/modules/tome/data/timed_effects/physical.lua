@@ -862,13 +862,13 @@ newEffect{
 newEffect{
 	name = "SERPENTINE_NATURE", image = "talents/hydra.png",
 	desc = "Serpentine Nature",
-	long_desc = function(self, eff) return ("The target takes on the properties of the hydra, gaining %d%% affinity to cold, acid, and nature damage and regenerating %d life per turn."):format(eff.power, eff.regen) end,
+	long_desc = function(self, eff) return ("The target takes on the properties of the hydra, gaining %d%% affinity to lightning, acid, and nature damage and regenerating %d life per turn."):format(eff.power, eff.regen) end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
 	parameters = { power=15, regen=10 },
 	activate = function(self, eff)
-		eff.pid = self:addTemporaryValue("damage_affinity", {NATURE=eff.power, ACID=eff.power, COLD=eff.power})
+		eff.pid = self:addTemporaryValue("damage_affinity", {NATURE=eff.power, ACID=eff.power, LIGHTNING=eff.power})
 		eff.regenid = self:addTemporaryValue("life_regen", eff.regen)
 	end,
 	deactivate = function(self, eff)
