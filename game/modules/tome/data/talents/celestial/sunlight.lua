@@ -25,7 +25,7 @@ newTalent{
 	require = divi_req1,
 	random_ego = "attack",
 	points = 5,
-	cooldown = 4,
+	cooldown = 5,
 	positive = -16,
 	range = 7,
 	tactical = { ATTACK = {LIGHT = 2} },
@@ -33,7 +33,7 @@ newTalent{
 	reflectable = true,
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 6, 160) end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 6, 80) end,
+	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 6, 160)/2 end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
 		local x, y = self:getTarget(tg)
@@ -44,7 +44,7 @@ newTalent{
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, 4,
-			DamageType.LIGHT, t.getDamageOnSpot(self, t),
+			DamageType.LIGHT, self:spellCrit(t.getDamageOnSpot(self, t)),
 			0,
 			5, nil,
 			{type="light_zone"},
@@ -117,8 +117,8 @@ newTalent{
 	require = divi_req3,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 5,
-	positive = 15,
+	cooldown = 6,
+	positive = 10,
 	tactical = { ATTACK = {FIRE = 2}  },
 	range = 7,
 	direct_hit = true,
@@ -133,7 +133,7 @@ newTalent{
 		if not x or not y then return nil end
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project(tg, x, y, DamageType.LIGHT, dam)
-		self:project(tg, x, y, DamageType.FIREBURN, {dam=dam, dur=3, initial=0})
+		self:project(tg, x, y, DamageType.FIREBURN, {dam=dam/2, dur=3, initial=0})
 		local _ _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
@@ -144,7 +144,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		return ([[Call forth the Sun to summon a fiery beam, dealing %d light damage and burning all targets in a line for %d fire damage over 3 turns.
 		The damage done will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.FIRE, damage))
+		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.FIRE, damage/2))
 	end,
 }
 
