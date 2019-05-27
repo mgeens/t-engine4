@@ -2886,7 +2886,7 @@ newEffect{
 newEffect{
 	name = "BORN_INTO_MAGIC", image = "talents/born_into_magic.png",
 	desc = "Born into Magic",
-	long_desc = function(self, eff) return ("%s damage increased by 15%%."):format(DamageType:get(eff.damtype).name:capitalize()) end,
+	long_desc = function(self, eff) return ("%s damage increased by 20%%."):format(DamageType:get(eff.damtype).name:capitalize()) end,
 	type = "magical",
 	subtype = { race=true },
 	status = "beneficial",
