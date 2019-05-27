@@ -49,10 +49,10 @@ newTalent{
 			return 0
 		end
 	end,
-	getBlindDur = function(self, t) return self:combatTalentLimit(t, 7, 1, 4.5) end,
+	getDisarmDur = function(self, t) return self:combatTalentLimit(t, 7, 1, 4.5) end,
 	getFatigueDur = function(self, t) return self:combatTalentLimit(t, 14, 1, 8) end,
 	getFatigueDam = function(self, t) return self:combatTalentSpellDamage(t, 1, 80) end,
-	getKnockBack = function(self, t) return self:combatTalentLimit(t, 10, 1, 6) end,
+	getTPdist = function(self, t) return self:combatTalentLimit(t, 10, 1, 6) end,
 	on_crit = function(self, t)
 		if self:getPositive() < 5 or self:getNegative() < 5 then return nil end
 		if self.turn_procs.glyphs then return nil end
@@ -76,10 +76,10 @@ newTalent{
 		end)
 		self.turn_procs.glyphs = 1 --as late as possible, but before any crits to prevent stack overflow
 		local dam = self:spellCrit(t.getGlyphDam(self, t))
-		local blindDur = t.getBlindDur(self, t)
+		local disarmDur = t.getDisarmDur(self, t)
 		local fatigueDur = t.getFatigueDur(self, t)
 		local fatigueDam = self:spellCrit(t.getFatigueDam(self, t))
-		local dist = t.getKnockBack(self, t)
+		local dist = t.getTPdist(self, t)
 
 ----------------------------------------------------------------
 -- START - Define Glyph Traps - START
@@ -91,9 +91,9 @@ local function makeSunGlyph()
 		display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
 		faction = self.faction,
 		dam = dam,
-		blindDur = blindDur,
+		disarmDur = disarmDur,
 		desc = function(self)
-			return ([[Deals %d light damage and blinds for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), self.blindDur)
+			return ([[Deals %d light damage and disarms for %d turns.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam), self.disarmDur)
 		end,
 		canTrigger = function(self, x, y, who)
 			if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
@@ -103,8 +103,8 @@ local function makeSunGlyph()
 			if self.dam then
 				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam, {type="light"})
 			end
-			if who:canBe("blind") then
-				who:setEffect(who.EFF_BLINDED, self.blindDur, {})
+			if who:canBe("disarm") then
+				who:setEffect(who.EFF_DISARMED, self.disarmDur, {})
 			end
 			game.level.map:particleEmitter(x, y, 0, "sunburst", {radius=0, x=x, y=y})
 	--divine glyphs buff
@@ -328,20 +328,20 @@ end
 	end,
 	info = function(self, t)
 		local dam = t.getGlyphDam(self, t)
-		local blindDur = t.getBlindDur(self, t)
+		local disarmDur = t.getdisarmDur(self, t)
 		local fatigueDur = t.getFatigueDur(self, t)
 		local fatigueDam = t.getFatigueDam(self, t)
-		local kbDist = t.getKnockBack(self, t)
+		local tpDist = t.getTPdist(self, t)
 		return ([[When one of your spells goes critical, you bind glyphs in radius 1 centred on a random target in range 7 at the cost of 5 positive and 5 negative.
 		Glyphs are hidden traps (%d detection and disarm power) lasting for %d turns.
 		This can only happen once per turn and each glyph can only be bound every %d turns.
 		Glyph damage will scale with spellpower and detection and disarm powers scale with magic.
 
 		Avalable glyphs are:
-		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %d light damage and blinding for %d turns.
+		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %d light damage and disarming for %d turns.
 		Glyph of Fatigue - Bind starlight into a glyph. When triggered it will release a fatiguing darkness. For %d turns, every action the foe makes will increase the cooldown of a cooling-down talent by 1 and cause it to take %d darkness damage.
 		Glyph of Explosion - Bind twilight into a glyph. When triggered it will release a burst of twilight, teleporting the target %d tiles away and dealing %d light and %d darkness damage.
-		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), blindDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), kbDist, damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
+		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), disarmDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), tpDist, damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
 	end,
 }
 
