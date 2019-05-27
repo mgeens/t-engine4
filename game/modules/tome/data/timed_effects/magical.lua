@@ -2892,7 +2892,7 @@ newEffect{
 	status = "beneficial",
 	parameters = { eff=DamageType.ARCANE },
 	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "inc_damage", {[eff.damtype]=15})
+		self:effectTemporaryValue(eff, "inc_damage", {[eff.damtype]=20})
 	end,
 	deactivate = function(self, eff)
 	end,
