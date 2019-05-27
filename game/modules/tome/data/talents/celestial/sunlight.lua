@@ -32,8 +32,8 @@ newTalent{
 	direct_hit = true,
 	reflectable = true,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 6, 160) end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 6, 160)/2 end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 17, 200) end,
+	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 17, 200)/2 end,
 	action = function(self, t)
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
 		local x, y = self:getTarget(tg)
@@ -57,9 +57,9 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local damageonspot = t.getDamageOnSpot(self, t)
-		return ([[Calls the power of the Sun into a searing lance, doing %0.2f damage to the target and leaving a spot on the ground for 4 turns that does %0.2f light damage to anyone within it.
+		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a spot on the ground for 4 turns that does %d light damage to anyone within it.
 		The damage dealt will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, damage), damageonspot)
+		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damageonspot))
 	end,
 }
 
@@ -82,7 +82,7 @@ newTalent{
 		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t), talent=t}
 	end,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 4, 80) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -126,7 +126,7 @@ newTalent{
 	target = function(self, t)
 		return {type="beam", range=self:getTalentRange(t), talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 200) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 16, 200) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
@@ -157,34 +157,50 @@ newTalent{
 	cooldown = 15,
 	positive = 20,
 	tactical = { ATTACKAREA = {LIGHT = 2} },
-	range = 0,
-	radius = 6,
+	range = 7,
 	direct_hit = true,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
+		return {type="ball", range=self:getTalentRange(t), radius=7, friendlyfire=false, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 200) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
 	getDuration = function(self, t) return 6 end,
-	getPower = function(self, t) return self:combatTalentLimit(t, 1.5, 0.2, 1) end,
+	getPower = function(self, t) return self:combatTalentLimit(t, 1, 0.2, 0.7) end,
+	getTargetCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
 	action = function(self, t)
-		self.inc_damage.LIGHT, self.resists_pen.LIGHT, self.inc_damage.DARKNESS, self.resists_pen.DARKNESS = self.inc_damage.LIGHT or 0, self.resists_pen.LIGHT or 0, self.inc_damage.DARKNESS or 0, self.resists_pen.DARKNESS or 0
-		local damVal = math.max(self.inc_damage.LIGHT, self.inc_damage.DARKNESS * t.getPower(self, t))
-		local damInc = damVal - self.inc_damage.LIGHT
-		local penVal = math.max(self.resists_pen.LIGHT, self.resists_pen.DARKNESS * t.getPower(self, t))
-		local penInc = penVal - self.resists_pen.LIGHT
-		self:setEffect(self.EFF_SUNBURST, t.getDuration(self, t), {damVal=damVal, damInc=damInc, penVal=penVal, penInc=penInc}) --all these params for eff tt
+		local damInc = (self.inc_damage.DARKNESS or 0) * t.getPower(self, t)
+		self:setEffect(self.EFF_SUNBURST, t.getDuration(self, t), {damInc=damInc})
 
-		local tg = self:getTalentTarget(t)
-		self:project(tg, self.x, self.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
+		--do cool lasers
+		local tgts = {}
+		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
+		for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
+			local a = game.level.map(x, y, Map.ACTOR)
+			if a and self:reactionToward(a) < 0 then
+				tgts[#tgts+1] = a
+			end
+		end end
 
-			DamageType:get(DamageType.LIGHT).projector(self, px, py, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
-		end)
+		if #tgts <= 0 then return true end
+
+		local dam = self:spellCrit(t.getDamage(self, t))
+
+		-- Randomly take targets
+		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		for i = 1, t.getTargetCount(self, t) do
+			if #tgts <= 0 then break end
+			local a, id = rng.table(tgts)
+			table.remove(tgts, id)
+
+			self:project(tg, a.x, a.y, DamageType.LIGHT, dam)
+			self:project(tg, a.x, a.y, DamageType.FIREBURN, {dam=dam/2, dur=3, initial=0})
+			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "light_beam", {tx=a.x-self.x, ty=a.y-self.y})
+
+			game:playSoundNear(self, "talents/spell_generic")
+		end
+
 		return true
 	end,
 	info = function(self, t)
-		return ([[Release a furious burst of sunlight, setting your light damage and penetration to %d%% of your darkness damage and penetration for %d turns, if doing so would increase their values.
-		The burst of sunlight will deal %d light damage to all within radius %d.]]):format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), self:getTalentRadius(t))
+		return ([[Release a furious burst of sunlight, increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns and dealing %d light damage to %d foes in radius %d, setting them ablaze for %d fire damage over 3 turns.]]):format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRange(t), damDesc(self, DamageType.FIRE, t.getDamage(self, t)/2))
 	end,
 }

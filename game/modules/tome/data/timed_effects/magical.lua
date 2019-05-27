@@ -1435,7 +1435,7 @@ newEffect{
 	name = "SUNBURST", image = "talents/sunburst.png",
 	desc = "Sunburst",
 	long_desc = function(self, eff)
-		return ("Light damage has been increased by %d to %d. Light penetration has been increased by %d to %d."):format(eff.damInc, eff.damVal, eff.penInc, eff.penVal)
+		return ("Light damage has been increased by %d%% to +%d%%."):format(eff.damInc, self.inc_damage.LIGHT)
 	end,
 	type = "magical",
 	subtype = {light=true, darkness=true},
@@ -1443,7 +1443,6 @@ newEffect{
 	paramters ={},
 	activate = function(self, eff)
 		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.LIGHT]=eff.damInc})
-		self:effectTemporaryValue(eff, "resists_pen", {[DamageType.LIGHT]=eff.penInc})
 	end,
 }
 
