@@ -52,7 +52,7 @@ newTalent{
 	getDisarmDur = function(self, t) return self:combatTalentLimit(t, 7, 1, 4.5) end,
 	getFatigueDur = function(self, t) return self:combatTalentLimit(t, 14, 1, 8) end,
 	getFatigueDam = function(self, t) return self:combatTalentSpellDamage(t, 1, 80) end,
-	getTPdist = function(self, t) return self:combatTalentLimit(t, 10, 1, 6) end,
+	getKnockBack = function(self, t) return self:combatTalentLimit(t, 10, 1, 6) end,
 	on_crit = function(self, t)
 		if self:getPositive() < 5 or self:getNegative() < 5 then return nil end
 		if self.turn_procs.glyphs then return nil end
@@ -79,7 +79,7 @@ newTalent{
 		local disarmDur = t.getDisarmDur(self, t)
 		local fatigueDur = t.getFatigueDur(self, t)
 		local fatigueDam = self:spellCrit(t.getFatigueDam(self, t))
-		local dist = t.getTPdist(self, t)
+		local dist = t.getKnockBack(self, t)
 
 ----------------------------------------------------------------
 -- START - Define Glyph Traps - START
@@ -331,10 +331,10 @@ end
 	end,
 	info = function(self, t)
 		local dam = t.getGlyphDam(self, t)
-		local disarmDur = t.getdisarmDur(self, t)
+		local disarmDur = t.getDisarmDur(self, t)
 		local fatigueDur = t.getFatigueDur(self, t)
 		local fatigueDam = t.getFatigueDam(self, t)
-		local tpDist = t.getTPdist(self, t)
+		local kbDist = t.getKnockBack(self, t)
 		return ([[When one of your spells goes critical, you bind glyphs in radius 1 centred on a random target in range 7 at the cost of 5 positive and 5 negative.
 		Glyphs are hidden traps (%d detection and disarm power) lasting for %d turns.
 		This can only happen once per turn and each glyph can only be bound every %d turns.
@@ -344,7 +344,7 @@ end
 		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %d light damage and disarming for %d turns.
 		Glyph of Fatigue - Bind starlight into a glyph. When triggered it will release a fatiguing darkness. For %d turns, every action the foe makes will increase the cooldown of a cooling-down talent by 1 and cause it to take %d darkness damage.
 		Glyph of Explosion - Bind twilight into a glyph. When triggered it will release a burst of twilight, knocking the foe back %d tiles and dealing %d light and %d darkness damage.
-		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), blindDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), kbDist, damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
+		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), disarmDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), kbDist, damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
 	end,
 }
 
