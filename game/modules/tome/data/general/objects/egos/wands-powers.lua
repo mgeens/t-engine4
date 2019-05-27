@@ -17,16 +17,6 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
---[[
-Wands
-*detection
-*light
-*trap destruction
-*firewall
-*lightning
-*conjuration
-]]
-
 newEntity{
 	name = " of clairvoyance", addon=true, instant_resolve=true,
 	keywords = {clairvoyance=true},
@@ -35,12 +25,12 @@ newEntity{
 
 	charm_power_def = {add=8, max=10, floor=true},
 	resolvers.charm(function(self, who)
-		return ("reveal the area around you, dispelling darkness (radius %d, power %d based on Magic), and detect the presence of nearby creatures for 3 turns"):format(self.use_power.radius(self, who), self.use_power.litepower(self, who))
+		return ("reveal the area around you, dispelling darkness (radius %d, power %d based on Magic), and detect the presence of nearby creatures for 10 turns"):format(self.use_power.radius(self, who), self.use_power.litepower(self, who))
 	end,
-	6,
+	15,
 	function(self, who)
 		local rad = self.use_power.radius(self, who)
-		who:setEffect(who.EFF_SENSE, 3, {
+		who:setEffect(who.EFF_SENSE, 10, {
 			range = rad,
 			actor = 1,
 		})
@@ -61,12 +51,13 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 10,
 
-	charm_power_def = {add=10, max=400, floor=true},
+	charm_power_def = {add=0, max=800, floor=true},
 	resolvers.charm(function(self, who)
 		local dam = who:damDesc(engine.DamageType.LIGHTNING, self.use_power.damage(self, who))
 		local radius = self.use_power.radius
 		local duration = 5
-		return ("create a radius %d storm for %d turns. Each turn, enemies within take %d lightning damage and will be dazed for 1 turn"):format(radius, duration, math.floor(dam / duration))
+		return ("create a radius %d storm for %d turns. Each turn, creatures within take %d lightning damage and will be dazed for 1 turn (%d total damage)"):
+			format(radius, duration, math.floor(dam / duration), math.floor(dam))
 	end,
 	15,
 	function(self, who)
@@ -79,8 +70,7 @@ newEntity{
 		local MapEffect = require "engine.MapEffect"
 		who:project(tg, x, y, function(px, py)
 			game.level.map:addEffect(who, px, py, 5, DamageType.LIGHTNING_DAZE, dam, 0, 5, nil, 
-				MapEffect.new{color_br=30, color_bg=150, color_bb=160, effect_shader="shader_images/retch_effect.png"}, nil, true)
-			--overlay_particle={zdepth=6, only_one=true, type="circle", args={appear=8, oversize=0, img="moon_circle", radius=self:getTalentRadius(t)}}
+				{zdepth=6, type="lightning_storm"}, nil, true)
 		end)
 		game:playSoundNear(who, "talents/lightning")
 		return {id=true, used=true}
@@ -88,7 +78,7 @@ newEntity{
 	"T_GLOBAL_CD",
 	{
 	range = 8,
-	radius = 4,
+	radius = 3,
 	requires_target = true,
 	no_npc_use = function(self, who) return self:restrictAIUseObject(who) end, -- don't let dumb ai hurt friends
 	target = function(self, who) return {type="ball", range=self.use_power.range, radius=self.use_power.radius} end,
@@ -112,12 +102,12 @@ newEntity{
 		}
 	end),
 
-	charm_power_def = {add=30, max=800, floor=true},
+	charm_power_def = {add=0, max=1000, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("fire a magical bolt dealing %d %s damage"):format(dam, self.elem[3] )
 		end,
-		10,
+		15,
 		function(self, who)
 			local tg = self.use_power.target(self, who)
 			local x, y = who:getTarget(tg)
@@ -145,10 +135,10 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=50, max=500, floor=true},
+	charm_power_def = {add=0, max=600, floor=true},
 	resolvers.charm(
 		function(self, who) 
-			local shield = self.use_power.shield(self, who)
+			local shield = self.use_power.shield(self, who) * (100 + (who:attr("shield_factor") or 0)) / 100
 			return ("create a shield absorbing up to %d damage on yourself and all friendly characters within 10 spaces for %d turns"):
 				format(shield, 4) end,
 		20,

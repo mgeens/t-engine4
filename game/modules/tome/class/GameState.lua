@@ -381,6 +381,7 @@ end
 -- @param data.nb_powers_add = #extra random powers to add <0>
 -- @param data.powers_special = function(p) that must return true on each random power to add (from base.randart_able)
 -- @param data.nb_themes = #power themes (power groups) for random powers to use <scales to 5 with lev>
+-- @param data.nb_themes_add = #extra power themes to add <0>
 -- @param data.force_themes = additional power theme(s) to use for random powers = {"attack", "arcane", ...}
 -- @param data.egos = total #egos to include (forced + random) <3>
 -- @param data.greater_egos_bias = #egos that should be greater egos <2/3 * data.egos>
@@ -427,9 +428,11 @@ function _M:generateRandart(data)
 	-- Pick Themes
 	-----------------------------------------------------------
 	local nb_themes = data.nb_themes
+	local nb_themes_add = data.nb_themes_add or 0
 	if not nb_themes then -- Gradually increase number of themes at higher levels so there are enough powers to spend points on
 		nb_themes = math.max(2,5*lev/(lev+50)) -- Maximum 5 themes possible
 		nb_themes= math.floor(nb_themes) + (rng.percent((nb_themes-math.floor(nb_themes))*100) and 1 or 0)
+		nb_themes = math.min(5, nb_themes + nb_themes_add)
 	end
 	-- update power sources and themes lists based on base object properties
 	local psource
@@ -602,6 +605,8 @@ function _M:generateRandart(data)
 	-----------------------------------------------------------
 	-- Imbue random powers into the randart according to themes
 	-----------------------------------------------------------
+	-- Note:  The same power can be selected twice for both the base power list as well as the bias power list, this will lead to wasted points very easily at low theme/high power point counts
+	local max_reached = false
 	local function merger(d, e, k, dst, src, rules, state) --scale: factor to adjust power limits for levels higher than 50
 		if (not state.path or #state.path == 0) and not state.copy then
 			if k == "copy" then -- copy into root
@@ -615,11 +620,13 @@ function _M:generateRandart(data)
 			d.max = e.max
 			if e.max < 0 then
 				if d.v < e.max * scale then --Adjust maximum values for higher levels
-					d.v = math.floor(e.max * scale)
+					d.v = e.max * scale
+					max_reached = true
 				end
 			else
 				if d.v > e.max * scale then --Adjust maximum values for higher levels
-					d.v = math.floor(e.max * scale)
+					d.v = e.max * scale
+					max_reached = true
 				end
 			end
 			return true
@@ -636,9 +643,16 @@ function _M:generateRandart(data)
 		local p = powers[i]
 		if p and p.points <= hpoints*2 then -- Intentionally allow the budget to be exceeded slightly to guarantee powers at low levels
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
-		print(" * adding power: "..p.name.."("..p.points.." points)")
+			print(" * adding power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
 			selected_powers[p.name] = selected_powers[p.name] or {}
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
+			if max_reached or p.unique then
+				print("Removing power from the list, ", p.name, "==", powers[i], "remaining:")
+				for i, v in ripairs(powers) do
+					if v.name == p.name then table.remove(powers, i) end
+				end
+				max_reached = false
+			end
 			hpoints = hpoints - p.points 
 			p.points = p.points * 1.5 --increased cost (=diminishing returns) on extra applications of the same power
 		else
@@ -656,15 +670,21 @@ function _M:generateRandart(data)
 	fails = 0 
 	while hpoints > 0 and fails <= #bias_powers do
 		i = util.boundWrap(i + 1, 1, #bias_powers)
-
 		local p = bias_powers[i] and bias_powers[i]
 		if p and p.points <= hpoints * 2 then
 			local state = {scaleup = math.max(1,(lev/(p.level_range[2] or 50))^0.5)} --Adjust scaleup factor for each power based on lev and level_range max
---			print(" * adding bias power: "..p.name.."("..p.points.." points)")
+			print(" * adding bias power: "..p.name.."("..p.points.." points), "..hpoints.." remaining")
 			selected_powers[p.name] = selected_powers[p.name] or {}
 			table.ruleMergeAppendAdd(selected_powers[p.name], p, {merger}, state)
+			if max_reached or p.unique then
+				print("Removing power from bias list , ", p.name)
+				for i, v in ripairs(bias_powers) do
+					if v.name == p.name then table.remove(bias_powers, i) end
+				end
+				max_reached = false
+			end
 			hpoints = hpoints - p.points
-			p.points = p.points * 1.5 --increased cost (=diminishing returns) on extra applications of the same power
+			p.points = p.points * 1.2 --increased cost (=diminishing returns) on extra applications of the same power, but less on the biased powers
 		else
 			fails = fails + 1
 		end
@@ -697,33 +717,6 @@ function _M:generateRandart(data)
 		if not next(ps) then ps = {unknown = true} end
 		print(" * using implied power source(s) ", table.concat(table.keys(ps), ','))
 		o.power_source = ps
-	end
-
-	-- Assign weapon damage
-	if o.combat and not (o.subtype == "staff" or o.subtype == "mindstar" or o.fixed_randart_damage_type) then
-		local theme_map = {
-			physical = engine.DamageType.PHYSICAL,
-			--mental = engine.DamageType.MIND,
-			fire = engine.DamageType.FIRE,
-			lightning = engine.DamageType.LIGHTNING,
-			acid = engine.DamageType.ACID,
-			mind = engine.DamageType.MIND,
-			arcane = engine.DamageType.ARCANE,
-			blight = engine.DamageType.BLIGHT,
-			nature = engine.DamageType.NATURE,
-			temporal = engine.DamageType.TEMPORAL,
-			light = engine.DamageType.LIGHT,
-			dark = engine.DamageType.DARK,
-		}
-
-		local pickDamtype = function(themes_list)
-			if not rng.percent(18) then return engine.DamageType.PHYSICAL end
-				for k, v in pairs(themes_list) do
-					if theme_map[k] then return theme_map[k] end
-				end
-			return engine.DamageType.PHYSICAL
-		end
-		o.combat.damtype = pickDamtype(themes)
 	end
 
 	o.display = display
@@ -1491,8 +1484,9 @@ local standard_rnd_boss_adjust = function(b)
 	if b.level <= 30 then
 		-- Damage reduction is applied in all cases, acknowledging the frontloaded strength of randbosses and the potential for players to lack tools early
 		b.inc_damage = b.inc_damage or {}
-		local change =  (70 * (30 - b.level + 1) / 30) + 20
-		b.inc_damage.all = math.max(-80, (b.inc_damage.all or 0) - change)
+		--local change =  (70 * (30 - b.level + 1) / 30) + 20
+		local change =  95 - b.level * 3
+		b.inc_damage.all = math.max(-80, (b.inc_damage.all or 0) - change)  -- Minimum of 20% damage
 		
 		-- Things prone to binary outcomes (0 damage, 0 hit rate, ...) like armor and defense are only reduced if they exceed a cap per level regardless of source
 		-- This lets us not worry about stuff like Shield Wall+lucky equipment creating early threats that some builds cannot hurt
@@ -1502,7 +1496,8 @@ local standard_rnd_boss_adjust = function(b)
 		change = (max - flat)
 		if flat > max then
 			b.flat_damage_armor.all = b.flat_damage_armor.all - (flat - max)
-			print("[standard_rnd_boss_adjust]:  Adjusting flat armor", flat, "Max", max, "Change", change)
+			-- Do NOT activate this log for production, it may trigger undefined upvalue if print is redefined
+			-- print("[standard_rnd_boss_adjust]:  Adjusting flat armor", flat, "Max", max, "Change", change)
 		end
 
 		if b.level <= 20 then
@@ -1511,7 +1506,8 @@ local standard_rnd_boss_adjust = function(b)
 			change = (max - armor)
 			if armor > max then
 				b.combat_armor = b.combat_armor - (armor - max)
-				print("[standard_rnd_boss_adjust]:  Adjusting armor", armor, "Max", max, "Change", change)
+				-- Do NOT activate this log for production, it may trigger undefined upvalue if print is redefined
+				-- print("[standard_rnd_boss_adjust]:  Adjusting armor", armor, "Max", max, "Change", change)
 			end
 
 			local defense = b:combatDefense()
@@ -1519,7 +1515,8 @@ local standard_rnd_boss_adjust = function(b)
 			change = (max - defense)
 			if defense > max then
 				b.combat_def = b.combat_def - (defense - max)
-				print("[standard_rnd_boss_adjust]:  Adjusting defense", defense, "Max", max, "Change", change)
+				-- Do NOT activate this log for production, it may trigger undefined upvalue if print is redefined
+				-- print("[standard_rnd_boss_adjust]:  Adjusting defense", defense, "Max", max, "Change", change)
 			end
 
 			-- Temporarily just hard removing this early game pending this stat not being spammed everywhere causing tons of damage most people don't even notice is happening
@@ -1532,6 +1529,7 @@ local standard_rnd_boss_adjust = function(b)
 
 		-- Early game melee don't have much mobility which makes randbosses too good at running and pulling more enemies in or being generally frustrating
 		b.ai_tactic.escape = -1
+		b.ai_tactic.safe_range = 1
 
 		-- Cap the talent level of crippling debuffs (stun, ...) at 1 + floor(level / 10)
 		-- rnd_boss_restrict is the right way to handle this for most things
@@ -1567,7 +1565,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 			if _G.type(filter.random_boss) == "boolean" then filter.random_boss = {}
 			else filter.random_boss = table.clone(filter.random_boss, true) end
 			filter.random_boss.level = filter.random_boss.level or zone:level_adjust_level(level, zone, type)
-			filter.random_boss.rnd_boss_final_adjust = filter.random_boss.rnd_boss_final_adjust or standard_rnd_boss_adjust
+			filter.random_boss.rnd_boss_final_adjust = filter.random_boss.rnd_boss_final_adjust or game.state.birth.random_boss_adjust_fct or standard_rnd_boss_adjust
 			e = self:createRandomBoss(e, filter.random_boss)
 		elseif filter.random_elite and not e.unique then
 			if _G.type(filter.random_elite) == "boolean" then filter.random_elite = {}
@@ -1576,7 +1574,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 			local base = {
 				nb_classes=1,
 				rank=3.2, ai = "tactical",
-				life_rating = filter.random_elite.life_rating or function(v) return v * 1.3 + 2 end,
+				life_rating = filter.random_elite.life_rating or function(v) return v * 1.5 + 2 end,
 				loot_quality = "store",
 				loot_quantity = 0,
 				drop_equipment = false,
@@ -1592,7 +1590,8 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 				post = function(b, data)
 					-- Drop
 					for i = 1, data.nb_rares do -- generate rares as weak (1 ego) randarts with more and stronger powers
-						local fil = {lev=lev, egos=1, greater_egos_bias = 0, power_points_factor = 3, nb_powers_add = 2, forbid_power_source=b.not_power_source,
+						local bonus = 1.5 + lev / 25  -- Scale power point bonus with level to account for egos gaining a lot of power per level relative
+						local fil = {lev=lev, egos=1, greater_egos_bias = 0, power_points_factor = bonus, nb_themes_add = 1, nb_powers_add = 2, forbid_power_source=b.not_power_source,
 							base_filter = {no_tome_drops=true, ego_filter={keep_egos=true, ego_chance=-1000}, 
 							special=function(e)
 								return (not e.unique and e.randart_able) and (not e.material_level or e.material_level >= 1) and true or false
@@ -1614,7 +1613,7 @@ function _M:entityFilterPost(zone, level, type, e, filter)
 					end
 					if data.user_post then data.user_post(b, data) end
 				end,
-				rnd_boss_final_adjust = filter.random_elite.rnd_boss_final_adjust or standard_rnd_boss_adjust
+				rnd_boss_final_adjust = filter.random_elite.rnd_boss_final_adjust or game.state.birth.random_boss_adjust_fct or standard_rnd_boss_adjust
 			}
 			e = self:createRandomBoss(e, table.merge(base, filter.random_elite, true))
 		end
@@ -1677,8 +1676,18 @@ function _M:egoFilter(zone, level, type, etype, e, ego_filter, egos_list, picked
 		fcts[#fcts+1] = function(ego) return not ego.power_source or not ego.power_source.arcane end
 	end
 
+	-- If unique_ego is a string it represents a category a single item can only have 1 ego from, this is useful for stuff that overwrites each other like item actives, etc
+	-- If unique_ego is a non-string we just prevent it from being applied to the same item twice
 	if unique_check then
-		fcts[#fcts+1] = function(ego) 
+		fcts[#fcts+1] = function(ego)
+			if _G.type(ego.unique_ego) == "string" then
+				for k,v in pairs(e.ego_list) do
+					if v and v[1] and v[1].unique_ego and v[1].unique_ego == ego.unique_ego then
+						return false 
+					end
+				end
+			end
+
 			-- Use keywords as a proxy for name, a bit simpler than going through Object.ego_list
 			for k,v in pairs(ego.keywords) do
 				if e.keywords and e.keywords[k] then return false end
@@ -2087,6 +2096,10 @@ function _M:applyRandomClass(b, data, instant)
 						end
 						b[#b+1] = resolver
 					end
+				elseif resolver.__resolver == "auto_equip_filters" then
+					if not data.forbid_equip then
+						b[#b+1] = resolver
+					end
 				elseif resolver._allow_random_boss then -- explicitly allowed resolver
 					b[#b+1] = resolver
 				end
@@ -2287,7 +2300,7 @@ function _M:createRandomBoss(base, data)
 	if data.life_rating then
 		b.life_rating = data.life_rating(b.life_rating)
 	else
-		b.life_rating = b.life_rating * 1.5 + rng.range(2, 6)
+		b.life_rating = b.life_rating * 1.7 + rng.range(4, 9)
 	end
 	b.max_life = b.max_life or 150
 	b.max_inscriptions = 5 -- Note:  This usually won't add inscriptions to NPC bases without them
@@ -2319,6 +2332,9 @@ function _M:createRandomBoss(base, data)
 	-- Randbosses resemble players so they should use the same resist cap rules
 	-- This is particularly important because at high levels boss ranks get a lot of free resist all
 	b.resists_cap = { all = 70 }
+
+	b.move_others = true
+	b.open_door = true
 	
 	-- Update default equipment, if any, to "boss" levels
 	for k, resolver in ipairs(b) do
@@ -2399,7 +2415,11 @@ function _M:createRandomBoss(base, data)
 	if data.ai then b.ai = data.ai
 	else b.ai = (b.rank > 3) and "tactical" or b.ai
 	end
-	b.ai_state = { talent_in=1, ai_move=data.ai_move or "move_astar" }
+	b.ai_state = { talent_in=1 }
+	if not b.no_overwrite_ai_move then 
+		b.ai_state.ai_move = "move_astar_advanced" 
+	end
+
 	if data.ai_tactic then
 		b.ai_tactic = data.ai_tactic
 	else
@@ -2437,10 +2457,13 @@ end
 --	@field data.forbid_equip set true to ignore class equipment resolvers (and filters) or equip inventory <nil>
 --	@field data.loot_quality = drop table to use for equipment <"boss">
 --	@field data.drop_equipment set true to force dropping of equipment <nil>
+--  @field data.calculate_tactical:  set true to recalculate ai_tactic weights based on learned talents <nil>
+
 --	@param instant set true to force instant learning of talents and generating golem <nil>
 function _M:applyRandomClassNew(b, data, instant)
 	if not data.level then data.level = b.level end -- use the level specified if needed
 
+	if data.calculate_tactical then self.ai_calculate_tactical = true end
 	------------------------------------------------------------
 	-- Apply talents from classes
 	------------------------------------------------------------
@@ -2453,11 +2476,11 @@ function _M:applyRandomClassNew(b, data, instant)
 			if data.descriptor_choices and data.descriptor_choices.subclass and data.descriptor_choices.subclass[class.name] then mclass = data break end
 		end
 		if not mclass then
-			print("[applyRandomClass] ### ABORTING ###", b.uid, b.name, "No main class type for", class.name)
+			print("[applyRandomClassNew] ### ABORTING ###", b.uid, b.name, "No main class type for", class.name)
 			return
 		end
 
-		print("[applyRandomClass]", b.uid, b.name, "Adding class", class.name, mclass.name, "level_rate", level_rate)
+		print("[applyRandomClassNew]", b.uid, b.name, "Adding class", class.name, mclass.name, "level_rate", level_rate)
 
 		-- Add starting equipment and update filters as needed
 		local apply_resolvers = function(k, resolver)
@@ -2507,6 +2530,7 @@ function _M:applyRandomClassNew(b, data, instant)
 			auto_sustain = data.auto_sustain,
 			check_talents_level = data.check_talents_level,
 			level_by_class = data.level_by_class,
+			calculate_tactical = data.calculate_tactical,
 		}
 		table.insert(b.auto_classes, c_data)
 		return true
@@ -2555,7 +2579,7 @@ function _M:applyRandomClassNew(b, data, instant)
 	
 	-- apply random classes
 	local to_apply = data.nb_classes or 1.5 -- 1.5 is one primary class and one secondary class @ 50% stats/talents
-	print("[applyRandomClass] applying", to_apply, "classes at", data.level_rate, "%%")
+	print("[applyRandomClassNew] applying", to_apply, "classes at", data.level_rate, "%%")
 	while to_apply > 0 do
 		local c = rng.tableRemove(list)
 		if not c then break end --repeat attempts until list is exhausted
@@ -2631,6 +2655,8 @@ function _M:createRandomBossNew(base, data)
 	b.rank = data.rank or (rng.percent(30) and 4 or 3.5)
 	b.level_range[1] = data.level
 	b.fixed_rating = true
+	b.move_others = true
+	b.open_door = true
 	if data.life_rating then
 		b.life_rating = data.life_rating(b.life_rating)
 	else
@@ -2744,7 +2770,10 @@ function _M:createRandomBossNew(base, data)
 	if data.ai then b.ai = data.ai
 	else b.ai = (b.rank > 3) and "tactical" or b.ai
 	end
-	b.ai_state = { talent_in=1, ai_move=data.ai_move or "move_astar" }
+	b.ai_state = { talent_in=1}
+	if not b.no_overwrite_ai_move then 
+		b.ai_state.ai_move = "move_astar_advanced" 
+	end
 	if data.ai_tactic then
 		b.ai_tactic = data.ai_tactic
 	else

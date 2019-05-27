@@ -190,6 +190,7 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 			
 			local ok, ret, special
 			if not self.sustain_talents[id] then -- activating
+				if self.deactivating_sustain_talent == ab.id then return end
 				ok, ret, special = xpcall(function() return ab.activate(who, ab) end, debug.traceback)
 				if not ok then self:onTalentLuaError(ab, ret) error(ret) end
 				if ret == true then ret = {} end -- fix for badly coded talents

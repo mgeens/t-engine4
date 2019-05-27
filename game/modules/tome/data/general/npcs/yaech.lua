@@ -84,7 +84,7 @@ newEntity{ base = "BASE_NPC_YAECH",
 	max_life = resolvers.rngavg(90,110),
 	resolvers.equip{
 		{type="weapon", subtype="trident", autoreq=true, special_rarity="trident_rarity"},
-		{type="charm", subtype="torque"}
+		--{type="charm", subtype="torque"}
 	},
 	resolvers.talents{
 		[Talents.T_KINETIC_AURA]={base=1, every=7, max=5},
@@ -102,7 +102,7 @@ newEntity{ base = "BASE_NPC_YAECH",
 	max_life = resolvers.rngavg(80,90),
 	resolvers.equip{
 		{type="weapon", subtype="trident", autoreq=true, special_rarity="trident_rarity"},
-		{type="charm", subtype="torque"}
+		--{type="charm", subtype="torque"}
 	},
 	resolvers.talents{
 		[Talents.T_PYROKINESIS]={base=2, every=7, max=5},

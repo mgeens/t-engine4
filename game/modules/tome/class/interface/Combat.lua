@@ -47,9 +47,7 @@ function _M:bumpInto(target, x, y)
 			local chat = Chat.new(self.can_talk, self, target, {npc=self, player=target})
 			chat:invoke()
 			if target.can_talk_only_once then target.can_talk = nil end
-		elseif self.move_others and not target.cant_be_moved then
-			if target.move_others and self ~= game.player then return end
-
+		elseif self.player or (self ~= game.player and self.canBumpDisplace and self:canBumpDisplace(target)) then  -- canBumpDisplace is only on NPCs
 			-- Check we can both walk in the tile we will end up in
 			local blocks = game.level.map:checkAllEntitiesLayersNoStop(target.x, target.y, "block_move", self)
 			for kind, v in pairs(blocks) do if kind[1] ~= Map.ACTOR and v then return end end
@@ -360,7 +358,7 @@ end
 function _M:getAccuracyEffect(weapon, atk, def, scale, max)
 	max = max or 10000000
 	scale = scale or 1
-	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale or 1))
+	return math.min(max, math.max(0, atk - def) * scale * (weapon.accuracy_effect_scale and 0.5 or 1))
 end
 
 function _M:isAccuracyEffect(weapon, kind)
@@ -504,6 +502,12 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		dam = rng.range(dam, dam * damrange)
 		print("[ATTACK] HIT:: damrange", damrange, "==> dam/apr::", dam, apr, "vs. armor/hardiness", armor, pres)
 
+		if self:isAccuracyEffect(weapon, "mace") then
+			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.002, 0.2)  -- +20% base damage at 100 accuracy
+			print("[ATTACK] mace accuracy bonus", atk, def, "=", bonus)
+			dam = dam * bonus
+		end
+
 		local eff = target.knowTalent and target:hasEffect(target.EFF_PARRY)
 		-- check if target deflects the blow (deflected blows cannot crit)
 		if eff then
@@ -525,7 +529,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		end
 
 		if self:isAccuracyEffect(weapon, "knife") then
-			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.005, 0.25)
+			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.005, 0.5)  -- +50% APR bonus at 100 accuracy
 			apr = apr * bonus
 			print("[ATTACK] dagger accuracy bonus", atk, def, "=", bonus, "apr ==>", apr)
 		end
@@ -538,12 +542,6 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		print("[ATTACK] after crit", dam)
 		dam = dam * mult
 		print("[ATTACK] after mult", dam)
-
-		if self:isAccuracyEffect(weapon, "mace") then
-			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.001, 0.1)
-			print("[ATTACK] mace accuracy bonus", atk, def, "=", bonus)
-			dam = dam * bonus
-		end
 
 		if target:hasEffect(target.EFF_COUNTERSTRIKE) then
 			dam = target:callEffect(target.EFF_COUNTERSTRIKE, "onStrike", dam, self)
@@ -673,7 +671,7 @@ end
 --- handle various on hit procs for melee combat
 function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult, atk, def, hitted, crit, evaded, repelled, old_target_life)
 	if self:isAccuracyEffect(weapon, "staff") then
-		local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.025, 2)
+		local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.02, 2)  -- +200% proc damage at 100 accuracy
 		print("[ATTACK] staff accuracy bonus", atk, def, "=", bonus)
 		self.__global_accuracy_damage_bonus = bonus
 	end
@@ -732,19 +730,15 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	end end
 
 	-- Shadow cast
-	if hitted and not target.dead and self:knowTalent(self.T_SHADOW_COMBAT) and self:isTalentActive(self.T_SHADOW_COMBAT) and self:getMana() > 0 then
-		local dam = 2 + self:combatTalentSpellDamage(self.T_SHADOW_COMBAT, 2, 50)
-		local mana = 2
-		if self:getMana() > mana then
-			DamageType:get(DamageType.DARKNESS).projector(self, target.x, target.y, DamageType.DARKNESS, dam)
-			self:incMana(-mana)
-		end
+	if hitted and not target.dead and self:knowTalent(self.T_SHADOW_COMBAT) and self:isTalentActive(self.T_SHADOW_COMBAT) then
+		local dam = self:callTalent(self.T_SHADOW_COMBAT, "getDamage")
+		DamageType:get(DamageType.DARKNESS).projector(self, target.x, target.y, DamageType.DARKNESS, dam)
 	end
 
 	-- Ruin
 	if hitted and not target.dead and self:knowTalent(self.T_RUIN) and self:isTalentActive(self.T_RUIN) then
 		local t = self:getTalentFromId(self.T_RUIN)
-		local dam = t.getDamage(self, t)
+		local dam = {dam=t.getDamage(self, t), healfactor=0.4, source=t}
 		DamageType:get(DamageType.DRAINLIFE).projector(self, target.x, target.y, DamageType.DRAINLIFE, dam)
 	end
 
@@ -760,6 +754,9 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	end
 
 	-- On hit talent
+	-- Disable friendly fire for procs since players can't control when they happen or where they hit
+	local old_ff = self.nullify_all_friendlyfire
+	self.nullify_all_friendlyfire = true
 	if hitted and not target.dead and weapon and weapon.talent_on_hit and next(weapon.talent_on_hit) and not self.turn_procs.melee_talent then
 		for tid, data in pairs(weapon.talent_on_hit) do
 			if rng.percent(data.chance) then
@@ -777,6 +774,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			end
 		end
 	end
+	self.nullify_all_friendlyfire = old_ff
 
 	-- Shattering Impact
 	if hitted and self:attr("shattering_impact") and (not self.shattering_impact_last_turn or self.shattering_impact_last_turn < game.turn) then
@@ -816,14 +814,13 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Arcane Destruction
 	if hitted and crit and weapon and self:knowTalent(self.T_ARCANE_DESTRUCTION) then
 		local chance = 100
-		if self:hasShield() then chance = 75
+		if self:hasShield() then chance = 50
 		elseif self:hasDualWeapon() then chance = 50
 		end
 		if rng.percent(chance) then
 			local t = self:getTalentFromId(self.T_ARCANE_DESTRUCTION)
-			local typ = rng.table{{DamageType.FIRE,"ball_fire"}, {DamageType.LIGHTNING,"ball_lightning_beam"}, {DamageType.ARCANE,"ball_arcane"}}
-			self:project({type="ball", radius=self:getTalentRadius(t), friendlyfire=false}, target.x, target.y, typ[1], self:combatSpellpower() * 2 * t.getDamMult(self, t))
-			game.level.map:particleEmitter(target.x, target.y, self:getTalentRadius(t), typ[2], {radius=2, tx=target.x, ty=target.y})
+			self:project({type="ball", radius=self:getTalentRadius(t), friendlyfire=false}, target.x, target.y, DamageType.ARCANE, t.getDamage(self, t))
+			game.level.map:particleEmitter(target.x, target.y, self:getTalentRadius(t), "ball_arcane", {radius=2, tx=target.x, ty=target.y})
 		end
 	end
 
@@ -851,6 +848,11 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	-- Reactive target on_melee_hit damage
 	if hitted then
 		local dr, fa, pct = 0
+
+		-- Use an intermediary talent to give retaliation damage a unique source in the combat log
+		local old = target.__project_source
+		target.__project_source = target:getTalentFromId(target.T_MELEE_RETALIATION)
+
 		for typ, dam in pairs(target.on_melee_hit) do
 			if not fa then
 				if self:knowTalent(self.T_CLOSE_COMBAT_MANAGEMENT) then
@@ -889,6 +891,8 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 				end
 			end
 		end
+		target.__project_source = old
+
 	end
 	-- Acid splash
 	if hitted and not target.dead and target:knowTalent(target.T_ACID_BLOOD) then
@@ -1095,7 +1099,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 
 	if hitted and not target.dead then
 		-- Curse of Madness: Twisted Mind
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_MADNESS) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_MADNESS)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(self, eff, target)
@@ -1104,10 +1108,10 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_MADNESS)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_MADNESS]
 			def.doConspirator(target, eff, self)
-		end
+		end]]
 
 		-- Curse of Nightmares: Suffocate
-		if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
+		--[[if self.hasEffect and self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES) then
 			local eff = self:hasEffect(self.EFF_CURSE_OF_NIGHTMARES)
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(self, eff, target)
@@ -1116,7 +1120,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			local eff = target:hasEffect(target.EFF_CURSE_OF_NIGHTMARES)
 			local def = target.tempeffect_def[target.EFF_CURSE_OF_NIGHTMARES]
 			def.doSuffocate(target, eff, self)
-		end
+		end]]
 	end
 
 	if target:isTalentActive(target.T_SHARDS) and hitted and not target.dead and not target.turn_procs.shield_shards then
@@ -1241,8 +1245,12 @@ function _M:combatDefenseBase(fake)
 			local t = self:getTalentFromId(self.T_SURGE)
 			add = add + t.getDefenseChange(self, t)
 		end
+		if self:knowTalent(self.T_UMBRAL_AGILITY) then
+			local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
+			add = add + t.getDefense(self, t)
+		end
 	end
-	local d = math.max(0, self.combat_def + (self:getDex() - 10) * 0.35 + (self:getLck() - 50) * 0.4)
+	local d = math.max(0, self.combat_def + (self:getDex() - 10) * 0.7 + (self:getLck() - 50) * 0.4)
 	local mult = 1
 	if light_armor then
 		if self:knowTalent(self.T_MOBILE_DEFENCE) then
@@ -1343,6 +1351,7 @@ function _M:combatAttackBase(weapon, ammo)
 	local atk = 4 + self.combat_atk + talent + (weapon.atk or 0) + (ammo and ammo.atk or 0) + (self:getLck() - 50) * 0.4
 
 	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then atk = atk + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
+	if self:knowTalent(self["T_UMBRAL_AGILITY"]) then atk = atk + self:callTalent(self["T_UMBRAL_AGILITY"], "getAccuracy") end
 
 	if self:attr("hit_penalty_2h") then atk = atk * (1 - math.max(0, 20 - (self.size_category - 4) * 5) / 100) end
 
@@ -1408,7 +1417,7 @@ end
 --- Gets the weapon speed
 function _M:combatSpeed(weapon, add)
 	weapon = weapon or self.combat or {}
-	return (weapon.physspeed or 1) / math.max(self.combat_physspeed + (add or 0), 0.1)
+	return (weapon.physspeed or 1) / math.max(self.combat_physspeed + (add or 0), 0.4)
 end
 
 --- Gets the crit rate
@@ -1672,7 +1681,6 @@ function _M:combatDamage(weapon, adddammod, damage)
 	end
 	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then totstat = totstat + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
-	if talented_mod > 1 then totstat = totstat + 30 end -- This is horrible, but its to prevent the +30 constant put in to help keep the weapon damage changes symmetric from effecting things without a mastery
 	local power = self:combatDamagePower(damage or weapon, totstat)
 	local phys = self:combatPhysicalpower(nil, weapon, totstat)
 	return 0.3 * phys * power * talented_mod
@@ -1755,7 +1763,7 @@ function _M:combatSpellpower(mod, add)
 		add = add + self:callTalent(self.T_SHADOW_CUNNING,"getSpellpower") * self:getCun() / 100
 	end
 	if self:hasEffect(self.EFF_BLOODLUST) then
-		add = add + self:hasEffect(self.EFF_BLOODLUST).power
+		add = add + self:hasEffect(self.EFF_BLOODLUST).spellpower * self:hasEffect(self.EFF_BLOODLUST).stacks
 	end
 
 	local am = 1
@@ -1852,17 +1860,17 @@ end
 
 --- Gets spellspeed
 function _M:combatSpellSpeed()
-	return 1 / math.max(self.combat_spellspeed, 0.1)
+	return 1 / math.max(self.combat_spellspeed, 0.4)
 end
 
 -- Gets mental speed
 function _M:combatMindSpeed()
-	return 1 / math.max(self.combat_mindspeed, 0.1)
+	return 1 / math.max(self.combat_mindspeed, 0.4)
 end
 
 --- Gets summon speed
 function _M:combatSummonSpeed()
-	return math.max(1 - ((self:attr("fast_summons") or 0) / 100), 0.1)
+	return math.max(1 - ((self:attr("fast_summons") or 0) / 100), 0.4)
 end
 
 --- Computes physical crit chance reduction
@@ -1927,7 +1935,7 @@ function _M:physicalCrit(dam, weapon, target, atk, def, add_chance, crit_power_a
 	end
 
 	if self:isAccuracyEffect(weapon, "axe") then
-		local bonus = self:getAccuracyEffect(weapon, atk, def, 0.2, 10)
+		local bonus = self:getAccuracyEffect(weapon, atk, def, 0.25, 25)  -- +25% crit at 100 accuracy
 		print("[PHYS CRIT %] axe accuracy bonus", atk, def, "=", bonus)
 		chance = chance + bonus
 	end
@@ -1941,7 +1949,7 @@ function _M:physicalCrit(dam, weapon, target, atk, def, add_chance, crit_power_a
 		end
 
 		if self:isAccuracyEffect(weapon, "sword") then
-			local bonus = self:getAccuracyEffect(weapon, atk, def, 0.004, 0.25)
+			local bonus = self:getAccuracyEffect(weapon, atk, def, 0.004, 0.5)  -- +50% crit power at 100 accuracy
 			print("[PHYS CRIT %] sword accuracy bonus", atk, def, "=", bonus)
 			crit_power_add = crit_power_add + bonus
 		end
@@ -2070,6 +2078,12 @@ function _M:combatMindpower(mod, add)
 		add = add + 60 * self:getStr() / 100
 	end
 
+	local gloom = self:knowTalent(self.T_GLOOM)
+	if gloom then
+		local t = self:getTalentFromId(self.T_GLOOM)
+		add = add + t.getMindpower(self)
+	end
+
 	if self:knowTalent(self.T_GESTURE_OF_POWER) then
 		local t = self:getTalentFromId(self.T_GESTURE_OF_POWER)
 		add = add + t.getMindpowerChange(self, t)
@@ -2097,12 +2111,18 @@ function _M:combatTalentMindDamage(t, base, max)
 end
 
 --- Gets damage based on talent
-function _M:combatTalentStatDamage(t, stat, base, max)
+-- stat == "str", "con", ....
+-- base = value to match when stat = 10 before diminishing returns
+-- max = value to match when stat = 100 before diminishing returns
+-- no_dr = set true to skip extra diminishing returns and force values to match at base = TL1, Stat10 max = TL5, Stat100
+function _M:combatTalentStatDamage(t, stat, base, max, no_dr)
 	-- Compute at "max"
 	local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
 	-- Compute real
 	local dam = (base + (self:getStat(stat))) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod
-	dam =  dam * (1 - math.log10(dam * 2) / 7)
+	if not no_dr then
+		dam =  dam * (1 - math.log10(dam * 2) / 7)
+	end
 	dam = dam ^ (1 / 1.04)
 	return self:rescaleDamage(dam)
 end
@@ -2230,7 +2250,7 @@ function _M:combatGetResist(type)
 	end
 
 	local a = math.min((self.resists.all or 0) / 100,1) -- Prevent large numbers from inverting the resist formulas
-	local b = math.min((self.resists[type] or 0) / 100,1)
+	local b = (type == "all") and 0 or math.min((self.resists[type] or 0) / 100,1)
 	local r = util.bound(100 * (1 - (1 - a) * (1 - b)), -100, (self.resists_cap.all or 0) + (self.resists_cap[type] or 0))
 	return r * power / 100
 end
@@ -2240,6 +2260,7 @@ function _M:combatGetResistPen(type, straight)
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
 	if straight then return pen end
+	local add = 0
 
 	if self.auto_highest_resists_pen and self.auto_highest_resists_pen[type] then
 		local highest = self.resists_pen.all or 0
@@ -2251,7 +2272,13 @@ function _M:combatGetResistPen(type, straight)
 		end
 		return highest + self.auto_highest_resists_pen[type]
 	end
-	return pen
+
+	if self.knowTalent and self:knowTalent(self.T_UMBRAL_AGILITY) and type == "DARKNESS" then
+		local t = self:getTalentFromId(self.T_UMBRAL_AGILITY)
+		add = add + t.getPenetration(self, t)
+	end
+
+	return pen + add
 end
 
 --- Returns the damage affinity
@@ -2305,7 +2332,7 @@ function _M:combatMovementSpeed(x, y)
 		local t = self:getTalentFromId(self.T_DARK_VISION)
 		movement_speed = movement_speed + t.getMovementSpeedChange(self, t)
 	end
-	movement_speed = math.max(movement_speed, 0.1)
+	movement_speed = math.max(movement_speed, 0.4)
 	return mult * (self.base_movement_speed or 1) / movement_speed
 end
 

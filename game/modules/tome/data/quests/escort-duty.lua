@@ -418,6 +418,7 @@ on_grant = function(self, who)
 
 	g:resolve() g:resolve(nil, true)
 	game.zone:addEntity(game.level, g, "terrain", gx, gy)
+	game.state:locationRevealAround(gx, gy)
 	npc.escort_target = {x=gx, y=gy}
 	npc.x, npc.y = nil, nil
 	game.zone:addEntity(game.level, npc, "actor", x, y)

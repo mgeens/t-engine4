@@ -25,6 +25,51 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 local Astar = require "engine.Astar"
 
+-- Item specific
+newEffect{
+	name = "ITEM_EXPOSED", image = "talents/curse_of_the_meek.png",  -- Re-used icon
+	desc = "Exposed",
+	long_desc = function(self, eff) return ("Mind and body exposed to effects and attacks, reducing all saves and defense by %d."):format(eff.reduce) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
+	type = "mental",
+	subtype = { },
+	status = "detrimental",
+	parameters = {reduce=0},
+	on_gain = function(self, err) return "#Target#'s is vulnerable to attacks and effects!" end,
+	on_lose = function(self, err) return "#Target# is less vulnerable." end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_physresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_spellresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_mentalresist", -eff.reduce)
+		self:effectTemporaryValue(eff, "combat_def", -eff.reduce)
+	end,
+	deactivate = function(self, eff)
+
+	end,
+}
+
+newEffect{
+	name = "ITEM_NUMBING_DARKNESS", image = "effects/bane_blinded.png",
+	desc = "Numbing Darkness",
+	long_desc = function(self, eff) return ("The target is losing hope, all damage it does is reduced by %d%%."):format(eff.reduce) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
+	type = "mental",
+	subtype = { darkness=true,}, no_ct_effect = true,
+	status = "detrimental",
+	parameters = {power=10, reduce=5},
+	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Darkness" end,
+	on_lose = function(self, err) return "#Target# regains their energy.", "-Numbing Darkness" end,
+	on_timeout = function(self, eff)
+
+	end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("numbed", eff.reduce)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("numbed", eff.tmpid)
+	end,
+}
+
 newEffect{
 	name = "SILENCED", image = "effects/silenced.png",
 	desc = "Silenced",
@@ -68,7 +113,7 @@ newEffect{
 	name = "CONFUSED", image = "effects/confused.png",
 	desc = "Confused",
 	long_desc = function(self, eff) return ("The target is confused, acting randomly (chance %d%%) and unable to perform complex actions."):format(eff.power) end,
-	charges = function(self, eff) return (tostring(eff.power).."%") end,
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,
 	type = "mental",
 	subtype = { confusion=true },
 	status = "detrimental",
@@ -155,6 +200,30 @@ newEffect{
 			game.logSeen(self, "%s collapses.",self.name:capitalize())
 			self:die(eff.src)
 		end
+	end,
+}
+
+newEffect{
+	name = "DOMINANT_WILL_BOSS", image = "talents/yeek_will.png",
+	desc = "Mental Domination",
+	long_desc = function(self, eff) return ("The target's mind has been shaken. It is temporarily aligned with %s and immune to all damage."):format(eff.src.name:capitalize()) end,
+	type = "mental",
+	subtype = { dominate=true },
+	status = "detrimental",
+	parameters = { },
+	on_gain = function(self, err) return "#Target#'s mind is dominated.", "+Dominant Will" end,
+	on_lose = function(self, err) return "#Target# is free from the domination.",  "-Dominant Will"  end,
+	activate = function(self, eff)
+		self:setTarget() -- clear ai target
+		eff.old_faction = self.faction
+		self.faction = eff.src.faction
+		self:effectTemporaryValue(eff, "never_anger", 1)
+		self:effectTemporaryValue(eff, "invulnerable", 1)
+	end,
+	deactivate = function(self, eff)
+		if eff.particle then self:removeParticles(eff.particle) end
+		self.faction = eff.old_faction
+		self:setTarget(eff.src)
 	end,
 }
 
@@ -1005,6 +1074,68 @@ local function updateFearParticles(self)
 end
 
 newEffect{
+	name = "HEIGHTEN_FEAR", image = "talents/heighten_fear.png",
+	desc = "Heighten Fear",
+	long_desc = function(self, eff) return ("The target is in a state of growing fear. If they spend %d more turns within range %d and in sight of the source of this fear (%s), they will take %d mind and darkness damage and be subjected to a new fear."):
+		format(eff.turns_left, eff.range, eff.src.name, eff.damage) end,
+	type = "other",
+	charges = function(self, eff) return "#ORANGE#"..eff.turns_left.."#LAST#" end,
+	subtype = { },
+	status = "detrimental",
+	cancel_on_level_change = true,
+	parameters = { },
+	on_timeout = function(self, eff)
+		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
+--		if tInstillFear.hasEffect(eff.src, tInstillFear, self) then
+			if core.fov.distance(self.x, self.y, eff.src.x, eff.src.y) <= eff.range and self:hasLOS(eff.src.x, eff.src.y) then
+				eff.turns_left = eff.turns_left - 1
+			end
+			if eff.turns_left <= 0 then
+				eff.turns_left = eff.turns
+				if rng.percent(eff.chance or 100) then
+					game.logSeen(self, "%s succumbs to heightening fears!", self.name:capitalize())
+					DamageType:get(DamageType.MIND).projector(eff.src, self.x, self.y, DamageType.MIND, { dam=eff.damage, crossTierChance=25 })
+					DamageType:get(DamageType.DARKNESS).projector(eff.src, self.x, self.y, DamageType.DARKNESS, eff.damage)
+					tInstillFear.applyEffect(eff.src, tInstillFear, self, true)
+				else
+					game.logSeen(self, "%s feels a little less afraid!", self.name:capitalize())
+				end
+			end
+	end,
+	activate = function(self, eff)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
+	name = "Tyrant", image = "talents/tyrant.png",
+	desc = "Tyrant",
+	long_desc = function(self, eff) return ("Your tyranny is increasing your Mindpower and Physicalpower by 2 for each fear applied, for a total of %d"): format(eff.tyrantPower * eff.stacks) end,
+	type = "mental",
+	subtype = {  },
+	status = "beneficial",
+	parameters = { stacks=1 },
+	activate = function(self, eff)
+		eff.mpower = self:addTemporaryValue("combat_mindpower", eff.tyrantPower * eff.stacks)
+		eff.ppower = self:addTemporaryValue("combat_dam", eff.tyrantPower * eff.stacks)
+	end,
+	on_merge = function(self, old_eff, new_eff)
+		old_eff.dur = new_eff.dur
+		old_eff.stacks = util.bound(old_eff.stacks + 1, 1, new_eff.maxStacks)
+		self:removeTemporaryValue("combat_mindpower", old_eff.mpower)
+		self:removeTemporaryValue("combat_dam", old_eff.ppower)
+		old_eff.mpower = self:addTemporaryValue("combat_mindpower", old_eff.tyrantPower * old_eff.stacks)
+		old_eff.ppower = self:addTemporaryValue("combat_dam", old_eff.tyrantPower * old_eff.stacks)
+		return old_eff
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_mindpower", eff.mpower)
+		self:removeTemporaryValue("combat_dam", eff.ppower)
+	end,
+}
+
+newEffect{
 	name = "PARANOID", image = "effects/paranoid.png",
 	desc = "Paranoid",
 	long_desc = function(self, eff) return ("Paranoia has gripped the target, causing a %d%% chance they will physically attack anyone nearby, friend or foe. Targets of the attack may become paranoid themselves."):format(eff.attackChance) end,
@@ -1015,13 +1146,14 @@ newEffect{
 	on_gain = function(self, err) return "#F53CBE##Target# becomes paranoid!", "+Paranoid" end,
 	on_lose = function(self, err) return "#Target# is no longer paranoid", "-Paranoid" end,
 	activate = function(self, eff)
+		--fear effect for each fear effect in mental.lua to give caster a buff
+		if eff.src and eff.src.knowTalent and eff.src:knowTalent(eff.src.T_TYRANT) then
+			eff.src:setEffect(eff.src.EFF_TYRANT, eff.tyrantDur, { tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
+		end
 		updateFearParticles(self)
 	end,
 	deactivate = function(self, eff)
 		updateFearParticles(self)
-
-		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
-		tInstillFear.endEffect(self, tInstillFear)
 	end,
 	do_act = function(self, eff)
 		if not self:enoughEnergy() then return nil end
@@ -1053,7 +1185,7 @@ newEffect{
 							elseif not target:checkHit(eff.mindpower, target:combatMentalResist()) then
 								game.logSeen(target, "%s resists the fear!", target.name:capitalize())
 							else
-								target:setEffect(target.EFF_PARANOID, eff.duration, {src=eff.src, attackChance=eff.attackChance, mindpower=eff.mindpower, duration=eff.duration })
+								target:setEffect(target.EFF_PARANOID, eff.duration, {src=eff.src, attackChance=eff.attackChance, mindpower=eff.mindpower, duration=eff.duration, tyrantDur = eff.tyrantDur, tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
 							end
 						end
 						return
@@ -1067,7 +1199,7 @@ newEffect{
 newEffect{
 	name = "DISPAIR", image = "effects/despair.png",
 	desc = "Despair",
-	long_desc = function(self, eff) return ("The target is in despair, reducing all damage reduction by %d%%."):format(-eff.resistAllChange) end,
+	long_desc = function(self, eff) return ("The target is in despair, reducing their armour, defence, mindsave and mind resist by %d."):format(-eff.statChange) end,
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1075,41 +1207,53 @@ newEffect{
 	on_gain = function(self, err) return "#F53CBE##Target# is in despair!", "+Despair" end,
 	on_lose = function(self, err) return "#Target# is no longer in despair", "-Despair" end,
 	activate = function(self, eff)
-		eff.damageId = self:addTemporaryValue("resists", { all=eff.resistAllChange })
+		--fear effect for each fear effect in mental.lua to give caster a buff
+		if eff.src and eff.src.knowTalent and eff.src:knowTalent(eff.src.T_TYRANT) then
+			eff.src:setEffect(eff.src.EFF_TYRANT, eff.tyrantDur, { tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
+		end
+		eff.despairRes = self:addTemporaryValue("resists", { [DamageType.MIND]=eff.statChange })
+		eff.despairSave = self:addTemporaryValue("combat_mentalresist", eff.statChange)
+		eff.despairArmor = self:addTemporaryValue("combat_armor", eff.statChange)
+		eff.despairDef = self:addTemporaryValue("combat_def", eff.statChange)
 		updateFearParticles(self)
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("resists", eff.damageId)
+		self:removeTemporaryValue("resists", eff.despairRes)
+		self:removeTemporaryValue("combat_mentalresist", eff.despairSave)
+		self:removeTemporaryValue("combat_armor", eff.despairArmor)
+		self:removeTemporaryValue("combat_def", eff.despairDef)
 		updateFearParticles(self)
-
-		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
-		tInstillFear.endEffect(self, tInstillFear)
 	end,
 }
 
 newEffect{
 	name = "TERRIFIED", image = "effects/terrified.png",
 	desc = "Terrified",
-	long_desc = function(self, eff) return ("The target is terrified, causing talents and attacks to fail %d%% of the time."):format(eff.actionFailureChance) end,
+	long_desc = function(self, eff) return ("The target is terrified taking %d mind and darkness damage per turn and increasing all their cooldowns by %d%%."):format(eff.damage, eff.cooldownPower * 100) end,
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
 	parameters = {},
 	on_gain = function(self, err) return "#F53CBE##Target# becomes terrified!", "+Terrified" end,
 	on_lose = function(self, err) return "#Target# is no longer terrified", "-Terrified" end,
-	activate = function(self, eff)
-		eff.terrifiedId = self:addTemporaryValue("terrified", eff.actionFailureChance)
+	activate = function(self, eff) --cooldown increase handled in class.actor.lua
+		--fear effect for each fear effect in mental.lua to give caster a buff
+		if eff.src and eff.src.knowTalent and eff.src:knowTalent(eff.src.T_TYRANT) then
+			eff.src:setEffect(eff.src.EFF_TYRANT, eff.tyrantDur, { tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
+		end
 		updateFearParticles(self)
 	end,
+	on_timeout = function(self, eff)
+		eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, eff.damage)
+		eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.DARKNESS, eff.damage)
+	end,
 	deactivate = function(self, eff)
-		eff.terrifiedId = self:removeTemporaryValue("terrified", eff.terrifiedId)
 		updateFearParticles(self)
-
-		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
-		tInstillFear.endEffect(self, tInstillFear)
 	end,
 }
 
+-- distressed fear for prosperity
+--[[
 newEffect{
 	name = "DISTRESSED", image = "effects/distressed.png",
 	desc = "Distressed",
@@ -1136,11 +1280,12 @@ newEffect{
 		tInstillFear.endEffect(self, tInstillFear)
 	end,
 }
+]]
 
 newEffect{
 	name = "HAUNTED", image = "effects/haunted.png",
 	desc = "Haunted",
-	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each existing or new fear effect to inflict %d mind damage."):format(eff.damage) end,
+	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each detrimental mental effect to inflict %d mind and darkness damage every turn."):format(eff.damage) end, --perhaps add total.
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1148,30 +1293,36 @@ newEffect{
 	on_gain = function(self, err) return "#F53CBE##Target# becomes haunted!", "+Haunted" end,
 	on_lose = function(self, err) return "#Target# is no longer haunted", "-Haunted" end,
 	activate = function(self, eff)
-		for e, p in pairs(self.tmp) do
-			local def = self.tempeffect_def[e]
-			if def.subtype and def.subtype.fear then
-				if not self.dead then
-					game.logSeen(self, "#F53CBE#%s is struck by fear of the %s effect.", self.name:capitalize(), def.desc)
-					eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, { dam=eff.damage,alwaysHit=true,criticals=false,crossTierChance=0 })
-				end
-			end
+		--fear effect for each fear effect in mental.lua to give caster a buff
+		if eff.src and eff.src.knowTalent and eff.src:knowTalent(eff.src.T_TYRANT) then
+			eff.src:setEffect(eff.src.EFF_TYRANT, eff.tyrantDur, { tyrantPower = eff.tyrantPower, maxStacks = eff.maxStacks })
 		end
 		updateFearParticles(self)
 	end,
+	
+	on_timeout = function(self, eff)
+		local nb = 0
+		for e, p in pairs(self.tmp) do
+			local def = self.tempeffect_def[e]
+			if def.type == "mental" and def.status == "detrimental" then
+				nb = nb + 1
+			end
+		end
+		if nb > 0 and not self.dead then
+			eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, { dam=nb * eff.damage,alwaysHit=true,crossTierChance=0 })
+			eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.DARKNESS, nb * eff.damage)
+		end
+	end,
 	deactivate = function(self, eff)
 		updateFearParticles(self)
-
-		local tInstillFear = self:getTalentFromId(self.T_INSTILL_FEAR)
-		tInstillFear.endEffect(self, tInstillFear)
 	end,
 	on_setFearEffect = function(self, e)
 		local eff = self:hasEffect(self.EFF_HAUNTED)
-		game.logSeen(self, "#F53CBE#%s is struck by fear of the %s effect.", self.name:capitalize(), util.getval(e.desc, self, e))
-		eff.src:project({type="hit", x=self.x,y=self.y}, self.x, self.y, DamageType.MIND, { dam=eff.damage,alwaysHit=true,criticals=false,crossTierChance=0 })
 	end,
 }
 
+--tormented for prosperity
+--[[
 newEffect{
 	name = "TORMENTED", image = "effects/tormented.png",
 	desc = "Tormented",
@@ -1259,6 +1410,7 @@ newEffect{
 		end
 	end,
 }
+]]
 
 newEffect{
 	name = "PANICKED", image = "talents/panic.png",
@@ -1477,7 +1629,7 @@ newEffect{
 newEffect{
 	name = "PSI_REGEN", image = "talents/matter_is_energy.png",
 	desc = "Matter is energy",
-	long_desc = function(self, eff) return ("The gem's matter gradually transforms, granting %0.2f energy per turn."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The gem's matter gradually transforms, granting %0.2f psi per turn."):format(eff.power) end,
 	type = "mental",
 	subtype = { psychic_drain=true },
 	status = "beneficial",
@@ -1724,7 +1876,7 @@ newEffect{
 	desc = "Bloodbath",
 	long_desc = function(self, eff) return ("The thrill of combat improves the target's maximum life by %d%%, life regeneration by %0.2f, and stamina regeneration by %0.2f."):format(eff.hp, eff.cur_regen or eff.regen, eff.cur_regen/5 or eff.regen/5) end,
 	type = "mental",
-	subtype = { frenzy=true, heal=true },
+	subtype = { frenzy=true, heal=true, regeneration=true, },
 	status = "beneficial",
 	parameters = { hp=10, regen=10, max=50 },
 	on_gain = function(self, err) return nil, "+Bloodbath" end,
@@ -1858,7 +2010,7 @@ newEffect{
 	name = "RAMPAGE", image = "talents/rampage.png",
 	desc = "Rampaging",
 	long_desc = function(self, eff)
-		local desc = ("The target is rampaging! (+%d%% movement speed, +%d%% attack speed"):format(eff.movementSpeedChange * 100, eff.combatPhysSpeedChange * 100)
+		local desc = ("The target is rampaging! (+%d%% movement speed, +%d%% attack speed, +%d%% mind speed"):format(eff.movementSpeedChange * 100, eff.combatPhysSpeedChange * 100, eff.combatMindSpeedChange * 100)
 		if eff.physicalDamageChange > 0 then
 			desc = desc..(", +%d%% physical damage, +%d physical save, +%d mental save"):format(eff.physicalDamageChange, eff.combatPhysResistChange, eff.combatMentalResistChange)
 		end
@@ -1877,6 +2029,7 @@ newEffect{
 	activate = function(self, eff)
 		if eff.movementSpeedChange or 0 > 0 then eff.movementSpeedId = self:addTemporaryValue("movement_speed", eff.movementSpeedChange) end
 		if eff.combatPhysSpeedChange or 0 > 0 then eff.combatPhysSpeedId = self:addTemporaryValue("combat_physspeed", eff.combatPhysSpeedChange) end
+		if eff.combatMindSpeedChange or 0 > 0 then eff.combatMindSpeedId = self:addTemporaryValue("combat_mindspeed", eff.combatMindSpeedChange) end
 		if eff.physicalDamageChange or 0 > 0 then eff.physicalDamageId = self:addTemporaryValue("inc_damage", { [DamageType.PHYSICAL] = eff.physicalDamageChange }) end
 		if eff.combatPhysResistChange or 0 > 0 then eff.combatPhysResistId = self:addTemporaryValue("combat_physresist", eff.combatPhysResistChange) end
 		if eff.combatMentalResistChange or 0 > 0 then eff.combatMentalResistId = self:addTemporaryValue("combat_mentalresist", eff.combatMentalResistChange) end
@@ -1888,6 +2041,7 @@ newEffect{
 	deactivate = function(self, eff)
 		if eff.movementSpeedId then self:removeTemporaryValue("movement_speed", eff.movementSpeedId) end
 		if eff.combatPhysSpeedId then self:removeTemporaryValue("combat_physspeed", eff.combatPhysSpeedId) end
+		if eff.combatMindSpeedId then self:removeTemporaryValue("combat_mindspeed", eff.combatMindSpeedId) end
 		if eff.physicalDamageId then self:removeTemporaryValue("inc_damage", eff.physicalDamageId) end
 		if eff.combatPhysResistId then self:removeTemporaryValue("combat_physresist", eff.combatPhysResistId) end
 		if eff.combatMentalResistId then self:removeTemporaryValue("combat_mentalresist", eff.combatMentalResistId) end
@@ -2208,28 +2362,6 @@ newEffect{
 }
 
 newEffect{
-	name = "INTIMIDATED",
-	desc = "Intimidated",
-	long_desc = function(self, eff) return ("The target's morale is weakened, reducing its attack power, mind power, and spellpower by %d."):format(eff.power) end,
-	type = "mental",
-	subtype = { fear=true },
-	status = "detrimental",
-	on_gain = function(self, err) return "#Target#'s morale has been lowered.", "+Intimidated" end,
-	on_lose = function(self, err) return "#Target# has regained its confidence.", "-Intimidated" end,
-	parameters = { power=1 },
-	activate = function(self, eff)
-		eff.damid = self:addTemporaryValue("combat_dam", -eff.power)
-		eff.spellid = self:addTemporaryValue("combat_spellpower", -eff.power)
-		eff.mindid = self:addTemporaryValue("combat_mindpower", -eff.power)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("combat_dam", eff.damid)
-		self:removeTemporaryValue("combat_spellpower", eff.spellid)
-		self:removeTemporaryValue("combat_mindpower", eff.mindid)
-	end,
-}
-
-newEffect{
 	name = "BRAINLOCKED",
 	desc = "Brainlocked",
 	long_desc = function(self, eff) return ("Renders a random talent unavailable. Talent cooldown is halved until the effect has worn off."):format() end,
@@ -2320,7 +2452,7 @@ newEffect{
 	type = "mental",
 	subtype = { confusion=true },
 	status = "detrimental",
-	charges = function(self, eff) return (tostring(eff.confuse).."%") end,
+	charges = function(self, eff) return (tostring(math.floor(eff.confuse)).."%") end,
 	on_gain = function(self, err) return "#Target# higher mental functions have been imparied.", "+Lobotomized" end,
 	on_lose = function(self, err) return "#Target#'s regains its senses.", "-Lobotomized" end,
 	parameters = { power=1, confuse=10, dam=1 },

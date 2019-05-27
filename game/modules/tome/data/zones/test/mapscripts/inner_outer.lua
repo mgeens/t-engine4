@@ -64,7 +64,7 @@ tm:carveLinearPath('.', doorwaytunnel + doorwaypos, 6, '.')
 -- Find rooms
 local rooms = tm:findGroupsOf{'r'}
 local noroomforest = true
-tm:applyOnGroups(rooms, function(w, h, data, room, idx)
+tm:applyOnGroups(rooms, function(room, idx)
 	local p1, p2, rw, rh = tm:groupOuterRectangle(room)
 	print("ROOM", idx, "::", rw, rh, "=>", rw * rh)
 	tm:fillGroup(room, '.')
@@ -91,11 +91,6 @@ tm:fillAll()
 
 -- Elimitate the rest
 if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
-
-self.data.greater_vaults_list = {"32-chambers"}
-local proom = Rooms.new(self, "greater_vault"):generateRoom()
-tm:carveArea('#', tm:point(28, 1), tm:point(28+proom.data_w+4, 2+proom.data_h+4))
-tm:merge(30, 2, proom)
 
 tm:printResult()
 

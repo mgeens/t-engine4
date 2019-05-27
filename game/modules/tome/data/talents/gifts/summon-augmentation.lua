@@ -137,7 +137,7 @@ newTalent{
 	np_npc_use = true,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 2, 6)) end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		local tg = {type="hit", nolock=true, range=self:getTalentRange(t), talent=t}
 		local tx, ty, target = self:getTarget(tg)
 		if not tx or not ty or not target or not target.summoner or target.summoner ~= self or not target.wild_gift_summon then return nil end
 

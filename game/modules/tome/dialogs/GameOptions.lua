@@ -23,6 +23,7 @@ local TreeList = require "engine.ui.TreeList"
 local Textzone = require "engine.ui.Textzone"
 local Separator = require "engine.ui.Separator"
 local GetQuantity = require "engine.dialogs.GetQuantity"
+local GetQuantitySlider = require "engine.dialogs.GetQuantitySlider"
 local Tabs = require "engine.ui.Tabs"
 local GraphicMode = require("mod.dialogs.GraphicMode")
 local FontPackage = require "engine.FontPackage"
@@ -412,12 +413,21 @@ function _M:generateListUi()
 		self.c_list:drawItem(item)
 	end,}
 
-	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Toggles display of glove unarmed attack properties.#WHITE#"}
-	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Display glove combat stats#WHITE##{normal}#", status=function(item)
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Always display the combat properties of gloves even if you don't know unarmed attack talents.#WHITE#"}
+	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Always show glove combat properties#WHITE##{normal}#", status=function(item)
 		return tostring(config.settings.tome.display_glove_stats and "enabled" or "disabled")
 	end, fct=function(item)
 		config.settings.tome.display_glove_stats = not config.settings.tome.display_glove_stats
 		game:saveSettings("tome.display_glove_stats", ("tome.display_glove_stats = %s\n"):format(tostring(config.settings.tome.display_glove_stats)))
+		self.c_list:drawItem(item)
+	end,}
+
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Always display combat properties of shields even if you don't know shield attack talents.#WHITE#"}
+	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Always show shield combat properties#WHITE##{normal}#", status=function(item)
+		return tostring(config.settings.tome.display_shield_stats and "enabled" or "disabled")
+	end, fct=function(item)
+		config.settings.tome.display_shield_stats = not config.settings.tome.display_shield_stats
+		game:saveSettings("tome.display_shield_stats", ("tome.display_shield_stats = %s\n"):format(tostring(config.settings.tome.display_shield_stats)))
 		self.c_list:drawItem(item)
 	end,}
 
@@ -437,6 +447,19 @@ function _M:generateListUi()
 		config.settings.tome.quest_popup = not config.settings.tome.quest_popup
 		game:saveSettings("tome.quest_popup", ("tome.quest_popup = %s\n"):format(tostring(config.settings.tome.quest_popup)))
 		self.c_list:drawItem(item)
+	end,}
+
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Sharpen Visuals, set to 0 to disable.#WHITE#"}
+	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Sharpen Visuals#WHITE##{normal}#", status=function(item)
+		return tostring((config.settings.tome.sharpen_display or 0))
+	end, fct=function(item)
+		game:registerDialog(GetQuantitySlider.new("Enter Sharpen Power", "From 0(disable) to 10", math.floor(config.settings.tome.sharpen_display), 0, 10, 1, function(qty)
+			qty = util.bound(qty, 0, 10)
+			game:saveSettings("tome.sharpen_display", ("tome.sharpen_display = %f\n"):format(qty))
+			config.settings.tome.sharpen_display = qty
+			self.c_list:drawItem(item)
+			if self:isTome() and game.player then game.player:updateMainShader() end
+		end))
 	end,}
 
 	self.list = list
@@ -595,7 +618,7 @@ function _M:generateListOnline()
 		self.c_list:drawItem(item)
 	end,}
 
-	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Keep a copy of your character sheets (not the whole savefile) on the online vault at te4.org.\nFor each characters you will be given a link to this online character sheet so that you drag about your heroic deeds or sad deaths to your friends or the whole community.#WHITE#"}
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Keep a copy of your character sheets (not the whole savefile) on the online vault at te4.org.\nFor each character you will be given a link to this online character sheet so that you can brag about your heroic deeds or sad deaths to your friends or the whole community.#WHITE#"}
 	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Upload characters sheets to the online vault#WHITE##{normal}#", status=function(item)
 		return tostring(config.settings.upload_charsheet and "enabled" or "disabled")
 	end, fct=function(item)

@@ -284,7 +284,7 @@ newTalent{
 		end
 
 		if #diseases == 0 then return end
-		self:project({type="ball", radius=self:getTalentRadius(t)}, carrier.x, carrier.y, function(px, py)
+		self:project({type="ball", radius=self:getTalentRadius(t), friendlyfire=false}, carrier.x, carrier.y, function(px, py)
 			local target = game.level.map(px, py, engine.Map.ACTOR)
 			if not target or target == carrier or target == self then return end
 
@@ -293,8 +293,10 @@ newTalent{
 			params.__tmpvals = nil
 			params.src = self
 			params.apply_power = self:combatSpellpower()
+			local dur = math.max(6, params.dur)
+
 			if target:canBe("disease") then
-				target:setEffect(disease.id, 6, params)
+				target:setEffect(disease.id, dur, params)
 			else
 				game.logSeen(target, "%s resists the disease!", target.name:capitalize())
 			end

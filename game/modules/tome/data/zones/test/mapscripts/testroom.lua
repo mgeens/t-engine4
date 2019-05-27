@@ -19,13 +19,17 @@
 
 -- Merge them all
 local tm = Tilemap.new(self.mapsize, '#')
-tm:carveArea(';', tm:point(1, 1), tm:point(4, 4))
+tm:carveArea(';', tm:point(1, 1), tm:point(4, 10))
+tm:carveArea('T', tm:point(15, 3), tm:point(15, 16))
+tm:carveArea(';', tm:point(30, 1), tm:point(35, 10))
 
-self.data.greater_vaults_list = {"32-chambers"}
-local proom = Rooms.new(self, "greater_vault"):generateRoom()
-tm:merge(12, 5, proom)
+-- tm:tunnel(tm:point(1, 10), tm:point(36, 10), ';', nil, {'T'}, {tunnel_change=60, tunnel_random=5})
+-- tm:tunnelAStar(tm:point(1, 10), tm:point(36, 1), '=', nil, {'T'}, {})
+tm:tunnelAStar(tm:point(1, 1), tm:point(36, 10), '.', nil, {'T'}, {})
+-- tm:tunnelAStar(tm:point(1, 30), tm:point(36, 30), '.', nil, {}, {})
 
 tm:printResult()
+
 
 -- print('---==============---')
 -- local noise = Noise.new(nil, 0.5, 2, 3, 6):make(80, 50, {'T', 'T', '=', '=', '=', ';', ';'})

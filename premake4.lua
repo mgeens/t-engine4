@@ -71,16 +71,8 @@ configuration "windows"
  	}
 end
 
-function cppconfig(what)
-	links { "stdc++" }
-end
-
-configuration "macosx"
-	premake.gcc.cc  = 'clang'
-	premake.gcc.cxx = 'clang++'
-
-	buildoptions { "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk", "-mmacosx-version-min=10.7" }
-	function cppconfig(what)
+cppconfig = function(what)
+	if os.get() == "macosx" then
 		if what == "web" then
 			buildoptions { "-stdlib=libstdc++" }
 			linkoptions { "-stdlib=libstdc++" }
@@ -88,8 +80,15 @@ configuration "macosx"
 			buildoptions { "-stdlib=libc++" }
 			linkoptions { "-stdlib=libc++" }
 		end
-		links { "stdc++" }
 	end
+	-- links { "stdc++" }
+end
+
+configuration "macosx"
+	premake.gcc.cc  = 'clang'
+	premake.gcc.cxx = 'clang++'
+
+	buildoptions { "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk", "-mmacosx-version-min=10.7" }
 	includedirs {
                         "/Library/Frameworks/SDL2.framework/Headers",
                         "/Library/Frameworks/SDL2_image.framework/Headers",

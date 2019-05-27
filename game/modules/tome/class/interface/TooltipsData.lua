@@ -100,8 +100,8 @@ It slowly decreases and is replenished by using some talents.
 TOOLTIP_VIM = [[#GOLD#Vim#LAST#
 Vim represents the amount of life energy you control. Each corruption talent requires some.
 It does not regenerate naturally; you need to drain it from yourself or your victims.
-Each time you kill a creature you drain 10% of your Willpower as Vim.
-Also if you used a Corruption spell that cost Vim to kill a creature, that cost is refunded on death.
+Each time you kill a creature you gain 30% of your Willpower + 1 as Vim.  This value is multiplied by half the rank of the creature.
+If you can't pay for the Vim cost of a talent you may instead pay with life at a rate of 200% of the Vim cost.
 ]]
 
 TOOLTIP_EQUILIBRIUM = [[#GOLD#Equilibrium#LAST#
@@ -205,19 +205,23 @@ Note that the amount of time to performa various actions like moving, casting sp
 TOOLTIP_SPEED_MOVEMENT = [[#GOLD#Movement Speed#LAST#
 How quickly you move compared to normal.
 Higher is faster, so 200% means that you move twice as fast as normal.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_SPELL = [[#GOLD#Spell Speed#LAST#
 How quickly you cast spells.
 Higher is faster, so 200% means that you can cast spells twice as fast as normal.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_ATTACK = [[#GOLD#Attack Speed#LAST#
 How quickly you attack with weapons, either ranged or melee.
 Higher is faster, so 200% means that you can attack twice as fast as normal.
 The actual speed may also be affected by the weapon used.
+Minimum:  40%
 ]]
 TOOLTIP_SPEED_MENTAL = [[#GOLD#Mental Speed#LAST#
 How quickly you perform mind powers.
 Higher is faster, so 200% means that you can use mind powers twice as fast as normal.
+Minimum:  40%
 ]]
 -------------------------------------------------------------
 -- Stats
@@ -252,6 +256,7 @@ TOOLTIP_MAGWILCUN = "#AQUAMARINE#Mental stats#LAST#\n---\n"..TOOLTIP_MAG.."\n---
 TOOLTIP_COMBAT_ATTACK = [[#GOLD#Accuracy#LAST#
 Determines your chance to hit your target as well as knock your target off-balance when measured against the target's Defense.
 When you use Accuracy to inflict temporary physical effects on an enemy, every point your opponent's relevant saving throw exceeds your accuracy will reduce the duration of the effect by 5%.
+Many weapon types will have an additional "accuracy bonus" scaling per point of Accuracy greater than the targets Defense.
 ]]
 TOOLTIP_COMBAT_PHYSICAL_POWER = [[#GOLD#Physical Power#LAST#
 Measures your ability to deal physical damage in combat.

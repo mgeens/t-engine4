@@ -34,7 +34,6 @@ newTalent{
 		local tg = {type="beam", range=self:getTalentRange(t), talent=t}
 		return tg
 	end,
-	allow_for_arcane_combat = true,
 	getDigs = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5, "log")) end,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 30, 300) end,
 	action = function(self, t)
@@ -66,7 +65,7 @@ newTalent{
 	mode = "sustained",
 	require = spells_req2,
 	points = 5,
-	sustain_mana = 30,
+	sustain_mana = 15,
 	cooldown = 10,
 	tactical = { BUFF = 2 },
 	getArmor = function(self, t) return self:combatTalentSpellDamage(t, 10, 23) end,
@@ -119,7 +118,7 @@ newTalent{
 	require = spells_req3,
 	points = 5,
 	random_ego = "attack",
-	mana = 40,
+	mana = 20,
 	cooldown = 12,
 	direct_hit = true,
 	tactical = { ATTACKAREA = { PHYSICAL = 2 }, DISABLE = { knockback = 2 }, ESCAPE = { knockback = 1 } },

@@ -50,6 +50,7 @@ project "TEngine"
 	if _OPTIONS.relpath == "64" then defines{"TE4_RELPATH64"} end
 
 	links { "m" }
+	links { "stdc++" }
 	cppconfig()
 
 	if _OPTIONS.no_rwops_size then defines{"NO_RWOPS_SIZE"} end

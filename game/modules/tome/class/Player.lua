@@ -414,6 +414,14 @@ function _M:act()
 	end
 end
 
+function _M:useEnergy(val)
+	mod.class.Actor.useEnergy(self, val)
+	if self.player and self.energy.value < game.energy_to_act then
+		game.paused = false
+		self:fireTalentCheck("callbackOnActEnd")
+	end
+end
+
 function _M:tooltip(x, y, seen_by)
 	local str = mod.class.Actor.tooltip(self, x, y, seen_by)
 	if not str then return end
@@ -499,6 +507,12 @@ function _M:updateMainShader()
 		if self:attr("timestopping") and pf.timestop and pf.timestop.shad then
 			effects[pf.timestop.shad] = true
 			pf.timestop.shad:paramNumber("tick_start", core.game.getTime())
+		end
+
+		-- Sharpen shader
+		if config.settings.tome.sharpen_display and config.settings.tome.sharpen_display > 1 then
+			effects[pf.sharpen.shad] = true
+			pf.sharpen.shad:paramNumber("sharpen_power", config.settings.tome.sharpen_display)
 		end
 
 		game.posteffects_use = table.keys(effects)
@@ -651,7 +665,12 @@ function _M:playerFOV()
 		local lradius = self.lite
 		if self.radiance_aura and lradius < self.radiance_aura then lradius = self.radiance_aura end
 		if self.lite <= 0 then game.level.map:applyLite(self.x, self.y)
-		else self:computeFOV(lradius, "block_sight", function(x, y, dx, dy, sqdist) game.level.map:applyLite(x, y) end, true, true, true) end
+		else
+			self:computeFOV(lradius, "block_sight", function(x, y, dx, dy, sqdist)
+				game.level.map:applyExtraLite(x, y) 
+			end, 
+			true, true, true)
+		end
 
 		-- For each entity, generate lite
 		local uid, e = next(game.level.entities)
@@ -904,7 +923,7 @@ function _M:automaticTalents()
 		if cd <= turns_used and t.mode ~= "sustained" then
 			game.logPlayer(self, "Automatic use of talent %s #DARK_RED#skipped#LAST#: cooldown too low (%d).", self:getTalentDisplayName(t), cd)
 		elseif (t.mode ~= "sustained" or not self.sustain_talents[tid]) and not self.talents_cd[tid] and self:preUseTalent(t, true, true) and (not t.auto_use_check or t.auto_use_check(self, t)) then
-			if (c == 1) or (c == 2 and #spotted <= 0) or (c == 3 and #spotted > 0) then
+			if (c == 1) or (c == 2 and #spotted <= 0) or (c == 3 and #spotted > 0) or (c == 5 and not self.in_combat) then
 				if c ~= 2 then
 					uses[#uses+1] = {name=t.name, turns_used=turns_used, cd=cd, fct=function() self:useTalent(tid) end}
 				else

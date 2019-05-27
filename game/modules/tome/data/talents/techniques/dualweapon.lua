@@ -267,7 +267,7 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 12,
-	stamina = 15,
+	stamina = 30,
 	require = techs_dex_req2,
 	requires_target = true,
 	is_melee = true,
@@ -301,7 +301,7 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 8,
-	stamina = 18,
+	stamina = 10,
 	require = techs_dex_req3,
 	is_melee = true,
 	getDamage = function (self, t) return self:combatTalentWeaponDamage(t, 1.0, 1.7) end,
@@ -369,7 +369,7 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 10,
-	stamina = 20,
+	stamina = 10,
 	is_melee = true,
 	require = techs_dex_req4,
 	tactical = { ATTACKAREA = { weapon = 2 }, CLOSEIN = 1.5 },
@@ -377,7 +377,7 @@ newTalent{
 	radius = 1,
 	requires_target = true,
 	target = function(self, t)
-		return  {type="beam", range=self:getTalentRange(t), talent=t }
+		return  {type="beam", nolock=true, default_target=self, range=self:getTalentRange(t), talent=t }
 	end,
 	getDamage = function (self, t) return self:combatTalentWeaponDamage(t, 0.6, 1.1) end,
 	proj_speed = 20, --not really a projectile, so make this super fast

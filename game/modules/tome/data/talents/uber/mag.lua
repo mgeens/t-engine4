@@ -46,10 +46,10 @@ uberTalent{
 	passives = function(self, t, tmptable)
 		self:talentTemporaryValue(tmptable, "resists_pen", {all = 25})
 		self:talentTemporaryValue(tmptable, "resists", {absolute = 25})
-		self:talentTemporaryValue(tmptable, "combat_def", self:getMag() * 0.7)	
+		self:talentTemporaryValue(tmptable, "combat_def", math.max(self:getMag(), self:getDex()) * 0.7)	
 	end,
 	callbackOnStatChange = function(self, t, stat, v)
-		if stat == self.STAT_MAG then
+		if (stat == self.STAT_MAG) or (stat == self.STAT_DEX) then
 			self:updateTalentPassives(t)
 		end
 	end,
@@ -61,8 +61,8 @@ uberTalent{
 	end,
 	info = function(self, t)
 		return ([[You gain 25%% absolute damage resistance and 25%% all damage penetration.  Each time you are struck by a weapon these bonuses are reduced by 5%% but fully recovered after 8 turns.
-			Additionally, you gain 70%% of your Magic stat as defense (%d)]])
-		:format(self:getMag() * 0.7)
+			Additionally, you gain 70%% of the highest of your Magic or Dexterity stat as defense (%d)]])
+		:format(math.max(self:getMag(), self:getDex()) * 0.7)
 	end,
 }
 

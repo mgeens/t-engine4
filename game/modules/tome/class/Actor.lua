@@ -35,6 +35,7 @@ require "mod.class.interface.Combat"
 require "mod.class.interface.Archery"
 require "mod.class.interface.ActorInscriptions"
 require "mod.class.interface.ActorObjectUse"
+local Particles = require "engine.Particles"
 local Faction = require "engine.Faction"
 local Dialog = require "engine.ui.Dialog"
 local Map = require "engine.Map"
@@ -89,7 +90,8 @@ _M.clone_nodes = table.merge({running_fov=false, running_prev=false,
 
 --- cloneActor default post copy fields (merged by cloneActor)
 _M.clone_copy = table.merge({no_drops=true, no_rod_recall=true, no_inventory_access=true, no_levelup_access=true,
-	remove_from_party_on_death=true, keep_inventory_on_death=false,
+	remove_from_party_on_death=true, keep_inventory_on_death=false, no_source_remove=true,
+
 	energy={value=0},
 	}, _M.clone_copy or {})
 	
@@ -467,9 +469,6 @@ function _M:useEnergy(val)
 	-- Curse of Shrouds: turn shroud of passing on or off
 	local eff = self:hasEffect(self.EFF_CURSE_OF_SHROUDS)
 	if eff then self.tempeffect_def[self.EFF_CURSE_OF_SHROUDS].doShroudOfPassing(self, eff) end
-
-	-- Do not fire those talents if this is not turn's end
-	if self:enoughEnergy() or game.zone.wilderness then return end
 end
 
 -- Called at the start of a turn before the actor chooses their action, energy is handled, etc
@@ -660,16 +659,13 @@ function _M:act()
 		for res, res_def in ipairs(_M.resources_def) do
 			if (t.remove_on_zero == nil and res_def.depleted_unsustain) or (t.remove_on_zero ~= nil and util.getval(t.remove_on_zero, self, t)) then
 				if t[res_def.sustain_prop] then
-					if res == self.RS_STAMINA and self:hasEffect(self.EFF_ADRENALINE_SURGE) then
+					if res_def.invert_values then
+						if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
+							deact = true break
+						end
 					else
-						if res_def.invert_values then
-							if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
-								deact = true break
-							end
-						else
-							if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
-								deact = true break
-							end
+						if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
+							deact = true break
 						end
 					end
 				end
@@ -732,7 +728,7 @@ function _M:act()
 
 	if self:attr("never_act") then return false end
 
-	if not game.zone.wilderness and not self:attr("confused") and not self:attr("terrified") then self:automaticTalents() end
+	if not game.zone.wilderness and not self:attr("confused") --[[and not self:attr("terrified")]] then self:automaticTalents() end --terrified check for prosperity
 
 	-- Compute bonuses based on actors in FOV
 	if self:knowTalent(self.T_MILITANT_MIND) then
@@ -1638,6 +1634,9 @@ function _M:teleportRandom(x, y, dist, min_dist)
 	
 	self:fireTalentCheck("callbackOnTeleport", teleported, ox, oy, self.x, self.y)
 
+	-- We store this so the AI can determine when an "abnormal" movement occured and not immediately cheat to their location with their own teleport, mostly
+	if teleported then self.last_special_movement = game.turn end
+	
 	return teleported
 end
 
@@ -1902,7 +1901,23 @@ function _M:tooltip(x, y, seen_by)
 	if self.hide_level_tooltip then ts:add({"color", 0, 255, 255}, "Level: unknown", {"color", "WHITE"}, true)
 	else ts:add({"color", 0, 255, 255}, ("Level: %d"):format(self.level), {"color", "WHITE"}, true) end
 	if self:attr("invulnerable") then ts:add({"color", "PURPLE"}, "INVULNERABLE!", true) end
-	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%)"):format(self.life, self.life * 100 / self.max_life), {"color", "WHITE"})
+	ts:add({"color", 255, 0, 0}, ("HP: %d (%d%%) #GREEN#+%0.2f#LAST#"):format(self.life, self.life * 100 / self.max_life, self.life_regen * util.bound(self.healing_factor or 1)), {"color", "WHITE"})
+	
+	-- Avoid cluttering tooltip if resources aren't relevant (add menu option?)
+	if game.player:knowTalentType("wild-gift/antimagic") then
+		if self:knowTalent(self.T_MANA_POOL) then 
+			ts:add(("\nMana:  "..self.resources_def.mana.color.."%d / %d#LAST#"):format(self.mana, self.max_mana, true))
+		end
+		if self:knowTalent(self.T_VIM_POOL) then
+			ts:add(("\nVim:  "..self.resources_def.vim.color.."%d / %d#LAST#"):format(self.vim, self.max_vim, true))
+		end
+		if self:knowTalent(self.T_POSITIVE_POOL) then
+			ts:add(("\nPositive:  "..self.resources_def.positive.color.."%d / %d#LAST#"):format(self.positive, self.max_positive, true))
+		end
+		if self:knowTalent(self.T_NEGATIVE_POOL) then
+			ts:add(("\nNegative:  "..self.resources_def.negative.color.."%d / %d#LAST#"):format(self.negative, self.max_negative, true))
+		end
+	end
 
 	if self:knowTalent(self.T_SOLIPSISM) then
 		local psi_percent = 100*self.psi/self.max_psi
@@ -1913,26 +1928,37 @@ function _M:tooltip(x, y, seen_by)
 		local eff = self:hasEffect(self.EFF_FROZEN)
 		ts:add({"color", 0, 255, 128}, ("Iceblock: %d"):format(eff.hp), {"color", "WHITE"}, true)
 	end
+	if game.player:knowTalent(self.T_VIM_POOL) then
+		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.3 + 1) * self.rank), {"color", "WHITE"}, true)
+	end
+
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
+
+	local dt_order = function(a, b)
+		if a[1] == "all" then return true
+		elseif b[1] == "all" then return false
+		else return a[2] > b[2] end
+	end
 
 	local resists = tstring{}
 	local first = true
 	ts:add({"color", "ANTIQUE_WHITE"}, "Resists: ")
-	for t, v in pairs(self.resists) do
+	for t, _ in table.orderedPairs2(self.resists, dt_order) do
+		local v = self:combatGetResist(t)
 		if t == "all" or t == "absolute" then
-			if first then first = false else ts:add(", ") end
 			ts:add({"color", "LIGHT_BLUE"}, tostring(math.floor(v)) .. "%", " ", {"color", "LAST"}, t..", ")
 		elseif type(t) == "string" and math.abs(v) >= 20 then
-			local res = tostring ( math.floor(self:combatGetResist(t)) ) .. "%"
+			local res = tostring(math.floor(v)) .. "%"
 			if first then first = false else ts:add(", ") end
 			if v > 0 then
-				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_GREEN"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			else
-				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name, ", ")
+				ts:add({"color", "LIGHT_RED"}, res, " ", {"color", "LAST"}, DamageType:get(t).name)
 			end
 		end
 	end
+
 	if self:attr("speed_resist") then
 		local res = 100 - (util.bound(self.global_speed * self.movement_speed, (100-(self.speed_resist_cap or 70))/100, 1)) * 100
 		if res > 0 then
@@ -1968,6 +1994,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Main:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -1977,6 +2004,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Off :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -1986,6 +2014,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Psi :#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -1995,6 +2024,7 @@ function _M:tooltip(x, y, seen_by)
 			local tst = ("#LIGHT_BLUE#Ammo:#LAST#"..o:getShortName({force_id=true, do_color=true, no_add_name=true})):toTString()
 			tst = tst:splitLines(game.tooltip.max-1, game.tooltip.font, 2)
 			tst = tst:extractLines(true)[1]
+			tst:add(" ("..math.floor(self:combatDamage(o.combat))..")")
 			table.append(ts, tst)
 			ts:add(true)
 		end
@@ -2150,10 +2180,6 @@ function _M:onHeal(value, src)
 
 	if self:attr("arcane_shield") and self:attr("allow_on_heal") and value > 0 then
 		self:setEffect(self.EFF_DAMAGE_SHIELD, 3, {power=value * self.arcane_shield / 100})
-	end
-
-	if self:attr("fungal_growth") and self:attr("allow_on_heal") and value > 0 and not self:hasEffect(self.EFF_REGENERATION) then
-		self:setEffect(self.EFF_REGENERATION, 6, {power=(value * self.fungal_growth / 100) / 6, no_wild_growth=true})
 	end
 
 	-- Must be last!
@@ -2401,35 +2427,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	if value > 0 and self:isTalentActive(self.T_DISRUPTION_SHIELD) then
-		local mana = math.max(0, self:getMaxMana() - self:getMana())
-		local mana_val = value * self:attr("disruption_shield")
-		local converted = math.min(value, mana / self:attr("disruption_shield"))
-		game:delayedLogMessage(self, nil,  "disruption_shield", "#LIGHT_BLUE##Source# converts damage to mana!")
-		game:delayedLogDamage(src, self, 0, ("#LIGHT_BLUE#(%d converted)#LAST#"):format(converted), false)
-
-		-- We have enough to absorb the full hit
-		if mana_val <= mana then
-			self:incMana(mana_val)
-			self.disruption_shield_absorb = self.disruption_shield_absorb + value
-			return 0
-		-- Or the shield collapses in a deadly arcane explosion
-		else
-			self:incMana(mana)
-			self.disruption_shield_absorb = self.disruption_shield_absorb + mana / self:attr("disruption_shield")
-			value = value - mana / self:attr("disruption_shield")
-
-			local dam = self.disruption_shield_absorb
-
-			-- Deactivate without loosing energy
-			self:forceUseTalent(self.T_DISRUPTION_SHIELD, {ignore_energy=true})
-
-			-- Explode!
-			local t = self:getTalentFromId(self.T_DISRUPTION_SHIELD)
-			t.explode(self, t, dam)
-		end
-	end
-
 	if value <=0 then return 0 end
 	if self.knowTalent and (self:knowTalent(self.T_SEETHE) or self:knowTalent(self.T_GRIM_RESOLVE)) then
 		if not self:hasEffect(self.EFF_CURSED_FORM) then
@@ -2618,11 +2615,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	-- Bloodlust!
-	if value > 0 and src and not (src == self) and src.knowTalent and src:knowTalent(src.T_BLOODLUST) then
-		src:setEffect(src.EFF_BLOODLUST, 1, {})
-	end
-
 	if value > 0 and self:knowTalent(self.T_RAMPAGE) then
 		local t = self:getTalentFromId(self.T_RAMPAGE)
 		t:onTakeHit(self, value / self.max_life)
@@ -2721,7 +2713,10 @@ function _M:onTakeHit(value, src, death_note)
 			local value = self:heal(sl, self)
 			game.logSeen(self, "#YELLOW#%s has been healed by a blast of positive energy!#LAST#", self.name:capitalize())
 			if value > 0 then
-				if self.player then world:gainAchievement("AVOID_DEATH", self) end
+				if self.player then
+					self:setEmote(require("engine.Emote").new("The Sun Protects!", 45))
+					world:gainAchievement("AVOID_DEATH", self)
+				end
 			end
 		end
 
@@ -2811,19 +2806,6 @@ function _M:onTakeHit(value, src, death_note)
 		if leech > 0 then
 			src:heal(leech, self)
 			game:delayedLogMessage(src, self, "lifesteal"..self.uid, "#CRIMSON##Source# steals life from #Target#!")
-		end
-	end
-
-	-- Flat damage cap
-	if self.flat_damage_cap and self.max_life and death_note and death_note.damtype then
-		local cap = nil
-		if self.flat_damage_cap.all then cap = self.flat_damage_cap.all end
-		if self.flat_damage_cap[death_note.damtype] then cap = self.flat_damage_cap[death_note.damtype] end
-		if cap and cap > 0 then
-			local ignored = math.max(0, value - cap * self.max_life / 100)
-			if ignored > 0 then game:delayedLogDamage(src, self, 0, ("#LIGHT_GREY#(%d resilience)#LAST#"):format(ignored), false) end
-			value = value - ignored
-			print("[TAKE HIT] after flat damage cap", value)
 		end
 	end
 
@@ -2918,6 +2900,13 @@ function _M:takeHit(value, src, death_note)
 	return dead, val
 end
 
+-- Superloaded
+function _M:cloneActor(post_copy, alt_nodes)
+	local a, post_copy = engine.Actor.cloneActor(self, post_copy, alt_nodes)
+	a.immune_possession = 1
+	return a, post_copy
+end
+
 --- Remove certain effects when cloned
 function _M:removeTimedEffectsOnClone()
 	local todel = {}
@@ -2968,10 +2957,12 @@ function _M:emptyDrops()
 end
 
 function _M:die(src, death_note)
+	if self.in_resurrect then return end
 	if self.dead then self:disappear(src) self:deleteFromMap(game.level.map) if game.level:hasEntity(self) then game.level:removeEntity(self, true) end return true end
 
 	-- Self resurrect, mouhaha!
 	if self:attr("self_resurrect") and not self.no_resurrect then
+		self.in_resurrect = true
 		self:attr("self_resurrect", -1)
 		game.logSeen(self, self.self_resurrect_msg or "#LIGHT_RED#%s rises from the dead!", self.name:capitalize()) -- src, not self as the source, to make sure the player knows his doom ;>
 		local sx, sy = game.level.map:getTileToScreen(self.x, self.y, true)
@@ -2991,13 +2982,14 @@ function _M:die(src, death_note)
 		self.died = (self.died or 0) + 1
 		self:move(self.x, self.y, true)
 		self:check("on_resurrect", "basic_resurrect")
+		self:triggerHook{"Actor:resurrect", reason="basic_resurrect"}
 
 		if self:attr("self_resurrect_chat") then
 			local chat = Chat.new(self.self_resurrect_chat, self, game.player)
 			chat:invoke()
 			self.self_resurrect_chat = nil
 		end
-
+		self.in_resurrect = nil
 		return
 	end
 
@@ -3243,9 +3235,7 @@ function _M:die(src, death_note)
 	if src and src.hasEffect and src:hasEffect(src.EFF_CURSE_OF_CORPSES) then
 		local eff = src:hasEffect(src.EFF_CURSE_OF_CORPSES)
 		local def = src.tempeffect_def[src.EFF_CURSE_OF_CORPSES]
-		if not def.doReprieveFromDeath(src, eff, self) then
-			def.doCorpselight(src, eff, self)
-		end
+		def.doReprieveFromDeath(src, eff, self)
 	end
 
 	-- Curse of Shrouds: Shroud of Death
@@ -3256,15 +3246,13 @@ function _M:die(src, death_note)
 	end
 
 	-- Increase vim
-	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) then src:incVim(1 + src:getWil() / 10) end
-	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
-	if src and death_note and death_note.source_talent and death_note.source_talent.vim and src.last_vim_turn ~= game.turn then
-		src.last_vim_turn = game.turn
-		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being refunded
-			src:incVim(util.getval(death_note.source_talent.vim, self, death_note.source_talent))
+	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) and src:reactionToward(self) <= 0 then
+		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being gained, otherwise it feels weird when you expect to spend life
+			src:incVim((src:getWil() * 0.3 + 1) * self.rank)
 		end)
 	end
-
+	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
+	
 	if src and ((src.resolveSource and src:resolveSource().player) or src.player) then
 		-- Achievements
 		local p = game.party:findMember{main=true}
@@ -3351,7 +3339,7 @@ end
 -- @field level_rate: rate levels in character class are gained as % of actor level <100>
 -- @field check_talents_level: set true to enforce character level limits on talent levels (i.e. level 5 at level 50) <nil>
 -- @field level_by_class: set true to use class level rather than actor level when checking talent/stat limits <nil>
--- @foe;d ignore_special: set true to skip checking talent special requirements
+-- @field ignore_special: set true to skip checking talent special requirements
 -- @field auto_sustain: set true to automatically turn on sustained talents learned <nil>
 -- @field tt_focus: talent type focus, higher values cause talent selections to be focused within fewer talent types <3>
 -- @field use_actor_points: set true to apply stat/talent points from base actor levels in addtion to class levels <nil>
@@ -3360,14 +3348,19 @@ end
 --		{talent_type_name = {[1]=known, [2]=mastery_add}, ...}
 -- @field auto_stats: ordered list of stat ids to use when applying unused_stats points
 --		generated from class descriptor by default, set false to disable, see Actor:learnStats
+-- @field calculate_tactical:  set true to recalculate ai_tactic weights based on learned talents <nil>
 -- Additional talent inputs for each talent definition t:
 --	t.random_boss_rarity: if defined, the percent chance the talent may be learned each time randomly selected
 function _M:levelupClass(c_data)
+	if game.player.level <= (game.state.birth.fixedboss_class_minimum_level or 0) then return end
+	local difficulty_adjusted_level_rate = (game.state.birth.fixedboss_class_level_rate_mult or 1) * (c_data.level_rate or 100)	
+	
+	
 	c_data.last_level = c_data.last_level or 0
 	c_data.start_level = c_data.start_level or 1
-
-	local new_level = math.ceil((self.level - c_data.start_level + 1)*(c_data.level_rate or 100)/100)
+	if c_data.calculate_tactical then self.ai_calculate_tactical = true end
 	
+	local new_level = math.ceil((self.level - c_data.start_level + 1)*difficulty_adjusted_level_rate/100)
 	if new_level <= c_data.last_level then return end
 	print("[Actor:levelupClass]", self.name, "auto level up", c_data.class, c_data.last_level, "-->", new_level, c_data)
 	
@@ -3397,7 +3390,7 @@ function _M:levelupClass(c_data)
 			return 
 		end
 
-		print(("[Actor:levelupClass] %s %s ## Initialzing auto_class %s (%s) %s%% level_rate from level %s ##"):format(self.uid, self.name, c_data.class, mclass.name, c_data.level_rate, c_data.start_level))
+		print(("[Actor:levelupClass] %s %s ## Initialzing auto_class %s (%s) %s%% level_rate from level %s ##"):format(self.uid, self.name, c_data.class, mclass.name, difficulty_adjusted_level_rate, c_data.start_level))
 
 		-- update class descriptor list and build inherent power sources
 		self.descriptor = self.descriptor or {}
@@ -3713,10 +3706,7 @@ function _M:resetToFull()
 		if res_def.short_name == "paradox" then
 			self.paradox = self.preferred_paradox or 300
 		elseif res_def.short_name == "mana" then
-			-- Special handling of Disruption Shield to avoid penalizing Archmages on levelup
-			if not (self.isTalentActive and self:isTalentActive(self.T_DISRUPTION_SHIELD)) then
-				self.mana = self:getMaxMana()
-			end
+			self.mana = self:getMaxMana()
 		else
 			if res_def.invert_values or res_def.switch_direction then
 				self[res_def.short_name] = self:check(res_def.getMinFunction) or self[res_def.short_name] or res_def.min
@@ -3768,8 +3758,8 @@ function _M:levelup()
 	engine.interface.ActorLevel.levelup(self)
 	self:resolveLevelTalents()
 
-	-- Restock shops at level 5 and every 10 levels
-	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) or (self.level == 5) ) then
+	-- Restock shops at every 10 levels
+	if self == game.player and game.state.birth.stores_restock_by_level and ( (self.level % 10 == 0) ) then
 		if not (game.state.stores_restocks and game.state.stores_restocks[self.level]) then
 			game.state:storesRestock()
 			game.state.stores_restocks = game.state.stores_restocks or {}
@@ -3986,7 +3976,7 @@ end
 
 function _M:getMaxEncumbrance()
 	local add = 0
-	return math.floor(40 + self:getStr() * 1.8 + (self.max_encumber or 0) + add)
+	return math.floor(70 + self:getStr() * 1.8 + (self.max_encumber or 0) + add)
 end
 
 function _M:getEncumbrance()
@@ -4079,8 +4069,7 @@ function _M:getObjectModdableTile(slot)
 	return o
 end
 
---- Update tile for races that can handle it
-function _M:updateModdableTile()
+function _M:updateModdableTilePrepare()
 	local selfbase = self.replace_display or self
 	if not selfbase.moddable_tile or Map.tiles.no_moddable_tiles then
 		local add = selfbase.add_mos or {}
@@ -4115,9 +4104,33 @@ function _M:updateModdableTile()
 			self:removeAllMOs()
 			if self.x and game.level then game.level.map:updateMap(self.x, self.y) end
 		end
-		return
+		return false
 	end
 	self:removeAllMOs()
+	return true
+end
+
+--- Update tile for races that can handle it
+function _M:updateModdableTile()
+	if not self:updateModdableTilePrepare() then return end
+
+	if self.shimmer_particles_active then
+		for _, p in ipairs(self.shimmer_particles_active) do self:removeParticles(p) end
+		self.shimmer_particles_active = nil
+	end
+
+	if self.moddable_tile_base_shimmer_particle then
+		self.shimmer_particles_active = self.shimmer_particles_active or {}
+		for _, def in ipairs(self.moddable_tile_base_shimmer_particle) do
+			local args = table.clone(def.args, true)
+			if def.spot then
+				args.x, args.y = self:attachementSpot(def.spot, true)
+				if args.x and args.y and def.spot_offset then args.x, args.y = args.x + def.spot_offset.x, args.y + def.spot_offset.y end
+			end
+			local p = self:addParticles(Particles.new(def.name, 1, args, def.shader))
+			table.insert(self.shimmer_particles_active, p)
+		end
+	end
 
 	local base = "player/"..self.moddable_tile:gsub("#sex#", self.female and "female" or "male").."/"
 
@@ -4135,17 +4148,28 @@ function _M:updateModdableTile()
 			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
 		end
 	end
+	if self.moddable_tile_base_shimmer_aura then
+		for _, def in ipairs(self.moddable_tile_base_shimmer_aura) do
+			add[#add+1] = {image_alter="sdm", sdm_double="dynamic", image=base..(self.moddable_tile_base or "base_01.png"), shader=def.shader, shader_args=def.shader_args, textures=def.textures, display_h=2, display_y=-1}
+		end
+	end
 
-	local basebody = self.moddable_tile_base or "base_01.png"
+	local basebody = self.moddable_tile_base_shimmer or self.moddable_tile_base or "base_01.png"
 	if self.moddable_tile_base_alter then basebody = self:moddable_tile_base_alter(basebody) end
 	add[#add+1] = {image = base..basebody, auto_tall=1}
 
+	if self.moddable_tile_tatoo then add[#add+1] = {image = base..self.moddable_tile_tatoo..".png", auto_tall=1} end
+
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
-			add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, back=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("right")..".png", auto_tall=1}
+			end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile_back then
+				add[#add+1] = {image = base..(i.moddable_tile_back):format("left")..".png", auto_tall=1}
+			end
 		end
 	end
 
@@ -4157,30 +4181,42 @@ function _M:updateModdableTile()
 	i = self:getObjectModdableTile(self.INVEN_CLOAK); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile):format("shoulder")..".png", auto_tall=1} end
 	local done_head = false
 	i = self:getObjectModdableTile(self.INVEN_CLOAK); if config.settings.tome.show_cloak_hoods and i and i.moddable_tile_hood then add[#add+1] = {image = base..(i.moddable_tile):format("hood")..".png", auto_tall=1} done_head = true end
+
+	if self.moddable_tile_hair then add[#add+1] = {image = base..self.moddable_tile_hair..".png", auto_tall=1} end
+	if self.moddable_tile_facial_features then for _, f in ipairs(self.moddable_tile_facial_features) do add[#add+1] = {image = base..f..".png", auto_tall=1} end end
+
 	i = self:getObjectModdableTile(self.INVEN_HEAD); if not done_head and i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} done_head = true end
 	if not done_head and self:attr("moddable_tile_head_underwear") then add[#add+1] = {image = base..self:attr("moddable_tile_head_underwear"), auto_tall=1} end
 	self:triggerHook{"Actor:updateModdableTile:middle", base=base, add=add}
+
+	if self.moddable_tile_horn then add[#add+1] = {image = base..self.moddable_tile_horn..".png", auto_tall=1} end
+
 	i = self:getObjectModdableTile(self.INVEN_HANDS); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
 	i = self:getObjectModdableTile(self.INVEN_QUIVER); if i and i.moddable_tile then add[#add+1] = {image = base..(i.moddable_tile)..".png", auto_tall=1} end
+
 	if not self:attr("disarmed") then
-		i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
-			if i.moddable_tile_particle then
-				add[#add].particle = i.moddable_tile_particle[1]
-				add[#add].particle_args = i.moddable_tile_particle[2]
+		local hd = {"Actor:updateModdableTile:weapon", base=base, add=add, front=true, replace=false}
+		self:triggerHook(hd)
+		if not hd.replace then
+			i = self:getObjectModdableTile(self.INVEN_MAINHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("right")..".png", auto_tall=1}
+				if i.moddable_tile_particle then
+					add[#add].particle = i.moddable_tile_particle[1]
+					add[#add].particle_args = i.moddable_tile_particle[2]
+				end
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
 			end
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("right")..".png", auto_tall=1} end
-		end
-		i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
-			add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
-			if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			i = self:getObjectModdableTile(self.INVEN_OFFHAND); if i and i.moddable_tile then
+				add[#add+1] = {image = base..(i.moddable_tile):format("left")..".png", auto_tall=1}
+				if i.moddable_tile_ornament then add[#add+1] = {image = base..(i.moddable_tile_ornament):format("left")..".png", auto_tall=1} end
+			end
 		end
 	end
 
 	self:triggerHook{"Actor:updateModdableTile:front", base=base, add=add}
 
-	if self.moddable_tile_ornament and self.moddable_tile_ornament[self.female and "female" or "male"] then add[#add+1] = {image = base..self.moddable_tile_ornament[self.female and "female" or "male"]..".png", auto_tall=1, shader=self.moddable_tile_ornament_shader} end
-	if self.moddable_tile_ornament2 and self.moddable_tile_ornament2[self.female and "female" or "male"] then add[#add+1] = {image = base..self.moddable_tile_ornament2[self.female and "female" or "male"]..".png", auto_tall=1, shader=self.moddable_tile_ornament_shader2} end
+	-- if self.moddable_tile_ornament and self.moddable_tile_ornament[self.female and "female" or "male"] then add[#add+1] = {image = base..self.moddable_tile_ornament[self.female and "female" or "male"]..".png", auto_tall=1, shader=self.moddable_tile_ornament_shader} end
+	-- if self.moddable_tile_ornament2 and self.moddable_tile_ornament2[self.female and "female" or "male"] then add[#add+1] = {image = base..self.moddable_tile_ornament2[self.female and "female" or "male"]..".png", auto_tall=1, shader=self.moddable_tile_ornament_shader2} end
 
 	if self.x and game.level then game.level.map:updateMap(self.x, self.y) end
 end
@@ -4332,11 +4368,26 @@ function _M:onWear(o, inven_id, bypass_set, silent)
 							object_inven, conditions[1], conditions[2])
 					end
 				else
-					object, index, object_inven_id =
-						self:findInAllInventoriesBy(conditions[1], conditions[2])
+					-- Can't use Actor:findInAllInventories() here;
+					-- if a matching item is worn but there's also a
+					-- matching item in the pack,
+					-- findInAllInventories() may return the one that
+					-- is in the pack instead of the worn one
+					--
+					-- So manually search only the worn inventories
+					-- instead
+					for inven_id, inven in pairs(self.inven) do
+						if self:getInven(inven_id).worn then
+							object, index = self:findInInventoryBy(inven, conditions[1], conditions[2])
+							if object then
+								object_inven_id = inven_id
+								break
+							end
+						end
+					end
 				end
 				-- If we're wearing it, add it to the list.
-				if object and self:getInven(object_inven_id).worn and
+				if object and
 					(not object.set_complete or not object.set_complete[set_id])
 				then
 					table.insert(set_objects, {
@@ -4486,19 +4537,30 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 				if type(broken) == "table" then broken = broken[set_id] end
 				if broken then broken(d.object, self, d.inven_id, set_objects) end
 				if d.object._special_set then
-					for k, id in pairs(d.object._special_set) do
-						d.object:removeTemporaryValue(k, id)
+					if d.object._special_set[set_id] then
+						for k, id in pairs(d.object._special_set[set_id]) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set[set_id] = nil
+						-- Remove if empty.
+						if not next(d.object._special_set) then
+							d.object._special_set = nil
+						end
+					else -- Object only has one set (old behaviour)
+						for k, id in pairs(d.object._special_set) do
+							d.object:removeTemporaryValue(k, id)
+						end
+						d.object._special_set = nil
 					end
-					d.object._special_set = nil
 				end
 				if d.object ~= o then self:onWear(d.object, d.inven_id, true) end
 				self:useObjectDisable(d.object)
 				self:useObjectEnable(d.object)
 				d.object.set_complete[set_id] = nil
 				-- Remove if empty.
-				local empty = true
-				for k, v in pairs(d.object.set_complete) do empty = false break end
-				if empty then d.object.set_complete = nil end
+				if not next(d.object.set_complete) then
+					d.object.set_complete = nil
+				end
 			end
 		end
 	end
@@ -4549,7 +4611,7 @@ function _M:onTakeoff(o, inven_id, bypass_set, silent)
 	-- If objected buffed us, remove
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__object_source == o then todel[#todel+1] = eff_id end
+		if p.__object_source == o and not self.no_source_remove and not o.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
@@ -4803,9 +4865,11 @@ function _M:searchAllInventories(o, fct)
 end
 
 local oldGetTalentTypeMastery = _M.getTalentTypeMastery
-function _M:getTalentTypeMastery(tt)
+function _M:getTalentTypeMastery(tt, only_base)
 	local mastery = oldGetTalentTypeMastery(self, tt)
-	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[tt.category] or 0
+	if only_base then return mastery end
+	local def = self:getTalentTypeFrom(tt)
+	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[def.category] or 0
 	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
 	return mastery + bonus1 + bonus2
 end
@@ -5019,7 +5083,7 @@ function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
 	-- Remove buffs ?
 	local todel = {}
 	for eff_id, p in pairs(self.tmp) do
-		if p.__talent_source == t_id then todel[#todel+1] = eff_id end
+		if p.__talent_source == t_id and not self.no_source_remove and not t.no_source_remove then todel[#todel+1] = eff_id end
 	end
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
@@ -5251,13 +5315,15 @@ end
 -- Overwrite incVim to set up Bloodcasting
 local previous_incVim = _M.incVim
 function _M:incVim(v)
-	if v < 0 and self:attr("bloodcasting") then
-		local mult = self:attr("bloodcasting") / 100
+	if v < 0 then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end
+
 		local cost = math.abs(v)
 		if self.vim - cost < 0 then
 			local damage = (cost - (self.vim or 0)) * mult
 			self:incVim(-self.vim or 0)
-			self.life = self.life - damage
+			self.life = self.life - damage  -- die_at life can't be used
 		else
 			return previous_incVim(self, v)
 		end
@@ -5269,8 +5335,10 @@ end
 -- Overwrite getVim to set up Bloodcasting
 local previous_getVim = _M.getVim
 function _M:getVim()
-	if self:attr("bloodcasting") and self.on_preuse_checking_resources then
-		return math.max(self.vim, self.life)
+	if self.on_preuse_checking_resources then
+		local mult = 2
+		if self:attr("bloodcasting") then mult = self:attr("bloodcasting") / 100 end		
+		return math.max(self.vim, self.life / mult)
 	else
 		return previous_getVim(self)
 	end
@@ -5559,6 +5627,10 @@ function _M:preUseTalent(ab, silent, fake)
 			if rng.percent(self:attr("spell_failure")) then
 				if not silent then game.logSeen(self, "%s's %s has been disrupted by #ORCHID#anti-magic forces#LAST#!", self.name:capitalize(), ab.name) end
 				if not util.getval(ab.no_energy, self, ab) then
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 					self:useEnergy()
 				else
 					self.turn_procs.forbid_instant_talents = self.turn_procs.forbid_instant_talents or {}
@@ -5605,6 +5677,10 @@ function _M:preUseTalent(ab, silent, fake)
 		if self:attr("confused") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
 			if rng.percent(util.bound(self:attr("confused"), 0, 50)) then
 				if not silent then game.logSeen(self, "%s is confused and fails to use %s.", self.name:capitalize(), ab.name) end
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 				self:useEnergy()
 				return false
 			end
@@ -5613,17 +5689,12 @@ function _M:preUseTalent(ab, silent, fake)
 		-- Failure chance?
 		if self:attr("talent_fail_chance") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") and not ab.innate then
 			if rng.percent(self:attr("talent_fail_chance")) then
+				-- Should this trigger callbackOnTalentDisturbed?
 				if not silent then game.logSeen(self, "%s fails to use %s.", self.name:capitalize(), ab.name) end
-				self:useEnergy()
-				return false
-			end
-		end
-
-		-- terrified effect
-		if self:attr("terrified") and (ab.mode ~= "sustained" or not self:isTalentActive(ab.id)) and util.getval(ab.no_energy, self, ab) ~= true and not fake and not self:attr("force_talent_ignore_ressources") then
-			local eff = self:hasEffect(self.EFF_TERRIFIED)
-			if rng.percent(self:attr("terrified")) then
-				if not silent then game.logSeen(self, "%s is too terrified to use %s.", self.name:capitalize(), ab.name) end
+				if self:attr("scoundrel_failure") then
+					local eff = self:hasEffect(self.EFF_FUMBLE)
+					if eff then self:callEffect(self.EFF_FUMBLE, "do_Fumble") end
+				end
 				self:useEnergy()
 				return false
 			end
@@ -5635,7 +5706,7 @@ function _M:preUseTalent(ab, silent, fake)
 			if rng.percent(self:attr("scoundrel_failure")) then
 				if not silent then game.logSeen(self, "%s fumbles and fails to use %s, injuring %s!", self.name:capitalize(), ab.name, self:his_her_self()) end
 				self:useEnergy()
-				self:fireTalentCheck("callbackOnTalentDisturbed", ab)
+				self:fireTalentCheck("callbackOnTalentDisturbed", ab, eff)
 				return false
 			end
 		end
@@ -5703,6 +5774,7 @@ local sustainCallbackCheck = {
 	callbackOnHit = "talents_on_hit",
 	callbackOnAct = "talents_on_act",
 	callbackOnActBase = "talents_on_act_base",
+	callbackOnActEnd = "talents_on_act_end",
 	callbackOnMove = "talents_on_move",
 	callbackOnRest = "talents_on_rest",
 	callbackOnWait = "talents_on_wait",
@@ -6190,7 +6262,7 @@ function _M:postUseTalent(ab, ret, silent)
 
 	if self.turn_procs.anomalies_checked then self.turn_procs.anomalies_checked = nil end  -- clears out anomaly checks
 
-	if config.settings.tome.talents_flyers and not self:attr("save_cleanup") and self.x and self.y and game.level.map.seens(self.x, self.y) then
+	if config.settings.tome.talents_flyers and not self:attr("save_cleanup") and self.x and self.y and game.level.map.seens(self.x, self.y) and ab.id ~= "T_ATTACK" then
 		local name = (ab.display_entity and ab.display_entity:getDisplayString() or "")..ab.name
 		local sx, sy = game.level.map:getTileToScreen(self.x, self.y, true)
 		game.flyers:add(sx, sy - game.level.map.tile_h / 2, 20, rng.float(-0.1, 0.1), rng.float(-0.5,-0.8), name, colors.simple(colors.OLIVE_DRAB))
@@ -6496,6 +6568,12 @@ function _M:getTalentCooldown(t, base)
 		cd = 1 + cd * eff.power
 	end
 
+	--terrified cooldown increase effect
+	local eff = self:hasEffect(self.EFF_TERRIFIED)
+	if eff and not self:attr("talent_reuse") and not (t.fixed_cooldown or base) then
+		cd = math.ceil(cd * (1 + eff.cooldownPower))
+	end
+
 	local p = self:isTalentActive(self.T_MATRIX)
 	if p and p.talent == t.id then
 		cd = math.floor(cd * (1 - self:callTalent(self.T_MATRIX, "getPower")))
@@ -6579,6 +6657,7 @@ function _M:checkSetTalentAuto(tid, v, opt)
 		end
 		if opt == 3 then list[#list+1] = "- will only trigger if enemies are visible" end
 		if opt == 4 then list[#list+1] = "- will only trigger if enemies are visible and adjacent" end
+		if opt == 5 then list[#list+1] = "- will only trigger if you are not in combat" end
 
 		if #list == 0 then
 			doit()
@@ -6815,11 +6894,13 @@ function _M:talentCooldownFilter(t, change, nb, duplicate)
 
 	-- For each talent currently on cooldown find its definition (e) and add it to another table if the filter (t) applies
 	for tid, cd in pairs(self.talents_cd) do
-		if type(t) == "function" then
-			local e = self:getTalentFromId(tid)
-			if t(e) then talents[#talents+1] = {tid, cd} end
-		else -- Apply to all talents on cooldown the filter isn't a function
-			talents[#talents+1] = {tid, cd}
+		local e = self:getTalentFromId(tid)
+		if not e.fixed_cooldown then
+			if type(t) == "function" then
+				if t(e) then talents[#talents+1] = {tid, cd} end
+			else -- Apply to all talents on cooldown the filter isn't a function
+				talents[#talents+1] = {tid, cd}
+			end
 		end
 	end
 
@@ -6827,12 +6908,11 @@ function _M:talentCooldownFilter(t, change, nb, duplicate)
 	while #talents > 0 and nb > 0 do
 		local i = rng.range(1, #talents)
 		local t = talents[i]
-		local removed = false
 
 		self:alterTalentCoolingdown(t[1], -change)
 
 		if not duplicate then
-			if not removed then table.remove(talents, i) end -- only remove if it hasn't already been removed
+			table.remove(talents, i)
 		end
 
 		nb = nb - 1
@@ -6891,6 +6971,7 @@ function _M:canSeeNoCache(actor, def, def_pct)
 
 	-- Blindness means can't see anything
 	if self:attr("blind") then
+
 		return false, 0
 	end
 	
@@ -7163,7 +7244,7 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 		end
 	end
 
-	if e.status == "detrimental" and self:knowTalent(self.T_RESILIENT_BONES) then
+	if e.status == "detrimental" and e.type ~= "other" and self:knowTalent(self.T_RESILIENT_BONES) then
 		p.dur = math.ceil(p.dur * (1 - self:callTalent(self.T_RESILIENT_BONES,"durresist")))
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("reduce_detrimental_status_effects_time") then
@@ -7173,10 +7254,6 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 	if self:knowTalent(self.T_VITALITY) and e.status == "detrimental" and (e.subtype.wound or e.subtype.poison or e.subtype.disease) then
 		local t = self:getTalentFromId(self.T_VITALITY)
 		p.dur = math.ceil(p.dur * (1 - util.bound(t.getWoundReduction(self, t), 0, 1)))
-	end
-	if self:hasEffect(self.EFF_HAUNTED) and e.subtype and e.subtype.fear then
-		local e = self.tempeffect_def[self.EFF_HAUNTED]
-		e.on_setFearEffect(self, e)
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("negative_status_effect_immune") then
 		p.dur = 0
@@ -7224,7 +7301,7 @@ end
 function _M:on_temporary_effect_added(eff_id, e, p)
 	self:registerCallbacks(e, eff_id, "effect")
 	self:fireTalentCheck("callbackOnTemporaryEffectAdd", eff_id, e, p)
-	if e.status == "detrimental" then self:enterCombatStatus() end
+	if e.status == "detrimental" and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() end
 
 	-- Register talent source if any
 	if (e.status == "beneficial" or e.status == "neutral") then
@@ -7240,7 +7317,7 @@ end
 function _M:on_temporary_effect_removed(eff_id, e, p)
 	self:unregisterCallbacks(e, eff_id)
 	self:fireTalentCheck("callbackOnTemporaryEffectRemove", eff_id, e, p)
-	if e.status == "detrimental" then self:enterCombatStatus() end
+	if e.status == "detrimental" and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() end
 end
 
 --- Called when we are initiating a projection
@@ -7779,7 +7856,7 @@ function _M:checkStillInCombat()
 	-- Status effects need rechecking
 	for eff_id, p in pairs(self.tmp) do
 		local e = self:getEffectFromId(eff_id)
-		if e.status == "detrimental" and e.decrease > 0 then self:enterCombatStatus() break end
+		if e.status == "detrimental" and e.decrease > 0 and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() break end 
 	end
 
 	if game.turn - self.in_combat < 50 then return end -- Still good?
@@ -7811,4 +7888,32 @@ function _M:projectSource(t, x, y, damtype, dam, particles, source)
 	self.__project_source = source
 	self:project(t, x, y, damtype, dam, particles)
 	self.__project_source = old_source
+end
+
+-- Superload from ActorPoject to handle player_selffire
+function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
+	-- Now project on each grid, one type
+	-- Call the projected method of the target grid if possible
+	if not game.level.map:checkAllEntities(px, py, "projected", self, typ, px, py, damtype, dam, particles) then
+		-- Check self- and friendly-fire, and if the projection "misses"
+		local act = game.level.map(px, py, engine.Map.ACTOR)
+		if act and act == self and not (
+			((type(typ.selffire) == "number" and rng.percent(typ.selffire)) 
+			or 
+			(type(typ.selffire) ~= "number" and typ.selffire))
+			and (act == game.player and typ.player_selffire)  -- Disable friendlyfire for player projectiles unless explicitly overriden
+			)
+			then
+		elseif act and self.reactionToward and (self:reactionToward(act) >= 0) and not ((type(typ.friendlyfire) == "number" and rng.percent(typ.friendlyfire)) or (type(typ.friendlyfire) ~= "number" and typ.friendlyfire)) then
+		-- Otherwise hit
+		else
+			DamageType:projectingFor(self, {project_type=tg})
+			if type(damtype) == "function" then if damtype(px, py, tg, self, tmp) then return true end
+			else DamageType:get(damtype).projector(self, px, py, damtype, dam, tmp, nil, tg) end
+			if particles and type(particles) == "table" then
+				game.level.map:particleEmitter(px, py, 1, particles.type, particles.args)
+			end
+			DamageType:projectingFor(self, nil)
+		end
+	end
 end

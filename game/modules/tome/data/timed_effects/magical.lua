@@ -25,27 +25,8 @@ local Chat = require "engine.Chat"
 local Map = require "engine.Map"
 local Level = require "engine.Level"
 
----------- Item specific
-newEffect{
-	name = "ITEM_NUMBING_DARKNESS", image = "effects/bane_blinded.png",
-	desc = "Numbing Darkness",
-	long_desc = function(self, eff) return ("The target is losing hope, all damage it does is reduced by %d%%."):format(eff.reduce) end,
-	type = "magical",
-	subtype = { darkness=true,}, no_ct_effect = true,
-	status = "detrimental",
-	parameters = {power=10, reduce=5},
-	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Poison" end,
-	on_lose = function(self, err) return "#Target# regains their energy.", "-Darkness" end,
-	on_timeout = function(self, eff)
+---------- Item specific 
 
-	end,
-	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("numbed", eff.reduce)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("numbed", eff.tmpid)
-	end,
-}
 
 -- Use a word other than disease because diseases are associated with damage
 -- Add dummy power/dam parameters to try to stay in line with other diseases for subtype checks
@@ -53,6 +34,7 @@ newEffect{
 	name = "ITEM_BLIGHT_ILLNESS", image = "talents/decrepitude_disease.png",
 	desc = "Illness",
 	long_desc = function(self, eff) return ("The target is infected by a disease, reducing its dexterity, strength, and constitution by %d."):format(eff.reduce) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
 	type = "magical",
 	subtype = {disease=true, blight=true},
 	status = "detrimental",
@@ -76,6 +58,7 @@ newEffect{
 	name = "ITEM_ACID_CORRODE", image = "talents/acidic_skin.png",
 	desc = "Armor Corroded",
 	long_desc = function(self, eff) return ("The target has been splashed with acid, reducing armour by %d%% (#RED#%d#LAST#)."):format(eff.pct*100 or 0, eff.reduce or 0) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
 	type = "magical",
 	subtype = { acid=true, sunder=true },
 	status = "detrimental",
@@ -85,7 +68,7 @@ newEffect{
 	on_timeout = function(self, eff)
 	end,
 	activate = function(self, eff)
-		local armor = self.combat_armor * eff.pct
+		local armor = math.max(0, self.combat_armor * eff.pct)
 		eff.reduce = armor
 		self:effectTemporaryValue(eff, "combat_armor", -armor)
 	end,
@@ -177,7 +160,7 @@ newEffect{
 newEffect{
 	name = "ARCANE_STORM", image = "talents/disruption_shield.png",
 	desc = "Arcane Storm",
-	long_desc = function(self, eff) return ("The target is the epicenter of a terrible arcane storm, he gets +%d%% arcane resistance."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is the epicenter of a terrible arcane storm, providing +%d%% arcane resistance."):format(eff.power) end,
 	type = "magical",
 	subtype = { arcane=true},
 	status = "beneficial",
@@ -514,6 +497,7 @@ newEffect{
 	name = "BANE_CONFUSED", image = "effects/bane_confused.png",
 	desc = "Bane of Confusion",
 	long_desc = function(self, eff) return ("The target is confused, acting randomly (chance %d%%), unable to perform complex actions and takes %0.2f darkness damage per turn."):format(eff.power, eff.dam) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
 	type = "magical",
 	subtype = { bane=true, confusion=true },
 	status = "detrimental",
@@ -999,47 +983,21 @@ newEffect{
 newEffect{
 	name = "BLOODLUST", image = "talents/bloodlust.png",
 	desc = "Bloodlust",
-	long_desc = function(self, eff) return ("The target is in a magical frenzy, improving spellpower by %d."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target is in a magical frenzy, improving spellpower by %d."):format(eff.spellpower * eff.stacks) end,
 	type = "magical",
 	subtype = { frenzy=true },
 	status = "beneficial",
-	charges = function(self, eff) return math.floor(eff.power) end,
-	parameters = { power=1 },
-	on_timeout = function(self, eff)
-		if eff.refresh_turn + 10 < game.turn then -- Decay only if it's not refreshed
-			eff.power = math.max(0, eff.power*(100-eff.decay)/100)
-		end
-	end,
+	charges = function(self, eff) return math.floor(eff.spellpower * eff.stacks) end,
+	parameters = { spellpower=1, stacks=1, max_stacks=1 },
 	on_merge = function(self, old_eff, new_eff)
-		local dur = new_eff.dur
-		local max_turn, maxDur = self:callTalent(self.T_BLOODLUST, "getParams")
-		local maxSP = max_turn * 6 -- max total sp
-		local power = new_eff.power
-
-		if old_eff.last_turn + 10 <= game.turn then -- clear limits every game turn (10 ticks)
-			old_eff.used_this_turn = 0
-			old_eff.last_turn = game.turn
-		end
-		if old_eff.used_this_turn >= max_turn then
-			dur = 0
-			power = 0
-		else
-			power = math.min(max_turn-old_eff.used_this_turn, power)
-			old_eff.power = math.min(old_eff.power + power, maxSP)
-			old_eff.used_this_turn = old_eff.used_this_turn + power
-		end
-
-		old_eff.decay = 100/maxDur
-		old_eff.dur = math.min(old_eff.dur + dur, maxDur)
-		old_eff.refresh_turn = game.turn
+		old_eff.dur = new_eff.dur
+		old_eff.stacks = old_eff.stacks + 1
+		old_eff.max_stacks = new_eff.max_stacks
+		old_eff.stacks = math.min(old_eff.max_stacks, old_eff.stacks)
 		return old_eff
 	end,
 	activate = function(self, eff)
-		eff.last_turn = game.turn
-		local SPbonus, maxDur = self:callTalent(self.T_BLOODLUST, "getParams")
-		eff.used_this_turn = eff.power
-		eff.decay = 100/maxDur
-		eff.refresh_turn = game.turn
+		eff.stacks = 1
 	end,
 	deactivate = function(self, eff)
 	end,
@@ -1292,6 +1250,7 @@ newEffect{
 		eff.tmpid = self:addTemporaryValue("can_pass", {pass_wall=20})
 		eff.defid = self:addTemporaryValue("combat_def", eff.def)
 		eff.armid = self:addTemporaryValue("combat_armor", eff.armor)
+		self:effectTemporaryValue(eff, "no_breath", 1)
 		if not self.shader then
 			eff.set_shader = true
 			self.shader = "moving_transparency"
@@ -1635,7 +1594,7 @@ newEffect{
 	desc = "Invigorate",
 	long_desc = function(self, eff) return ("The target is regaining %d life per turn and refreshing talents at twice the normal rate."):format(eff.power) end,
 	type = "magical",
-	subtype = { temporal=true },
+	subtype = { temporal=true, regeneration=true },
 	status = "beneficial",
 	parameters = {power = 10},
 	on_gain = function(self, err) return "#Target# is invigorated.", "+Invigorate" end,
@@ -2464,8 +2423,8 @@ newEffect{
 newEffect{
 	name = "SPELLSURGE", image = "talents/gather_the_threads.png",
 	desc = "Spellsurge",
-	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):
-	format(eff.cur_power or eff.power) end,
+	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):format(eff.cur_power or eff.power) end,
+	charges = function(self, eff) return math.floor(eff.cur_power or eff.power) end,
 	type = "magical",
 	subtype = { arcane=true },
 	status = "beneficial",
@@ -2494,7 +2453,7 @@ newEffect{
 newEffect{
 	name = "OUT_OF_PHASE", image = "talents/phase_door.png",
 	desc = "Out of Phase",
-	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%.\nThese effects cap at 60%%."):format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
+	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%.\nThese effects cap at 40%%."):format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
 	type = "magical",
 	subtype = { teleport=true },
 	status = "beneficial",
@@ -2502,9 +2461,9 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is out of phase.", "+Phased" end,
 	on_lose = function(self, err) return "#Target# is no longer out of phase.", "-Phased" end,
 	activate = function(self, eff)
-		eff.defense = math.min(60, eff.defense + (self:attr("defense_on_teleport") or 0))
-		eff.resists = math.min(60, eff.resists + (self:attr("resist_all_on_teleport") or 0))
-		eff.effect_reduction = math.min(60, eff.effect_reduction + (self:attr("effect_reduction_on_teleport") or 0))
+		eff.defense = math.min(40, eff.defense + (self:attr("defense_on_teleport") or 0))
+		eff.resists = math.min(40, eff.resists + (self:attr("resist_all_on_teleport") or 0))
+		eff.effect_reduction = math.min(40, eff.effect_reduction + (self:attr("effect_reduction_on_teleport") or 0))
 
 		eff.defid = self:addTemporaryValue("combat_def", eff.defense)
 		eff.resid= self:addTemporaryValue("resists", {all=eff.resists})
@@ -2512,9 +2471,9 @@ newEffect{
 		eff.particle = self:addParticles(Particles.new("phantasm_shield", 1))
 	end,
 	on_merge = function(self, old_eff, new_eff)
-		old_eff.defense = math.min(60, math.max(old_eff.defense, new_eff.defense)) or 0
-		old_eff.resists = math.min(60, math.max(old_eff.resists, new_eff.resists)) or 0
-		old_eff.effect_reduction = math.min(60, math.max(old_eff.effect_reduction, new_eff.effect_reduction)) or 0
+		old_eff.defense = math.min(40, math.max(old_eff.defense, new_eff.defense)) or 0
+		old_eff.resists = math.min(40, math.max(old_eff.resists, new_eff.resists)) or 0
+		old_eff.effect_reduction = math.min(40, math.max(old_eff.effect_reduction, new_eff.effect_reduction)) or 0
 
 		self:removeTemporaryValue("combat_def", old_eff.defid)
 		self:removeTemporaryValue("resists", old_eff.resid)
@@ -2577,7 +2536,7 @@ newEffect{
 newEffect{
 	name = "ARCANE_VORTEX", image = "talents/arcane_vortex.png",
 	desc = "Arcane Vortex",
-	long_desc = function(self, eff) return ("An arcane vortex followes the target. Each turn a manathrust fires from it to a random foe in sight doing %0.2f arcane damage to all. If no foes are found the main target takes 50%% more arcane damage this turn. If the target dies the remaining damage is deal as a radius 2 ball of arcane."):format(eff.dam) end,
+	long_desc = function(self, eff) return ("An arcane vortex follows the target. Each turn a manathrust fires from it to a random foe in sight doing %0.2f arcane damage to all. If no foes are found the main target takes 50%% more arcane damage this turn. If the target dies the remaining damage is dealt as a radius 2 ball of arcane."):format(eff.dam) end,
 	type = "magical",
 	subtype = { arcane=true },
 	status = "detrimental",
@@ -2660,11 +2619,13 @@ newEffect{
 	status = "beneficial",
 	parameters = { },
 	activate = function(self, eff)
+		local inc_mana = self:getMaxMana() * 0.33
 		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.ARCANE]=25})
-		self:effectTemporaryValue(eff, "max_mana", self:getMaxMana() * 0.33)
-		self:effectTemporaryValue(eff, "use_only_arcane", (self:isTalentActive(self.T_PURE_AETHER) and self:getTalentLevel(self.T_PURE_AETHER) >= 5) and 2 or 1)
-		self:effectTemporaryValue(eff, "arcane_cooldown_divide", 3)
+		self:effectTemporaryValue(eff, "resists_pen", {[DamageType.ARCANE]=25})
 
+		self:effectTemporaryValue(eff, "max_mana", inc_mana)
+		self:effectTemporaryValue(eff, "arcane_cooldown_divide", 3)
+		self:incMana(inc_mana)
 		if not self.shader then
 			eff.set_shader = true
 			self.shader = "shadow_simulacrum"
@@ -2679,6 +2640,7 @@ newEffect{
 			self:removeAllMOs()
 			game.level.map:updateMap(self.x, self.y)
 		end
+		self.mana = math.min(self.mana, self.max_mana)
 	end,
 }
 
@@ -3005,13 +2967,13 @@ newEffect{
 newEffect{
 	name = "BORN_INTO_MAGIC", image = "talents/born_into_magic.png",
 	desc = "Born into Magic",
-	long_desc = function(self, eff) return ("%s damage increased by 15%%."):format(DamageType:get(eff.damtype).name:capitalize()) end,
+	long_desc = function(self, eff) return ("%s damage increased by 20%%."):format(DamageType:get(eff.damtype).name:capitalize()) end,
 	type = "magical",
 	subtype = { race=true },
 	status = "beneficial",
 	parameters = { eff=DamageType.ARCANE },
 	activate = function(self, eff)
-		self:effectTemporaryValue(eff, "inc_damage", {[eff.damtype]=15})
+		self:effectTemporaryValue(eff, "inc_damage", {[eff.damtype]=20})
 	end,
 	deactivate = function(self, eff)
 	end,
@@ -4354,6 +4316,7 @@ newEffect{
 	long_desc = function(self, eff) return ("The target is hexed.  Each time it uses an ability it takes %0.2f fire damage, and talent cooldowns are increased by %s plus 1 turn."):
 		format(eff.dam, eff.power and ("%d%%"):format((eff.power-1)*100) or "")
 	end,
+	charges = function(self, eff) return (tostring(math.floor((eff.power-1)*100)).."%") end,
 	type = "magical",
 	subtype = { hex=true, fire=true },
 	status = "detrimental",
@@ -4367,6 +4330,7 @@ newEffect{
 	name = "EMPATHIC_HEX", image = "talents/empathic_hex.png",
 	desc = "Empathic Hex",
 	long_desc = function(self, eff) return ("The target is hexed, creating an empathic bond with its victims. It takes %d%% feedback damage from all damage done."):format(eff.power) end,
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
 	type = "magical",
 	subtype = { hex=true, dominate=true },
 	status = "detrimental",
@@ -4406,5 +4370,83 @@ newEffect{
 	deactivate = function(self, eff)
 		if eff.particle then self:removeParticles(eff.particle) end
 		self.faction = eff.olf_faction
+	end,
+}
+
+newEffect{
+	name = "SHADOWGUARD_IMMUNITY", image = "talents/shadowguard.png",
+	desc = "Shadowguard Immunity",
+	long_desc = function(self, eff) return "The target is immune to all detrimental effects." end,
+	type = "other",
+	subtype = { shadow=true },
+	status = "beneficial",
+	on_gain = function(self, err) return "#Target#'s fades into the shadows.", "+Shadowguard" end,
+	on_lose = function(self, err) return "#Target#'s can be afflicted again.", "-Shadowguard" end,
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "negative_status_effect_immune", 1)
+	end,
+}
+
+newEffect{
+	name = "SHADOWGUARD_BUFF", image = "talents/shadowguard.png",
+	desc = "Shadowguard",
+	long_desc = function(self, eff) return ("The target is enveloped in shadows gaining %d spellpower and defense."):format(eff.spellpower) end,
+	type = "magical",
+	subtype = { shadow=true },
+	status = "beneficial",
+	--on_gain = function(self, err) return "#Target#'s fades into the shadows.", "+Shadowguard" end,
+	on_lose = function(self, err) return "#Target#'s fully exits the shadows.", "-Shadowguard" end,
+	parameters = { spellpower=0},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_spellpower", eff.spellpower)
+		self:effectTemporaryValue(eff, "combat_def", eff.spellpower)
+	end,
+}
+
+newEffect{
+	name = "RETCHED", image = "talents/retch.png",
+	desc = "Retched",
+	long_desc = function(self, eff) return ("The target is walking in its own retch, negating the natural ghoul's speed penalty."):format() end,
+	type = "magical",
+	subtype = { undead=true, speed=true },
+	status = "beneficial",
+	on_gain = function(self, err) return "#Target# speeds up in the retch.", "+Retched" end,
+	on_lose = function(self, err) return "#Target# speeds down outside of the retch.", "-Retched" end,
+	parameters = { spellpower=0},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "global_speed_add", 0.2)
+	end,
+}
+
+newEffect{
+	name = "SHADOW_CUT", image = "",
+	desc = "Shadow Cut",
+	long_desc = function(self, eff) return ("Huge shadow cut that bleeds, doing %0.2f darkness damage per turn. Anytime you hit it you get healed for %d."):format(eff.dam/5, eff.heal) end,
+	type = "magical",
+	subtype = { wound=true, cut=true, bleed=true, darkness=true },
+	status = "detrimental",
+	parameters = { dam=1, heal=1 },
+	on_gain = function(self, err) return "#Target# starts to bleed darkness.", "+Shadow Cut" end,
+	on_lose = function(self, err) return "#Target# stops bleeding darkness.", "-Shadow Cut" end,
+	callbackOnMeleeHit = function(self, eff, src, dam)
+		if not dam or dam <= 0 or src ~= eff.src then return end
+
+		src:heal(eff.heal)
+		if core.shader.active(4) then
+			src:addParticles(Particles.new("shader_shield_temp", 1, {toback=true , size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=6000, beamsCount=15, noup=2.0, beamColor1={0xcb/255, 0xcb/255, 0xcb/255, 1}, beamColor2={0x35/255, 0x35/255, 0x35/255, 1}}))
+			src:addParticles(Particles.new("shader_shield_temp", 1, {toback=false, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=6000, beamsCount=15, noup=1.0, beamColor1={0xcb/255, 0xcb/255, 0xcb/255, 1}, beamColor2={0x35/255, 0x35/255, 0x35/255, 1}}))
+		end
+		game:playSoundNear(src, "talents/heal")
+	end,
+	activate = function(self, eff)
+		if eff.src and eff.src:knowTalent(self.T_BLOODY_BUTCHER) then
+			local t = eff.src:getTalentFromId(eff.src.T_BLOODY_BUTCHER)
+			local resist = math.min(t.getResist(eff.src, t), math.max(0, self:combatGetResist(DamageType.PHYSICAL)))
+			self:effectTemporaryValue(eff, "resists", {[DamageType.PHYSICAL] = -resist})
+		end
+	end,
+	on_timeout = function(self, eff)
+		DamageType:get(DamageType.DARKNESS).projector(eff.src or self, self.x, self.y, DamageType.DARKNESS, eff.dam)
 	end,
 }

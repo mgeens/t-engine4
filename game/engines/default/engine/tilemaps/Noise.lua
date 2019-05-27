@@ -25,6 +25,8 @@ local Tilemap = require "engine.tilemaps.Tilemap"
 module(..., package.seeall, class.inherit(Tilemap))
 
 function _M:init(noise_kind, hurst, lacunarity, zoom, octave)
+	Tilemap.init(self)
+
 	self.noise_kind = noise_kind or "fbm_perlin"
 	hurst = hurst or 0.5
 	lacunarity = lacunarity or 2
@@ -40,9 +42,7 @@ end
 function _M:make(w, h, chars, normalize)
 	if normalize == nil then normalize = true end
 
-	self.data_w = w
-	self.data_h = h
-	self.data = self:makeData(w, h, ' ')
+	self:setSize(w, h, ' ')
 
 	local tmp = {}
 	local min, max = 1, 0

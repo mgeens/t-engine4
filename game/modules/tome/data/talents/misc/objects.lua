@@ -235,6 +235,9 @@ newTalent{
 		}
 		return p
 	end,
+	callbackOnAct = function(self, eff)
+		if not self:knowTalent(self.T_ETERNAL_GUARD) and self:hasEffect(self.EFF_BLOCKING) and self:hasEffect(self.EFF_BLOCKING).from_block and self:hasEffect(self.EFF_BLOCKING).did_block then self:removeEffect(self.EFF_BLOCKING) end
+	end,
 	getBlockValue = function(self, t) return self:combatShieldBlock() or 0 end,
 	getBlockedTypes = function(self, t)
 		local shield1, combat1, shield2, combat2 = self:hasShield()
@@ -264,7 +267,7 @@ newTalent{
 
 		local list = table.keys(bonuses)
 		local n = #list
-		if n < 1 then return bt, "(error 2)" end
+		if n < 1 then return bt, "None" end
 		local e_string = ""
 		if n == 1 then
 			e_string = DamageType.dam_def[next(bonuses)].name
@@ -280,7 +283,7 @@ newTalent{
 	action = function(self, t)
 		local properties = t.getProperties(self, t)
 		local bt, bt_string = t.getBlockedTypes(self, t)
-		self:setEffect(self.EFF_BLOCKING, 2, {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties})
+		self:setEffect(self.EFF_BLOCKING, 2, {power = t.getBlockValue(self, t), d_types=bt, bonus_block_pct = bonuses, properties=properties, from_block=true})
 		return true
 	end,
 	info = function(self, t)
@@ -298,9 +301,9 @@ newTalent{
 			br_text = " All blocked damage heals the wielder."
 		end
 		local bt, bt_string = t.getBlockedTypes(self, t)
-		return ([[Raise your shield into blocking position for 2 turns or until the start of your next turn, reducing all non-Mind damage by %d. If you block all of an attack's damage, the attacker will be vulnerable to a deadly counterstrike (the next weapon attack will instead deal 200%% damage) for one turn.
+		return ([[Raise your shield into blocking position for 2 turns reducing all non-Mind damage by %d. If you block all of an attack's damage, the attacker will be vulnerable to a deadly counterstrike (the next weapon attack will instead deal 200%% damage) for one turn.
 			Counterstrike can normally only effect one enemy per block.
-			
+			If any damage was successfully blocked this effect will be removed at the start of your turn.
 			If the shield has damage resistance to the blocked damage type the block value is increased by 50%%.
 			
 			Current Bonuses:  %s%s%s%s]]):
@@ -695,3 +698,12 @@ for i = 1, (ActorObjectUse.max_object_use_talents or 0) do
 end
 print("[Talents] Defined", ActorObjectUse.max_object_use_talents or 0, "ActorObjectUse Talents base_name:", ActorObjectUse.base_object_talent_name )
 
+newTalent{
+	name = "Melee retaliation",
+	type = {"misc/objects", 1},
+	points = 1,
+	mode = "passive",
+	info = function(self, t)
+		return ([[Intermediary for melee retaliation.]])
+	end,
+}

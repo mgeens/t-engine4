@@ -17,13 +17,6 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
---[[
-Totems
-*healing
-*cure illness
-*thorny skin
-]]
-
 -- gfx
 newEntity{
 	name = " of healing", addon=true, instant_resolve=true,
@@ -31,13 +24,13 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=50, max=500, floor=true},
+	charm_power_def = {add=0, max=600, floor=true},
 	resolvers.charm(
 		function(self, who) 
 			local heal = self.use_power.heal(self, who)
 			return ("heals yourself and all friendly characters within 10 spaces for %d"):
 				format(heal) end,
-		20,
+		15,
 		function(self, who)
 			local tg = self.use_power.target(self, who)
 			local heal = who:mindCrit(self.use_power.heal(self, who))
@@ -68,17 +61,17 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=15, max=800, floor=true},
+	charm_power_def = {add=0, max=800, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("instantly sting an enemy dealing %d nature damage over 7 turns and reducing their healing by 50%%%%"):format(dam, 50)
 		end,
-		12,
+		15,
 		function(self, who)
 			local tg = self.use_power.target(self, who)
 			local x, y = who:getTarget(tg)
 			if not x or not y then return nil end
-			local dam = {dam = who:mindCrit(self.use_power.damage(self, who)), heal_factor = 0.5, dur = 7}
+			local dam = {dam = who:mindCrit(self.use_power.damage(self, who)), heal_factor = 50, dur = 7}
 			game.logSeen(who, "%s activates %s %s!", who.name:capitalize(), who:his_her(), self:getName({no_add_name = true, do_color = true}))
 			who:project(tg, x, y, engine.DamageType.INSIDIOUS_POISON, dam, {type="slime"})
 			return {id=true, used=true}
@@ -180,7 +173,7 @@ newEntity{
 
 					local target = rng.tableRemove(tgts)
 					if target then
-						if self:attackTarget(target, nil, 1, true) and target:canBe("pin") then target:setEffect(target.EFF_PINNED, 2, {}) end
+						if self:attackTarget(target, nil, 1, true) and target:canBe("pin") then target:setEffect(target.EFF_PINNED, 1, {}) end
 					end
 					self.energy.value = 0
 				end,
