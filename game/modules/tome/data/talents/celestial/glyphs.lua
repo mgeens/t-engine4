@@ -207,7 +207,7 @@ local function makeTwilightGlyph()
 		dam = dam,
 		dist=dist,
 		desc = function(self)
-			return ([[Explodes, knocking back and dealing %d light and %d darkness damage.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam/2), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam/2))
+			return ([[Deals %d light and %d darkness damage and teleports the target away.]]):format(engine.interface.ActorTalents.damDesc(self, engine.DamageType.LIGHT, self.dam/2), engine.interface.ActorTalents.damDesc(self, engine.DamageType.DARKNESS, self.dam/2))
 		end,
 		canTrigger = function(self, x, y, who)
 			if who:reactionToward(self.summoner) < 0 then return mod.class.Trap.canTrigger(self, x, y, who) end
@@ -218,13 +218,10 @@ local function makeTwilightGlyph()
 				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.LIGHT, self.dam/2, {type="light"})
 				self:project({type="hit", x=x,y=y}, x, y, engine.DamageType.DARKNESS, self.dam/2, {type="light"})
 			end
-			if who:canBe("knockback") then
-				local ox, oy = self.x, self.y
-				local dir = util.getDir(who.x, who.y, who.old_x, who.old_y)
-				self.x, self.y = util.coordAddDir(self.x, self.y, dir)
-				who:knockback(self.x, self.y, self.dist)
-				self.x, self.y = ox, oy
+			if not who.dead and who:canBe("teleport") then
+				who:teleportRandom(self.summoner.x, self.summoner.y, self.dist, 0)
 			end
+
 	--divine glyphs buff
 			if self.summoner:knowTalent(self.summoner.T_DIVINE_GLYPHS) then
 				self.summoner.turn_procs.divine_glyphs = self.summoner.turn_procs.divine_glyphs or 0
@@ -343,7 +340,7 @@ end
 		Avalable glyphs are:
 		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %d light damage and blinding for %d turns.
 		Glyph of Fatigue - Bind starlight into a glyph. When triggered it will release a fatiguing darkness. For %d turns, every action the foe makes will increase the cooldown of a cooling-down talent by 1 and cause it to take %d darkness damage.
-		Glyph of Explosion - Bind twilight into a glyph. When triggered it will release a burst of twilight, knocking the foe back %d tiles and dealing %d light and %d darkness damage.
+		Glyph of Explosion - Bind twilight into a glyph. When triggered it will release a burst of twilight, teleporting the target %d tiles away and dealing %d light and %d darkness damage.
 		]]):format(t.trapPower(self, t), t.getDuration(self, t), t.getGlyphCD(self, t), damDesc(self, DamageType.LIGHT, dam), blindDur, fatigueDur, damDesc(self, DamageType.DARKNESS, fatigueDam), kbDist, damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
 	end,
 }
