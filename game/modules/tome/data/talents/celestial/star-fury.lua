@@ -68,8 +68,8 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=self:spellFriendlyFire()}
 	end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 4, 40) end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 5, 110) end,
+	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 10, 120)/2 end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 2.8, 6)) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -113,7 +113,7 @@ newTalent{
 	positive = -10,
 	tactical = { ATTACKAREA = {LIGHT = 1, DARKNESS = 1} },
 	range = 0,
-	radius = 4,
+	radius = 5,
 	direct_hit = true,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, selffire=false}
