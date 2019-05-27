@@ -168,6 +168,6 @@ newTalent{
 		local dotDam = t.getDotDamage(self, t)
 		local conversion = t.getConversion(self, t)
 		local duration = t.getDuration(self, t)
-		return ([[Call upon eclipse light to shroud your foes in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(damDesc(self, DamageType.LIGHT, dotDam), damDesc(self, DamageType.DARKNESS, dotDam), conversion*100, duration)
+		return ([[Shroud foes within radius %d in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(radius, damDesc(self, DamageType.LIGHT, dotDam), damDesc(self, DamageType.DARKNESS, dotDam), conversion*100, duration)
 	end,
 }
