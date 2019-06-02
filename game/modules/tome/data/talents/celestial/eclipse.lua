@@ -145,7 +145,7 @@ newTalent{
 	negative = 15,
 	tactical = { ATTACKAREA = {LIGHT = 2} },
 	range = 0,
-	radius = 7,
+	radius = 10,
 	direct_hit = true,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
@@ -158,7 +158,7 @@ newTalent{
 		self:project(tg, self.x, self.y, function(px, py)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if not target then return end
-			target:setEffect(target.EFF_DARKLIGHT, t.getDuration(self, t), {src=self, dotDam=t.getDotDamage(self, t), conversion=t.getConversion(self, t)})
+			target:setEffect(target.EFF_DARKLIGHT, t.getDuration(self, t), {src=self, dotDam=self:spellCrit(t.getDotDamage(self, t)), conversion=t.getConversion(self, t)})
 		end)
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y})
 		game:playSoundNear(self, "talents/fireflash")
@@ -169,6 +169,6 @@ newTalent{
 		local dotDam = t.getDotDamage(self, t)
 		local conversion = t.getConversion(self, t)
 		local duration = t.getDuration(self, t)
-		return ([[Shroud foes within radius %d in darkest light, dealing %d light and %d darkness damage per turn and splitting %d%% of their damage between light and darkness for %d turns.]]):format(radius, damDesc(self, DamageType.LIGHT, dotDam), damDesc(self, DamageType.DARKNESS, dotDam), conversion*100, duration)
+		return ([[Shroud foes within radius %d in darkest light, dealing %0.2f light and %0.2f darkness damage per turn and converting %d%% of the damage they deal between light and darkness for %d turns.]]):format(radius, damDesc(self, DamageType.LIGHT, dotDam), damDesc(self, DamageType.DARKNESS, dotDam), conversion*100, duration)
 	end,
 }
