@@ -2010,11 +2010,6 @@ function _M:spellCrit(dam, add_chance, crit_power_add)
 			t.on_crit(self, t)
 		end
 
-		if self:isTalentActive(self.T_GLYPHS) then
-			local t = self:getTalentFromId(self.T_GLYPHS)
-			t.on_crit(self, t)
-		end
-
 		if self:knowTalent(self.T_EYE_OF_THE_TIGER) then self:triggerTalent(self.T_EYE_OF_THE_TIGER, nil, "spell") end
 
 		self:fireTalentCheck("callbackOnCrit", "spell", dam, chance)
