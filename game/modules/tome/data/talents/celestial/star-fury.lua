@@ -109,7 +109,7 @@ newTalent{
 	require = divi_req3,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 7,
+	cooldown = 5,
 	negative = -20,
 	positive = -10,
 	tactical = { ATTACKAREA = {LIGHT = 1, DARKNESS = 1} },
@@ -119,24 +119,23 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, selffire=false}
 	end,
-	getLightDamage = function(self, t) return 10 + self:combatSpellpower(0.2) * self:combatTalentScale(t, 1, 5) end,
-	getDarknessDamage = function(self, t) return 10 + self:combatSpellpower(0.2) * self:combatTalentScale(t, 1, 5) end,
+	getDamage = function(self, t) return 10 + self:combatSpellpower(0.2) * self:combatTalentScale(t, 1, 5) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
-		local grids = self:project(tg, self.x, self.y, DamageType.LIGHT, self:spellCrit(t.getLightDamage(self, t)))
-		self:project(tg, self.x, self.y, DamageType.DARKNESS, self:spellCrit(t.getDarknessDamage(self, t)))
+		local dam = self:spellCrit(t.getDamage(self, t))
+		local grids = self:project(tg, self.x, self.y, DamageType.LIGHT, dam)
+		self:project(tg, self.x, self.y, DamageType.DARKNESS, dam)
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "shadow_flash", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y})
 
 		game:playSoundNear(self, "talents/flame")
 		return true
 	end,
 	info = function(self, t)
-		local lightdam = t.getLightDamage(self, t)
-		local darknessdam = t.getDarknessDamage(self, t)
+		local dam = t.getDamage(self, t)
 		local radius = self:getTalentRadius(t)
 		return ([[A surge of twilight pulses from you, doing %0.2f light and %0.2f darkness damage to all others within radius %d.
 		The damage dealt will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, lightdam),damDesc(self, DamageType.DARKNESS, darknessdam), radius)
+		format(damDesc(self, DamageType.LIGHT, dam),damDesc(self, DamageType.DARKNESS, dam), radius)
 	end,
 }
 
