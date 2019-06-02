@@ -189,24 +189,24 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 15,
-	positive = 20,
+	positive = 30,
 	tactical = { ATTACKAREA = {LIGHT = 2} },
-	range = 7,
+	radius = 10,
 	direct_hit = true,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), radius=7, friendlyfire=false, talent=t}
+		return {type="ball", radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
-	getDuration = function(self, t) return 6 end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 250) end,
+	getDuration = function(self, t) return 4 end,
 	getPower = function(self, t) return self:combatTalentLimit(t, 1, 0.2, 0.7) end,
 	getTargetCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
 	action = function(self, t)
-		local damInc = (self.inc_damage.DARKNESS or 0) * t.getPower(self, t)
+		local damInc = (self:combatGetDamageIncrease(DamageType.DARKNESS) or 0, true) * t.getPower(self, t)
 		self:setEffect(self.EFF_SUNBURST, t.getDuration(self, t), {damInc=damInc})
 
 		--do cool lasers
 		local tgts = {}
-		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRange(t), true)
+		local grids = core.fov.circle_grids(self.x, self.y, self:getTalentRadius(t), true)
 		for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
 			local a = game.level.map(x, y, Map.ACTOR)
 			if a and self:reactionToward(a) < 0 then
@@ -219,14 +219,13 @@ newTalent{
 		local dam = self:spellCrit(t.getDamage(self, t))
 
 		-- Randomly take targets
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		local tg = {type="hit", range=self:getTalentRadius(t), talent=t}
 		for i = 1, t.getTargetCount(self, t) do
 			if #tgts <= 0 then break end
 			local a, id = rng.table(tgts)
 			table.remove(tgts, id)
 
 			self:project(tg, a.x, a.y, DamageType.LIGHT, dam)
-			self:project(tg, a.x, a.y, DamageType.FIREBURN, {dam=dam/2, dur=3, initial=0})
 			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "light_beam", {tx=a.x-self.x, ty=a.y-self.y})
 
 			game:playSoundNear(self, "talents/spell_generic")
@@ -235,6 +234,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Release a furious burst of sunlight, increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns and dealing %d light damage to %d foes in radius %d, setting them ablaze for %d fire damage over 3 turns.]]):format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRange(t), damDesc(self, DamageType.FIRE, t.getDamage(self, t)/2))
+		return ([[Release a furious burst of sunlight, increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns and dealing %0.2f light damage to %d random foes in radius %d.]]):
+			format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRadius(t))
 	end,
 }
