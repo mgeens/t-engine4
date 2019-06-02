@@ -1328,6 +1328,26 @@ newEffect{
 }
 
 newEffect{
+	name = "SOLAR_INFUSION", image = "talents/sun_flare.png",
+	desc = "Solar Infusion",
+	long_desc = function(self, eff) return ("The target's light, darkness, and fire resistance has been increased by %d%%."):format(eff.resist) end,
+	type = "magical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { resist=10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "resists", {
+			[DamageType.DARKNESS] = eff.resist,
+			[DamageType.LIGHT] = eff.resist,
+			[DamageType.FIRE] = eff.resist,
+
+		})
+	end,
+	deactivate = function(self, eff)
+	end,
+}
+
+newEffect{
 	name = "TOTALITY", image = "talents/totality.png",
 	desc = "Totality",
 	long_desc = function(self, eff) return ("The target's light and darkness spell penetration has been increased by %d%%."):format(eff.power) end,
@@ -4448,5 +4468,22 @@ newEffect{
 	end,
 	on_timeout = function(self, eff)
 		DamageType:get(DamageType.DARKNESS).projector(eff.src or self, self.x, self.y, DamageType.DARKNESS, eff.dam)
+	end,
+}
+
+newEffect{
+	name = "GLYPH_OF_MOONLIGHT", image = "trap/trap_glyph_fatigue_01_64.png",
+	desc = "Draining Moonlight",
+	long_desc = function(self, eff) return ("The target has been drained by a glyph, all damage it does is reduced by %d%%."):format(eff.reduce) end,
+	type = "magical",
+	subtype = { darkness=true,},
+	status = "detrimental",
+	parameters = {reduce=5},
+	on_gain = function(self, err) return "#Target# is weakened by the glyph of moonlight!", "+Draining Moonlight" end,
+	on_lose = function(self, err) return "#Target# looks shakes off the effect of the glyph of moonlight.", "-Draining Moonlight" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "numbed", eff.reduce)
+	end,
+	deactivate = function(self, eff)
 	end,
 }
