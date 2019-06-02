@@ -66,38 +66,41 @@ newTalent{
 	end,
 }
 
+-- High end Light damage nuke, synergy with Darkest Light via resists mid/late game
 newTalent{
 	name = "Sun Flare",
 	type = {"celestial/sunlight", 2},
 	require = divi_req2,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 20,
-	positive = -15,
+	cooldown = 12,
+	positive = 30,
 	tactical = { DISABLE = 2,
 		ATTACKAREA = function(self, t, aitarget)
 			if self:getTalentLevel(t) >= 3 then return {light = 1} end
 		end, },
 	direct_hit = true,
 	range = 0,
-	radius = function(self, t) return math.floor(self:combatTalentScale(t, 2.5, 4.5)) end,
+	radius = function(self, t) return math.min(8, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t), talent=t}
 	end,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 250) end,
+	getDuration = function(self, t) return 4 end,
+	getRes = function(self, t) return self:combatTalentSpellDamage(t, 15, 50) end,
+	getResDuration = function(self, t) return 4 end,
+
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		-- Temporarily turn on "friendlyfire" to lite all tiles
 		tg.selffire = true
-		tg.radius = tg.radius * 2
 		self:project(tg, self.x, self.y, DamageType.LITE, 1)
-		tg.radius = tg.radius / 2
 		tg.selffire = false
 		local grids = self:project(tg, self.x, self.y, DamageType.BLIND, t.getDuration(self, t))
+		self:project(tg, self.x, self.y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
 		if self:getTalentLevel(t) >= 3 then
-			self:project(tg, self.x, self.y, DamageType.LIGHT, t.getDamage(self, t))
+			self:setEffect(self.EFF_SOLAR_INFUSION, t.getResDuration(self, t), {resist=t.getRes(self, t)})
 		end
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "sunburst", {radius=tg.radius, grids=grids, tx=self.x, ty=self.y, max_alpha=80})
 		game:playSoundNear(self, "talents/flame")
@@ -107,10 +110,13 @@ newTalent{
 		local radius = self:getTalentRadius(t)
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
-		return ([[Invokes the Sun to cause a flare within radius %d, blinding your foes for %d turns and lighting up your immediate area (radius %d).
-		At level 3 it will also do %0.2f light damage within radius %d.
-		The damage done will increase with your Spellpower.]]):
-		format(radius, duration, radius * 2, damDesc(self, DamageType.LIGHT, damage), radius)
+		local res = t.getRes(self, t)
+		local resdur = t.getResDuration(self, t)
+		return ([[Invokes the Sun to cause a flare within radius %d, blinding your foes for %d turns and lighting up the area.
+		All enemies effected will take %0.2f light damage.
+		At talent level 3 you gain %d%% light, darkness, and fire resistance for %d turns.
+		The damage done and resistances will increase with your Spellpower.]]):
+		format(radius, duration, damDesc(self, DamageType.LIGHT, damage), res, resdur )
    end,
 }
 
