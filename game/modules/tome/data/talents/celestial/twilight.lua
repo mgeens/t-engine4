@@ -205,7 +205,7 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	cooldown = 50,
-	negative = 10,
+	negative = 30,
 	tactical = { ATTACK = 2 },
 	requires_target = true,
 	range = 5,
