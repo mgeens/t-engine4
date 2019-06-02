@@ -128,7 +128,8 @@ newTalent{
 		local darknessdamage = t.getDarknessDamage(self, t)
 		return ([[Each time one of your spells criticals, you project a bolt of light or shadow at up to %d targets within radius %d, doing %0.2f light damage or %0.2f darkness damage per bolt.
 		This effect costs 2 positive or 2 negative energy each time it's triggered, and will not activate if either your positive or negative energy is below 2.
-		The damage scales with your Spellpower.]]):
+		The damage scales with your Spellpower.
+		This spell cannot crit.]]):
 		format(targetcount, self:getTalentRange(t), damDesc(self, DamageType.LIGHT, lightdamage), damDesc(self, DamageType.DARKNESS, darknessdamage))
 	end,
 }
