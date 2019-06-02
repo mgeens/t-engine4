@@ -26,8 +26,9 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	cooldown = 5,
-	positive = -16,
+	positive = -10,
 	range = 7,
+	radius = 1,
 	tactical = { ATTACK = {LIGHT = 2} },
 	direct_hit = true,
 	reflectable = true,
@@ -35,17 +36,19 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 17, 200) end,
 	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 17, 200)/2 end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		local tg = {type="hit", range=self:getTalentRange(t), radius=1, talent=t}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		self:project(tg, x, y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)), {type="light"})
+
+		local dam = self:spellCrit(t.getDamage(self, t))
+		self:project(tg, x, y, DamageType.LIGHT, dam, {type="light"})
 
 		local _ _, x, y = self:canProject(tg, x, y)
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, 4,
-			DamageType.LIGHT, self:spellCrit(t.getDamageOnSpot(self, t)),
-			0,
+			DamageType.LIGHT, dam / 2,
+			1,
 			5, nil,
 			{type="light_zone"},
 			nil, self:spellFriendlyFire()
