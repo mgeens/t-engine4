@@ -120,40 +120,65 @@ newTalent{
    end,
 }
 
+-- Some anti-synergy/potentially unexpected behavior with cooldown reduction, ideally we should distinguish between manual activation
 newTalent{
 	name = "Firebeam",
 	type = {"celestial/sunlight",3},
 	require = divi_req3,
 	points = 5,
 	random_ego = "attack",
-	cooldown = 6,
-	positive = 10,
+	cooldown = 12,
+	positive = 30,
 	tactical = { ATTACK = {FIRE = 2}  },
-	range = 7,
+	range = 10,
 	direct_hit = true,
 	requires_target = true,
 	target = function(self, t)
-		return {type="beam", range=self:getTalentRange(t), talent=t}
+		return {type="ball", radius=self:getTalentRange(t), friendlyfire=false, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 16, 200) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 50) end,
+	callbackOnLevelChange = function(self, eff)
+		self.firebeam_turns_remaining = nil
+	end,
+	callbackOnAct = function(self, t)
+		if not self.firebeam_turns_remaining then return end
+		if self.firebeam_turns_remaining <= 0 then self.firebeam_turns_remaining = nil return end
+
+		if self.firebeam_turns_remaining % 2 ~= 0 then
+			self:forceUseTalent(self.T_FIREBEAM, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
+		end
+
+		self.firebeam_turns_remaining = self.firebeam_turns_remaining - 1
+	end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
-		local x, y = self:getTarget(tg)
-		if not x or not y then return nil end
+
+		local tgts = {}
+		self:project(tg, self.x, self.y, function(px, py)
+			local target = game.level.map(px, py, engine.Map.ACTOR)
+			if not target then return end
+			tgts[#tgts+1] = {tgt=target, distance=core.fov.distance(self.x, self.y, target.x, target.y)}
+		end)
+
+		if #tgts > 0 then table.sort(tgts, "distance") else return end
+		
+		local tgt, x, y = tgts[#tgts].tgt, tgts[#tgts].tgt.x, tgts[#tgts].tgt.y
 		local dam = self:spellCrit(t.getDamage(self, t))
-		self:project(tg, x, y, DamageType.LIGHT, dam)
-		self:project(tg, x, y, DamageType.FIREBURN, {dam=dam/2, dur=3, initial=0})
+		self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, x, y, DamageType.FIRE, dam)
+
 		local _ _, x, y = self:canProject(tg, x, y)
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
 		game:playSoundNear(self, "talents/flame")
+		if not self.firebeam_turns_remaining then self.firebeam_turns_remaining = 4 end
 		return true
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[Call forth the Sun to summon a fiery beam, dealing %d light damage and burning all targets in a line for %d fire damage over 3 turns.
+		return ([[Call forth the Sun to summon a fiery beam that pierces to the farthest enemy dealing %d fire damage to all enemies hit.
+		This spell will automatically cast again at the start of every other one of your turns up to twice.
 		The damage done will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.FIRE, damage/2))
+		format(damDesc(self, DamageType.FIRE, damage))
 	end,
 }
 
