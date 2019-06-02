@@ -59,9 +59,9 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 10,
-	negative = 15,
+	negative = 20,
 	tactical = { ATTACKAREA = {DARKNESS = 2} },
-	range = 5,
+	range = 6,
 	radius = 3,
 	direct_hit = true,
 	requires_target = true,
@@ -70,17 +70,18 @@ newTalent{
 	end,
 	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 10, 120)/2 end,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
-	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 2.8, 6)) end,
+	getDuration = function(self, t) return math.min(9, math.floor(self:combatTalentScale(t, 2.8, 6))) end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
-		local grids = self:project(tg, x, y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)), {type="shadow"})
+		local dam = self:spellCrit(t.getDamage(self, t))
+		local grids = self:project(tg, x, y, DamageType.DARKNESS, dam, {type="shadow"})
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, t.getDuration(self, t),
-			DamageType.DARKNESS, self:spellCrit(t.getDamageOnSpot(self, t)),
+			DamageType.DARKNESS, dam,
 			self:getTalentRadius(t),
 			5, nil,
 			{type="shadow_zone", overlay_particle={zdepth=6, only_one=true, type="circle", args={oversize=0.7, a=60, appear=8, speed=-0.5, img="moon_circle", radius=self:getTalentRadius(t)}}},
