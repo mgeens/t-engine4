@@ -472,7 +472,7 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 7, 80) end,
 	getTargetCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
 	getNegativeDrain = function(self, t) return self:combatTalentLimit(t, 0, 5, 3) end,
-	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 end,
+	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 + 0.5 end,
 	callbackOnRest = function(self, t)
 		if not self:knowTalent(self.T_NEGATIVE_POOL) then return false end
 		if self.negative_regen > 0 and self.negative < self.max_negative then return true end
