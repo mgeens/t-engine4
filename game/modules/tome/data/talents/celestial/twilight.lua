@@ -169,30 +169,32 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 15,
-	negative = 15,
+	negative = 20,
 	tactical = { DISABLE = 3 },
-	radius = 5,
+	radius = 10,
 	direct_hit = true,
 	requires_target = true,
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), talent=t, selffire=false}
 	end,
-	getConfuseDuration = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t) + self:getCun(5), 2, 0, 12, 10)) end,
+	getConfuseDuration = function(self, t) return math.min(10, math.floor(self:combatScale(self:getTalentLevel(t) + self:getCun(5), 2, 0, 12, 10))) end,
 	getConfuseEfficency = function(self, t) return self:combatTalentLimit(t, 60, 15, 45) end, -- Limit < 60% (slightly better than most confusion effects)
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 100) end,  -- Mostly for the crit synergy
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		self:project(tg, self.x, self.y, DamageType.CONFUSION, {
 			dur = t.getConfuseDuration(self, t),
 			dam = t.getConfuseEfficency(self, t)
 		})
+		self:project(tg, self.x, self.y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
 		game:playSoundNear(self, "talents/flame")
 		return true
 	end,
 	info = function(self, t)
 		local duration = t.getConfuseDuration(self, t)
-		return ([[Let out a mental cry that shatters the will of your targets within radius 3, confusing (%d%% to act randomly) them for %d turns.
-		The duration will improve with your Cunning.]]):
-		format(t.getConfuseEfficency(self,t),duration)
+		return ([[Let out a mental cry that shatters the will of your targets within radius %d, dealing %0.2f darkness damage and confusing (%d%% to act randomly) them for %d turns.
+		The damage will improve with your spellpower and the duration will improve with your Cunning.]]):
+		format(self:getTalentRadius(t), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t)), t.getConfuseEfficency(self,t), duration)
 	end,
 }
 
