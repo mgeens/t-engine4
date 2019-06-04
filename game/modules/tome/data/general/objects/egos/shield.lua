@@ -337,10 +337,10 @@ newEntity{
 	on_block = {
 		desc=function(self, who, special)
 			local dam = special.shield_wintry(who)
-			return ("Deals #VIOLET#%d#LAST# cold damage and freezes enemies in radius 4 to the ground for 3 turns (1/turn)"):format(dam)
+			return ("Deals #YELLOW#%d#LAST# cold damage and freezes enemies in radius 4 to the ground for 3 turns (1/turn)"):format(dam)
 		end,
 		shield_wintry=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 10, 200))
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatMindpower(), 1, 300)))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -356,6 +356,69 @@ newEntity{
 			game.level.map:particleEmitter(who.x, who.y, tg.radius, "circle", {oversize=1.1, a=255, limit_life=16, grow=true, speed=0, img="ice_nova", radius=tg.radius})
 			game:playSoundNear(self, "talents/ice")
 		end,			
+	},
+}
+
+newEntity{
+	power_source = {psionic=true},
+	name = "windwalling ", prefix=true, instant_resolve=true,
+	keywords = {windwalling=true},
+	level_range = {1, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 20,
+	cost = 60,
+	special_combat = {
+		melee_project = {
+			[DamageType.PHYSICAL] = resolvers.mbonus_material(20, 10),
+		},
+	},
+	wielder = {
+		resists={
+			[DamageType.PHYSICAL] = resolvers.mbonus_material(10, 10),
+		},
+		inc_stats = {
+			[Stats.STAT_WIL] = resolvers.mbonus_material(5, 1),
+		},
+	},
+	on_block = {
+		desc=function(self, who, special)
+			local dam = special.shield_windwall(who)
+			return ("Blasts a radius 10 area dealing #YELLOW#%d#LAST# physical damage to enemies and destroying any hostile projectiles"):format(dam)
+		end,
+		shield_windwall=function(who)
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatMindpower(), 1, 150)))
+			return dam
+		end,
+		fct=function(self, who, target, type, dam, eff, special)
+			if who.turn_procs and who.turn_procs.shield_windwall then return end
+			who.turn_procs.shield_windwall = true
+			local DamageType = require "engine.DamageType"
+			local dam = special.shield_windwall(who)
+			who:project({type="ball", radius=10, friendlyfire=false, selffire=false}, who.x, who.y, DamageType.PHYSICAL, dam)
+			game.level.map:particleEmitter(who.x, who.y, 10, "shout",
+				{additive=true, life=10, size=3, distorion_factor=0.0, radius=10, nb_circles=4, rm=0.8, rM=1, gm=0, gM=0, bm=0.8, bM=1.0, am=0.4, aM=0.6})
+
+			local grids = core.fov.circle_grids(who.x, who.y, 10, true)
+			for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
+				local i = 0
+				local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+				while p do
+					if p.src and p.src:reactionToward(who) >= 0 then return end
+					if p.name then 
+						game.logPlayer(who, "#GREEN#"..p.name .. "is blown away!#LAST#")
+					else
+						game.logPlayer(who, "#GREEN#A projectile is blown away!!#LAST#")
+					end
+					
+					p:terminate(x, y)
+					game.level:removeEntity(p, true)
+					p.dead = true
+   
+					i = i + 1
+					p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+				end end end
+		end,
 	},
 }
 
@@ -502,7 +565,7 @@ newEntity{
 			return ("Deals #VIOLET#%d#LAST# light and fire damage to each enemy blocked"):format(dam)
 		end,
 		shield_wrathful=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 1, 450) / 2)
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatSpellpower(), 1, 450) / 2))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -655,6 +718,7 @@ newEntity{
 	},
 }
 
+-- needs gfx
 newEntity{
 	power_source = {techniquee=true},
 	name = " of shrapnel", suffix=true, instant_resolve=true,
@@ -670,7 +734,7 @@ newEntity{
 			return ("Cause enemies within radius 6 to bleed for #RED#%d#LAST# physical damage over 5 turns (1/turn)"):format(dam)
 		end,
 		shield_shrapnel=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatPhysicalpower(), 1, 350))
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatPhysicalpower(), 1, 350)))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
