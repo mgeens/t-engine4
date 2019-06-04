@@ -201,7 +201,7 @@ newTalent{
 	getPower = function(self, t) return self:combatTalentLimit(t, 1, 0.2, 0.7) end,
 	getTargetCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
 	action = function(self, t)
-		local damInc = (self:combatGetDamageIncrease(DamageType.DARKNESS) or 0, true) * t.getPower(self, t)
+		local damInc = (self:combatGetDamageIncrease(DamageType.DARKNESS, true)) * t.getPower(self, t)
 		self:setEffect(self.EFF_SUNBURST, t.getDuration(self, t), {damInc=damInc})
 
 		--do cool lasers
