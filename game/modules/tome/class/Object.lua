@@ -632,15 +632,15 @@ function _M:descAccuracyBonus(desc, weapon, use_actor)
 
 	local m = weapon.accuracy_effect_scale or 1
 	if kind == "sword" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.4, m), {"color","LAST"}, " crit.pwr / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.4, m), {"color","LAST"}, " crit mult (max 40%)", true)
 	elseif kind == "axe" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.2, m), {"color","LAST"}, " crit / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.25, m), {"color","LAST"}, " crit chance (max 25%)", true)
 	elseif kind == "mace" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.1, m), {"color","LAST"}, " dam / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.2, m), {"color","LAST"}, " base dam (max 20%)", true)
 	elseif kind == "staff" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(2.5, m), {"color","LAST"}, " procs dam / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(2.5, m), {"color","LAST"}, " proc dam (max 200%)", true)
 	elseif kind == "knife" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.5, m), {"color","LAST"}, " APR / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.5, m), {"color","LAST"}, " APR (max 50%)", true)
 	end
 end
 
