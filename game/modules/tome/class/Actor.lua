@@ -1634,6 +1634,9 @@ function _M:teleportRandom(x, y, dist, min_dist)
 	
 	self:fireTalentCheck("callbackOnTeleport", teleported, ox, oy, self.x, self.y)
 
+	-- We store this so the AI can determine when an "abnormal" movement occured and not immediately cheat to their location with their own teleport, mostly
+	if teleported then self.last_special_movement = game.turn end
+	
 	return teleported
 end
 

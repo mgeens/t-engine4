@@ -242,7 +242,11 @@ function _M:aiSeeTargetPos(target)
 		LSeen.GCache_turn = game.turn
 	else
 		if target == self.ai_target.actor and (LSeen.GCache_turn or 0) + 10 <= game.turn and LSeen.x then
-			spread = spread + math.min(10, math.floor((game.turn - (LSeen.GCknown_turn or game.turn)) / (game.energy_to_act / game.energy_per_tick))) -- Limit spread to 10 tiles
+			if target.last_special_movement and LSeen.GCknown_turn and (target.last_special_movement > LSeen.GCknown_turn) then 
+				spread = 10  -- If the target has done a "special" movement, such as teleporting a long distance or out of LOS, max out our randomness so we don't cheat chasing them with teleports or whatever
+			else
+				spread = spread + math.min(10, math.floor((game.turn - (LSeen.GCknown_turn or game.turn)) / (game.energy_to_act / game.energy_per_tick))) -- Limit spread to 10 tiles
+			end
 			tx, ty = util.bound(tx + rng.range(-spread, spread), 0, game.level.map.w - 1), util.bound(ty + rng.range(-spread, spread), 0, game.level.map.h - 1)
 			
 			-- Inertial average with last guess: can specify another method here to make the targeting position less random
