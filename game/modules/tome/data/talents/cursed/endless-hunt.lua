@@ -100,6 +100,7 @@ newTalent{
 	cooldown = 6,
 	hate = 5,
 	tactical = { ATTACK = { PHYSICAL = 3 } },
+	is_melee = true,
 	getCooldownDuration = function(self, t) return math.ceil(self:combatTalentLimit(t, 5, 0.75, 2.7)) end,
 	getDamageMultiplier = function(self, t, hate)
 		return getHateMultiplier(self, 0.35, 0.67, false, hate)
@@ -175,6 +176,7 @@ newTalent{
 	cooldown = 10,
 	hate = 2,
 	tactical = { DISABLE = 2 },
+	is_mind = true,
 	range = 10,
 	getDuration = function(self, t)
 		return math.min(10, math.floor(5 + self:getTalentLevel(t) * 2))
