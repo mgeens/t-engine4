@@ -78,7 +78,7 @@ newEntity{
 	"T_GLOBAL_CD",
 	{
 	range = 8,
-	radius = 4,
+	radius = 3,
 	requires_target = true,
 	no_npc_use = function(self, who) return self:restrictAIUseObject(who) end, -- don't let dumb ai hurt friends
 	target = function(self, who) return {type="ball", range=self.use_power.range, radius=self.use_power.radius} end,
