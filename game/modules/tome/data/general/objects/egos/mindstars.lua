@@ -484,6 +484,8 @@ newEntity{
 				end
 
 				local t = rng.tableRemove(tids)
+				if not t then return end
+				
 				target.talents_cd[t.id] = turns
 				game.logSeen(target, "#YELLOW#%s has their %s spell disrupted for for %d turns!", target.name:capitalize(), t.name, turns)
 			end
