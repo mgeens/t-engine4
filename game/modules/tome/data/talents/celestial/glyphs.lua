@@ -104,7 +104,7 @@ newTalent{
 		-- Grab all adjacent coordinates that don't have an existing trap or something that blocks movement
 		self:project(tg, target.x, target.y, function(px, py)
 			local trap = game.level.map(px, py, Map.TRAP)
-			if not game.level.map:checkEntity(px, py, Map.TERRAIN, "block_move") or not (trap and trap.is_glyph) then glyphgrids[#glyphgrids+1] = {x=px, y=py} end		
+			if not game.level.map:checkEntity(px, py, Map.TERRAIN, "block_move") and not (trap and trap.is_glyph) then glyphgrids[#glyphgrids+1] = {x=px, y=py} end		
 		end)
 
 		local dam = self:spellCrit(t.getGlyphDam(self, t))
@@ -324,9 +324,9 @@ end
 	activate = function(self, t)
 		local ret = {}
 		if core.shader.active() then
-			particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
-			particle1.toback = true
-			particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+			ret.particle1 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_yellow"}, {type="lightningshield", time_factor=3000, noup=1.0}))
+			ret.particle1.toback = true
+			ret.particle2 = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=0.8, img="runicshield_dark"}, {type="lightningshield", time_factor=3000, noup=1.0}))
 		end
 		return ret
 	end,
@@ -386,7 +386,7 @@ newTalent{
 	getMaxStacks = function(self, t) return self:combatTalentLimit(t, 6, 2, 5) end,
 	getTurns = function(self, t) return self:combatTalentLimit(t, 10, 1, 7) end,
 	info = function(self, t)
-		return ([[Up to 3 times pers turn when one of your glyphs triggers you feel a surge of celestial power, increasing your darkness and light resistence and affinity by 5%% for %d turns, stacking up to %d times.]]):format(t.getTurns(self, t), t.getMaxStacks(self, t))
+		return ([[Up to 3 times pers turn when one of your glyphs triggers you feel a surge of celestial power, increasing your darkness and light resistance and affinity by 5%% for %d turns, stacking up to %d times.]]):format(t.getTurns(self, t), t.getMaxStacks(self, t))
 	end,
 }
 
