@@ -876,7 +876,7 @@ newTalent{
 		if not x or not y then return nil end
 		if not target or target.dead or target == self then return end
 		if game.party:hasMember(target) then return end
-		if target.instakill_immune >= 1 then 			
+		if target.instakill_immune and target.instakill_immune >= 1 then  -- We special case this instead of letting the canBe check waste the talent because instakill is at present always binary
 			game.logSeen(target, "%s is immune to instakill and mind control effects!", target.name:capitalize())
 			return
 		end
