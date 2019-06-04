@@ -193,7 +193,7 @@ newEntity{ base = "BASE_RING",
 			-- Add a lasting map effect
 			local wave = game.level.map:addEffect(who,
 				who.x, who.y, duration,
-				engine.DamageType.WAVE, {dam=dam, x=who.x, y=who.y, apply_wet=true},
+				engine.DamageType.WAVE, {dam=dam, x=who.x, y=who.y, apply_wet=1},
 				radius,
 				5, nil,
 				engine.MapEffect.new{color_br=30, color_bg=60, color_bb=200, effect_shader="shader_images/water_effect1.png"},
