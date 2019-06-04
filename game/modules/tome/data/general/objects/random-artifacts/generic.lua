@@ -140,9 +140,7 @@ newEntity{ theme={physical=true}, name="generic increased stamina", points = 1, 
 ----------------------------------------------------------------
 -- Misc
 ----------------------------------------------------------------
-newEntity{ theme={misc=true}, name="generic decreased fatigue", points = 1, rarity = 15, level_range = {1, 50},
-	wielder = { fatigue = -2 },
-}
+
 ----------------------------------------------------------------
 -- Defense Themes
 ----------------------------------------------------------------
