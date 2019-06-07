@@ -377,7 +377,7 @@ newTalent{
 	radius = 1,
 	requires_target = true,
 	target = function(self, t)
-		return  {type="beam", range=self:getTalentRange(t), talent=t }
+		return  {type="beam", nolock=true, default_target=self, range=self:getTalentRange(t), talent=t }
 	end,
 	getDamage = function (self, t) return self:combatTalentWeaponDamage(t, 0.6, 1.1) end,
 	proj_speed = 20, --not really a projectile, so make this super fast

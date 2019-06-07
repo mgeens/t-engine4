@@ -236,8 +236,8 @@ newTalent{
 	getVim = function(self, t) return 8 + math.floor(self:combatTalentScale(t, 5, 35)) end,
 	getDam = function(self, t) return self:combatTalentLimit(t, 1, 20, 5) end,
 	tactical = {HEAL = 0.5},  -- Only use the healing functionality of this since in practice thats almost always optimal, but use it rarely so we don't waste time hopping around a lot as a melee
-	target = function(self, t)
-		return {type="hit", range=self:getTalentRange(t)}
+	target = function(self, t) -- no change to default_target because worms will usually be in melee with an enemy
+		return {type="hit", nolock=true, range=self:getTalentRange(t)}
 	end,
 	onAIGetTarget = function(self, t) -- Find a worm to target
 		local tgts = {}
