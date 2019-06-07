@@ -360,7 +360,7 @@ newEntity{
 
 newEntity{
 	power_source = {technique=true, psionic=true, arcane=true},
-	name = "of force", suffix=true, instant_resolve=true,
+	name = " of force", suffix=true, instant_resolve=true,
 	keywords = {force=true},
 	level_range = {30, 50},
 	greater_ego = 1,

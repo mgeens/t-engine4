@@ -501,7 +501,13 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		local damrange = self:combatDamageRange(weapon)
 		dam = rng.range(dam, dam * damrange)
 		print("[ATTACK] HIT:: damrange", damrange, "==> dam/apr::", dam, apr, "vs. armor/hardiness", armor, pres)
-		
+
+		if self:isAccuracyEffect(weapon, "mace") then
+			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.002, 0.2)  -- +20% base damage at 100 accuracy
+			print("[ATTACK] mace accuracy bonus", atk, def, "=", bonus)
+			dam = dam * bonus
+		end
+
 		local eff = target.knowTalent and target:hasEffect(target.EFF_PARRY)
 		-- check if target deflects the blow (deflected blows cannot crit)
 		if eff then
@@ -523,7 +529,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		end
 
 		if self:isAccuracyEffect(weapon, "knife") then
-			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.005, 0.25)
+			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.005, 0.5)  -- +50% APR bonus at 100 accuracy
 			apr = apr * bonus
 			print("[ATTACK] dagger accuracy bonus", atk, def, "=", bonus, "apr ==>", apr)
 		end
@@ -536,12 +542,6 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		print("[ATTACK] after crit", dam)
 		dam = dam * mult
 		print("[ATTACK] after mult", dam)
-
-		if self:isAccuracyEffect(weapon, "mace") then
-			local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.001, 0.1)
-			print("[ATTACK] mace accuracy bonus", atk, def, "=", bonus)
-			dam = dam * bonus
-		end
 
 		if target:hasEffect(target.EFF_COUNTERSTRIKE) then
 			dam = target:callEffect(target.EFF_COUNTERSTRIKE, "onStrike", dam, self)
@@ -671,7 +671,7 @@ end
 --- handle various on hit procs for melee combat
 function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult, atk, def, hitted, crit, evaded, repelled, old_target_life)
 	if self:isAccuracyEffect(weapon, "staff") then
-		local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.025, 2)
+		local bonus = 1 + self:getAccuracyEffect(weapon, atk, def, 0.02, 2)  -- +200% proc damage at 100 accuracy
 		print("[ATTACK] staff accuracy bonus", atk, def, "=", bonus)
 		self.__global_accuracy_damage_bonus = bonus
 	end
@@ -1936,7 +1936,7 @@ function _M:physicalCrit(dam, weapon, target, atk, def, add_chance, crit_power_a
 	end
 
 	if self:isAccuracyEffect(weapon, "axe") then
-		local bonus = self:getAccuracyEffect(weapon, atk, def, 0.2, 10)
+		local bonus = self:getAccuracyEffect(weapon, atk, def, 0.25, 25)  -- +25% crit at 100 accuracy
 		print("[PHYS CRIT %] axe accuracy bonus", atk, def, "=", bonus)
 		chance = chance + bonus
 	end
@@ -1950,7 +1950,7 @@ function _M:physicalCrit(dam, weapon, target, atk, def, add_chance, crit_power_a
 		end
 
 		if self:isAccuracyEffect(weapon, "sword") then
-			local bonus = self:getAccuracyEffect(weapon, atk, def, 0.004, 0.25)
+			local bonus = self:getAccuracyEffect(weapon, atk, def, 0.004, 0.5)  -- +50% crit power at 100 accuracy
 			print("[PHYS CRIT %] sword accuracy bonus", atk, def, "=", bonus)
 			crit_power_add = crit_power_add + bonus
 		end

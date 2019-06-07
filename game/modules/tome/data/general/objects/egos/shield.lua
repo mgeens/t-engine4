@@ -21,10 +21,6 @@ local Stats = require "engine.interface.ActorStats"
 local Talents = require "engine.interface.ActorTalents"
 local DamageType = require "engine.DamageType"
 
---load("/data/general/objects/egos/charged-attack.lua")
---load("/data/general/objects/egos/charged-defensive.lua")
---load("/data/general/objects/egos/charged-utility.lua")
-
 ----------------------------------------------------------------
 -- Resists Lesser - Suffix
 ----------------------------------------------------------------
@@ -168,7 +164,7 @@ newEntity{
 		on_melee_hit={[DamageType.FIRE] = resolvers.mbonus_material(20, 1)},
 		melee_project={
 			[DamageType.FIRE] = resolvers.mbonus_material(5, 5),
-	},
+		},
 	},
 }
 
@@ -183,7 +179,7 @@ newEntity{
 		on_melee_hit={[DamageType.ICE] = resolvers.mbonus_material(20, 1)},
 		melee_project={
 			[DamageType.COLD] = resolvers.mbonus_material(30, 5),
-	},
+		},
 	},
 }
 newEntity{
@@ -197,7 +193,7 @@ newEntity{
 		on_melee_hit={[DamageType.LIGHTNING] = resolvers.mbonus_material(20, 1)},
 		melee_project={
 			[DamageType.LIGHTNING] = resolvers.mbonus_material(30, 5),
-	},
+		},
 	},
 }
 
@@ -215,7 +211,7 @@ newEntity{
 		on_melee_hit={[DamageType.ACID] = resolvers.mbonus_material(20, 1)},
 		melee_project={
 			[DamageType.ACID] = resolvers.mbonus_material(5, 5),
-	},
+		},
 	},
 }
 
@@ -223,23 +219,21 @@ newEntity{
 ----------------------------------------------------------------
 -- Greater Elemental - Prefix 
 ----------------------------------------------------------------
--- This is close to strictly better than the others in this category so it gets a higher rarity/level req
 newEntity{
 	power_source = {psionic=true},
 	name = "exposing ", prefix=true, instant_resolve=true,
 	keywords = {exposing=true},
 	level_range = {10, 50},
-	rarity = 25,
+	rarity = 20,
 	cost = 12,
 	wielder = {
 		on_melee_hit={[DamageType.ITEM_MIND_EXPOSE] = resolvers.mbonus_material(25, 10)},
 		melee_project={
 			[DamageType.ITEM_MIND_EXPOSE] = resolvers.mbonus_material(10, 5),
-	},
+		},
 	},
 }
 
--- Needs something special
 newEntity{
 	power_source = {arcane=true},
 	name = "coruscating ", prefix=true, instant_resolve=true,
@@ -287,7 +281,7 @@ newEntity{
 			[Stats.STAT_DEX] = resolvers.mbonus_material(5, 1),
 		},
 		on_melee_hit = {
-			--[DamageType.ITEM_LIGHTNING_DAZE] = resolvers.mbonus_material(10, 10),
+			[DamageType.LIGHTNING] = resolvers.mbonus_material(30, 1),
 		},
 	},
 }
@@ -343,10 +337,10 @@ newEntity{
 	on_block = {
 		desc=function(self, who, special)
 			local dam = special.shield_wintry(who)
-			return ("Deals #ORCHID#%d#LAST# cold damage and freezes enemies in radius 4 to the ground for 3 turns (1/turn)"):format(dam)
+			return ("Deals #YELLOW#%d#LAST# cold damage and freezes enemies in radius 4 to the ground for 3 turns (1/turn)"):format(dam)
 		end,
 		shield_wintry=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 10, 200))
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatMindpower(), 1, 300)))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -362,6 +356,69 @@ newEntity{
 			game.level.map:particleEmitter(who.x, who.y, tg.radius, "circle", {oversize=1.1, a=255, limit_life=16, grow=true, speed=0, img="ice_nova", radius=tg.radius})
 			game:playSoundNear(self, "talents/ice")
 		end,			
+	},
+}
+
+newEntity{
+	power_source = {psionic=true},
+	name = "windwalling ", prefix=true, instant_resolve=true,
+	keywords = {windwalling=true},
+	level_range = {1, 50},
+	greater_ego = 1,
+	unique_ego = 1,
+	rarity = 20,
+	cost = 60,
+	special_combat = {
+		melee_project = {
+			[DamageType.PHYSICAL] = resolvers.mbonus_material(20, 10),
+		},
+	},
+	wielder = {
+		resists={
+			[DamageType.PHYSICAL] = resolvers.mbonus_material(10, 10),
+		},
+		inc_stats = {
+			[Stats.STAT_WIL] = resolvers.mbonus_material(5, 1),
+		},
+	},
+	on_block = {
+		desc=function(self, who, special)
+			local dam = special.shield_windwall(who)
+			return ("Blasts a radius 10 area dealing #YELLOW#%d#LAST# physical damage to enemies and destroying any hostile projectiles"):format(dam)
+		end,
+		shield_windwall=function(who)
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatMindpower(), 1, 150)))
+			return dam
+		end,
+		fct=function(self, who, target, type, dam, eff, special)
+			if who.turn_procs and who.turn_procs.shield_windwall then return end
+			who.turn_procs.shield_windwall = true
+			local DamageType = require "engine.DamageType"
+			local dam = special.shield_windwall(who)
+			who:project({type="ball", radius=10, friendlyfire=false, selffire=false}, who.x, who.y, DamageType.PHYSICAL, dam)
+			game.level.map:particleEmitter(who.x, who.y, 10, "shout",
+				{additive=true, life=10, size=3, distorion_factor=0.0, radius=10, nb_circles=4, rm=0.8, rM=1, gm=0, gM=0, bm=0.8, bM=1.0, am=0.4, aM=0.6})
+
+			local grids = core.fov.circle_grids(who.x, who.y, 10, true)
+			for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
+				local i = 0
+				local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+				while p do
+					if p.src and p.src:reactionToward(who) >= 0 then return end
+					if p.name then 
+						game.logPlayer(who, "#GREEN#"..p.name .. "is blown away!#LAST#")
+					else
+						game.logPlayer(who, "#GREEN#A projectile is blown away!!#LAST#")
+					end
+					
+					p:terminate(x, y)
+					game.level:removeEntity(p, true)
+					p.dead = true
+   
+					i = i + 1
+					p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+				end end end
+		end,
 	},
 }
 
@@ -416,11 +473,10 @@ newEntity{
 			[DamageType.NATURE] = resolvers.mbonus_material(10, 10),
 			[DamageType.BLIGHT] = resolvers.mbonus_material(10, 10),
 		},
-		max_life = resolvers.mbonus_material(70, 40),
+		max_life = resolvers.mbonus_material(100, 20),
 	},
 }
 
--- Meh, needed to re-use Scouring, needed AM shield egos, whatever
 newEntity{
 	power_source = {antimagic=true},
 	name = "scouring ", prefix=true, instant_resolve=true,
@@ -435,8 +491,12 @@ newEntity{
 			[DamageType.NATURE] = resolvers.mbonus_material(15, 5),
 		},
 		on_melee_hit = {
-			[DamageType.ITEM_ANTIMAGIC_SCOURING] = resolvers.mbonus_material(20, 15), 
-			[DamageType.ITEM_ANTIMAGIC_MANABURN] = resolvers.mbonus_material(20, 15),
+			[DamageType.ITEM_ANTIMAGIC_MANABURN] = resolvers.mbonus_material(10, 5),
+		},
+		melee_project = {
+			[DamageType.ACID] = resolvers.mbonus_material(20, 5),
+			[DamageType.NATURE] = resolvers.mbonus_material(20, 5),
+			[DamageType.ITEM_ANTIMAGIC_MANABURN] = resolvers.mbonus_material(20, 5),
 		},
 		inc_stats = {
 			[Stats.STAT_CON] = resolvers.mbonus_material(4, 3),
@@ -502,10 +562,10 @@ newEntity{
 	on_block = {
 		desc=function(self, who, special)
 			local dam = special.shield_wrathful(who)
-			return ("Deals #ORCHID#%d#LAST# light and fire damage to each enemy blocked"):format(dam)
+			return ("Deals #VIOLET#%d#LAST# light and fire damage to each enemy blocked"):format(dam)
 		end,
 		shield_wrathful=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatSpellpower(), 50, 450) / 2)
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatSpellpower(), 1, 450) / 2))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -658,6 +718,7 @@ newEntity{
 	},
 }
 
+-- needs gfx
 newEntity{
 	power_source = {techniquee=true},
 	name = " of shrapnel", suffix=true, instant_resolve=true,
@@ -673,7 +734,7 @@ newEntity{
 			return ("Cause enemies within radius 6 to bleed for #RED#%d#LAST# physical damage over 5 turns (1/turn)"):format(dam)
 		end,
 		shield_shrapnel=function(who)
-			local dam = math.floor(who:combatStatScale(who:combatPhysicalpower(), 30, 250))
+			local dam = math.max(15, math.floor(who:combatStatScale(who:combatPhysicalpower(), 1, 350)))
 			return dam
 		end,
 		fct=function(self, who, target, type, dam, eff, special)
@@ -701,7 +762,7 @@ newEntity{
 		special_on_hit = {
 		desc=function(self, who, special)
 			local dam = who:combatArmor()
-			return ("deal bonus physical damage equal to your armor (%d)"):format(dam)
+			return ("Deal physical damage equal to your armor (%d)"):format(dam)
 		end,
 		fct=function(combat, who, target)
 			local tg = {type="hit", range=1}

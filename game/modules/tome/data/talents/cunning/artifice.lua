@@ -408,6 +408,7 @@ newTalent{
 	points = 1,
 	cooldown = 20,
 	getDollImage = function(self, t) return self:knowTalent(self.T_ROGUE_S_BREW_MASTERY) and "artifices/mastery_rogues_brew" or "artifices/rogues_brew" end,
+	no_break_stealth = true,
 	tactical = { HEAL = 1.5, STAMINA = 1.5,
 		CURE = function(self, t, target)
 			local num, max = 0, t.getCure(self, t)

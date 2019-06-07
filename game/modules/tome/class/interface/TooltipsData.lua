@@ -256,6 +256,7 @@ TOOLTIP_MAGWILCUN = "#AQUAMARINE#Mental stats#LAST#\n---\n"..TOOLTIP_MAG.."\n---
 TOOLTIP_COMBAT_ATTACK = [[#GOLD#Accuracy#LAST#
 Determines your chance to hit your target as well as knock your target off-balance when measured against the target's Defense.
 When you use Accuracy to inflict temporary physical effects on an enemy, every point your opponent's relevant saving throw exceeds your accuracy will reduce the duration of the effect by 5%.
+Many weapon types will have an additional "accuracy bonus" scaling per point of Accuracy greater than the targets Defense.
 ]]
 TOOLTIP_COMBAT_PHYSICAL_POWER = [[#GOLD#Physical Power#LAST#
 Measures your ability to deal physical damage in combat.
