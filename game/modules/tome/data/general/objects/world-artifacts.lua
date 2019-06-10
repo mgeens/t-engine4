@@ -8115,7 +8115,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 		},
 	},
 	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_FROST_GRAB, level=4, power = 20 },
+	use_talent = { id = Talents.T_INSTILL_FEAR, level=3, power = 20 },
 }
 
 newEntity{ base = "BASE_KNIFE",
