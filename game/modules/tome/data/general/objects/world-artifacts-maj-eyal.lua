@@ -421,24 +421,26 @@ It seems somebody well versed in antimagic could use it to its fullest potential
 	material_level = 5,
 
 	wielder = {
-		lite = 4,
-		inc_stats = { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6,},
-		combat_physresist = 6,
-		combat_mentalresist = 6,
-		combat_spellresist = 6,
-		talents_types_mastery = { ["wild-gift/call"] = 0.2, ["wild-gift/antimagic"] = 0.5, },
+		lite = 6,
+		inc_stats = { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6, [Stats.STAT_CON] = 6},
+		combat_physresist = 15,
+		combat_mentalresist = 15,
+		combat_spellresist = 15,
+		talents_types_mastery = { ["wild-gift/call"] = 0.2, ["wild-gift/antimagic"] = 0.2, },
 		resists_cap = { [DamageType.BLIGHT] = 10, },
 		resists = { [DamageType.BLIGHT] = 20, },
+		flat_damage_armor = {all=30, [DamageType.PHYSICAL] = -30, [DamageType.MIND] = -30 },
 	},
 	on_wear = function(self, who)
 		if who:attr("forbid_arcane") then
 			local Stats = require "engine.interface.ActorStats"
 			local DamageType = require "engine.DamageType"
 
-			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_WIL] = 10, [Stats.STAT_CUN] = 10, })
-			self:specialWearAdd({"wielder","combat_physresist"}, 20)
-			self:specialWearAdd({"wielder","combat_spellresist"}, 20)
-			self:specialWearAdd({"wielder","combat_mentalresist"}, 20)
+			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6, [Stats.STAT_CON] = 6})
+			self:specialWearAdd({"wielder","combat_spellresist"}, 15)
+			self:specialSetAdd({"wielder","equilibrium_regen"}, -1)
+			self:specialSetAdd({"wielder","resists"}, {[engine.DamageType.ARCANE]=20})
+			self:specialSetAdd({"wielder","resists_cap"}, {[engine.DamageType.ARCANE]=10})			
 			game.logPlayer(who, "#LIGHT_BLUE#You feel a great hero guiding you!")
 		end
 	end,
