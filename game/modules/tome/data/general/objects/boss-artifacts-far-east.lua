@@ -302,7 +302,7 @@ newEntity{ base = "BASE_WHIP",
 		apr = 0,
 		physcrit = 9,
 		dammod = {dex=1},
-		damtype = DamageType.FIREKNOCKBACK,
+		damtype = DamageType.FIRE_DRAIN,
 		talent_on_hit = { [Talents.T_BONE_NOVA] = {level=4, chance=20}, [Talents.T_BLOOD_BOIL] = {level=3, chance=15} },
 	},
 	wielder = {
@@ -400,6 +400,7 @@ newEntity{ base = "BASE_LONGBOW",
 		self.worn_by = nil
 	end,
 }
+
 --Ice Cloak that can release massive freezing AOE, dropped by Glacial Legion.
 newEntity{ base = "BASE_CLOAK", define_as="GLACIAL_CLOAK",
 	power_source = {arcane=true},
