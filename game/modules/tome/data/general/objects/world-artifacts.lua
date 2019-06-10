@@ -1307,6 +1307,7 @@ It was made by Humans for Humans; only they can harness the true power of the ro
 		inc_damage = {[DamageType.ARCANE]=10},
 		inc_stats = { [Stats.STAT_MAG] = 6 },
 		combat_spellcrit = 15,
+		combat_spellpower = 15,
 	},
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Human" then
