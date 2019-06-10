@@ -1327,6 +1327,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 	name = "Firewalker", color = colors.RED, image = "object/artifact/robe_firewalker.png",
 	unided_name = "blazing robe",
 	desc = [[This fiery robe was worn by the mad pyromancer Halchot, who terrorised many towns in the late Age of Dusk, burning and looting villages as they tried to recover from the Spellblaze.  Eventually he was tracked down by the Ziguranth, who cut out his tongue, chopped off his head, and rent his body to shreds.  The head was encased in a block of ice and paraded through the streets of nearby towns amidst the cheers of the locals.  Only this robe remains of the flames of Halchot.]],
+	special_desc = function(self) return "Damage all enemies in range 3 for 35 fire damage every turn and all friendly units (including yourself) for 5 damage." end,
 	level_range = {20, 30},
 	rarity = 300,
 	cost = math.random(225,350),
@@ -1340,6 +1341,42 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		resists_pen = { [DamageType.FIRE] = 20 },
 		on_melee_hit = {[DamageType.FIRE] = 18},
 	},
+	hasFoes = function(self, who)
+		local who = self.worn_by
+		for i = 1, #who.fov.actors_dist do
+			local act = who.fov.actors_dist[i]
+			if act and who:reactionToward(act) < 0 and who:canSee(act) then return true end
+		end
+		return false
+	end,
+	on_takeoff = function(self, who)
+		self.worn_by=nil
+		who:removeParticles(self.particle)
+	end,
+	on_wear = function(self, who)
+		self.worn_by=who
+		if core.shader.active(4) then
+			self.particle = who:addParticles(engine.Particles.new("shader_ring_rotating", 1, {rotation=0, radius=4}, {type="flames", aam=0.5, zoom=3, npow=4, time_factor=4000, color1={1,0,0,1}, color2={1,0,0,1}, hide_center=0}))
+		else
+			self.particle = who:addParticles(engine.Particles.new("ultrashield", 1, {rm=0, rM=0, gm=180, gM=220, bm=10, bM=80, am=80, aM=150, radius=3, density=40, life=14, instop=17}))
+		end
+		game.logPlayer(who, "#CRIMSON# A powerful fire aura appears around you as you equip the %s.", self:getName({no_add_name = true, do_color = true}))
+	end,
+	act = function(self)
+		self:useEnergy()
+		self:regenPower()	
+		if not self.worn_by then return end
+		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by=nil return end
+		if self.worn_by:attr("dead") then return end
+		local who = self.worn_by
+		if self.hasFoes(self, who) then
+			local blast = {type="ball", range=0, radius=3, friendlyfire=false}
+			who:project(blast, who.x, who.y, engine.DamageType.FIRE, 35)
+			local blast2 = {type="ball", range=0, radius=0, friendlyfire=true}
+			who:project(blast2, who.x, who.y, engine.DamageType.FIRE, 5)
+		end
+	end,
+	max_power = 15, power_regen = 1,
 }
 
 newEntity{ base = "BASE_CLOTH_ARMOR",
