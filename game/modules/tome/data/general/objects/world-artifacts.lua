@@ -3124,6 +3124,12 @@ newEntity{ base = "BASE_WHIP",
 		dammod = {dex=0.7, wil=0.2, cun=0.1},
 		wil_attack = true,
 		damtype=DamageType.MIND,
+		special_on_crit = {desc="Try to fry your enemies brain (25% chance to brainlock)", fct=function(combat, who, target)
+			if rng.percent(25) then
+				local maxpower = math.max(who:combatAttack(), who:combatMindpower())
+				target:crossTierEffect(target.EFF_BRAINLOCKED, maxpower)
+			end
+		end},
 	},
 	wielder = {
 		combat_mindpower = 10,
