@@ -1554,7 +1554,7 @@ newEntity{ base = "BASE_WHIP",
 		physcrit = 5,
 		dammod = {dex=1},
 		melee_project={[DamageType.POISON] = 22, [DamageType.BLEED] = 22},
-		talent_on_hit = { T_DISARM = {level=3, chance=10} },
+		talent_on_hit = { T_DISARM = {level=3, chance=30} },
 	},
 	wielder = {
 		combat_atk = 10,
