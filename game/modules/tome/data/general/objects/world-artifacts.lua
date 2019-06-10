@@ -2578,7 +2578,7 @@ newEntity{ base = "BASE_STAFF", define_as = "SET_SCEPTRE_LICH",
 	name = "Sceptre of the Archlich",
 	flavor_name = "vilestaff",
 	unided_name = "bone carved sceptre",
-	level_range = {30, 38},
+	level_range = {35, 50},
 	color=colors.VIOLET, image = "object/artifact/sceptre_of_the_archlich.png",
 	rarity = 320,
 	desc = [[This sceptre, carved of ancient, blackened bone, holds a single gem of deep obsidian. You feel a dark power from deep within, looking to get out.]],
@@ -2593,15 +2593,15 @@ newEntity{ base = "BASE_STAFF", define_as = "SET_SCEPTRE_LICH",
 		element = DamageType.DARKNESS,
 	},
 	wielder = {
-		combat_spellpower = 28,
-		combat_spellcrit = 14,
+		combat_spellpower = 40,
+		combat_spellcrit = 15,
 		inc_damage={
-			[DamageType.DARKNESS] = 26,
+			[DamageType.DARKNESS] = 35,
 		},
 		talents_types_mastery = {
 			["celestial/star-fury"] = 0.2,
 			["spell/necrotic-minions"] = 0.2,
-			["spell/advanced-necrotic-minions"] = 0.1,
+			["spell/advanced-necrotic-minions"] = 0.2,
 		}
 	},
 	on_wear = function(self, who)
@@ -2613,6 +2613,7 @@ newEntity{ base = "BASE_STAFF", define_as = "SET_SCEPTRE_LICH",
 			self:specialWearAdd({"wielder","combat_mentalresist"}, 10)
 			self:specialWearAdd({"wielder","max_mana"}, 50)
 			self:specialWearAdd({"wielder","mana_regen"}, 0.5)
+			self:specialWearAdd({"wielder","negative_regen"}, 0.5)
 			game.logPlayer(who, "#LIGHT_BLUE#You feel the power of the sceptre flow over your undead form!")
 		end
 	end,
