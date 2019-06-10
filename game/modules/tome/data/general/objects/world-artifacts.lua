@@ -3060,6 +3060,14 @@ newEntity{ base = "BASE_WHIP",
 		physcrit = 5,
 		dammod = {dex=1},
 		convert_damage = {[DamageType.LIGHTNING_DAZE] = 50,},
+		special_on_crit = {desc="Focus the lightning forces on an enemy", fct=function(combat, who, target)
+			if rng.percent(25) then
+				game.logPlayer(who, "The storm is on your side !")
+				target:setEffect(target.EFF_HURRICANE, 5, {src=who, dam=who:getDex()*0.5+who:getMag()*0.5, radius=2 })
+			else
+				game.logPlayer(who, "The storm betrayed you...")
+			end
+		end},
 	},
 	wielder = {
 		combat_atk = 7,
