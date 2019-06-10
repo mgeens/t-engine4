@@ -2219,6 +2219,8 @@ newEntity{ base = "BASE_ARROW",
 		physcrit = 2,
 		dammod = {dex=0.6, str=0.5, mag=0.2},
 		damtype = DamageType.LITE_LIGHT,
+		ranged_project = {[DamageType.ITEM_LIGHT_BLIND] = 25},
+
 	},
 }
 
