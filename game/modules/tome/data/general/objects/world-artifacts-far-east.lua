@@ -464,22 +464,22 @@ newEntity{ base = "BASE_KNIFE", define_as = "MANDIBLE_UNGOLMOR",
 		physcrit = 22,
 		dammod = {cun=0.30, str=0.35, dex=0.35},
 		convert_damage ={[DamageType.DARKNESS] = 30},
-		special_on_crit = {desc="inflicts pinning spydric poison upon the target", fct=function(combat, who, target)
+		special_on_crit = {desc="inflicts spydric poison dealing 200 damage over 3 turns and pinning the target", fct=function(combat, who, target)
 			if target:canBe("poison") then
 				local tg = {type="hit", range=1}
-				who:project(tg, target.x, target.y, engine.DamageType.SPYDRIC_POISON, {src=who, dam=30, dur=3})
+				who:project(tg, target.x, target.y, engine.DamageType.SPYDRIC_POISON, {src=who, dam=200, dur=3})
 			end
 		end},
+		talent_on_hit = { [Talents.T_BITE_POISON] = {level=3, chance=20} },
 	},
 	wielder = {
 		inc_damage={[DamageType.NATURE] = 30, [DamageType.DARKNESS] = 20,},
 		inc_stats = {[Stats.STAT_CUN] = 8, [Stats.STAT_DEX] = 4,},
-		combat_armor = 5,
-		combat_armor_hardiness = 5,
+		combat_armor = 15,
+		poison_immune = 1,
 		lite = -2,
+		learn_talent = { [Talents.T_TOXIC_DEATH] = 5, },  -- Radius 3 at TL5
 	},
-	max_power = 40, power_regen = 1,
-	use_talent = { id = Talents.T_CREEPING_DARKNESS, level = 3, power = 25 },
 }
 
 newEntity{ base = "BASE_KNIFE", define_as = "KINETIC_SPIKE",
