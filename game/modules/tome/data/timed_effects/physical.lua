@@ -4147,3 +4147,41 @@ newEffect{
 		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed)
 	end,
 }
+
+newEffect{ name = "CROOKED", image = "shockbolt/object/artifact/weapon_crooked_club.png",
+	desc = "Crooked",
+	long_desc = function(self, eff) return ("The target becomes more and more primitive, reducing accuracy and powers by %d"):format(eff.power*eff.stacks) end,
+	type = "physical",
+	subtype = { }, 
+	status = "detrimental",
+	parameters = { power=10, stacks=1, max_stacks=5 },
+	
+	on_merge = function(self, old_eff, new_eff)
+		old_eff.dur = new_eff.dur
+		old_eff.stacks = math.min(old_eff.stacks + new_eff.stacks, new_eff.max_stacks)
+		self:removeTemporaryValue("combat_atk", old_eff.acc)
+		self:removeTemporaryValue("combat_mindpower", old_eff.mental)
+		self:removeTemporaryValue("combat_spellpower", old_eff.spell)
+		self:removeTemporaryValue("combat_dam", old_eff.physical)	
+		old_eff.acc = self:addTemporaryValue("combat_atk", -old_eff.power*old_eff.stacks)
+		old_eff.mental = self:addTemporaryValue("combat_mindpower", -old_eff.power*old_eff.stacks)
+		old_eff.spell = self:addTemporaryValue("combat_spellpower", -old_eff.power*old_eff.stacks)
+		old_eff.physical = self:addTemporaryValue("combat_dam", -old_eff.power*old_eff.stacks)	
+		return old_eff
+		
+	end,
+	
+	activate = function(self, eff)		
+		eff.acc = self:addTemporaryValue("combat_atk", -eff.power*eff.stacks )
+		eff.mental = self:addTemporaryValue("combat_mindpower", -eff.power*eff.stacks)
+		eff.spell = self:addTemporaryValue("combat_spellpower", -eff.power*eff.stacks)
+		eff.physical = self:addTemporaryValue("combat_dam", -eff.power*eff.stacks)
+	end,
+	
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_atk", eff.acc)
+		self:removeTemporaryValue("combat_mindpower", eff.mental)
+		self:removeTemporaryValue("combat_spellpower", eff.spell)
+		self:removeTemporaryValue("combat_dam", eff.physical)
+	end,
+}

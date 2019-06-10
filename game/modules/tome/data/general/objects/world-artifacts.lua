@@ -990,16 +990,18 @@ newEntity{ base = "BASE_MACE", define_as = "CROOKED_CLUB",
 		apr = 4,
 		physcrit = 10,
 		dammod = {str=1},
-		melee_project={[DamageType.RANDOM_CONFUSION_PHYS] = 14},
-		burst_on_crit = {
-			[DamageType.PHYSICAL] = 20,
+		melee_project={
+			[DamageType.RANDOM_CONFUSION_PHYS] = 14,
+			[DamageType.PHYSICAL] = 30,
+
 		},
+		special_on_hit = {desc="Reduce targets accuracy and powers by 5 (stacks 5 times)", fct=function(combat, who, target)
+			target:setEffect(target.EFF_CROOKED, 5, { power = 5 })
+		end},
 	},
 	wielder = {		
 		combat_atk = 12,
 	},
-	max_power = 20, power_regen = 1,
-	use_talent = { id = Talents.T_BATTLE_CALL, level = 2, power = 20 },
 }
 
 newEntity{ base = "BASE_CLOTH_ARMOR",
