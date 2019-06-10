@@ -550,7 +550,7 @@ newEntity{ base = "BASE_STAFF",
 		is_greater = true,
 		dam = 30,
 		apr = 4,
-		dammod = {mag=1.5},
+		dammod = {mag=0.8},
 		element = DamageType.TEMPORAL,
 	},
 	wielder = {

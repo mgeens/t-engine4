@@ -51,7 +51,7 @@ newEntity{ base = "BASE_STAFF",
 		dam = 15,
 		staff_power = 30,  -- it roocks
 		apr = 4,
-		dammod = {mag=1.2},
+		dammod = {mag=0.8},
 		damtype = DamageType.NATURE, -- Note this is odd for a staff; it's intentional.
 		element = DamageType.NATURE,
 		-- melee_element = true, -- always melee nature :>
@@ -144,7 +144,7 @@ newEntity{ base = "BASE_STAFF", define_as = "STAFF_TARELION",
 		is_greater = true,
 		dam = 30,
 		apr = 4,
-		dammod = {mag=1.5},
+		dammod = {mag=0.8},
 	},
 	wielder = {
 		inc_stats = { [Stats.STAT_WIL] = 7, [Stats.STAT_MAG] = 8 },
@@ -320,7 +320,7 @@ newEntity{ base = "BASE_LONGSWORD",
 	combat = {
 		dam = 50,
 		physcrit = 5,
-		dammod = {str=1},
+		dammod = {str=0.9 , mag = 0.2},
 	},
 	wielder = {
 		lite = 1,
