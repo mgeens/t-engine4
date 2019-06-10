@@ -407,22 +407,48 @@ newEntity{ base = "BASE_LITE",
 	level_range = {30, 40},
 	color = colors.RED,
 	encumber = 1,
+	unlit_bonus = false,
 	rarity = 300,
 	material_level = 4,
+	sentient = true,
 	desc = [[This dark red heart still beats despite being separated from its owner.  It also snuffs out any light source that comes near it.]],
-	cost = 100,
-
+	special_desc = function(self) return "The heart seems to absorb light when you deal darkness damage. Standing on unlit tiles, you feel stronger." end,
+	cost = math.random(400,650),
+	
 	wielder = {
 		lite = -1000,
 		infravision = 6,
 		resists_cap = { [DamageType.LIGHT] = 10 },
 		resists = { [DamageType.LIGHT] = 30 },
-		talents_types_mastery = { ["cunning/stealth"] = 0.1 },
+		talents_types_mastery = { 
+		["cunning/stealth"] = 0.2,
+		["cursed/darkness"] = 0.2
+		},
 		combat_dam = 7,
+		melee_project={[DamageType.DARKNESS] = 20},
 	},
-
-	max_power = 15, power_regen = 1,
-	use_talent = { id = Talents.T_BLOOD_GRASP, level = 3, power = 10 },
+	
+	talent_on_spell = { {chance=15, talent=Talents.T_INVOKE_DARKNESS, level=4}},
+	
+	on_wear = function(self, who)
+		self.worn_by = who
+		who:attr("darkness_darkens", 1)
+	end,
+	on_takeoff = function(self, who)
+		who:attr("darkness_darkens", -1)
+		self.worn_by = nil
+	end,
+	act = function(self)
+		local who=self.worn_by 
+		if not self.worn_by then return end
+		if who.x and who.y and not game.level.map.lites(who.x, who.y) then 
+			who:setEffect(who.EFF_UNLIT_HEART, 1,  { dam = 15, res = 10})
+		else 
+			if who.x and who.y and game.level.map.lites(who.x, who.y) and who:hasEffect(who.EFF_UNLIT_HEART) then
+				who:removeEffect(who.EFF_UNLIT_HEART)
+			end
+		end
+	end,
 }
 
 newEntity{
