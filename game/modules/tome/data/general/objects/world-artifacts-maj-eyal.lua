@@ -448,6 +448,7 @@ newEntity{ base = "BASE_SLING",
 	name = "Eldoral Last Resort", image = "object/artifact/sling_eldoral_last_resort.png",
 	unided_name = "well-made sling",
 	desc = [[A sling with an inscription on its handle: 'May the wielder be granted cunning in his fight against the darkness'.]],
+	special_desc = function(self) return "When dropping below 30% max HP, you gain 20% attack speed, lose 100% fatigue, and your shots don't consume ammo for 5 turns. 30 turns cd." end,
 	level_range = {15, 25},
 	rarity = 200,
 	require = { stat = { dex=26 }, },
@@ -455,13 +456,30 @@ newEntity{ base = "BASE_SLING",
 	material_level = 3,
 	combat = {
 		range = 10,
-		physspeed = 0.9,
+		physspeed = 0.7,
 	},
 	wielder = {
 		inc_stats = { [Stats.STAT_DEX] = 4, [Stats.STAT_CUN] = 3,  },
 		inc_damage={ [DamageType.PHYSICAL] = 15 },
-		talent_cd_reduction={[Talents.T_STEADY_SHOT]=1, [Talents.T_SCATTER_SHOT]=2},
+		talent_cd_reduction={[Talents.T_SKIRMISHER_SWIFT_SHOT]=1, [Talents.T_SKIRMISHER_HURRICANE_SHOT]=2,},
+		--talent_cd_reduction={[Talents.T_STEADY_SHOT]=1, [Talents.T_SCATTER_SHOT]=2,},
 	},
+	
+	on_wear = function(self, who)
+		self.worn_by = who
+	end,
+	on_takeoff = function(self)
+		self.worn_by = nil
+	end,
+	max_power = 30, power_regen = 1,
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
+		if not self.worn_by or self.worn_by:attr("dead") or self.power < self.max_power then return end
+		if (who.life - dam)/who.max_life >= 0.3 then return end
+		if not who:hasEffect(who.EFF_ELDORAL) then
+			who:setEffect(who.EFF_ELDORAL, 5, {speed = 20, fatigue = 100})
+			self.power = 0
+		end
+	end,
 }
 
 newEntity{ base = "BASE_KNIFE",

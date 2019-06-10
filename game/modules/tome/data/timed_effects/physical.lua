@@ -4185,3 +4185,20 @@ newEffect{ name = "CROOKED", image = "shockbolt/object/artifact/weapon_crooked_c
 		self:removeTemporaryValue("combat_dam", eff.physical)
 	end,
 }
+
+newEffect{
+	name = "ELDORAL", image = "talents/uncanny_reload.png",
+	desc = "Eldoral",
+	long_desc = function(self, eff) return ("Firing slings does not consume shots."):format() end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { speed = 20, fatigue = 100},
+	on_gain = function(self, err) return "#Target# is focused on firing.", "+Eldoral" end,
+	on_lose = function(self, err) return "#Target# is less focused.", "-Eldoral" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "infinite_ammo", 1)
+		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed/100)
+		self:effectTemporaryValue(eff, "fatigue", -eff.fatigue)
+	end,
+}
