@@ -2950,6 +2950,13 @@ newEntity{ base = "BASE_KNIFE",
 		convert_damage = {
 			[DamageType.DARKNESS] = 50,
 		},
+		special_on_hit = {desc="20% chance to make the target bleed shadows. You heal for 15 whenever you hit an enemy bleeding shadows.", fct=function(combat, who, target)
+			if target:canBe("cut") and rng.percent(20) then
+				target:setEffect(target.EFF_SHADOW_CUT, 5, {apply_power=math.max(who:combatSpellpower(), who:combatAttack()), src=who, dam=20, heal=15})
+			else
+				game.logSeen(target, "%s resists the shadowy cut", target.name:capitalize())
+			end
+		end},
 	},
 	wielder = {
 		inc_stealth=10,
