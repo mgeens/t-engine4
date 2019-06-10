@@ -812,8 +812,13 @@ newEntity{ base = "BASE_KNIFE",
 		dammod = {dex=0.55,str=0.35},
 		no_stealth_break = true,
 		melee_project={[DamageType.RANDOM_SILENCE] = 10},
+		special_on_kill = {desc="Enter stealth for 3 turns.", fct=function(combat, who, target)
+			who:setEffect(who.EFF_SILENT_STEALTH, 3, { power = 30 })
+		end},
 	},
-	wielder = {combat_atk = 10},
+	wielder = {
+		combat_atk = 10,
+	},
 }
 
 -- The Moon/Star set offers an alternative damage scaling that works well with Dexterity and Cunning but doesn't play nice with the usual high weapon damage+physical dam/pen+crit setups

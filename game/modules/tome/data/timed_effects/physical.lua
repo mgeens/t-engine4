@@ -4202,3 +4202,18 @@ newEffect{
 		self:effectTemporaryValue(eff, "fatigue", -eff.fatigue)
 	end,
 }
+
+newEffect{
+	name = "SILENT_STEALTH", image = "talents/stealth.png",
+	desc = "Stealthed",
+	long_desc = function(self, eff) return ("Gain %d stealth power"):format(eff.power) end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { power = 30 },
+	on_gain = function(self, err) return "#Target# is more stealthy.", "+Silent stealth" end,
+	on_lose = function(self, err) return "#Target# is visible again.", "-Silent stealth" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "stealth", eff.power)
+	end,
+}
