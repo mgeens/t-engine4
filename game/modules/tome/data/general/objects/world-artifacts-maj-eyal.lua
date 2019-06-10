@@ -267,7 +267,6 @@ newEntity{ base = "BASE_LONGBOW",
 	end,
 }
 
--- Broken for its tier, Archery has very rarely had broken for its tier, its fine
 newEntity{ base = "BASE_LONGBOW",
 	power_source = {arcane=true, nature=true},
 	name = "Corpsebow", unided_name = "rotting longbow", unique=true, image = "object/artifact/bow_corpsebow.png",
@@ -279,17 +278,17 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 2,
 	combat = {
 		range = 7,
+		talent_on_hit = { T_EPIDEMIC = {level=1, chance=25}, T_CYST_BURST = {level=1, chance=25} },
 	},
 	wielder = {
 		disease_immune = 0.5,
 		ranged_project = {
 			[DamageType.ITEM_BLIGHT_DISEASE] = 40,
 			[DamageType.BLIGHT] = 20
-		}, -- ITEM_BLIGHT_DISEASE doesn't do damage, so this is big
-		inc_damage={ [DamageType.BLIGHT] = 40, }, -- Hacky method of scaling the damage on the active because the diseases do no DPS
+		},
+		inc_damage={ [DamageType.BLIGHT] = 20, },
+		combat_spellpower = 10,
 	},
-	max_power = 20, power_regen = 1,
-	use_talent = { id = Talents.T_CYST_BURST, level = 5, power = 10 },
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Undead" then
 			local Stats = require "engine.interface.ActorStats"
