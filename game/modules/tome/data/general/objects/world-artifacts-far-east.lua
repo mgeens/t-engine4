@@ -110,7 +110,7 @@ newEntity{ base = "BASE_SHIELD", define_as = "SHIELD_UNSETTING",
 		dawn = "Glows brightly in the light of dawn.",
 	},
 	on_set_complete = function(self, who)
-		self:specialSetAdd({"wielder","life_regen"}, 0.25)
+		self:specialSetAdd({"wielder","life_regen"}, 5)
 		self:specialSetAdd({"wielder","lite"}, 1)
 	end,
 	on_set_broken = function(self, who)
