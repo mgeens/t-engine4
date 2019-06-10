@@ -235,6 +235,7 @@ newEntity{ base = "BASE_AMULET",
 	end,
 }
 
+-- Vaguely AM oriented, about on par with above average randarts unless you use both damage types
 newEntity{ base = "BASE_LONGBOW",
 	power_source = {nature=true},
 	name = "Thaloren-Tree Longbow", unided_name = "glowing elven-wood longbow", unique=true, image = "object/artifact/thaloren_tree_longbow.png",
@@ -246,14 +247,15 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 5,
 	combat = {
 		range = 10,
-		physspeed = 0.9,
+		physspeed = 0.7,
 		apr = 12,
 	},
 	wielder = {
-		inc_damage={ [DamageType.PHYSICAL] = 30, },
-		lite = 1,
-		inc_stats = { [Stats.STAT_DEX] = 10, [Stats.STAT_WIL] = 10,  },
-		ranged_project={[DamageType.LIGHT] = 30},
+		inc_damage={ [DamageType.PHYSICAL] = 30, [DamageType.NATURE] = 30 },
+		resists_pen={ [DamageType.PHYSICAL] = 20, [DamageType.NATURE] = 20 },
+		inc_stats = { [Stats.STAT_DEX] = 10, [Stats.STAT_WIL] = 20,  },
+		combat_physcrit=15,
+		combat_mindcrit=15,
 	},
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.subrace == "Thalore" then
