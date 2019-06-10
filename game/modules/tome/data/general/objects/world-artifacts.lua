@@ -4106,6 +4106,9 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
  			["spell/water"] = 0.1,
  		},
 	},
+	talent_on_spell = {
+		{chance=5, talent=Talents.T_WATER_JET, level=1},
+	},
 }
 
 newEntity{ base = "BASE_WHIP", --Thanks Grayswandir!
