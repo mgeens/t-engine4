@@ -7878,7 +7878,11 @@ newEntity{ base = "BASE_TOOL_MISC",
 	color = colors.BLUE,
 	level_range = {10, 20},
 	desc = [[This torque feels tingly to the touch, but seems to enhance your thinking.]],
-	special_desc = function(self) return "Any lightning damage you do that is more than 10% of the victim's maximum life will attempt to mental crosstier the target, which inflicts Brainlock if your mindpower is a tier above their mindsave." end,
+	special_desc = function(self) return [[Your mind is attuned to electricity. 
+Any lightning damage you do that is more than 10% of the victim's maximum life will attempt to brainlock the target.
+Upon taking lightning damage >10% of your max life, your mind fires back, dealing 30% of the original damage as mind and trying to brainlock the target.
+Upon taking mind damage >10% of your max life, you reflexively trigger the jolt, sending an arc of dazing lightning toward the target (damage based on mindpower).
+This item can have up to 2 charges, with each charge having 4 turn cooldown.]] end,
 	cost = math.random(125,200),
 	material_level = 2,
 	wielder = {
@@ -7889,6 +7893,44 @@ newEntity{ base = "BASE_TOOL_MISC",
 		inc_stats = {[Stats.STAT_CUN] = 4,},
 		lightning_brainlocks = 1,
 	},
+	on_wear = function(self, who)
+		self.worn_by=who
+		-- who.cooldown_mind = 4
+		-- who.cooldown_lightning = 4
+	end,
+	
+	onTakeoff = function(self)
+		self.worn_by = nil
+	end,
+	max_power = 8,
+	power_regen= 1,
+	-- act = function(self)
+		-- who.cooldown_mind = math.max(who.cooldown_mind - 1, 0)
+		-- who.cooldown_lightning = math.max(who.cooldown_lightning - 1, 0)
+		-- self:useEnergy()
+	-- end,
+	
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
+		local dam2 = dam
+		if not self.worn_by or self.worn_by:attr("dead") then return end
+		if type == engine.DamageType.LIGHTNING then
+			if self.power >= 4 then
+				if dam > who.max_life *0.1 then
+				self.power = self.power - 4
+				who:project(src, src.x, src.y, engine.DamageType.MIND, { dam = 0.3 * dam2, crossTierChance=25 })
+				end
+			end
+		else 
+			if type == engine.DamageType.MIND  then
+				if self.power >= 4 then
+					if dam > who.max_life *0.1 then
+					self.power = self.power - 4
+					who:project(src, src.x, src.y, engine.DamageType.LIGHTNING_DAZE, who:combatScale(who.combat_mindpower, 50, 0, 300, 100))
+					end
+				end
+			end
+		end
+	end,
 }
 
 newEntity{ base = "BASE_BATTLEAXE",
