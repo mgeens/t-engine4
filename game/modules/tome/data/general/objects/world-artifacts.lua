@@ -7324,6 +7324,29 @@ newEntity{ base = "BASE_HELM",
 		},
 		blind_fight = 1,
 	},
+	special_desc = function(self) return [[Up to 5 times per turn, upon receiving light damage, reflect blinding darkness at the assailant.
+Up to 5 times per turn, upon receiving darkness damage, reflect blinding light at the assailant]] end,
+	on_wear = function(self, who)
+		self.worn_by = who
+	end,
+	on_takeoff = function(self)
+		self.worn_by = nil
+	end,
+	
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
+		if not self.worn_by or self.worn_by:attr("dead") then return end
+		if type == engine.DamageType.DARKNESS and who ~= src then
+			if (who.turn_procs.dark_yaldan or 0) > 4 then return end
+			who.turn_procs.dark_yaldan = (who.turn_procs.dark_yaldan or 0) + 1
+			who:project(src, src.x, src.y, engine.DamageType.LIGHT_BLIND, 0.2 * dam)
+		else 
+			if type == engine.DamageType.LIGHT and who ~= src  then
+				if (who.turn_procs.light_yaldan or 0) > 4 then return end
+				who.turn_procs.light_yaldan = (who.turn_procs.light_yaldan or 0) + 1
+				who:project(src, src.x, src.y, engine.DamageType.DARKNESS_BLIND, 0.2 * dam)
+			end
+		end
+	end,
 }
 
 newEntity{ base = "BASE_GREATSWORD",
