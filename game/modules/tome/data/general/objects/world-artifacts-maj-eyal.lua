@@ -465,7 +465,6 @@ newEntity{ base = "BASE_SLING",
 		inc_stats = { [Stats.STAT_DEX] = 4, [Stats.STAT_CUN] = 3,  },
 		inc_damage={ [DamageType.PHYSICAL] = 15 },
 		talent_cd_reduction={[Talents.T_SKIRMISHER_SWIFT_SHOT]=1, [Talents.T_SKIRMISHER_HURRICANE_SHOT]=2,},
-		--talent_cd_reduction={[Talents.T_STEADY_SHOT]=1, [Talents.T_SCATTER_SHOT]=2,},
 	},
 	
 	on_wear = function(self, who)

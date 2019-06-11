@@ -1335,17 +1335,18 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 	name = "Firewalker", color = colors.RED, image = "object/artifact/robe_firewalker.png",
 	unided_name = "blazing robe",
 	desc = [[This fiery robe was worn by the mad pyromancer Halchot, who terrorised many towns in the late Age of Dusk, burning and looting villages as they tried to recover from the Spellblaze.  Eventually he was tracked down by the Ziguranth, who cut out his tongue, chopped off his head, and rent his body to shreds.  The head was encased in a block of ice and paraded through the streets of nearby towns amidst the cheers of the locals.  Only this robe remains of the flames of Halchot.]],
-	special_desc = function(self) return "Damage all enemies in range 3 for 35 fire damage every turn and all friendly units (including yourself) for 5 damage." end,
+	special_desc = function(self) return "Damage all enemies in range 4 for 40 fire damage and yourself for 5 fire damage every turn." end,
 	level_range = {20, 30},
 	rarity = 300,
 	cost = math.random(225,350),
 	material_level = 3,
 	wielder = {
 		inc_damage = {[DamageType.FIRE]=20},
-		combat_def = 8,
+		combat_def = 15,
 		combat_armor = 2,
-		inc_stats = { [Stats.STAT_MAG] = 6, [Stats.STAT_CUN] = 6, },
-		resists = {[DamageType.FIRE] = 20, [DamageType.COLD] = -10},
+		combat_spellpower = 12,
+		inc_stats = { [Stats.STAT_MAG] = 10, [Stats.STAT_CUN] = 6, },
+		resists = {[DamageType.FIRE] = 50, [DamageType.COLD] = -10},
 		resists_pen = { [DamageType.FIRE] = 20 },
 		on_melee_hit = {[DamageType.FIRE] = 18},
 	},
@@ -1378,8 +1379,8 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		if self.worn_by:attr("dead") then return end
 		local who = self.worn_by
 		if self.hasFoes(self, who) then
-			local blast = {type="ball", range=0, radius=3, friendlyfire=false}
-			who:project(blast, who.x, who.y, engine.DamageType.FIRE, 35)
+			local blast = {type="ball", range=0, radius=4, friendlyfire=false}
+			who:project(blast, who.x, who.y, engine.DamageType.FIRE, 40)
 			local blast2 = {type="ball", range=0, radius=0, friendlyfire=true}
 			who:project(blast2, who.x, who.y, engine.DamageType.FIRE, 5)
 		end
