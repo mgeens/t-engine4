@@ -30,7 +30,7 @@ newEntity{ base = "BASE_STAFF",
 	color=colors.VIOLET,
 	rarity = 200,
 	desc = [[A powerful staff sent in secret to Angolwen by the Shaloren, to aid their fighting of the plagues following the Spellblaze. Its power is not to harm, but to heal and protect.]],
-	cost = 200,
+	cost = math.random(125,200),
 	material_level = 2,
 
 	flavors = {
@@ -51,7 +51,7 @@ newEntity{ base = "BASE_STAFF",
 		dam = 15,
 		staff_power = 30,  -- it roocks
 		apr = 4,
-		dammod = {mag=1.2},
+		dammod = {mag=0.8},
 		damtype = DamageType.NATURE, -- Note this is odd for a staff; it's intentional.
 		element = DamageType.NATURE,
 		-- melee_element = true, -- always melee nature :>
@@ -136,7 +136,7 @@ newEntity{ base = "BASE_STAFF", define_as = "STAFF_TARELION",
 	color=colors.VIOLET,
 	rarity = 250,
 	desc = [[Archmage Tarelion travelled the world in his youth. But the world is not a nice place and it seems he had to run fast.]],
-	cost = 400,
+	cost = math.random(700,1100),
 	material_level = 5,
 
 	require = { stat = { mag=48 }, },
@@ -144,7 +144,7 @@ newEntity{ base = "BASE_STAFF", define_as = "STAFF_TARELION",
 		is_greater = true,
 		dam = 30,
 		apr = 4,
-		dammod = {mag=1.5},
+		dammod = {mag=0.8},
 	},
 	wielder = {
 		inc_stats = { [Stats.STAT_WIL] = 7, [Stats.STAT_MAG] = 8 },
@@ -235,6 +235,7 @@ newEntity{ base = "BASE_AMULET",
 	end,
 }
 
+-- Vaguely AM oriented, about on par with above average randarts unless you use both damage types
 newEntity{ base = "BASE_LONGBOW",
 	power_source = {nature=true},
 	name = "Thaloren-Tree Longbow", unided_name = "glowing elven-wood longbow", unique=true, image = "object/artifact/thaloren_tree_longbow.png",
@@ -242,18 +243,19 @@ newEntity{ base = "BASE_LONGBOW",
 	level_range = {40, 50},
 	rarity = 200,
 	require = { stat = { dex=36 }, },
-	cost = 800,
+	cost = math.random(700,1100),
 	material_level = 5,
 	combat = {
 		range = 10,
-		physspeed = 0.9,
+		physspeed = 0.7,
 		apr = 12,
 	},
 	wielder = {
-		inc_damage={ [DamageType.PHYSICAL] = 30, },
-		lite = 1,
-		inc_stats = { [Stats.STAT_DEX] = 10, [Stats.STAT_WIL] = 10,  },
-		ranged_project={[DamageType.LIGHT] = 30},
+		inc_damage={ [DamageType.PHYSICAL] = 30, [DamageType.NATURE] = 30 },
+		resists_pen={ [DamageType.PHYSICAL] = 20, [DamageType.NATURE] = 20 },
+		inc_stats = { [Stats.STAT_DEX] = 10, [Stats.STAT_WIL] = 20,  },
+		combat_physcrit=15,
+		combat_mindcrit=15,
 	},
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.subrace == "Thalore" then
@@ -267,7 +269,6 @@ newEntity{ base = "BASE_LONGBOW",
 	end,
 }
 
--- Broken for its tier, Archery has very rarely had broken for its tier, its fine
 newEntity{ base = "BASE_LONGBOW",
 	power_source = {arcane=true, nature=true},
 	name = "Corpsebow", unided_name = "rotting longbow", unique=true, image = "object/artifact/bow_corpsebow.png",
@@ -279,17 +280,17 @@ newEntity{ base = "BASE_LONGBOW",
 	material_level = 2,
 	combat = {
 		range = 7,
+		talent_on_hit = { T_EPIDEMIC = {level=1, chance=25}, T_CYST_BURST = {level=1, chance=25} },
 	},
 	wielder = {
 		disease_immune = 0.5,
 		ranged_project = {
 			[DamageType.ITEM_BLIGHT_DISEASE] = 40,
 			[DamageType.BLIGHT] = 20
-		}, -- ITEM_BLIGHT_DISEASE doesn't do damage, so this is big
-		inc_damage={ [DamageType.BLIGHT] = 40, }, -- Hacky method of scaling the damage on the active because the diseases do no DPS
+		},
+		inc_damage={ [DamageType.BLIGHT] = 20, },
+		combat_spellpower = 10,
 	},
-	max_power = 20, power_regen = 1,
-	use_talent = { id = Talents.T_CYST_BURST, level = 5, power = 10 },
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Undead" then
 			local Stats = require "engine.interface.ActorStats"
@@ -313,14 +314,14 @@ newEntity{ base = "BASE_LONGSWORD",
 	rarity = 250,
 	desc = [[Mages sometimes have funny ideas. Archmage Varil once learned how to handle a sword and found he preferred wielding it instead of his staff.]],
 	on_id_lore = "spellblade",
-	cost = 1000,
+	cost = math.random(700,1100),
 
 	require = { stat = { mag=28, str=28 }, },
 	material_level = 5,
 	combat = {
 		dam = 50,
 		physcrit = 5,
-		dammod = {str=1},
+		dammod = {str=0.9 , mag = 0.2},
 	},
 	wielder = {
 		lite = 1,
@@ -416,15 +417,15 @@ newEntity{ base = "BASE_LITE",
 	rarity = 300,
 	desc = [[Said to have once belonged to Inquisitor Marcus Dunn during the Spellhunt this fist sized quartz crystal glows constantly with a soft white light and was rumoured to be a great aid in meditation, helping focus the mind, body, and soul of the owner as well as protecting them from the foulest of magics.
 It seems somebody well versed in antimagic could use it to its fullest potential.]],
-	cost = 100,
+	cost = math.random(700,1100),
 	material_level = 5,
 
 	wielder = {
-		lite = 4,
-		inc_stats = { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6,},
-		combat_physresist = 6,
-		combat_mentalresist = 6,
-		combat_spellresist = 6,
+		lite = 6,
+		inc_stats = { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6, [Stats.STAT_CON] = 6},
+		combat_physresist = 15,
+		combat_mentalresist = 15,
+		combat_spellresist = 15,
 		talents_types_mastery = { ["wild-gift/call"] = 0.2, ["wild-gift/antimagic"] = 0.5, },
 		resists_cap = { [DamageType.BLIGHT] = 10, },
 		resists = { [DamageType.BLIGHT] = 20, },
@@ -434,10 +435,11 @@ It seems somebody well versed in antimagic could use it to its fullest potential
 			local Stats = require "engine.interface.ActorStats"
 			local DamageType = require "engine.DamageType"
 
-			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_WIL] = 10, [Stats.STAT_CUN] = 10, })
-			self:specialWearAdd({"wielder","combat_physresist"}, 20)
-			self:specialWearAdd({"wielder","combat_spellresist"}, 20)
-			self:specialWearAdd({"wielder","combat_mentalresist"}, 20)
+			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_WIL] = 6, [Stats.STAT_CUN] = 6, [Stats.STAT_CON] = 6})
+			self:specialWearAdd({"wielder","combat_spellresist"}, 15)
+			self:specialSetAdd({"wielder","equilibrium_regen"}, -1)
+			self:specialSetAdd({"wielder","resists"}, {[engine.DamageType.ARCANE]=40})
+			self:specialSetAdd({"wielder","resists_cap"}, {[engine.DamageType.ARCANE]=10})			
 			game.logPlayer(who, "#LIGHT_BLUE#You feel a great hero guiding you!")
 		end
 	end,
@@ -449,20 +451,37 @@ newEntity{ base = "BASE_SLING",
 	name = "Eldoral Last Resort", image = "object/artifact/sling_eldoral_last_resort.png",
 	unided_name = "well-made sling",
 	desc = [[A sling with an inscription on its handle: 'May the wielder be granted cunning in his fight against the darkness'.]],
+	special_desc = function(self) return "When dropping below 30% max HP, you gain 20% attack speed, lose 100% fatigue, and your shots don't consume ammo for 5 turns. 30 turns cd." end,
 	level_range = {15, 25},
 	rarity = 200,
 	require = { stat = { dex=26 }, },
-	cost = 350,
+	cost = math.random(225,300),
 	material_level = 3,
 	combat = {
 		range = 10,
-		physspeed = 0.9,
+		physspeed = 0.7,
 	},
 	wielder = {
 		inc_stats = { [Stats.STAT_DEX] = 4, [Stats.STAT_CUN] = 3,  },
 		inc_damage={ [DamageType.PHYSICAL] = 15 },
-		talent_cd_reduction={[Talents.T_STEADY_SHOT]=1, [Talents.T_SCATTER_SHOT]=2},
+		talent_cd_reduction={[Talents.T_SKIRMISHER_SWIFT_SHOT]=1, [Talents.T_SKIRMISHER_HURRICANE_SHOT]=2,},
 	},
+	
+	on_wear = function(self, who)
+		self.worn_by = who
+	end,
+	on_takeoff = function(self)
+		self.worn_by = nil
+	end,
+	max_power = 30, power_regen = 1,
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
+		if not self.worn_by or self.worn_by:attr("dead") or self.power < self.max_power then return end
+		if (who.life - dam)/who.max_life >= 0.3 then return end
+		if not who:hasEffect(who.EFF_ELDORAL) then
+			who:setEffect(who.EFF_ELDORAL, 5, {speed = 20, fatigue = 100})
+			self.power = 0
+		end
+	end,
 }
 
 newEntity{ base = "BASE_KNIFE",
