@@ -441,7 +441,7 @@ function _M:descAttribute(attr)
 		return power(c)..", "..("%d"):format((c.apr or 0)).." apr, "..DamageType:get(c.element or DamageType.PHYSICAL).name.." element"
 	elseif attr == "SHIELD" then
 		local c = self.special_combat
-		if c and (game.player:knowTalentType("technique/shield-offense") or game.player:knowTalentType("technique/shield-defense") or game.player:attr("show_shield_combat")) then
+		if c and (game.player:knowTalentType("technique/shield-offense") or game.player:knowTalentType("technique/shield-defense") or game.player:attr("show_shield_combat") or config.settings.tome.display_shield_stats) then
 			return power(c)..", "..c.block.." block"
 		else
 			return c.block.." block"
@@ -632,15 +632,15 @@ function _M:descAccuracyBonus(desc, weapon, use_actor)
 
 	local m = weapon.accuracy_effect_scale or 1
 	if kind == "sword" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.4, m), {"color","LAST"}, " crit.pwr / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.4, m), {"color","LAST"}, " crit mult (max 40%)", true)
 	elseif kind == "axe" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.2, m), {"color","LAST"}, " crit / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.25, m), {"color","LAST"}, " crit chance (max 25%)", true)
 	elseif kind == "mace" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.1, m), {"color","LAST"}, " dam / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.2, m), {"color","LAST"}, " base dam (max 20%)", true)
 	elseif kind == "staff" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(2.5, m), {"color","LAST"}, " procs dam / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(2.5, m), {"color","LAST"}, " proc dam (max 200%)", true)
 	elseif kind == "knife" then
-		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.5, m), {"color","LAST"}, " APR / acc", true)
+		desc:add("Accuracy bonus: ", {"color","LIGHT_GREEN"}, showpct(0.5, m), {"color","LAST"}, " APR (max 50%)", true)
 	end
 end
 
@@ -1105,12 +1105,12 @@ function _M:descCombat(use_actor, combat, compare_with, field, add_table, is_fak
 		nil, nil,
 		function(k, v) return not DamageType.dam_def[k].tdesc end)
 
-	compare_table_fields(combat, compare_with, field, "burst_on_hit", "%+d", "Burst (radius 1) on hit: ", function(item)
+	compare_table_fields(combat, compare_with, field, "burst_on_hit", "%+d", "Damage (radius 1) on hit: ", function(item)
 			local col = (DamageType.dam_def[item] and DamageType.dam_def[item].text_color or "#WHITE#"):toTString()
 			return col[2], (" %s"):format(DamageType.dam_def[item].name),{"color","LAST"}
 		end)
 
-	compare_table_fields(combat, compare_with, field, "burst_on_crit", "%+d", "Burst (radius 2) on crit: ", function(item)
+	compare_table_fields(combat, compare_with, field, "burst_on_crit", "%+d", "Damage (radius 2) on crit: ", function(item)
 			local col = (DamageType.dam_def[item] and DamageType.dam_def[item].text_color or "#WHITE#"):toTString()
 			return col[2], (" %s"):format(DamageType.dam_def[item].name),{"color","LAST"}
 		end)
@@ -1171,11 +1171,11 @@ function _M:getTextualDesc(compare_with, use_actor)
 		local combat = self.combat
 		if not combat and self.wielded then
 			-- shield combat
-			if self.subtype == "shield" and self.special_combat and ((use_actor:knowTalentType("technique/shield-offense") or use_actor:knowTalentType("technique/shield-defense") or use_actor:attr("show_shield_combat"))) then
+			if self.subtype == "shield" and self.special_combat and ((use_actor:knowTalentType("technique/shield-offense") or use_actor:knowTalentType("technique/shield-defense") or use_actor:attr("show_shield_combat") or config.settings.tome.display_shield_stats)) then
 				combat = self.special_combat
 			end
 			-- gloves combat
-			if self.subtype == "hands" and self.wielder and self.wielder.combat and (use_actor:knowTalent(use_actor.T_EMPTY_HAND) or use_actor:attr("show_gloves_combat")) then
+			if self.subtype == "hands" and self.wielder and self.wielder.combat and (use_actor:knowTalent(use_actor.T_EMPTY_HAND) or use_actor:attr("show_gloves_combat") or config.settings.tome.display_glove_stats) then
 				combat = self.wielder.combat
 			end
 		end
@@ -1898,6 +1898,8 @@ function _M:getTextualDesc(compare_with, use_actor)
 			desc:add({"color","YELLOW"}, "When used to modify unarmed attacks:", {"color", "LAST"}, true)
 			compare_tab = { dam=1, atk=1, apr=0, physcrit=0, physspeed =(use_actor:knowTalent(use_actor.T_EMPTY_HAND) and 0.6 or 1), dammod={str=1}, damrange=1.1 }
 			desc_combat(w, compare_unarmed, "combat", compare_tab, true)
+		elseif (w and w.combat or can_combat_unarmed) then
+			desc:add({"color","LIGHT_BLUE"}, "Learn an unarmed attack talent or enable 'Always show glove combat' to see combat stats.", {"color", "LAST"}, true)
 		end
 	end
 	local can_combat = false
@@ -1928,9 +1930,11 @@ function _M:getTextualDesc(compare_with, use_actor)
 		desc_combat(self, compare_with, "combat")
 	end
 
-	if (self.special_combat or can_special_combat) and (use_actor:knowTalentType("technique/shield-offense") or use_actor:knowTalentType("technique/shield-defense") or use_actor:attr("show_shield_combat")) then
+	if (self.special_combat or can_special_combat) and (use_actor:knowTalentType("technique/shield-offense") or use_actor:knowTalentType("technique/shield-defense") or use_actor:attr("show_shield_combat") or config.settings.tome.display_shield_stats) then
 		desc:add({"color","YELLOW"}, "When used to attack (with talents):", {"color", "LAST"}, true)
 		desc_combat(self, compare_with, "special_combat")
+	elseif (self.special_combat or can_special_combat) then
+		desc:add({"color","LIGHT_BLUE"}, "Learn shield attack talent or enable 'Always show shield combat' to see combat stats.", {"color", "LAST"}, true)
 	end
 
 	local found = false

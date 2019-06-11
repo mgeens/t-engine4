@@ -150,8 +150,7 @@ newTalent{
 	range = 7,
 	radius = function(self, t) return math.max(0, 7 - math.floor(self:getTalentLevel(t))) end,
 	target = function(self, t)
-		local range=self:getTalentRange(t)
-		local tg = {talent=t, type="hit", nolock=true, pass_terrain=false, nowarning=true, range=range}
+		local tg = {type="beam", nolock=true, pass_terrain=false, nowarning=true, range=self:getTalentRange(t)}
 		if not self.player then
 			tg.grid_params = {want_range=self.ai_state.tactic == "escape" and self:getTalentCooldown(t) + 11 or self.ai_tactic.safe_range or 0, max_delta=-1}
 		end

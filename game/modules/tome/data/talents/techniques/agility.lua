@@ -151,7 +151,7 @@ newTalent{
 		if not target or not self:canProject(tg, x, y) then return nil end
 
 		-- Leap
-		local tg = {type="hit", range=t.getDist(self,t)}
+		local tg = {type="hit", nolock=true, range=t.getDist(self,t)}
 		local x, y  = self:getTarget(tg)
 		if not x or not y then return nil end
 		local _ _, x, y = self:canProject(tg, x, y)

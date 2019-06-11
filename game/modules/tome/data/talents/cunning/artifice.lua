@@ -408,6 +408,7 @@ newTalent{
 	points = 1,
 	cooldown = 20,
 	getDollImage = function(self, t) return self:knowTalent(self.T_ROGUE_S_BREW_MASTERY) and "artifices/mastery_rogues_brew" or "artifices/rogues_brew" end,
+	no_break_stealth = true,
 	tactical = { HEAL = 1.5, STAMINA = 1.5,
 		CURE = function(self, t, target)
 			local num, max = 0, t.getCure(self, t)
@@ -688,7 +689,7 @@ newTalent{
 	stamina = 14,
 	requires_target = true,
 	getDollImage = function(self, t) return self:knowTalent(self.T_GRAPPLING_HOOK_MASTERY) and "artifices/mastery_grappling_hook" or "artifices/grappling_hook" end,
-	target = function(self, t) return {type="bolt", range=t.range(self,t), talent=t} end,
+	target = function(self, t) return {type="bolt", range=t.range(self,t), talent=t, nolock=true} end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)

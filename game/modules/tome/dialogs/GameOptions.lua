@@ -413,12 +413,21 @@ function _M:generateListUi()
 		self.c_list:drawItem(item)
 	end,}
 
-	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Toggles display of glove unarmed attack properties.#WHITE#"}
-	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Display glove combat stats#WHITE##{normal}#", status=function(item)
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Always display the combat properties of gloves even if you don't know unarmed attack talents.#WHITE#"}
+	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Always show glove combat properties#WHITE##{normal}#", status=function(item)
 		return tostring(config.settings.tome.display_glove_stats and "enabled" or "disabled")
 	end, fct=function(item)
 		config.settings.tome.display_glove_stats = not config.settings.tome.display_glove_stats
 		game:saveSettings("tome.display_glove_stats", ("tome.display_glove_stats = %s\n"):format(tostring(config.settings.tome.display_glove_stats)))
+		self.c_list:drawItem(item)
+	end,}
+
+	local zone = Textzone.new{width=self.c_desc.w, height=self.c_desc.h, text=string.toTString"Always display combat properties of shields even if you don't know shield attack talents.#WHITE#"}
+	list[#list+1] = { zone=zone, name=string.toTString"#GOLD##{bold}#Always show shield combat properties#WHITE##{normal}#", status=function(item)
+		return tostring(config.settings.tome.display_shield_stats and "enabled" or "disabled")
+	end, fct=function(item)
+		config.settings.tome.display_shield_stats = not config.settings.tome.display_shield_stats
+		game:saveSettings("tome.display_shield_stats", ("tome.display_shield_stats = %s\n"):format(tostring(config.settings.tome.display_shield_stats)))
 		self.c_list:drawItem(item)
 	end,}
 

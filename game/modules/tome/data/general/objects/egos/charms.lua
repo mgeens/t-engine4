@@ -26,6 +26,9 @@ local function modify_charm(e, e, zone, level)
 	if e._old_finish and e._old_finish ~= e._modify_charm then return e._old_finish(e, e, zone, level) end
 end
 
+-- There are two copies of each of these egos with the same unique_ego identifier as a hack to essentially remove the lesser/greater ego distinction and keep the fairly small pool 
+-- diverse.  This is really hacky but there is no good way in the engine to do it that I know of.
+
 newEntity{
 	name = "quick ", prefix=true,
 	keywords = {quick=true},

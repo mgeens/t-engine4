@@ -69,6 +69,7 @@ newInscription{
 	points = 1,
 	tactical = { HEAL = 2 },
 	on_pre_use = function(self, t) return not self:hasEffect(self.EFF_REGENERATION) end,
+	no_break_stealth = true,
 	action = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
 		self:setEffect(self.EFF_REGENERATION, data.dur, {power=(data.heal + data.inc_stat) / data.dur})
@@ -307,6 +308,7 @@ newInscription{
 	points = 1,
 	is_spell = true,
 	is_teleport = true,
+	no_break_stealth = true,
 	tactical = { ESCAPE = 3 },
 	action = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
@@ -491,6 +493,7 @@ newInscription{
 	type = {"inscriptions/runes", 1},
 	points = 1,
 	is_spell = true,
+	no_break_stealth = true,
 	tactical = { MANA = 1 },
 	on_pre_use = function(self, t)
 		return self:knowTalent(self.T_MANA_POOL) and not self:hasEffect(self.EFF_MANASURGE)
@@ -766,6 +769,7 @@ newInscription{
 	type = {"inscriptions/runes", 1},
 	points = 1,
 	is_spell = true,
+	no_break_stealth = true,
 	tactical = { DEFEND = 3,},
 	getDur = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
@@ -800,6 +804,7 @@ newInscription{
 	image = "talents/phase_shift.png",  -- re-used icon
 	points = 1,
 	is_spell = true,
+	no_break_stealth = true,
 	tactical = { DEFEND = 3,},
 	getDur = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
@@ -1084,6 +1089,7 @@ newInscription{
 	type = {"inscriptions/runes", 1},
 	points = 1,
 	is_spell = true,
+	no_break_stealth = true,
 	tactical = { CURE = 2 },
 	getDur = function(self, t)
 		local data = self:getInscriptionData(t.short_name)

@@ -1686,12 +1686,13 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		state = initState(state)
 		if _G.type(dam) ~= "table" then dam = {dam=dam, dist=3} end
+		if not dam.check then dam.check = src:combatPhysicalpower() end
 		if target and not state[target] then
 			state[target] = true
 			DamageType:get(DamageType.PHYSICAL).projector(src, x, y, DamageType.PHYSICAL, dam.dam, state)
-			if target:checkHit(src:combatPhysicalpower(), target:combatPhysicalResist(), 0, 95, 15) and target:canBe("knockback") then
+			if target:checkHit(dam.check, target:combatPhysicalResist(), 0, 95, 15) and target:canBe("knockback") then
 				target:knockback(dam.x or src.x, dam.y or src.y, dam.dist)
-				target:crossTierEffect(target.EFF_OFFBALANCE, src:combatPhysicalpower())
+				target:crossTierEffect(target.EFF_OFFBALANCE, dam.check)
 				game.logSeen(target, "%s is knocked back!", target.name:capitalize())
 			else
 				game.logSeen(target, "%s resists the knockback!", target.name:capitalize())
@@ -2132,7 +2133,7 @@ newDamageType{
 			end
 		end
 		local val = src and src:combatStatScale(src:combatSpellpower(), 15, 50) or 0
-		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce armor by #ORCHID#%d%%#LAST#%s")
+		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce armor by #VIOLET#%d%%#LAST#%s")
 			:format(dam, val, parens)
 	end,
 	projector = function(src, x, y, type, dam, state)
@@ -2162,8 +2163,8 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 10, 40))
-		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce strength, dexterity, and constitution by #ORCHID#%d#LAST#%s")
+		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40))
+		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce strength, dexterity, and constitution by #VIOLET#%d#LAST#%s")
 			:format(dam, val, parens )
 	end,
 	projector = function(src, x, y, type, dam, state)
@@ -2174,7 +2175,7 @@ newDamageType{
 			if rng.percent(dam) then
 				if target:canBe("disease") then
 					local check = math.max(src:combatSpellpower(), src:combatMindpower(), src:combatAttack())
-					local disease_power = math.floor(src:combatStatScale(src:combatSpellpower(), 10, 40))
+					local disease_power = math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40))
 					target:setEffect(target.EFF_ITEM_BLIGHT_ILLNESS, 3, {reduce = disease_power, no_ct_effect = true})
 				end
 			end
@@ -2209,7 +2210,6 @@ newDamageType{
 	end,
 }
 
--- Fix on sludgefist
 newDamageType{
 	name = "item nature slow", type = "ITEM_NATURE_SLOW", text_color = "#LIGHT_GREEN#",
 	tdesc = function(dam, oldDam, src)
@@ -2224,7 +2224,7 @@ newDamageType{
 			end
 		end
 		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 30, 80) ) or 0
-		return ("* #LIGHT_GREEN#%d%%#LAST# chance to slow action speed by #YELLOW#%d%%#LAST#%s")
+		return ("* #LIGHT_GREEN#%d%%#LAST# chance to slow global speed by #YELLOW#%d%%#LAST#%s")
 			:format(dam or 0, val, parens)
 	end,
 	projector = function(src, x, y, type, dam, state)
@@ -2233,10 +2233,14 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and rng.percent(dam) then
 			local slow_power = math.floor(src:combatStatScale(src:combatMindpower(), 30, 80) ) / 100
-			target:setEffect(target.EFF_SLOW, 3, {power= math.min(0.6, slow_power), no_ct_effect=true})
+			target:setEffect(target.EFF_SLOW, 3, {power = slow_power, no_ct_effect=true})
 		end
 	end,
 }
+
+------------------------------------------------------------------------------------
+-- The item damage types below have been removed from most if not all egos
+-- You can still use them, just note that they're rare/unused for a reason
 
 -- Reduces all offensive powers by 20%
 newDamageType{
@@ -2266,10 +2270,6 @@ newDamageType{
 		end
 	end,
 }
-
-------------------------------------------------------------------------------------
--- The item damage types below have been removed from most if not all egos
--- You can still use them, just note that they're rare/unused for a reason
 
 newDamageType{
 	name = "item lightning daze", type = "ITEM_LIGHTNING_DAZE",
