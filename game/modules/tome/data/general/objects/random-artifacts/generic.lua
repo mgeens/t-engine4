@@ -99,10 +99,6 @@ newEntity{ theme={mental=true}, name="generic psi on hit", points = 1, rarity = 
 	wielder = { psi_regen_when_hit = resolvers.randartmax(.04, 2), },
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> da930f1afe427df9fcf43a51ece17feb6995432a
 ----------------------------------------------------------------
 -- Physical Themes
 ----------------------------------------------------------------
