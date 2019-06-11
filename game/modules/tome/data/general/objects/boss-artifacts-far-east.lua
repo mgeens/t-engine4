@@ -381,7 +381,7 @@ newEntity{ base = "BASE_LONGBOW",
 			end
 		end end
 
-		local tg = {type="hit", range=5, friendlyfire=false, talent=self}
+		local tg = {type="hit", range=5, friendlyfire=false}
 		for i = 1, 1 do
 			if #tgts <= 0 then break end
 			local a, id = rng.table(tgts)

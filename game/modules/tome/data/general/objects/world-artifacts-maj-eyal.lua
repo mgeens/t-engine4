@@ -839,13 +839,14 @@ newEntity{ base = "BASE_LEATHER_BELT",
 	unided_name = "short length of rope",
 	desc = [[The simplest of belts, worn for centuries by Nessilla Tantaelen as she tended to her people and forests. Some of her wisdom and power have settled permanently into its fibers.]],
 	color = colors.LIGHT_RED,
-	level_range = {20, 30},
+	level_range = {16, 30},
 	rarity = 200,
 	cost = 450,
 	material_level = 2,
 	wielder = {
 		inc_stats = { [Stats.STAT_CUN] = 7, [Stats.STAT_WIL] = 8, },
-		combat_mindpower = 12,
+		combat_mindpower = 15,
+		combat_mindcrit = 15,
 		talents_types_mastery = { ["wild-gift/harmony"] = 0.2 },
 	},
 	on_wear = function(self, who)
@@ -853,7 +854,7 @@ newEntity{ base = "BASE_LEATHER_BELT",
 			local Stats = require "engine.interface.ActorStats"
 			local DamageType = require "engine.DamageType"
 
-			self:specialWearAdd({"wielder","resists"}, { [engine.DamageType.MIND] = 20,} )
+			self:specialWearAdd({"wielder","talents_mastery_bonus"}, { ["wild-gift"] = 0.2 })
 			self:specialWearAdd({"wielder","combat_mentalresist"}, 15)
 			game.logPlayer(who, "#DARK_GREEN#Nessilla's belt seems to come alive as you put it on.")
 		end
@@ -1226,9 +1227,9 @@ newEntity{ base = "BASE_MASSIVE_ARMOR", -- Thanks SageAcrin!
 	unided_name = "thick wooden plate armour",
 	desc = [[Expertly hewn from the bark of trees, this wooden armor provides excellent protection at a low weight.]],
 	color = colors.WHITE,
-	level_range = {8, 22},
+	level_range = {10, 24},
 	rarity = 220,
-	require = { stat = { str=24 }, },
+	require = { stat = { str=26 }, },
 	cost = 300,
 	material_level = 2,
 	moddable_tile = "special/wooden_cuirass",
@@ -1251,8 +1252,11 @@ newEntity{ base = "BASE_MASSIVE_ARMOR", -- Thanks SageAcrin!
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.subrace == "Thalore" then
 			local Stats = require "engine.interface.ActorStats"
+			local Talents = require "engine.interface.ActorTalents"
 
 			self:specialWearAdd({"wielder","fatigue"}, -14)
+			self:specialWearAdd({"wielder","combat_def"}, 6)
+			self:specialWearAdd({"wielder","talent_cd_reduction"}, {[Talents.T_THALOREN_WRATH]=5,})
 			game.logPlayer(who, "#DARK_GREEN#The armor molds comfortably to one of its caretakers.")
 		end
 	end,

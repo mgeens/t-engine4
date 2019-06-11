@@ -280,7 +280,7 @@ newEntity{ base = "BASE_AMULET",
 	name = "Feathersteel Amulet", color = colors.WHITE, image = "object/artifact/feathersteel_amulet.png",
 	unided_name = "light amulet",
 	desc = [[The weight of the world seems a little lighter with this amulet around your neck.]],
-	level_range = {5, 15},
+	level_range = {5, 20},
 	rarity = 200,
 	cost = 90,
 	material_level = 2,
@@ -288,7 +288,7 @@ newEntity{ base = "BASE_AMULET",
 		max_encumber = 20,
 		fatigue = -20,
 		avoid_pressure_traps = 1,
-		movement_speed = 0.2,
+		movement_speed = 0.25, --ghoul movespeed breakpoint!--
 	},
 }
 
@@ -343,11 +343,12 @@ newEntity{ base = "BASE_LITE",
 	encumber = 1,
 	rarity = 100,
 	desc = [[A small crystal phial that captured Sunlight during the Summertide.]],
+	special_desc = function(self) return "When attacking in melee, deals 15 light damage and lights tiles in radius 1." end,
 	cost = 200,
 
 	max_power = 15, power_regen = 1,
 	use_power = {
-		name = function(self, who) return ("call light (%d power, based on Willpower)"):format(self.use_power.litepower(self, who)) end,
+		name = function(self, who) return ("call light, dispelling darkness and lighting tiles in radius 20.(%d power, based on Willpower)"):format(self.use_power.litepower(self, who)) end,
 		power = 10,
 		litepower = function(self, who) return who:combatStatScale("wil", 50, 150) end,
 		use = function(self, who)
@@ -358,10 +359,11 @@ newEntity{ base = "BASE_LITE",
 		no_npc_use = function(self, who) return not game.party:hasMember(who) end,
 	},
 	wielder = {
-		lite = 4,
+		lite = 5,
 		healing_factor = 0.1,
 		inc_damage = {[DamageType.LIGHT]=10},
 		resists = {[DamageType.LIGHT]=30},
+		melee_project={[DamageType.LITE_LIGHT_BURST] = 15}
 	},
 }
 
@@ -417,7 +419,10 @@ newEntity{ base = "BASE_LITE",
 	
 	wielder = {
 		lite = -1000,
-		infravision = 6,
+		infravision = 7,
+		inc_stats = {
+			[Stats.STAT_MAG] = 5,
+		},
 		resists_cap = { [DamageType.LIGHT] = 10 },
 		resists = { [DamageType.LIGHT] = 30 },
 		talents_types_mastery = { 
@@ -765,28 +770,29 @@ newEntity{ base = "BASE_HELM",
 	name = "Helm of the Dwarven Emperors", image = "object/artifact/helm_of_the_dwarven_emperors.png",
 	unided_name = "shining helm",
 	desc = [[A Dwarven helm embedded with a single diamond that can banish all underground shadows.]],
-	level_range = {20, 28},
+	level_range = {16, 28},
 	rarity = 240,
 	cost = math.random(125,200),
 	material_level = 2,
 	wielder = {
-		lite = 1,
+		lite = 6,
 		combat_armor = 6,
 		fatigue = 4,
 		blind_immune = 0.3,
 		confusion_immune = 0.3,
 		inc_stats = { [Stats.STAT_WIL] = 3, [Stats.STAT_MAG] = 4, },
+		resists={ [DamageType.DARKNESS] = 10, },
 		inc_damage={
-			[DamageType.LIGHT] = 8,
+			[DamageType.LIGHT] = 10,
 		},
 	},
-	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_SUN_FLARE, level = 3, power = 30 },
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Dwarf" then
 			local Stats = require "engine.interface.ActorStats"
 
-			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CUN] = 5, [Stats.STAT_MAG] = 5, [Stats.STAT_WIL] = 5, })
+			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CON] = 10, [Stats.STAT_MAG] = 6, [Stats.STAT_WIL] = 7})
+			self:specialWearAdd({"wielder","blind_immune"}, 0.3)
+			self:specialWearAdd({"wielder","confusion_immune"}, 0.3)
 			game.logPlayer(who, "#LIGHT_BLUE#The legacy of Dwarven Emperors grants you their wisdom.")
 		end
 	end,
@@ -2707,10 +2713,10 @@ newEntity{ base = "BASE_MINDSTAR",
 		combat_mindcrit = 4,
 		life_regen = 2,
 		healing_factor = 0.2,
-		talents_types_mastery = { ["wild-gift/fungus"] = 0.2,},
+		talents_types_mastery = { ["wild-gift/fungus"] = 0.3,},
 	},
-	max_power = 60, power_regen = 1,
-	use_talent = { id = Talents.T_BLOOM_HEAL, level = 1, power = 60 },
+	max_power = 40, power_regen = 1,
+	use_talent = { id = Talents.T_BLOOM_HEAL, level = 1, power = 40 },
 }
 
 newEntity{ base = "BASE_STAFF",
@@ -2773,76 +2779,39 @@ newEntity{ base = "BASE_MINDSTAR",
 		dammod = {wil=0.5, cun=0.1, str=0.2},
 		damtype=DamageType.PHYSICAL,
 		convert_damage = {
-			[DamageType.COLD] = 18,
-			[DamageType.FIRE] = 18,
-			[DamageType.ACID] = 18,
-			[DamageType.LIGHTNING] = 18,
+			[DamageType.COLD] = 20,
+			[DamageType.FIRE] = 20,
+			[DamageType.ACID] = 20,
+			[DamageType.LIGHTNING] = 20,
+			[DamageType.PHYSICAL] = 20,
 		},
 	},
 	wielder = {
-		combat_mindpower = 8,
-		combat_dam = 8,
-		combat_mindcrit = 4,
-		combat_physcrit = 4,
+		combat_mindpower = 10,
+		combat_dam = 10,
+		combat_mindcrit = 5,
+		combat_physcrit = 5,
 		inc_damage={
-			[DamageType.PHYSICAL] 	= 8,
-			[DamageType.FIRE] 	= 8,
-			[DamageType.COLD] 	= 8,
-			[DamageType.LIGHTNING] 	= 8,
-			[DamageType.ACID] 	= 8,
+			[DamageType.PHYSICAL] 	= 12,
+			[DamageType.FIRE] 	= 12,
+			[DamageType.COLD] 	= 12,
+			[DamageType.LIGHTNING] 	= 12,
+			[DamageType.ACID] 	= 12,
 		},
 		resists={
-			[DamageType.PHYSICAL] 	= 8,
-			[DamageType.FIRE] 	= 8,
-			[DamageType.COLD] 	= 8,
-			[DamageType.ACID] 	= 8,
-			[DamageType.LIGHTNING] 	= 8,
+			[DamageType.PHYSICAL] 	= 10,
+			[DamageType.FIRE] 	= 10,
+			[DamageType.COLD] 	= 10,
+			[DamageType.ACID] 	= 10,
+			[DamageType.LIGHTNING] 	= 10,
 		},
 		talents_types_mastery = {
-			["wild-gift/sand-drake"] = 0.1,
-			["wild-gift/fire-drake"] = 0.1,
-			["wild-gift/cold-drake"] = 0.1,
-			["wild-gift/storm-drake"] = 0.1,
-			["wild-gift/venom-drake"] = 0.1,
+			["wild-gift/sand-drake"] = 0.3,
+			["wild-gift/fire-drake"] = 0.3,
+			["wild-gift/cold-drake"] = 0.3,
+			["wild-gift/storm-drake"] = 0.3,
+			["wild-gift/venom-drake"] = 0.3,
 		}
-	},
-	ms_set_wyrm = true,
-	set_list = {
-		multiple = true,
-		harmonious = {{"ms_set_harmonious", true, inven_id = other_hand,},},
-		wyrm = {{"ms_set_drake", true, inven_id = other_hand,},},},
-	set_desc = {
-		wyrm = "The natural wyrm seeks an element.",
-	},
-	on_set_complete = {
-		multiple = true,
-		harmonious = function(self, who, inven_id)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
-			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "harmonious")
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "harmonious")
-		end,
-		wyrm = function(self, who, inven_id)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#PURPLE#You feel the spirit of the wyrm stirring inside you!")
-			end
-			self:specialSetAdd({"wielder","blind_immune"}, self.material_level / 10, "wyrm")
-			self:specialSetAdd({"wielder","stun_immune"}, self.material_level / 10, "wyrm")
-		end,
-	},
-	on_set_broken = {
-		multiple = true,
-		harmonious = function(self, who, inven_id, set_objects)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#SLATE#The link between the mindstars is broken.")
-			end
-		end,
-		wyrm = function(self, who, inven_id, set_objects)
-			if inven_id == "MAINHAND" then
-				game.logPlayer(who, "#SLATE#The link between the mindstars is broken.")
-			end
-		end,
 	},
 	on_wear = function(self, who)
 		self.worn_by = who
@@ -2971,8 +2940,8 @@ newEntity{ base = "BASE_KNIFE",
 		resists_pen = {[DamageType.DARKNESS] = 10,},
 		inc_damage = {[DamageType.DARKNESS] = 5,},
 	},
-	max_power = 10, power_regen = 1,
-	use_talent = { id = Talents.T_INVOKE_DARKNESS, level = 2, power = 8 },
+	max_power = 20, power_regen = 1,
+	use_talent = { id = Talents.T_INVOKE_DARKNESS, level = 3, power = 20 },
 }
 
 newEntity{ base = "BASE_LEATHER_BELT",
@@ -4106,7 +4075,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 	material_level = 1,
 	wielder = {
 		combat_def = 12,
-		combat_spellpower = 4,
+		combat_spellpower = 5,
 		
 		inc_damage={[DamageType.COLD] = 10},
 		resists={[DamageType.COLD] = 15},
@@ -4115,7 +4084,9 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 		
 		movement_speed=0.15,
 		talents_types_mastery = {
- 			["spell/water"] = 0.1,
+			["spell/water"] = 0.3,
+			["spell/ice"] = 0.3,
+			["spell/frost-alchemy"] = 0.3, --more!
  		},
 	},
 	talent_on_spell = {
@@ -5605,7 +5576,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		resists={[DamageType.NATURE] = 25},
 		resists_pen={[DamageType.NATURE] = 10},
 		on_melee_hit={[DamageType.SLIME] = 35},
-		talents_types_mastery = { ["wild-gift/moss"] = 0.1,},
+		talents_types_mastery = { ["wild-gift/moss"] = 0.3,},
 	},
 }
 
@@ -7300,6 +7271,41 @@ newEntity{ base = "BASE_GREATMAUL",
 		physcrit = 0,
 		dammod = {str=1.2},
 		crushing_blow=1,
+		special_on_hit = { --thanks nsrr!--
+			desc=function(self, who, special)
+				local damage = special.damage(self, who)
+				local s = ("Sends a tremor through the ground which causes jagged rocks to errupt in a beam of length 5, dealing %d Physical damage (equal to your Strength, up to 150) and causing targets hit to bleed for an additional 50 damage over 5 turns. Bleeding can stack."):format(damage)
+				return s
+			end,
+			damage = function(self, who)
+				return math.min (150, who:getStr())
+			end,
+			fct=function(self, who, target, dam, special)
+				local damage = special.damage(self, who)
+				local l = who:lineFOV(target.x, target.y)
+				l:set_corner_block()
+				local lx, ly, is_corner_blocked = l:step(true)
+				local target_x, target_y = lx, ly
+				-- Check for terrain and friendly actors
+				while lx and ly and not is_corner_blocked and core.fov.distance(who.x, who.y, lx, ly) <= 5 do -- projects to maximum range
+					local actor = game.level.map(lx, ly, engine.Map.ACTOR)
+					if actor and (who:reactionToward(actor) >= 0) then
+						break
+					elseif game.level.map:checkEntity(lx, ly, engine.Map.TERRAIN, "block_move") then
+						target_x, target_y = lx, ly
+						break
+					end
+					target_x, target_y = lx, ly
+					lx, ly = l:step(true)
+				end
+				local tg = {type="beam", range=5, selffire=false}
+				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "earth_beam", {tx=target_x-who.x, ty=target_y-who.y})
+				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "shadow_beam", {tx=target_x-who.x, ty=target_y-who.y})
+				local grids1 = who:project(tg, target_x, target_y, engine.DamageType.PHYSICAL, damage)
+				local grids2 = who:project(tg, target_x, target_y, engine.DamageType.BLEED, 50)
+				game:playSoundNear(who, "talents/earth")
+			end,
+		},
 
 	},
 	wielder = {
@@ -7316,49 +7322,37 @@ newEntity{ base = "BASE_HELM",
 	desc = [[The golden bascinet crown, affiliated with Veluca of Yaldan. King of the mythical city of Yaldan, that was struck from the face of Eyal by the arrogance of its people. Lone survivor of his kin, he spent his last years wandering the early world, teaching man to stand against the darkness. With his dying words, "Fear no evil", the crown was passed onto his successor.]],
 	level_range = {28, 39,},
 	rarity = 240,
-	cost = math.random(400,650),
+	cost = 700,
 	material_level = 4,
 	wielder = {
-		combat_armor = 6,
+		combat_armor = 10,
 		fatigue = 4,
-		resist_unseen = 25,
+		resist_unseen = 33,
 		sight = -2,
-		inc_stats = { [Stats.STAT_WIL] = 10, [Stats.STAT_CON] = 7, },
+		lite = -2,
+		inc_stats = { [Stats.STAT_STR] = 10, [Stats.STAT_CON] = 10, },
 		inc_damage={
-			[DamageType.LIGHT] = 10,
+			[DamageType.LIGHT] = 15,
 		},
 		resists={
-			[DamageType.LIGHT] = 10,
-			[DamageType.DARKNESS] = 15,
+			[DamageType.LIGHT] = 15,
+			[DamageType.DARKNESS] = 25,
 		},
 		resists_cap={
 			[DamageType.DARKNESS] = 10,
 		},
 		blind_fight = 1,
 	},
-	special_desc = function(self) return [[Up to 5 times per turn, upon receiving light damage, reflect blinding darkness at the assailant.
-Up to 5 times per turn, upon receiving darkness damage, reflect blinding light at the assailant]] end,
-	on_wear = function(self, who)
-		self.worn_by = who
-	end,
-	on_takeoff = function(self)
-		self.worn_by = nil
-	end,
-	
-	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
-		if not self.worn_by or self.worn_by:attr("dead") then return end
-		if type == engine.DamageType.DARKNESS and who ~= src then
-			if (who.turn_procs.dark_yaldan or 0) > 4 then return end
-			who.turn_procs.dark_yaldan = (who.turn_procs.dark_yaldan or 0) + 1
-			who:project(src, src.x, src.y, engine.DamageType.LIGHT_BLIND, 0.2 * dam)
-		else 
-			if type == engine.DamageType.LIGHT and who ~= src  then
-				if (who.turn_procs.light_yaldan or 0) > 4 then return end
-				who.turn_procs.light_yaldan = (who.turn_procs.light_yaldan or 0) + 1
-				who:project(src, src.x, src.y, engine.DamageType.DARKNESS_BLIND, 0.2 * dam)
-			end
+	max_power = 40, power_regen = 1,
+	use_power = {
+		name = function(self, who) return ("lower the helmet's visor, blinding yourself (and protecting from other blinds) for 6 turns. If the helmet is taken off, the effect will end early."):format(self.use_power.range) end,
+		power = 40,
+		use = function(self, who)
+			who:setEffect(who.EFF_FORGONE_VISION, 6, {power = 2})
+			game.logSeen(who, "%s forgoes their vision!", who.name:capitalize())
+			return {id=true, used=true}
 		end
-	end,
+	},
 }
 
 newEntity{ base = "BASE_GREATSWORD",

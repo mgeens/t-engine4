@@ -419,7 +419,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	},
 
 	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_CALL_LIGHTNING, level=2, power = 18 },
+	use_talent = { id = Talents.T_CALL_LIGHTNING, level=2, power = 20 },
 	talent_on_wild_gift = { {chance=10, talent=Talents.T_CALL_LIGHTNING, level=2} },
 }
 
@@ -442,11 +442,11 @@ newEntity{ base = "BASE_RING",
 		talent_cd_reduction={
 			[Talents.T_SHADOWSTEP]=1,
 		},
-		inc_damage={ [DamageType.PHYSICAL] = 5, },
+		inc_damage={ [DamageType.DARKNESS] = 10, },
 	},
 
 	max_power = 50, power_regen = 1,
-	use_talent = { id = Talents.T_DARK_TENDRILS, level=2, power = 40 },
+	use_talent = { id = Talents.T_SHADOWSTEP, level=2, power = 50 },
 }
 
 newEntity{ base = "BASE_HELM",
@@ -991,13 +991,15 @@ newEntity{ base = "BASE_SHIELD",
 		lifesteal = 8,
 	},
 	wielder = {
-		combat_armor = 4,
-		combat_def = 14,
-		combat_def_ranged = 14,
+		combat_armor = 15,
 		inc_stats = { [Stats.STAT_CON] = 10, },
 		fatigue = 19,
-		resists = { [DamageType.BLIGHT] = 25, },
+		resists = { 
+		[DamageType.BLIGHT] = 25, 
+		[DamageType.LIGHT] = 10, 
+		},
 		life_regen = 5,
+		on_melee_hit = {[DamageType. DRAINLIFE] = 15},
 		learn_talent = { [Talents.T_BLOCK] = 1, },
 	},
 }
@@ -1376,9 +1378,9 @@ newEntity{ base = "BASE_DIGGER",
 	material_level = 1,
 	digspeed = 12,
 	wielder = {
-		inc_damage = { [DamageType.BLIGHT] = 4 },
-		on_melee_hit = {[DamageType.BLIGHT] = 15},
-		combat_apr = 5,
+		inc_damage = { [DamageType.BLIGHT] = 5 },
+		on_melee_hit = {[DamageType. DRAINLIFE] = 10},
+		combat_apr = 15,
 	},
 }
 
@@ -1617,9 +1619,9 @@ It has been kept somewhat intact with layers of salt and clay, but in spite of t
 		if who.descriptor and who.descriptor.race == "Halfling" then
 			local Stats = require "engine.interface.ActorStats"
 			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_LCK] = -10}) -- Overcomes the +5 Bonus and adds a -5 penalty
-			self:specialWearAdd({"wielder","combat_physresist"}, -5)
-			self:specialWearAdd({"wielder","combat_mentalresist"}, -5)
-			self:specialWearAdd({"wielder","combat_spellresist"}, -5)
+			self:specialWearAdd({"wielder","combat_physresist"}, -10)
+			self:specialWearAdd({"wielder","combat_mentalresist"}, -10)
+			self:specialWearAdd({"wielder","combat_spellresist"}, -10)
 			game.logPlayer(who, "#LIGHT_RED#You feel uneasy carrying %s.", self:getName())
 		end
 	end,
