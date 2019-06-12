@@ -3608,6 +3608,7 @@ newEntity{ base = "BASE_LONGSWORD", define_as="MORRIGOR",
 	},
 }
 
+-- cathtifacts : breath damage are ridiculously low, put them to TL3 and buffed stat mod. Multi-hit when fighting several things at once isn't good enough to warrant how bad this weapon is
 newEntity{ base = "BASE_WHIP", define_as = "HYDRA_BITE",
 	slot_forbid = "OFFHAND",
 	offslot = false,
@@ -3627,8 +3628,8 @@ newEntity{ base = "BASE_WHIP", define_as = "HYDRA_BITE",
 		dam = 56,
 		apr = 7,
 		physcrit = 14,
-		dammod = {str=1.1},
-		talent_on_hit = { [Talents.T_LIGHTNING_BREATH_HYDRA] = {level=1, chance=10}, [Talents.T_ACID_BREATH] = {level=1, chance=10}, [Talents.T_POISON_BREATH] = {level=1, chance=10} },
+		dammod = {str=0.9, dex=0.4},
+		talent_on_hit = { [Talents.T_LIGHTNING_BREATH_HYDRA] = {level=3, chance=10}, [Talents.T_ACID_BREATH] = {level=3, chance=10}, [Talents.T_POISON_BREATH] = {level=3, chance=10} },
 		--convert_damage = {[DamageType.NATURE]=25,[DamageType.ACID]=25,[DamageType.LIGHTNING]=25},
 		special_on_hit = {desc="hit up to two adjacent enemies",on_kill=1, fct=function(combat, who, target)
 				local o, item, inven_id = who:findInAllInventoriesBy("define_as", "HYDRA_BITE")
