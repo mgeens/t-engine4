@@ -2559,6 +2559,7 @@ newEntity{ base = "BASE_MINDSTAR",
 	color=colors.AQUAMARINE, image = "object/artifact/amethyst_of_sanctuary.png",
 	rarity = 250,
 	desc = [[This bright violet gem exudes a calming, focusing force. Holding it, you feel protected against outside forces.]],
+	special_desc = function(self) return "Reduce damage from attackers more than 3 tiles away by 25%" end,
 	cost = 185,
 	require = { stat = { wil=28 }, },
 	material_level = 4,
@@ -2575,16 +2576,22 @@ newEntity{ base = "BASE_MINDSTAR",
 		combat_mentalresist = 25,
 		max_psi = 20,
 		talents_types_mastery = {
-			["psionic/focus"] = 0.1,
-			["psionic/absorption"] = 0.2,
+			["psionic/focus"] = 0.3,
+			["psionic/absorption"] = 0.3,
 		},
 		resists={
 			[DamageType.MIND] 	= 15,
 		},
 		inc_stats = { [Stats.STAT_WIL] = 8,},
 	},
-	max_power = 25, power_regen = 1,
-	use_talent = { id = Talents.T_RESONANCE_FIELD, level = 3, power = 25 },
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, tmp, no_martyr)
+		if src and src.x and src.y then
+			if core.fov.distance(who.x, who.y, src.x, src.y) > 3 then
+				dam = dam * 0.75
+			end
+		end
+		return {dam=dam}
+	end,
 }
 
 newEntity{ base = "BASE_STAFF", define_as = "SET_SCEPTRE_LICH",
