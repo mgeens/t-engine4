@@ -146,7 +146,7 @@ newTalent{
 	cooldown = 25,
 	range = 10,
 	requires_target = true,
-	np_npc_use = true,
+	no_npc_use = true,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 2, 6)) end,
 	action = function(self, t)
 		local tg = {type="hit", nolock=true, range=self:getTalentRange(t), talent=t}
