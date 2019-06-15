@@ -786,7 +786,7 @@ newTalent{
 				inc_stats = { -- No crit chance for escorts
 					str=15 + self:combatMindpower(2) * self:combatTalentScale(t, 1/6, 5/6, 0.75),
 					wil=38,
-					con=20 + self:combatMindpower(1.5) * self:combatTalentScale(t, 1/6, 5/6, 0.75) + self:callTalent(self.T_RESILIENCE, "incCon"), 
+					con=20 + self:combatMindpower(1.5) * self:combatTalentScale(t, 1/6, 5/6, 0.75), 
 				},
 				level_range = {self.level, self.level}, exp_worth = 0,
 
