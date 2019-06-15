@@ -78,12 +78,12 @@ newTalent{
 		- Fire Drake: Appears with %d fire drake hatchling(s)
 		- War Hound: Reduce physical resistance of all foes in a radius by %d%%
 		- Jelly: Reduce nature resistance of all foes in a radius by %d%%
-		- Minotaur: Reduces movement speed of all foes in a radius by %d%%
+		- Minotaur: Reduces movement speed of all foes in a radius by %0.1f%%
 		- Stone Golem: Dazes all foes in a radius
 		- Turtle: Heals all friendly targets in a radius %d HP
 		- Spider: Pins all foes in a radius
 		Radius for effects is %d, and the duration of each lasting effect is %d turns.
-		The effects improve with your mindpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t) / 6, t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), t.slowStrength(self,t), t.amtHealing(self,t), radius, t.effectDuration(self, t))
+		The effects improve with your mindpower.]]):format(t.resReduction(self, t), t.poisonDamage(self,t) / 6, t.resReduction(self, t), t.nbEscorts(self, t), t.resReduction(self, t), t.resReduction(self, t), 100*t.slowStrength(self,t), t.amtHealing(self,t), radius, t.effectDuration(self, t))
 	end,
 }
 
