@@ -402,7 +402,8 @@ newTalent{
 	on_detonate = function(self, t, m)
 		local tg = {type="ball", range=self:getTalentRange(t), friendlyfire=false, radius=self:getTalentRadius(t), talent=t, x=m.x, y=m.y}
 		local explodeDamage = self:callTalent(self.T_DETONATE,"explodeSecondary")
-		self:project(tg, m.x, m.y, DamageType.FLAMESHOCK, self:mindCrit(explodeDamage))
+		local duration = 3
+		self:project(tg, m.x, m.y, DamageType.FLAMESHOCK, {dur=duration, dam=self:mindCrit(explodeDamage)})
 		game.level.map:particleEmitter(m.x, m.y, tg.radius, "ball_fire", {radius=tg.radius})
 	end,
 	on_arrival = function(self, t, m)
