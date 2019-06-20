@@ -2809,19 +2809,6 @@ function _M:onTakeHit(value, src, death_note)
 		end
 	end
 
-	-- Flat damage cap
-	if self.flat_damage_cap and self.max_life and death_note and death_note.damtype then
-		local cap = nil
-		if self.flat_damage_cap.all then cap = self.flat_damage_cap.all end
-		if self.flat_damage_cap[death_note.damtype] then cap = self.flat_damage_cap[death_note.damtype] end
-		if cap and cap > 0 then
-			local ignored = math.max(0, value - cap * self.max_life / 100)
-			if ignored > 0 then game:delayedLogDamage(src, self, 0, ("#LIGHT_GREY#(%d resilience)#LAST#"):format(ignored), false) end
-			value = value - ignored
-			print("[TAKE HIT] after flat damage cap", value)
-		end
-	end
-
 	if self.on_takehit then value = self:check("on_takehit", value, src, death_note) end
 
 	local eff = self:hasEffect(self.EFF_ELDRITCH_STONE)

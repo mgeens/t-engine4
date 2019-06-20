@@ -465,6 +465,19 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			game.logPlayer(src, "You end your target with a crushing blow!")
 		end
 
+		-- Flat damage cap
+		if target.flat_damage_cap then
+			local cap = nil
+			if target.flat_damage_cap.all then cap = target.flat_damage_cap.all end
+			if target.flat_damage_cap[type] then cap = target.flat_damage_cap[type] end
+			if cap and cap > 0 then
+				local ignored = math.max(0, dam - cap * target.max_life / 100)
+				if ignored > 0 then game:delayedLogDamage(src, target, 0, ("#LIGHT_GREY#(%d resilience)#LAST#"):format(ignored), false) end
+				dam = dam - ignored
+				print("[PROJECTOR] after flat damage cap", dam)
+			end
+		end
+
 		print("[PROJECTOR] final dam after static checks", dam)
 
 		local hd = {"DamageProjector:final", src=src, x=x, y=y, type=type, dam=dam, state=state}
@@ -3461,7 +3474,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			dam = target.burnArcaneResources and target:burnArcaneResources(dam) or 0
-			if src:knowTalent(src.T_AURA_OF_SILENCE) and src.combatGetDamageIncrease then
+			if src.knowTalent and src:knowTalent(src.T_AURA_OF_SILENCE) and src.combatGetDamageIncrease then
 				local bonus = src:combatGetDamageIncrease(DamageType.NATURE) / 100
 				if bonus > 0 then dam = dam * (1 + bonus) end
 			end
