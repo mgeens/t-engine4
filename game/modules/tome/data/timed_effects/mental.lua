@@ -206,7 +206,7 @@ newEffect{
 newEffect{
 	name = "DOMINANT_WILL_BOSS", image = "talents/yeek_will.png",
 	desc = "Mental Domination",
-	long_desc = function(self, eff) return ("The target's mind has been shaken. It is temporarily aligned with %s."):format(eff.src.name:capitalize()) end,
+	long_desc = function(self, eff) return ("The target's mind has been shaken. It is temporarily aligned with %s and immune to all damage."):format(eff.src.name:capitalize()) end,
 	type = "mental",
 	subtype = { dominate=true },
 	status = "detrimental",
@@ -218,6 +218,7 @@ newEffect{
 		eff.old_faction = self.faction
 		self.faction = eff.src.faction
 		self:effectTemporaryValue(eff, "never_anger", 1)
+		self:effectTemporaryValue(eff, "invulnerable", 1)
 	end,
 	deactivate = function(self, eff)
 		if eff.particle then self:removeParticles(eff.particle) end

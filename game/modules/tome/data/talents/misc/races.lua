@@ -905,7 +905,7 @@ newTalent{
 	info = function(self, t)
 	return ([[Shatter the mind of your victim, giving you full control of its actions for %s turns (based on your Willpower).
 	When the effect ends, you pull out your mind and the victim's body collapses, dead.
-	Targets with ranks at or above rare must be below 80%% of their maximum life to be controlled and will break free without dying after 3 turns.
+	Targets with ranks at or above rare must be below 80%% of their maximum life to be controlled, will be invulnerable for the duration, and will break free of the effect without dying after 3 turns.
 	This effect cannot be saved against but checks instakill immunity.]]):format(t.getduration(self))
 	end,
 }
