@@ -80,7 +80,7 @@ newBirthDescriptor{
 		["wild-gift/summon-utility"]={true, 0.3},
 		["wild-gift/summon-augmentation"]={false, 0.3},
 		["wild-gift/summon-advanced"]={false, 0.3},
-		["wild-gift/mindstar-mastery"]={false, 0.1},
+		["wild-gift/mindstar-mastery"]={true, 0.3},
 		["cunning/survival"]={true, 0},
 		["technique/combat-training"]={true, 0},
 	},
