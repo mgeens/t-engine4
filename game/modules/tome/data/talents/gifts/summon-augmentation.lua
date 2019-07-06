@@ -74,7 +74,7 @@ newTalent{
 	hydraRegen = function(self,t) return self:combatTalentMindDamage (t, 8, 40) end,
 	jellySlow = function(self,t) return self:combatTalentLimit(t, 0.60, 0.10, 0.35) end,
 	minotaurConfuse = function(self,t) return self:combatTalentLimit(t, 50, 15, 35) end,
-	golemArmour = function(self,t) return self:combatTalentLimit(t, 100, 15, 50) end,
+	golemArmour = function(self,t) return self:combatTalentScale(t, 15, 33) end,
 	golemHardiness = function(self,t) return 15 + self:getTalentLevelRaw(t)*10 end,
 	shellShielding = function(self,t) return self:combatTalentMindDamage(t, 10, 35) end,
 	spiderKnockback = function(self,t) return 1 + math.floor(self:getTalentLevel(t)) end,
