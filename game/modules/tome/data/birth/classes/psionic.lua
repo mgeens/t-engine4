@@ -168,7 +168,7 @@ newBirthDescriptor{
 		["psionic/dreaming"]={true, 0.3},
 		["psionic/feedback"]={true, 0.3},
 		["psionic/mentalism"]={true, 0.3},
-		["cunning/survival"]={true, 0},
+		["cunning/survival"]={true, 0.0},
 
 		-- locked trees
 		["psionic/discharge"]={false, 0.3},

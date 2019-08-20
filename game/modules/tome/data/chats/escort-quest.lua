@@ -95,11 +95,13 @@ local reward_types = {
 	survival = {
 		types = {
 			["cunning/survival"] = 1.0,
+			["cunning/scoundrel"] = 1.0,
 		},
 		talents = {
 			[Talents.T_HEIGHTENED_SENSES] = 1,
-			[Talents.T_DEVICE_MASTERY] = 1,
 			[Talents.T_TRACK] = 1,
+			[Talents.T_LACERATING_STRIKES] = 1,
+			[Talents.T_MISDIRECTION] = 1,
 		},
 		stats = {
 			[Stats.STAT_DEX] = 5,

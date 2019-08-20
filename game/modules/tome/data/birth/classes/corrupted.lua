@@ -63,7 +63,7 @@ newBirthDescriptor{
 	stats = { str=4, mag=4, dex=1, },
 	talents_types = {
 		["technique/combat-training"]={true, 0.3},
-		["cunning/survival"]={false, 0.1},
+		["cunning/survival"]={false, 0.0},
 		["corruption/sanguisuge"]={true, 0.0},
 		["corruption/reaving-combat"]={true, 0.3},
 		["corruption/scourge"]={true, 0.3},
@@ -130,7 +130,7 @@ newBirthDescriptor{
 		end,
 	},
 	talents_types = {
-		["cunning/survival"]={false, 0},
+		["cunning/survival"]={false, 0.0},
 		["corruption/sanguisuge"]={true, 0.3},
 		["corruption/hexes"]={true, 0.3},
 		["corruption/curses"]={true, 0.3},
