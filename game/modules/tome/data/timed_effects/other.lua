@@ -3426,25 +3426,16 @@ newEffect{
 newEffect{
 	name = "SCOUNDREL", image = "talents/scoundrel.png",
 	desc = "Scoundrel's Strategies",
-	long_desc = function(self, eff) return ("The target is suffering from disabling wounds, reducing their critical strike chance by %d%%."):
+	long_desc = function(self, eff) return ("The target is suffering from disabling wounds, reducing their critical strike damage by %d%%."):
 		format( eff.power ) end,
 	type = "other",
 	subtype = { tactic=true },
 	status = "detrimental",
 	parameters = { power=1 },
 	activate = function(self, eff)
-		eff.cur_pcrit = -eff.power
-		eff.cur_scrit = -eff.power
-		eff.cur_mcrit = -eff.power
-
-		eff.pcritid = self:addTemporaryValue("combat_physcrit", eff.cur_pcrit)
-		eff.scritid = self:addTemporaryValue("combat_spellcrit", eff.cur_scrit)
-		eff.mcritid = self:addTemporaryValue("combat_mindcrit", eff.cur_mcrit)
+		self:effectTemporaryValue(eff, "combat_critical_power", -eff.power)
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("combat_physcrit", eff.pcritid)
-		self:removeTemporaryValue("combat_spellcrit", eff.scritid)
-		self:removeTemporaryValue("combat_mindcrit", eff.mcritid)
 	end,
 }
 
@@ -3473,7 +3464,6 @@ newEffect{
 		old_eff.stacks = stackCount
 		
 		return old_eff
-		
 	end,
 	activate = function(self, eff)
 		eff.cur_fail = eff.power
@@ -3482,14 +3472,18 @@ newEffect{
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("scoundrel_failure", eff.failid)
 	end,
-	callbackOnTalentDisturbed = function(self, eff, t)
+	do_Fumble = function(self, eff)
+		eff.src:projectSource({"hit"}, self.x, self.y, DamageType.PHYSICAL, eff.src:physicalCrit(eff.dam), nil, eff)
+	end,
+	callbackOnTalentDisturbed = function(self, eff, t, failure_cause)
 		if self:attr("scoundrel_failure") then
-			DamageType:get(DamageType.PHYSICAL).projector(eff.src or self, self.x, self.y, DamageType.PHYSICAL, eff.dam)
-			self:removeEffect(self.EFF_FUMBLE)
+			self:callEffect(self.EFF_FUMBLE, "do_Fumble")
+			if failure_cause == eff then
+				self:removeEffect(self.EFF_FUMBLE)
+			end
 		end
 	end,
 }
-
 
 newEffect{
 	name = "TOUCH_OF_DEATH", image = "talents/touch_of_death.png",
@@ -3725,5 +3719,29 @@ newEffect{
 	activate = function(self, eff)
 		self:effectTemporaryValue(eff, "inc_damage", {all = eff.dam})
 		self:effectTemporaryValue(eff, "resists", {all = eff.res})
+	end,
+}
+
+newEffect{
+	name = "INTIMIDATED",
+	desc = "Intimidated",
+	long_desc = function(self, eff) return ("The target's morale is weakened, reducing its attack power, mind power, and spellpower by %d."):format(eff.power) end,
+	charges = function(self, eff) return math.round(eff.power) end,	
+	type = "other",
+	subtype = { },
+	status = "detrimental",
+	on_gain = function(self, err) return "#Target#'s morale has been lowered.", "+Intimidated" end,
+	on_lose = function(self, err) return "#Target# has regained its confidence.", "-Intimidated" end,
+	parameters = { power=1 },
+	activate = function(self, eff)
+		eff.damid = self:addTemporaryValue("combat_dam", -eff.power)
+		eff.spellid = self:addTemporaryValue("combat_spellpower", -eff.power)
+		eff.mindid = self:addTemporaryValue("combat_mindpower", -eff.power)
+		game.level.map:particleEmitter(self.x, self.y, 1, "flame")	
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_dam", eff.damid)
+		self:removeTemporaryValue("combat_spellpower", eff.spellid)
+		self:removeTemporaryValue("combat_mindpower", eff.mindid)
 	end,
 }
