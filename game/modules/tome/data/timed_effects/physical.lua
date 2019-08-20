@@ -4147,3 +4147,105 @@ newEffect{
 		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed)
 	end,
 }
+
+newEffect{ name = "CROOKED", image = "shockbolt/object/artifact/weapon_crooked_club.png",
+	desc = "Crooked",
+	long_desc = function(self, eff) return ("The target becomes more and more primitive, reducing accuracy and powers by %d"):format(eff.power*eff.stacks) end,
+	type = "physical",
+	subtype = { }, 
+	status = "detrimental",
+	parameters = { power=10, stacks=1, max_stacks=5 },
+	
+	on_merge = function(self, old_eff, new_eff)
+		old_eff.dur = new_eff.dur
+		old_eff.stacks = math.min(old_eff.stacks + new_eff.stacks, new_eff.max_stacks)
+		self:removeTemporaryValue("combat_atk", old_eff.acc)
+		self:removeTemporaryValue("combat_mindpower", old_eff.mental)
+		self:removeTemporaryValue("combat_spellpower", old_eff.spell)
+		self:removeTemporaryValue("combat_dam", old_eff.physical)	
+		old_eff.acc = self:addTemporaryValue("combat_atk", -old_eff.power*old_eff.stacks)
+		old_eff.mental = self:addTemporaryValue("combat_mindpower", -old_eff.power*old_eff.stacks)
+		old_eff.spell = self:addTemporaryValue("combat_spellpower", -old_eff.power*old_eff.stacks)
+		old_eff.physical = self:addTemporaryValue("combat_dam", -old_eff.power*old_eff.stacks)	
+		return old_eff
+		
+	end,
+	
+	activate = function(self, eff)		
+		eff.acc = self:addTemporaryValue("combat_atk", -eff.power*eff.stacks )
+		eff.mental = self:addTemporaryValue("combat_mindpower", -eff.power*eff.stacks)
+		eff.spell = self:addTemporaryValue("combat_spellpower", -eff.power*eff.stacks)
+		eff.physical = self:addTemporaryValue("combat_dam", -eff.power*eff.stacks)
+	end,
+	
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_atk", eff.acc)
+		self:removeTemporaryValue("combat_mindpower", eff.mental)
+		self:removeTemporaryValue("combat_spellpower", eff.spell)
+		self:removeTemporaryValue("combat_dam", eff.physical)
+	end,
+}
+
+newEffect{
+	name = "ELDORAL", image = "talents/uncanny_reload.png",
+	desc = "Eldoral",
+	long_desc = function(self, eff) return ("Firing slings does not consume shots."):format() end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { speed = 20, fatigue = 100},
+	on_gain = function(self, err) return "#Target# is focused on firing.", "+Eldoral" end,
+	on_lose = function(self, err) return "#Target# is less focused.", "-Eldoral" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "infinite_ammo", 1)
+		self:effectTemporaryValue(eff, "combat_physspeed", eff.speed/100)
+		self:effectTemporaryValue(eff, "fatigue", -eff.fatigue)
+	end,
+}
+
+newEffect{
+	name = "SILENT_STEALTH", image = "talents/stealth.png",
+	desc = "Stealthed",
+	long_desc = function(self, eff) return ("Gain %d stealth power"):format(eff.power) end,
+	type = "physical",
+	subtype = { },
+	status = "beneficial",
+	parameters = { power = 30 },
+	on_gain = function(self, err) return "#Target# is more stealthy.", "+Silent stealth" end,
+	on_lose = function(self, err) return "#Target# is visible again.", "-Silent stealth" end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "stealth", eff.power)
+	end,
+}
+
+newEffect{
+	name = "FORGONE_VISION", image = "effects/blinded.png",
+	desc = "Blinded",
+	long_desc = function(self, eff) return "The target is blinded, unable to see anything." end,
+	type = "other",
+	subtype = {},
+	status = "detrimental",
+	parameters = {power = 2},
+	on_lose = function(self, err) return "#Target# recovers sight.", "-Blind" end,
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("blind", 1)
+		eff.blind = self:addTemporaryValue("blind_immune", eff.power) --Lets the player control blinds for the duration--
+		if game.level then
+			self:resetCanSeeCache()
+			if self.player then for uid, e in pairs(game.level.entities) do if e.x then game.level.map:updateMap(e.x, e.y) end end game.level.map.changed = true end
+		end
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("blind", eff.tmpid)
+		self:removeTemporaryValue("blind_immune", eff.blind)
+		if game.level then
+			self:resetCanSeeCache()
+			if self.player then for uid, e in pairs(game.level.entities) do if e.x then game.level.map:updateMap(e.x, e.y) end end game.level.map.changed = true end
+		end
+	end,
+	callbackOnTakeoff = function(self, eff, o)
+		if o.name and o.name == "Yaldan Baoth" then
+			self:removeEffect(self.EFF_FORGONE_VISION)
+		end
+	end,
+}

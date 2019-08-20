@@ -4337,3 +4337,35 @@ newEffect{
 		self:effectTemporaryValue(eff, "global_speed_add", 0.2)
 	end,
 }
+
+newEffect{
+	name = "SHADOW_CUT", image = "",
+	desc = "Shadow Cut",
+	long_desc = function(self, eff) return ("Huge shadow cut that bleeds, doing %0.2f darkness damage per turn. Anytime you hit it you get healed for %d."):format(eff.dam/5, eff.heal) end,
+	type = "magical",
+	subtype = { wound=true, cut=true, bleed=true, darkness=true },
+	status = "detrimental",
+	parameters = { dam=1, heal=1 },
+	on_gain = function(self, err) return "#Target# starts to bleed darkness.", "+Shadow Cut" end,
+	on_lose = function(self, err) return "#Target# stops bleeding darkness.", "-Shadow Cut" end,
+	callbackOnMeleeHit = function(self, eff, src, dam)
+		if not dam or dam <= 0 or src ~= eff.src then return end
+
+		src:heal(eff.heal)
+		if core.shader.active(4) then
+			src:addParticles(Particles.new("shader_shield_temp", 1, {toback=true , size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=6000, beamsCount=15, noup=2.0, beamColor1={0xcb/255, 0xcb/255, 0xcb/255, 1}, beamColor2={0x35/255, 0x35/255, 0x35/255, 1}}))
+			src:addParticles(Particles.new("shader_shield_temp", 1, {toback=false, size_factor=1.5, y=-0.3, img="healdark", life=25}, {type="healing", time_factor=6000, beamsCount=15, noup=1.0, beamColor1={0xcb/255, 0xcb/255, 0xcb/255, 1}, beamColor2={0x35/255, 0x35/255, 0x35/255, 1}}))
+		end
+		game:playSoundNear(src, "talents/heal")
+	end,
+	activate = function(self, eff)
+		if eff.src and eff.src:knowTalent(self.T_BLOODY_BUTCHER) then
+			local t = eff.src:getTalentFromId(eff.src.T_BLOODY_BUTCHER)
+			local resist = math.min(t.getResist(eff.src, t), math.max(0, self:combatGetResist(DamageType.PHYSICAL)))
+			self:effectTemporaryValue(eff, "resists", {[DamageType.PHYSICAL] = -resist})
+		end
+	end,
+	on_timeout = function(self, eff)
+		DamageType:get(DamageType.DARKNESS).projector(eff.src or self, self.x, self.y, DamageType.DARKNESS, eff.dam)
+	end,
+}

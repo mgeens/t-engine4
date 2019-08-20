@@ -3713,3 +3713,17 @@ newEffect{
 		self:setTarget(eff.target.actor, eff.target.last)
 	end,
 }
+
+newEffect{
+	name = "UNLIT_HEART", image = "talents/armour_of_shadows.png",
+	desc = "Empowered by the shadows",
+	long_desc = function(self, eff) return ("Gain %d%% all damage and %d%% all res."):format(eff.dam, eff.res) end,
+	type = "other",
+	subtype = { darkness = true },
+	status = "beneficial",
+	parameters = { dam = 15, res = 10 },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_damage", {all = eff.dam})
+		self:effectTemporaryValue(eff, "resists", {all = eff.res})
+	end,
+}
