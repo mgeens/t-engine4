@@ -26,27 +26,7 @@ local Map = require "engine.Map"
 local Level = require "engine.Level"
 
 ---------- Item specific 
-newEffect{
-	name = "ITEM_NUMBING_DARKNESS", image = "effects/bane_blinded.png",
-	desc = "Numbing Darkness",
-	long_desc = function(self, eff) return ("The target is losing hope, all damage it does is reduced by %d%%."):format(eff.reduce) end,
-	charges = function(self, eff) return (tostring(math.floor(eff.reduce))) end,
-	type = "magical",
-	subtype = { darkness=true,}, no_ct_effect = true,
-	status = "detrimental",
-	parameters = {power=10, reduce=5},
-	on_gain = function(self, err) return "#Target# is weakened by the darkness!", "+Numbing Poison" end,
-	on_lose = function(self, err) return "#Target# regains their energy.", "-Darkness" end,
-	on_timeout = function(self, eff)
 
-	end,
-	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("numbed", eff.reduce)
-	end,
-	deactivate = function(self, eff)
-		self:removeTemporaryValue("numbed", eff.tmpid)
-	end,
-}
 
 -- Use a word other than disease because diseases are associated with damage
 -- Add dummy power/dam parameters to try to stay in line with other diseases for subtype checks
@@ -2342,8 +2322,8 @@ newEffect{
 newEffect{
 	name = "SPELLSURGE", image = "talents/gather_the_threads.png",
 	desc = "Spellsurge",
-	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):
-	format(eff.cur_power or eff.power) end,
+	long_desc = function(self, eff) return ("The target's spellpower has been increased by %d."):format(eff.cur_power or eff.power) end,
+	charges = function(self, eff) return math.floor(eff.cur_power or eff.power) end,
 	type = "magical",
 	subtype = { arcane=true },
 	status = "beneficial",
@@ -2372,7 +2352,7 @@ newEffect{
 newEffect{
 	name = "OUT_OF_PHASE", image = "talents/phase_door.png",
 	desc = "Out of Phase",
-	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%.\nThese effects cap at 60%%."):format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
+	long_desc = function(self, eff) return ("The target is out of phase with reality, increasing defense by %d, resist all by %d%%, and reducing the duration of detrimental timed effects by %d%%.\nThese effects cap at 40%%."):format(eff.defense or 0, eff.resists or 0, eff.effect_reduction or 0) end,
 	type = "magical",
 	subtype = { teleport=true },
 	status = "beneficial",
@@ -2380,9 +2360,9 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is out of phase.", "+Phased" end,
 	on_lose = function(self, err) return "#Target# is no longer out of phase.", "-Phased" end,
 	activate = function(self, eff)
-		eff.defense = math.min(60, eff.defense + (self:attr("defense_on_teleport") or 0))
-		eff.resists = math.min(60, eff.resists + (self:attr("resist_all_on_teleport") or 0))
-		eff.effect_reduction = math.min(60, eff.effect_reduction + (self:attr("effect_reduction_on_teleport") or 0))
+		eff.defense = math.min(40, eff.defense + (self:attr("defense_on_teleport") or 0))
+		eff.resists = math.min(40, eff.resists + (self:attr("resist_all_on_teleport") or 0))
+		eff.effect_reduction = math.min(40, eff.effect_reduction + (self:attr("effect_reduction_on_teleport") or 0))
 
 		eff.defid = self:addTemporaryValue("combat_def", eff.defense)
 		eff.resid= self:addTemporaryValue("resists", {all=eff.resists})
@@ -2390,9 +2370,9 @@ newEffect{
 		eff.particle = self:addParticles(Particles.new("phantasm_shield", 1))
 	end,
 	on_merge = function(self, old_eff, new_eff)
-		old_eff.defense = math.min(60, math.max(old_eff.defense, new_eff.defense)) or 0
-		old_eff.resists = math.min(60, math.max(old_eff.resists, new_eff.resists)) or 0
-		old_eff.effect_reduction = math.min(60, math.max(old_eff.effect_reduction, new_eff.effect_reduction)) or 0
+		old_eff.defense = math.min(40, math.max(old_eff.defense, new_eff.defense)) or 0
+		old_eff.resists = math.min(40, math.max(old_eff.resists, new_eff.resists)) or 0
+		old_eff.effect_reduction = math.min(40, math.max(old_eff.effect_reduction, new_eff.effect_reduction)) or 0
 
 		self:removeTemporaryValue("combat_def", old_eff.defid)
 		self:removeTemporaryValue("resists", old_eff.resid)

@@ -381,24 +381,22 @@ newEntity{
 -- laggy/blocks view, needs new gfx
 newEntity{
 	power_source = {arcane=true},
-	name = "elemental ", prefix=true, instant_resolve=true,
+	name = "elemental ", prefix=true, instant_resolve="last",
 	keywords = {elemental=true},
 	level_range = {20, 50},
 	greater_ego = 1,
 	unique_ego = 1,
 	rarity = 25,
 	cost = 35,
-	elemental_values = {dam=resolvers.mbonus_material(25, 5), pen=resolvers.mbonus_material(25, 5)},  -- We can't add this until the element is picked for sure
+	elemental_values = {dam=resolvers.mbonus_material(25, 5), pen=resolvers.mbonus_material(25, 5)},  -- We can't add this until the element is picked
 	wielder = {
-		resists_pen = resolvers.genericlast(function(e)
-			return {[e.combat.elemental_element[1]] = e.elemental_values.dam}
-		end),
-		inc_damage = resolvers.genericlast(function(e)
-			return {[e.combat.elemental_element[1]] = e.elemental_values.pen}
+		resolvers.genericlast(function(e, ego)
+			ego.wielder.resists_pen = {[ego.combat.elemental_element[1]] = ego.elemental_values.pen}
+			ego.wielder.inc_damage = {[ego.combat.elemental_element[1]] = ego.elemental_values.dam}
 		end)
 	},
 	combat = {
-		elemental_element = resolvers.rngtable{
+		elemental_element = resolvers.rngtable{  -- We put this in the combat table because special_on_hit isn't passed the full object
 			{engine.DamageType.FIRE, "flame", "fire"},
 			{engine.DamageType.COLD, "freeze", "cold"},
 			{engine.DamageType.LIGHTNING, "lightning_explosion", "lightning"},

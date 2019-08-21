@@ -465,6 +465,19 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			game.logPlayer(src, "You end your target with a crushing blow!")
 		end
 
+		-- Flat damage cap
+		if target.flat_damage_cap then
+			local cap = nil
+			if target.flat_damage_cap.all then cap = target.flat_damage_cap.all end
+			if target.flat_damage_cap[type] then cap = target.flat_damage_cap[type] end
+			if cap and cap > 0 then
+				local ignored = math.max(0, dam - cap * target.max_life / 100)
+				if ignored > 0 then game:delayedLogDamage(src, target, 0, ("#LIGHT_GREY#(%d resilience)#LAST#"):format(ignored), false) end
+				dam = dam - ignored
+				print("[PROJECTOR] after flat damage cap", dam)
+			end
+		end
+
 		print("[PROJECTOR] final dam after static checks", dam)
 
 		local hd = {"DamageProjector:final", src=src, x=x, y=y, type=type, dam=dam, state=state}
@@ -535,7 +548,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			eff.isHit = true -- handle at the end of the turn
 		end
 
-		if not target.dead and dam > 0 and target:attr("elemental_harmony") and not target:hasEffect(target.EFF_ELEMENTAL_HARMONY) then
+		if not target.dead and dam > 0 and target:attr("elemental_harmony") and not target:hasEffect(target.EFF_ELEMENTAL_HARMONY) and target ~= src then
 			if type == DamageType.FIRE or type == DamageType.COLD or type == DamageType.LIGHTNING or type == DamageType.ACID or type == DamageType.NATURE then
 				target:setEffect(target.EFF_ELEMENTAL_HARMONY, target:callTalent(target.T_ELEMENTAL_HARMONY, "duration"), {power=target:attr("elemental_harmony"), type=type, no_ct_effect=true})
 			end
@@ -892,7 +905,7 @@ newDamageType{
 				end
 				return DamageType.defaultProjector(src, x, y, type, dam, state)
 			else
-				game.logSeen(target, "%s resists the mind attack!", target.name:capitalize())
+				--game.logSeen(target, "%s resists the mind attack!", target.name:capitalize())
 				return DamageType.defaultProjector(src, x, y, type, dam / 2, state)
 			end
 		end
@@ -3461,7 +3474,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			dam = target.burnArcaneResources and target:burnArcaneResources(dam) or 0
-			if src:knowTalent(src.T_AURA_OF_SILENCE) and src.combatGetDamageIncrease then
+			if src.knowTalent and src:knowTalent(src.T_AURA_OF_SILENCE) and src.combatGetDamageIncrease then
 				local bonus = src:combatGetDamageIncrease(DamageType.NATURE) / 100
 				if bonus > 0 then dam = dam * (1 + bonus) end
 			end

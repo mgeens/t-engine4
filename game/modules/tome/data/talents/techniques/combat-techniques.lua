@@ -130,11 +130,11 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 25,
-	stamina = 10,
+	stamina = 25,
 	require = techs_strdex_req3,
 	no_energy = true,
 	tactical = { BUFF = 2 },
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 25, 2, 6)) end, -- Limit < 25
+	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 7, 2, 5)) end, -- Limit < 25
 	getAtk = function(self, t) return self:combatTalentScale(t, 40, 100, 0.75) end,
 	action = function(self, t)
 		self:setEffect(self.EFF_ATTACK, t.getDuration(self, t), {power = t.getAtk(self, t)})

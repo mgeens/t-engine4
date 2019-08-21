@@ -143,8 +143,8 @@ newTalent{
 		local tgt = self.ai_target.actor
 		if self.stamina/self.max_stamina < 0.5 or tgt and core.fov.distance(self.x, self.y, tgt.x, tgt.y) < 10 and self:hasLOS(tgt.x, tgt.y) then return true end
 	end,
-	getAttackPower = function(self, t) return self:combatTalentStatDamage(t, "con", 5, 35) end,
-	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 24, 3, 7)) end, -- Limit < 24
+	getAttackPower = function(self, t) return self:combatTalentStatDamage(t, "con", 5, 45) end,
+	getDuration = function(self, t) return math.floor(self:combatTalentLimit(t, 10, 3, 7)) end, -- Limit < 24
 	no_energy = true,
 	action = function(self, t)
 		self:setEffect(self.EFF_ADRENALINE_SURGE, t.getDuration(self, t), {power = t.getAttackPower(self, t)})
@@ -154,7 +154,7 @@ newTalent{
 		local attack_power = t.getAttackPower(self, t)
 		local duration = t.getDuration(self, t)
 		return ([[You release a surge of adrenaline that increases your Physical Power by %d for %d turns. While the effect is active, you may continue to fight beyond the point of exhaustion.
-		Your stamina based sustains will not be disabled if your stamina reaches zero, and you may continue to use stamina based talents while at zero stamina at the cost of life.
+		You may continue to use stamina based talents while at zero stamina at the cost of life.
 		The Physical Power increase will scale with your Constitution.
 		Using this talent does not take a turn.]]):
 		format(attack_power, duration)

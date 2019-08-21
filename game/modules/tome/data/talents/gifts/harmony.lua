@@ -88,7 +88,7 @@ newTalent{
 		local lightning = math.floor(power)
 		local acid = 5 + power * 2
 		local nature = 5 + power * 1.4
-		return ([[Befriend the natural elements that constitute nature. Each time you are hit by one of the elements, you gain a special effect for %d turns. This can only happen every %d turns.
+		return ([[Befriend the natural elements that constitute nature. Whenever a creature damages you using one of the elements, you gain a special effect for %d turns. This can only happen every %d turns.
 		Fire: +%d%% global speed
 		Cold: +%d Armour
 		Lightning: +%d to all stats

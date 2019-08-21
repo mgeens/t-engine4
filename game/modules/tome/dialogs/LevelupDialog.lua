@@ -180,7 +180,7 @@ local subtleMessageOtherColor = {r=255, g=215, b=0}
 
 function _M:finish()
 	local ok, dep_miss = self:checkDeps(true, true)
-	if not ok then
+	if not ok and not config.settings.cheat then
 		self:simpleLongPopup("Impossible", "You cannot learn this talent(s): "..dep_miss, game.w * 0.4)
 		return nil
 	end
@@ -341,6 +341,7 @@ function _M:checkDeps(simple, ignore_special)
 end
 
 function _M:isUnlearnable(t, limit)
+	if config.settings.cheat then return 9999 end
 	if not self.actor.last_learnt_talents then return end
 	if self.on_birth and self.actor:knowTalent(t.id) and not t.no_unlearn_last then return 1 end -- On birth we can reset any talents except a very few
 	local list = self.actor.last_learnt_talents[t.generic and "generic" or "class"]
@@ -349,7 +350,7 @@ function _M:isUnlearnable(t, limit)
 	if limit then min = math.max(1, #list - (max - 1)) end
 	for i = #list, min, -1 do
 		if list[i] == t.id then
-			if not game.state.birth.force_town_respec or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
+			if not game.state.birth.force_town_respec or not self.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
 				return i
 			else
 				return nil, i
@@ -390,7 +391,7 @@ function _M:learnTalent(t_id, v)
 		if not self:isUnlearnable(t, true) and self.actor_dup:getTalentLevelRaw(t_id) >= self.actor:getTalentLevelRaw(t_id) then
 			local _, could = self:isUnlearnable(t, true)
 			if could then
-				self:subtleMessage("Impossible here", "You could unlearn this talent in a quiet place, like a #{bold}#town#{normal}#.", {r=200, g=200, b=255})
+				self:subtleMessage("Impossible here", "You must be out of combat or in a quiet place like a #{bold}#town#{normal}# to unlearn this talent.", {r=200, g=200, b=255})
 			else
 				self:subtleMessage("Impossible", "You cannot unlearn this talent!", subtleMessageErrorColor)
 			end
@@ -434,7 +435,7 @@ function _M:learnType(tt, v)
 			self.talent_types_learned[tt][1] = true
 		else
 			self.actor.__increased_talent_types[tt] = (self.actor.__increased_talent_types[tt] or 0) + 1
-			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt) + 0.2)
+			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt, true) + 0.2)
 			self.talent_types_learned[tt][2] = true
 		end
 		self:triggerHook{"PlayerLevelup:addTalentType", actor=self.actor, tt=tt}
@@ -456,7 +457,7 @@ function _M:learnType(tt, v)
 
 		if (self.actor.__increased_talent_types[tt] or 0) > 0 then
 			self.actor.__increased_talent_types[tt] = (self.actor.__increased_talent_types[tt] or 0) - 1
-			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt) - 0.2)
+			self.actor:setTalentTypeMastery(tt, self.actor:getTalentTypeMastery(tt, true) - 0.2)
 			self.actor.unused_talents_types = self.actor.unused_talents_types + 1
 			self.new_talents_changed = true
 			self.talent_types_learned[tt][2] = nil

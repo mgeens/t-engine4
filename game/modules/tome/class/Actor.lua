@@ -659,16 +659,13 @@ function _M:act()
 		for res, res_def in ipairs(_M.resources_def) do
 			if (t.remove_on_zero == nil and res_def.depleted_unsustain) or (t.remove_on_zero ~= nil and util.getval(t.remove_on_zero, self, t)) then
 				if t[res_def.sustain_prop] then
-					if res == self.RS_STAMINA and self:hasEffect(self.EFF_ADRENALINE_SURGE) then
+					if res_def.invert_values then
+						if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
+							deact = true break
+						end
 					else
-						if res_def.invert_values then
-							if self[res_def.maxname] and (self[res_def.maxname] - self[res_def.short_name]) < 1 then
-								deact = true break
-							end
-						else
-							if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
-								deact = true break
-							end
+						if self[res_def.minname] and (self[res_def.short_name] - self[res_def.minname]) < 1 then
+							deact = true break
 						end
 					end
 				end
@@ -1637,6 +1634,9 @@ function _M:teleportRandom(x, y, dist, min_dist)
 	
 	self:fireTalentCheck("callbackOnTeleport", teleported, ox, oy, self.x, self.y)
 
+	-- We store this so the AI can determine when an "abnormal" movement occured and not immediately cheat to their location with their own teleport, mostly
+	if teleported then self.last_special_movement = game.turn end
+	
 	return teleported
 end
 
@@ -2806,19 +2806,6 @@ function _M:onTakeHit(value, src, death_note)
 		if leech > 0 then
 			src:heal(leech, self)
 			game:delayedLogMessage(src, self, "lifesteal"..self.uid, "#CRIMSON##Source# steals life from #Target#!")
-		end
-	end
-
-	-- Flat damage cap
-	if self.flat_damage_cap and self.max_life and death_note and death_note.damtype then
-		local cap = nil
-		if self.flat_damage_cap.all then cap = self.flat_damage_cap.all end
-		if self.flat_damage_cap[death_note.damtype] then cap = self.flat_damage_cap[death_note.damtype] end
-		if cap and cap > 0 then
-			local ignored = math.max(0, value - cap * self.max_life / 100)
-			if ignored > 0 then game:delayedLogDamage(src, self, 0, ("#LIGHT_GREY#(%d resilience)#LAST#"):format(ignored), false) end
-			value = value - ignored
-			print("[TAKE HIT] after flat damage cap", value)
 		end
 	end
 
@@ -4878,8 +4865,9 @@ function _M:searchAllInventories(o, fct)
 end
 
 local oldGetTalentTypeMastery = _M.getTalentTypeMastery
-function _M:getTalentTypeMastery(tt)
+function _M:getTalentTypeMastery(tt, only_base)
 	local mastery = oldGetTalentTypeMastery(self, tt)
+	if only_base then return mastery end
 	local def = self:getTalentTypeFrom(tt)
 	local bonus1 = self.talents_mastery_bonus and self.talents_mastery_bonus[def.category] or 0
 	local bonus2 = self.talents_mastery_bonus and self.talents_mastery_bonus.all or 0
@@ -6604,6 +6592,7 @@ function _M:checkSetTalentAuto(tid, v, opt)
 		end
 		if opt == 3 then list[#list+1] = "- will only trigger if enemies are visible" end
 		if opt == 4 then list[#list+1] = "- will only trigger if enemies are visible and adjacent" end
+		if opt == 5 then list[#list+1] = "- will only trigger if you are not in combat" end
 
 		if #list == 0 then
 			doit()
@@ -6840,11 +6829,13 @@ function _M:talentCooldownFilter(t, change, nb, duplicate)
 
 	-- For each talent currently on cooldown find its definition (e) and add it to another table if the filter (t) applies
 	for tid, cd in pairs(self.talents_cd) do
-		if type(t) == "function" then
-			local e = self:getTalentFromId(tid)
-			if t(e) then talents[#talents+1] = {tid, cd} end
-		else -- Apply to all talents on cooldown the filter isn't a function
-			talents[#talents+1] = {tid, cd}
+		local e = self:getTalentFromId(tid)
+		if not e.fixed_cooldown then
+			if type(t) == "function" then
+				if t(e) then talents[#talents+1] = {tid, cd} end
+			else -- Apply to all talents on cooldown the filter isn't a function
+				talents[#talents+1] = {tid, cd}
+			end
 		end
 	end
 
@@ -6852,12 +6843,11 @@ function _M:talentCooldownFilter(t, change, nb, duplicate)
 	while #talents > 0 and nb > 0 do
 		local i = rng.range(1, #talents)
 		local t = talents[i]
-		local removed = false
 
 		self:alterTalentCoolingdown(t[1], -change)
 
 		if not duplicate then
-			if not removed then table.remove(talents, i) end -- only remove if it hasn't already been removed
+			table.remove(talents, i)
 		end
 
 		nb = nb - 1
@@ -7246,7 +7236,7 @@ end
 function _M:on_temporary_effect_added(eff_id, e, p)
 	self:registerCallbacks(e, eff_id, "effect")
 	self:fireTalentCheck("callbackOnTemporaryEffectAdd", eff_id, e, p)
-	if e.status == "detrimental" then self:enterCombatStatus() end
+	if e.status == "detrimental" and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() end
 
 	-- Register talent source if any
 	if (e.status == "beneficial" or e.status == "neutral") then
@@ -7262,7 +7252,7 @@ end
 function _M:on_temporary_effect_removed(eff_id, e, p)
 	self:unregisterCallbacks(e, eff_id)
 	self:fireTalentCheck("callbackOnTemporaryEffectRemove", eff_id, e, p)
-	if e.status == "detrimental" then self:enterCombatStatus() end
+	if e.status == "detrimental" and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() end
 end
 
 --- Called when we are initiating a projection
@@ -7801,7 +7791,7 @@ function _M:checkStillInCombat()
 	-- Status effects need rechecking
 	for eff_id, p in pairs(self.tmp) do
 		local e = self:getEffectFromId(eff_id)
-		if e.status == "detrimental" and e.decrease > 0 then self:enterCombatStatus() break end
+		if e.status == "detrimental" and e.decrease > 0 and e.type ~= "other" and not (e.ignore_from_combat_compute or (p.src and p.src.ignore_from_combat_compute)) then self:enterCombatStatus() break end 
 	end
 
 	if game.turn - self.in_combat < 50 then return end -- Still good?

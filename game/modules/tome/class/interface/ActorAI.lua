@@ -318,6 +318,7 @@ end
 
 -- Can an NPC shove or swap positions with a space occupied by another NPC?
 function _M:canBumpDisplace(target)
+	if target == game.player then return end
 	if target.rank >= self.rank then return false end
 	if not target.x then return end
 	if self.never_move or target.never_move or target.cant_be_moved then return false end

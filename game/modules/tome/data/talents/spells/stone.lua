@@ -155,7 +155,7 @@ newTalent{
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, t.getDuration(self, t),
-			DamageType.PHYSICAL_STUN, t.getDamage(self, t),
+			DamageType.PHYSICAL_STUN, self:spellCrit(t.getDamage(self, t)),
 			self:getTalentRadius(t),
 			5, nil,
 			{type="quake"},

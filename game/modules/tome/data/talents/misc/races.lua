@@ -258,7 +258,7 @@ newTalent{
 			local nb = 0
 			for eff_id, p in pairs(self.tmp) do
 				local e = self.tempeffect_def[eff_id]
-				if e.status == "detrimental" then nb = nb + 1 end
+				if e.type ~= "other" and e.status == "detrimental" then nb = nb + 1 end
 			end
 			return nb
 		end,
@@ -876,8 +876,12 @@ newTalent{
 		if not x or not y then return nil end
 		if not target or target.dead or target == self then return end
 		if game.party:hasMember(target) then return end
+		if target.instakill_immune and target.instakill_immune >= 1 then  -- We special case this instead of letting the canBe check waste the talent because instakill is at present always binary
+			game.logSeen(target, "%s is immune to instakill and mind control effects!", target.name:capitalize())
+			return
+		end
 		if target.rank > 3 and ((target.life / target.max_life) >= 0.8) then
-			game.logSeen(target, "%s must be below 70%% of their max life to be controlled!", target.name:capitalize())
+			game.logSeen(target, "%s must be below 80%% of their max life to be controlled!", target.name:capitalize())
 			return
 		end
 		self:project(tg, x, y, function(px, py)
@@ -901,7 +905,7 @@ newTalent{
 	info = function(self, t)
 	return ([[Shatter the mind of your victim, giving you full control of its actions for %s turns (based on your Willpower).
 	When the effect ends, you pull out your mind and the victim's body collapses, dead.
-	Targets with ranks at or above rare must be below 80%% of their maximum life to be controlled and will break free without dying after 3 turns.
+	Targets with ranks at or above rare must be below 80%% of their maximum life to be controlled, will be invulnerable for the duration, and will break free of the effect without dying after 3 turns.
 	This effect cannot be saved against but checks instakill immunity.]]):format(t.getduration(self))
 	end,
 }

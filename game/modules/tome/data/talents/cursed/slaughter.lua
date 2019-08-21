@@ -88,6 +88,7 @@ newTalent{
 	require = cursed_str_req2,
 	points = 5,
 	tactical = { ATTACKAREA = { PHYSICAL = 2 } },
+	is_melee = true,
 	random_ego = "attack",
 	cooldown = 12,
 	hate = 2,
@@ -168,6 +169,7 @@ newTalent{
 	hate = 5,
 	range = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
 	tactical = { CLOSEIN = 2 },
+	is_melee = true,
 	requires_target = true,
 	getDamageMultiplier = function(self, t, hate)
 		return 0.7 * getHateMultiplier(self, 0.5, 1, false, hate)
