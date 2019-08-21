@@ -172,8 +172,10 @@ newTalent{
 	-- called by _M:combatSpellpower in mod\class\interface\Combat.lua
 	getSpellpower = function(self, t) return self:combatTalentScale(t, 20, 40, 0.75) end,
 	info = function(self, t)
-		return ([[The user gains a bonus to Spellpower equal to %d%% of their Cunning.]]):
-		format(t.getSpellpower(self,t))
+		local spellpower = t.getSpellpower(self, t)
+		local bonus = self:getCun()*spellpower/100
+		return ([[The user gains a bonus to Spellpower equal to %d%% of your Cunning (Current bonus: %d).]]):
+		format(spellpower, bonus)
 	end,
 }
 

@@ -64,8 +64,9 @@ newTalent{
 	getSpellpower = function(self, t) return self:combatTalentScale(t, 20, 40, 0.75) end,
 	info = function(self, t)
 		local spellpower = t.getSpellpower(self, t)
-		return ([[Your preparations give you greater magical capabilities. You gain a bonus to Spellpower equal to %d%% of your Cunning.]]):
-		format(spellpower)
+		local bonus = self:getCun()*spellpower/100
+		return ([[Your preparations give you greater magical capabilities. You gain a bonus to Spellpower equal to %d%% of your Cunning (Current bonus: %d).]]):
+		format(spellpower, bonus)
 	end,
 }
 
