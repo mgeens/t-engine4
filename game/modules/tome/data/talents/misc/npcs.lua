@@ -3703,6 +3703,7 @@ newTalent{
 		Effect increases with Mindpower.]]):
 		format(duration, power)
 	end,
+}
 
 newTalent{
 	name = "Circle of Blazing Light",
