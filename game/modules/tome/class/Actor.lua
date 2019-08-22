@@ -2668,12 +2668,6 @@ function _M:onTakeHit(value, src, death_note)
 		t.do_vitality_recovery(self, t)
 	end
 
-	-- Daunting Presence?
-	if value > (self.max_life / 20) and self:isTalentActive(self.T_DAUNTING_PRESENCE) then
-		local t = self:getTalentFromId(self.T_DAUNTING_PRESENCE)
-		t.do_daunting_presence(self, t)
-	end
-
 	-- Shield of Light
 	tal = self:isTalentActive(self.T_SHIELD_OF_LIGHT)
 	if tal then
