@@ -1192,6 +1192,7 @@ function _M:loadList(file, no_default, res, mod, loaded)
 
 			local e = newenv.class.new(t, no_default)
 			if type(mod) == "function" then mod(e) end
+			if _M.alter_entity_load then _M.alter_entity_load(e) end
 
 			res[#res+1] = e
 			if t.define_as then res[t.define_as] = e end
@@ -1200,6 +1201,7 @@ function _M:loadList(file, no_default, res, mod, loaded)
 		importEntity = function(t)
 			local e = t:cloneFull()
 			if mod then mod(e) end
+			if _M.alter_entity_load then _M.alter_entity_load(e) end
 			res[#res+1] = e
 			if t.define_as then res[t.define_as] = e end
 		end,

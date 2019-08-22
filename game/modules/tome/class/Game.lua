@@ -45,6 +45,7 @@ local Actor = require "mod.class.Actor"
 local Party = require "mod.class.Party"
 local Player = require "mod.class.Player"
 local NPC = require "mod.class.NPC"
+local Entity = require "engine.Entity"
 
 local DebugConsole = require "engine.DebugConsole"
 local FlyingText = require "engine.FlyingText"
@@ -413,6 +414,12 @@ function _M:loaded()
 	Zone.alter_filter = function(...) return self.state:entityFilterAlter(...) end
 	Zone.post_filter = function(...) return self.state:entityFilterPost(...) end
 	Zone.ego_filter = function(...) return self.state:egoFilter(...) end
+	Entity.alter_entity_load = function(e)
+		if e:getEntityKind() == "object" and e.unique and not e.randart and e.level_range and not e.force_max_level_range then
+			e.level_range = table.clone(e.level_range)
+			e.level_range[2] = nil
+		end
+	end
 
 	self.uiset = (require("mod.class.uiset."..(config.settings.tome.uiset_mode or "Minimalist"))).new()
 
