@@ -1048,6 +1048,9 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 		_G.world:run()
 	end
 
+	-- TODO: Replace this with loading quickhotkeys from the profile.
+	if engine.interface.PlayerHotkeys then engine.interface.PlayerHotkeys:loadQuickHotkeys(mod.short_name, Savefile.hotkeys_file) end
+
 	-- Load the savefile if it exists, or create a new one if not (or if requested)
 	local save = engine.Savefile.new(_G.game.save_name)
 	if save:check() and not new_game then
@@ -1110,9 +1113,6 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 
 	profile:saveGenericProfile("modules_loaded", {name=mod.short_name, nb={"inc", 1}})
 	profile:setConfigsBatch(false)
-
-	-- TODO: Replace this with loading quickhotkeys from the profile.
-	if engine.interface.PlayerHotkeys then engine.interface.PlayerHotkeys:loadQuickHotkeys(mod.short_name, Savefile.hotkeys_file) end
 
 	core.wait.disable()
 	profile.waiting_auth_no_redraw = false
