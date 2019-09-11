@@ -115,6 +115,8 @@ newEntity{
 	rarity = 40,
 	cost = 40,
 	wielder = {
+	    heal_on_nature_summon = resolvers.mbonus_material(30, 15),
+	    nature_summon_max = resolvers.mbonus_material(2,1),
 		inc_damage = {
 			[DamageType.FIRE] = resolvers.mbonus_material(10, 5),
 			[DamageType.ACID] = resolvers.mbonus_material(10, 5),

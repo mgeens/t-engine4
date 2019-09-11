@@ -100,13 +100,6 @@ newEntity{ theme={mental=true}, name="generic psi on hit", points = 1, rarity = 
 }
 
 ----------------------------------------------------------------
--- Misc
-----------------------------------------------------------------
-newEntity{ theme={mental=true}, name="generic summon heal", points = 1, rarity = 16, level_range = {1, 50},
-	wielder = { heal_on_nature_summon  = resolvers.randartmax(10, 50), },
-}
-
-----------------------------------------------------------------
 -- Physical Themes
 ----------------------------------------------------------------
 ----------------------------------------------------------------
@@ -477,5 +470,4 @@ newEntity{ theme={defense=true, spell=true, temporal=true}, name="generic void",
 				effect_reduction_on_teleport = resolvers.randartmax(5, 15)
 	},
 }
-
 
