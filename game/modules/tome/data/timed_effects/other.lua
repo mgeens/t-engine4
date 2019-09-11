@@ -153,11 +153,24 @@ newEffect{
 }
 
 newEffect{
+	name = "SURGING_CIRCLES", image = "talents/celestial_surge.png",
+	desc = "Circle Surge",
+	long_desc = function(self, eff) return [[Residual power from the surge is emanating from the circles.
+		Shifting Shadows: +1 negative.
+		Sanctity: +1 postive.
+		Warding: +0.5 postive and negative.]] end,
+	type = "other",
+	subtype = {},
+	status = "beneficial",
+	paramters = {},
+}
+
+newEffect{
 	name = "FLASH_SHIELD", image = "talents/flash_of_the_blade.png",
 	desc = "Protected by the Sun",
 	long_desc = function(self, eff) return "The Sun has granted a brief immunity to all damage." end,
 	type = "other",
-	subtype = { },
+	subtype = {},
 	status = "beneficial",
 	on_gain = function(self, err) return "#Target# whirls around and a radiant shield surrounds them!", "+Divine Shield" end,
 	parameters = {},

@@ -469,10 +469,10 @@ newTalent{
 	target = function(self, t) -- for AI only
 		 return {type="ball", friendlyfire=false, friendlyblock=false, radius=t.range, range=0, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 7, 80) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 50) end,
 	getTargetCount = function(self, t) return math.floor(self:combatTalentScale(t, 1, 5)) end,
-	getNegativeDrain = function(self, t) return self:combatTalentLimit(t, 0, 5, 3) end,
-	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 end,
+	getNegativeDrain = function(self, t) return 5 end,
+	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 + 0.5 end,
 	callbackOnRest = function(self, t)
 		if not self:knowTalent(self.T_NEGATIVE_POOL) then return false end
 		if self.negative_regen > 0 and self.negative < self.max_negative then return true end
@@ -493,20 +493,19 @@ newTalent{
 		if #tgts <= 0 then return end
 		
 		local drain = t.getNegativeDrain(self, t)
-		local dam = rng.avg(1, self:spellCrit(t.getDamage(self, t)), 3)
+		self:incNegative(-drain)  -- Make sure to pay before Corona procs
+		local dam = self:spellCrit(t.getDamage(self, t))
 
 		-- Randomly take targets
 		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
 		for i = 1, t.getTargetCount(self, t) do
 			if #tgts <= 0 then break end
-			if self:getNegative() - 1 < drain then break end
 			local a, id = rng.table(tgts)
 			table.remove(tgts, id)
 
 			self:project(tg, a.x, a.y, DamageType.DARKNESS_BLIND, dam)
 			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "shadow_beam", {tx=a.x-self.x, ty=a.y-self.y})
 			game:playSoundNear(self, "talents/spell_generic")
-			self:incNegative(-drain)
 		end
 	end,
 	activate = function(self, t)
@@ -536,7 +535,7 @@ newTalent{
 	info = function(self, t)
 		return ([[Your passion for singing the praises of the Moons reaches its zenith; your hymns increase your negative energy regeneration by %0.2f per turn.
 		Your Hymns now fire shadowy beams that will hit up to %d of your foes within radius 5 for 1 to %0.2f damage, with a 20%% chance of blinding.
-		This powerful effect will drain %0.1f negative energy for each beam; no beam will fire if your negative energy is too low.
+		This powerful effect will drain %0.1f negative energy each time it fires at at least 1 target; no beam will fire if your negative energy is too low.
 		These values scale with your Spellpower.]]):format(t.getBonusRegen(self, t), t.getTargetCount(self, t), damDesc(self, DamageType.DARKNESS, t.getDamage(self, t)), t.getNegativeDrain(self, t))
 	end,
 }

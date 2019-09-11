@@ -5342,7 +5342,72 @@ function _M:getVim()
 		return previous_getVim(self)
 	end
 end
+--[[
+--darkest light negative gain
+local previous_incPositive = _M.incPositive
+function _M:incPositive(v)
+	if v > 0 and self:attr("darkest_light_mastery") then
+		local cost = math.abs(v)
+		self:incNegative(cost)
+		return previous_incPositive(self)
+	end
+end
+]]
 
+--darkest light cost switch vim template
+--Overwrite to set up darkest light
+local previous_incNegative = _M.incNegative
+function _M:incNegative(v)
+	if v < 0 and self:attr("darkest_light_mastery") then
+		local cost = math.abs(v)
+		if self.negative - cost < 0 then
+			local poscost = (cost - (self.negative or 0))
+			self:incNegative(-self.negative or 0)
+			self.positive = self.positive - poscost
+		else
+			return previous_incNegative(self, v)
+		end
+	else
+		return previous_incNegative(self, v)
+	end
+end
+
+-- Overwrite getVim to set up darkest light
+local previous_getNegative = _M.getNegative
+function _M:getNegative()
+	if self:attr("darkest_light_mastery") and self.on_preuse_checking_resources then
+		return math.max(self.negative, self.positive)
+	else
+		return previous_getNegative(self)
+	end
+end
+--[[
+
+--darkest light cost switch
+
+local previous_incNegative = _M.incNegative
+function _M:incNegative(v)
+	if v < 0 and self:attr("darkest_light_mastery") then
+		local cost = math.abs(v)
+		if self.negative - cost < 0 then
+			self:incPositive(cost)
+		else
+			return previous_incNegative(self, v)
+		end
+	else
+		return previous_incNegative(self, v)
+	end
+end
+
+local previous_getNegative = _M.getNegative
+function _M:getPositive()
+	if self:attr("darkest_light_mastery") and self.on_preuse_checking_resources then
+		return math.max(self.positive, self.negative)
+	else
+		return previous_getNegative(self)
+	end
+end
+]]
 -- Feedback Pseudo-Resource Functions
 function _M:getFeedback()
 	if self.psionic_feedback then

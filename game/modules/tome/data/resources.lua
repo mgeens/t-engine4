@@ -150,13 +150,13 @@ ActorResource:defineResource("Vim", "vim", ActorTalents.T_VIM_POOL, "vim_regen",
 ActorResource:defineResource("Positive energy", "positive", ActorTalents.T_POSITIVE_POOL, "positive_regen", "Positive energy represents your reserve of positive power. It slowly decreases.", nil, nil, {
 	color = "#ffd700#",
 	randomboss_enhanced = true,
-	cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
+	--cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
 	Minimalist = {highlight = function(player, vc, vn, vm, vr) return vc >=0.7*vm end},
 })
 ActorResource:defineResource("Negative energy", "negative", ActorTalents.T_NEGATIVE_POOL, "negative_regen", "Negative energy represents your reserve of negative power. It slowly decreases.", nil, nil, {
 	color = "#7f7f7f#",
 	randomboss_enhanced = true,
-	cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
+	--cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
 	Minimalist = {highlight = function(player, vc, vn, vm, vr) return vc >=0.7*vm end},
 })
 ActorResource:defineResource("Hate", "hate", ActorTalents.T_HATE_POOL, "hate_regen", "Hate represents your soul's primal antipathy towards others.  It generally decreases whenever you have no outlet for your rage, and increases when you are damaged or destroy others.", nil, nil, {
