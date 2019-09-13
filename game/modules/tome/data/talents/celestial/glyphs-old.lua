@@ -263,7 +263,7 @@ newTalent{
 		format(damDesc(self, DamageType.PHYSICAL, damage), t.trapPower(self, t)*0.8, t.trapPower(self, t), duration)
 	end,
 }
---[[
+--[=[
 newTalent{
 	name = "Glyph of Explosion",
 	type = {"celestial/glyphs", 3},
@@ -351,7 +351,7 @@ newTalent{
 		format(damDesc(self, DamageType.LIGHT, damage), t.trapPower(self, t)*0.8, t.trapPower(self, t)*0.8, duration)
 	end,
 }
-]]
+]=]
 
 newTalent{
 	name = "Glyph of Fatigue",
