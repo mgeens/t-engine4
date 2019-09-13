@@ -1,5 +1,3 @@
-
-
 -- ToME - Tales of Maj'Eyal
 -- Copyright (C) 2009 - 2018 Nicolas Casalini
 --
@@ -23,7 +21,7 @@ local Trap = require "mod.class.Trap"
 
 newTalent{
 	name = "Glyph of Explosion",
-	type = {"celestial/glyphs", 3},
+	type = {"celestial/other", 3},
 	require = divi_req_high3,
 	random_ego = "attack",
 	points = 5,
@@ -112,7 +110,7 @@ newTalent{
 
 newTalent{
 	name = "Glyph of Paralysis",
-	type = {"celestial/glyphs", 1},
+	type = {"celestial/other", 1},
 	require = divi_req_high1,
 	random_ego = "attack",
 	points = 5,
@@ -185,7 +183,7 @@ newTalent{
 
 newTalent{
 	name = "Glyph of Repulsion",
-	type = {"celestial/glyphs", 2},
+	type = {"celestial/other", 2},
 	require = divi_req_high2,
 	random_ego = "attack",
 	points = 5,
@@ -266,7 +264,7 @@ newTalent{
 --[=[
 newTalent{
 	name = "Glyph of Explosion",
-	type = {"celestial/glyphs", 3},
+	type = {"celestial/other", 3},
 	require = divi_req_high3,
 	random_ego = "attack",
 	points = 5,
@@ -355,7 +353,7 @@ newTalent{
 
 newTalent{
 	name = "Glyph of Fatigue",
-	type = {"celestial/glyphs", 4},
+	type = {"celestial/other", 4},
 	require = divi_req_high4,
 	random_ego = "attack",
 	points = 5,
