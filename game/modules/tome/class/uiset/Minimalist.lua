@@ -1601,7 +1601,10 @@ function _M:displayPlayer(scale, bx, by)
 			-- MTX
 			elseif bx >= 298 + pf_mtx_x and bx <= 298 + pf_mtx_x + pf_mtx[6] and by >= 6 + pf_mtx_y and by <= 6 + pf_mtx_y + pf_mtx[7] and profile:canMTXN() then
 				game.tooltip_x, game.tooltip_y = 1, 1; game:tooltipDisplayAtMap(game.w, game.h, "Show available cosmetic & fun microtransation")
-				if event == "button" and button == "left" then game.key:triggerVirtual("MTXN_PURCHASE") end
+				if event == "button" and button == "left" then
+					package.loaded["engine.dialogs.microtxn.MTXMain"] = nil
+					game:registerDialog(require("engine.dialogs.microtxn.MTXMain").new())
+				end
 			-- Move handle
 			elseif not self.locked and bx >= self.mhandle_pos.player.x and bx <= self.mhandle_pos.player.x + move_handle[6] and by >= self.mhandle_pos.player.y and by <= self.mhandle_pos.player.y + move_handle[7] then
 				self:uiMoveResize("player", button, mx, my, xrel, yrel, bx, by, event)

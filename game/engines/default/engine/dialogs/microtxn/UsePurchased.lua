@@ -65,7 +65,6 @@ function _M:init(mode)
 		ACCEPT = "EXIT",
 		EXIT = function()
 			game:unregisterDialog(self)
-			if on_exit then on_exit() end
 		end,
 	}
 end
@@ -88,6 +87,17 @@ function _M:use(item, button)
 Either you have the option currently disabled or you are playing a campaign that can not support these kind of events (mainly the Arena).
 Make sure you have #GOLD##{bold}#Allow online events#WHITE##{normal}# in the #GOLD##{bold}#Online#WHITE##{normal}# section of the game options set to "all". You can set it back to your own setting once you have received the event.
 ]], 600)
+		return
+	end
+
+	if item.is_shimmer then
+		game:unregisterDialog(self)
+		if item.is_installed then
+			Dialog:simplePopup(item.name, "This pack is already installed and in use for your character.")
+		else
+			local ShowPurchasable = require("engine.dialogs.microtxn.ShowPurchasable")
+			ShowPurchasable:installShimmer(item)
+		end
 		return
 	end
 
@@ -119,12 +129,22 @@ function _M:generateList()
 		end
 		if not e.list then return end
 		e.list = e.list:unserialize()
-		-- table.print(e.list)
+		table.print(e.list)
 
 		local list = {}
 		for _, item in ipairs(e.list) do
 			item.img = Entity.new{image=item.image}
 			item.display_name = item.img:getDisplayString().." "..item.name
+			if item.is_shimmer then
+				local pack_name = "cosmetic-"..item.effect
+				if game.__mod_info.addons and game.__mod_info.addons[pack_name] then
+					item.nb_available = "#LIGHT_GREEN#Installed"
+					item.is_installed = true
+				else
+					item.nb_available = "#YELLOW#Installable"
+					item.can_install = pack_name
+				end
+			end
 			list[#list+1] = item
 		end
 		self.list = list

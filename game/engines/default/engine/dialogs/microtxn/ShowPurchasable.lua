@@ -126,7 +126,7 @@ function _M:init(mode)
 		self:use(item.item, button)
 	end, select=function(item, sel) end}
 
---	local wv = WebView.new{width=500,height=500, url='https://i.giphy.com/media/uk9A7Mz8Jv4GI/giphy-downsized.gif'}
+	-- local wv = WebView.new{width=500,height=500, url='https://te4.org/images/tmp/mtx-short.gif'}
 
 	local uis = {
 		{vcenter=0, hcenter=0, ui=self.c_waiter},
@@ -134,7 +134,7 @@ function _M:init(mode)
 		{left=self.c_list, top=0, ui=vsep},
 		{right=0, top=0, ui=self.c_recap},
 		{right=0, bottom=0, ui=self.c_do_purchase},
---		{left=0, top=0, ui=wv},
+		-- {left=0, top=0, ui=wv},
 	}
 	-- Only show those for steam as te4.org purchases require already having a donation up
 	if mode == "steam" then
@@ -159,29 +159,6 @@ function _M:init(mode)
 	self:checks()
 
 	self:generateList()
-
-	if not config.settings.tome.mtxn_explain_seen then game:onTickEnd(function()
-		game:saveSettings("tome.mtxn_explain_seen", ("tome.mtxn_explain_seen = true\n"):format())
-		config.settings.tome.mtxn_explain_seen = true
-
-		Dialog:forceNextDialogUI("microtxn")
-		self:simpleLongPopup("Online Store", [[Welcome!
-
-I am #{italic}##ANTIQUE_WHITE#DarkGod#LAST##{normal}#, the creator of the game and before you go on your merry way I wish to take a few seconds of your time to explain why there are microtransactions in the game.
-
-Before you run off in terror let me put it plainly: I am very #{bold}#firmly #CRIMSON#against#LAST# pay2win#{normal}# things so rest assured I will not add this kind of stuff.
-
-So why put microtransactions? Tales of Maj'Eyal is a cheap/free game and has no subscription required to play. It is my baby and I love it; I plan to work on it for many years to come (as I do since 2009!) but for it to be viable I must ensure a steady stream of income as this is sadly the state of the world we live in.
-
-As for what kind of purchases are/will be available:
-- #GOLD#Cosmetics#LAST#: in addition to the existing racial cosmetics & item shimmers available in the game you can get new packs of purely cosmetic items & skins to look even more dapper!
-- #GOLD#Pay2DIE#LAST#: Tired of your character? End it with style!
-- #GOLD#Vault space#LAST#: For those that donated they can turn all those "useless" donations into even more online vault slots.
-- #GOLD#Community events#LAST#: A few online events are automatically and randomly triggered by the server. With those options you can force one of them to trigger; bonus point they trigger for the whole server so everybody online benefits from them each time!
-
-I hope I've convinced you of my non-evil intentions (ironic for a DarkGod I know ;)). I must say feel dirty even doing microtransactions even as benign as those but I want to find all the ways I can to ensure the game's future.
-Thanks, and have fun!]], math.min(900, game.w))
-	end) end
 end
 
 function _M:unload()
