@@ -116,6 +116,7 @@ local credits = {
 
 	{"Code Helpers", title=1},
 	{"Antagonist"},
+	{"Bunny"},
 	{"Graziel"},
 	{"Grayswandir"},
 	{"John 'Hachem Muche' Viles"},
