@@ -420,6 +420,21 @@ function _M:canWearObject(o, try_slot)
 				if self:getStat(s) < v then return nil, "not enough stat" end
 			end
 		end
+		if req.flag then
+			for _, flag in ipairs(req.flag) do
+				if type(flag) == "table" then
+					if not self:attr(flag[1]) or self:attr(flag[1]) < flag[2] then
+						local name = o.requirement_flags_names and o.requirement_flags_names[flag[1]] or flag[1]
+						return nil, "missing "..tostring(name).." (level "..tostring(flag[2])..")"
+					end
+				else
+					if not self:attr(flag) then
+						local name = o.requirement_flags_names and o.requirement_flags_names[flag] or flag
+						return nil, "missing "..tostring(name)
+					end
+				end
+			end
+		end
 		if req.level and self.level < req.level then
 			return nil, "not enough levels"
 		end
