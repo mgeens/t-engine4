@@ -97,6 +97,9 @@ int requested_fps_idle_saved = 0;
 bool forbid_idle_mode = FALSE;
 bool no_connectivity = FALSE;
 
+bool desktop_gamma_set = FALSE;
+float desktop_gamma = 1.0;
+
 SDL_TimerID display_timer_id = 0;
 SDL_TimerID realtime_timer_id = 0;
 
@@ -1112,6 +1115,11 @@ void do_resize(int w, int h, bool fullscreen, bool borderless, float zoom)
 				, TRUE);
 		SDL_SetWindowIcon(window, windowIconSurface);
 
+		if (!desktop_gamma_set) {
+			desktop_gamma = SDL_GetWindowBrightness(window);
+			desktop_gamma_set = TRUE;
+			printf("[GAMMA] Getting desktop gamma of %f\n", desktop_gamma);
+		}
 	} else {
 
 		/* SDL won't allow a fullscreen resolution change in one go.  Check. */
@@ -1740,7 +1748,7 @@ int main(int argc, char *argv[])
 	te4_web_terminate();
 	printf("Webcore shutdown complete\n");
 	// Restore default gamma on exit.
-	SDL_SetWindowBrightness(window, 1.0);
+	if (desktop_gamma_set) SDL_SetWindowBrightness(window, desktop_gamma);
 //	SDL_Quit();
 	printf("SDL shutdown complete\n");
 //	deinit_openal();
