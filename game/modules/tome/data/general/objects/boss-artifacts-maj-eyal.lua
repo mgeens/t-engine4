@@ -346,14 +346,68 @@ newEntity{ base = "BASE_LEATHER_BOOT",
 	callbackOnMove = function(self, who, moved, force, ox, oy, x, y)
 			if not moved or force or (ox == who.x and oy == who.y) then return end
 			local Talents = require "engine.interface.ActorTalents"
-			game.level.map:addEffect(who,
-				who.x, who.y, 5,
-				engine.DamageType.ITEM_FROST_TREADS, {},
-				1,
-				5, nil,
-				engine.MapEffect.new{zdepth=3, color_br=245, color_bg=245, color_bb=245, effect_shader="shader_images/ice_effect.png"},
-				nil, true
-			)
+
+			local e = game.level.map:hasEffectType(who.x, who.y, engine.DamageType.ITEM_FROST_TREADS)
+			if not e then
+				game.level.map:addEffect(who,
+					who.x, who.y, 5,
+					engine.DamageType.ITEM_FROST_TREADS, {},
+					1,
+					5, nil,
+					engine.MapEffect.new{zdepth=3, color_br=245, color_bg=245, color_bb=245, effect_shader="shader_images/ice_effect.png"},
+					function(e, update_shape_only, todel, i)
+						if not e.__setup_frost_tread then
+							e.__setup_frost_tread = true
+							e.grids_duration = {}
+							for lx, ys in pairs(e.grids) do
+								e.grids_duration[lx] = {}
+								for ly, _ in pairs(ys) do
+									e.grids_duration[lx][ly] = e.duration
+								end
+							end
+							e.duration = 50
+						end
+						if update_shape_only then return end
+
+						-- Find the ones to remove
+						local toremove = {}
+						for lx, ys in pairs(e.grids_duration) do
+							for ly, _ in pairs(ys) do
+								e.grids_duration[lx][ly] = e.grids_duration[lx][ly] - 1
+								if e.grids_duration[lx][ly] <= 0 then toremove[#toremove+1] = {x=lx, y=ly} end
+							end
+						end
+
+						-- Remove then now
+						while #toremove > 0 do
+							local g = table.remove(toremove)
+							e.grids_duration[g.x][g.y] = nil
+							if not next(e.grids_duration[g.x]) then e.grids_duration[g.x] = nil end
+							e.grids[g.x][g.y] = nil
+							if not next(e.grids[g.x]) then e.grids[g.x] = nil end
+						end
+
+						-- If nothing is left, we remove the while effect
+						if not next(e.grids) then
+							table.insert(todel, i)
+						end
+
+						return false
+					end, true
+				)
+			else
+				e.x, e.y = who.x, who.y
+				e.duration = 50
+				local ngrids = core.fov.circle_grids(who.x, who.y, 1, true)
+				for lx, ys in pairs(ngrids) do
+					for ly, _ in pairs(ys) do
+						e.grids[lx] = e.grids[lx] or {}
+						e.grids[lx][ly] = true
+						e.grids_duration[lx] = e.grids_duration[lx] or {}
+						e.grids_duration[lx][ly] = 5
+					end
+				end
+			end
 	end,
 	wielder = {
 		lite = 1,

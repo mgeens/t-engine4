@@ -1253,7 +1253,7 @@ function _M:processEffects(update_shape_only)
 		if e.duration <= 0 then
 			table.insert(todel, i)
 		elseif e.update_fct then
-			if e:update_fct(update_shape_only) then
+			if e:update_fct(update_shape_only, todel, i) then
 				if type(dir) == "table" then e.grids = core.fov.beam_any_angle_grids(e.x, e.y, e.radius, e.angle, e.dir.source_x or e.src.x or e.x, e.dir.source_y or e.src.y or e.y, e.dir.delta_x, e.dir.delta_y, true)
 				elseif e.dir == 5 then e.grids = core.fov.circle_grids(e.x, e.y, e.radius, true)
 				else e.grids = core.fov.beam_grids(e.x, e.y, e.radius, e.dir, e.angle, true) end
@@ -1289,6 +1289,12 @@ function _M:processEffects(update_shape_only)
 	end
 end
 
+--- Returns the first effect matching the given damage type, if any
+function _M:hasEffectType(x, y, type)
+	for i, e in ipairs(self.effects) do
+		if e.damtype == type and e.grids[x] and e.grids[x][y] then return e end
+	end
+end
 
 -------------------------------------------------------------
 -------------------------------------------------------------
