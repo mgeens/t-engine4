@@ -1405,7 +1405,7 @@ newEffect{
 		eff.src = self
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("additional_melee_chance", eff.extra_blow_chance) -- backwards compatibility
+		--self:removeTemporaryValue("additional_melee_chance", eff.extra_blow_chance) -- backwards compatibility
 	end,
 }
 
