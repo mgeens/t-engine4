@@ -46,7 +46,7 @@ uberTalent{
 	passives = function(self, t, tmptable)
 		self:talentTemporaryValue(tmptable, "resists_pen", {all = 25})
 		self:talentTemporaryValue(tmptable, "resists", {absolute = 25})
-		self:talentTemporaryValue(tmptable, "combat_def", math.max(self:getMag(), self:getDex()) * 0.7)	
+		self:talentTemporaryValue(tmptable, "combat_def", math.max(self:getMag(), self:getDex()) * 0.7)
 	end,
 	callbackOnStatChange = function(self, t, stat, v)
 		if (stat == self.STAT_MAG) or (stat == self.STAT_DEX) then

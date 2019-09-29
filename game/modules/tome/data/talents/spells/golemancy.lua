@@ -172,7 +172,7 @@ newTalent{
 		if not self.alchemy_golem then return end
 
 		local on_level = false
-		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do 
+		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
 			local act = game.level.map(x, y, Map.ACTOR)
 			if act and act == self.alchemy_golem then on_level = true break end
 		end end
@@ -274,7 +274,7 @@ newTalent{
 		local ammo = self:hasAlchemistWeapon()
 
 		local on_level = false
-		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do 
+		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
 			local act = game.level.map(x, y, Map.ACTOR)
 			if act and act == self.alchemy_golem then on_level = true break end
 		end end
