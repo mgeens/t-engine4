@@ -310,7 +310,7 @@ local minions_list = {
 		size_category = 3,
 		infravision = 10,
 		resolvers.racial(),
-		resolvers.tmasteries{ ["technique/other"]=0.3, }, 
+		resolvers.tmasteries{ ["technique/other"]=0.3, },
 		open_door = true,
 		blind_immune = 1,
 		see_invisible = 2,
@@ -338,7 +338,7 @@ local minions_list = {
 		size_category = 3,
 		infravision = 10,
 		resolvers.racial(),
-		resolvers.tmasteries{ ["technique/other"]=0.3, }, 
+		resolvers.tmasteries{ ["technique/other"]=0.3, },
 		open_door = true,
 		blind_immune = 1,
 		see_invisible = 2,
@@ -366,7 +366,7 @@ local minions_list = {
 		size_category = 3,
 		infravision = 10,
 		resolvers.racial(),
-		resolvers.tmasteries{ ["technique/other"]=0.3, }, 
+		resolvers.tmasteries{ ["technique/other"]=0.3, },
 		open_door = true,
 		blind_immune = 1,
 		see_invisible = 2,
@@ -663,7 +663,7 @@ local function makeNecroticMinion(self, lev)
 end
 --]]
 
-local minion_order = {"d_skel_warrior", "skel_warrior", "a_skel_warrior", "skel_archer", "skel_m_archer", "skel_mage", "ghoul", "ghast", "ghoulking","vampire", "m_vampire", "g_wight", "b_wight", "dread", "lich"} -- Sets listing order 
+local minion_order = {"d_skel_warrior", "skel_warrior", "a_skel_warrior", "skel_archer", "skel_m_archer", "skel_mage", "ghoul", "ghast", "ghoulking","vampire", "m_vampire", "g_wight", "b_wight", "dread", "lich"} -- Sets listing order
 
 -- Parameters are b, n, m, p where weight = b + n*tl + m*tl^p
 local MinionWeightParams = {
@@ -694,7 +694,7 @@ local function getMinionWeights(tl,wtable)
 	if type(tl) == "number" then tl = {tl} end
 	local tables = #wtable > 0 and #wtable or 1
 	local chances, sum = {}, 0
-	
+
 	for i = 1, tables do
 		for utype, params in pairs(tables > 1 and wtable[i] or wtable) do
 			chances[utype] = math.max(0,params[1] + params[2]*tl[i] + params[3]*tl[i]^params[4])
@@ -834,7 +834,7 @@ newTalent{
 		self:forceUseTalent(self.T_NECROTIC_AURA, {ignore_energy=true, ignore_cd=true, no_equilibrium_fail=true, no_paradox_fail=true})
 	end,
 	info = function(self, t)
-		return ([[Your dark power radiates further as you grow stronger. Increases the radius of your necrotic aura by %d, and reduces the decay rate of your minions outside the aura by %d%%. 
+		return ([[Your dark power radiates further as you grow stronger. Increases the radius of your necrotic aura by %d, and reduces the decay rate of your minions outside the aura by %d%%.
 		At level 3, necrotic minions inside your aura have a 25%% chance to refund their soul on death. If a minion turns into a will o' the wisp then the wisp will have that chance instead.]]):
 		format(math.floor(t.getbonusRadius(self, t)), math.min(7, self:getTalentLevelRaw(t)))
 	end,
