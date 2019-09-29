@@ -704,7 +704,6 @@ newEntity{ base = "BASE_STAFF",
 
 			local setupSummon = getfenv(who:getTalentFromId(who.T_SPIDER).action).setupSummon
 			if who:knowTalent(who.T_BLIGHTED_SUMMONING) then
-				crystal.blighted_summon_talent = who.T_BONE_SHIELD
 				crystal:incIncStat("mag", who:getMag())
 				crystal.summon_time=15
 			end

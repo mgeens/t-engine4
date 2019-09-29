@@ -210,7 +210,6 @@ newTalent{
 
 		if self:knowTalent(self.T_BLIGHTED_SUMMONING) then
 			ghoul:incIncStat("mag", self:getMag())
-			ghoul.blighted_summon_talent = self.T_REND
 		end
 		self:attr("summoned_times", 1)
 

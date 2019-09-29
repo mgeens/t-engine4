@@ -166,110 +166,42 @@ uberTalent{
 		return self:attr("summoned_times") and self:attr("summoned_times") >= 100
 	end} },
 	cant_steal = true,
+	-- Give the bonus to all summons immediately
 	on_learn = function(self, t)
-		local golem = self.alchemy_golem
-		if not golem then return end
-		golem:learnTalentType("corruption/reaving-combat", true)
-		golem:learnTalent(golem.T_CORRUPTED_STRENGTH, true, 3)
+		if game.party and game.party:hasMember(self) and game.party.members then
+			for act, def in pairs(game.party.members) do
+				if act ~= self and act.summoner == self then
+					if not act:knowTalent(act.T_BONE_SHIELD) then
+						act:learnTalent(act.T_BONE_SHIELD, true, 3, {no_unlearn=true})
+						act:forceUseTalent(act.T_BONE_SHIELD, {ignore_energy=true})
+					end
+					if not act:knowTalent(act.T_VIRULENT_DISEASE) then
+						act:learnTalent(act.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
+					end
+					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+					act:addTemporaryValue("all_damage_convert_percent", 50)
+				end
+			end
+		end
 	end,
-	bonusTalentLevel = function(self, t) return math.ceil(3*self.level/50) end, -- Talent level for summons
-	-- called by _M:addedToLevel and by _M:levelup in mod.class.Actor.lua
+	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
-		if who.necrotic_minion then who:incIncStat("mag", self:getMag()) end
-		local tlevel = self:callTalent(self.T_BLIGHTED_SUMMONING, "bonusTalentLevel")
-		-- learn specified talent if present
-		if who.blighted_summon_talent then 
-			who:learnTalent(who.blighted_summon_talent, true, tlevel)
-			if who.talents_def[who.blighted_summon_talent].mode == "sustained" then -- Activate sustained talents by default
-				who:forceUseTalent(who.blighted_summon_talent, {ignore_energy=true})
-			end 
-		elseif who.name == "war hound" then
-			who:learnTalent(who.T_CURSE_OF_DEFENSELESSNESS,true,tlevel)
-		elseif who.subtype == "jelly" then
-			who:learnTalent(who.T_VIMSENSE,true,tlevel)
-		elseif who.subtype == "minotaur" then
-			who:learnTalent(who.T_LIFE_TAP,true,tlevel)
-		elseif who.name == "stone golem" then
-			who:learnTalent(who.T_BONE_SPEAR,true,tlevel)
-		elseif who.subtype == "ritch" then
-			who:learnTalent(who.T_DRAIN,true,tlevel)
-		elseif who.type =="hydra" then
-			who:learnTalent(who.T_BLOOD_SPRAY,true,tlevel)
-		elseif who.name == "rimebark" then
-			who:learnTalent(who.T_POISON_STORM,true,tlevel)	
-		elseif who.name == "treant" then
-			who:learnTalent(who.T_CORROSIVE_WORM,true,tlevel)
-		elseif who.name == "fire drake" then
-			who:learnTalent(who.T_DARKFIRE,true,tlevel)
-		elseif who.name == "turtle" then
-			who:learnTalent(who.T_CURSE_OF_IMPOTENCE,true,tlevel)
-		elseif who.subtype == "spider" then
-			who:learnTalent(who.T_CORROSIVE_WORM,true,tlevel)
-		elseif who.subtype == "skeleton" then
-			who:learnTalent(who.T_BONE_GRAB,true,tlevel)
-		elseif who.subtype == "giant" and who.undead then
-			who:learnTalent(who.T_BONE_SHIELD,true,tlevel)
-		elseif who.subtype == "ghoul" then
-				who:learnTalent(who.T_BLOOD_LOCK,true,tlevel)
-		elseif who.subtype == "vampire" or who.subtype == "lich" then
-			who:learnTalent(who.T_DARKFIRE,true,tlevel)
-		elseif who.subtype == "ghost" or who.subtype == "wight" then
-			who:learnTalent(who.T_BLOOD_BOIL,true,tlevel)
-		elseif who.subtype == "shadow" then
-			local tl = who:getTalentLevelRaw(who.T_EMPATHIC_HEX)
-			tl = tlevel-tl
-			if tl > 0 then who:learnTalent(who.T_EMPATHIC_HEX, true, tl) end
-		elseif who.type == "thought-form" then
-			who:learnTalent(who.T_FLAME_OF_URH_ROK,true,tlevel)
-		elseif who.subtype == "yeek" then
-			who:learnTalent(who.T_DARK_PORTAL, true, tlevel)
-		elseif who.name == "bloated ooze" then
-			who:learnTalent(who.T_BONE_SHIELD,true,math.ceil(tlevel*2/3))
-		elseif who.name == "mucus ooze" then
-			who:learnTalent(who.T_VIRULENT_DISEASE,true,tlevel)
-		elseif who.name == "temporal hound" then
-			who:learnTalent(who.T_ELEMENTAL_DISCORD,true,tlevel)
-		else
---			print("Error: attempting to apply talent Blighted Summoning to incorrect creature type")
-			return false
+		if not who:knowTalent(who.T_BONE_SHIELD) then
+			who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
+			who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
 		end
-		who:incVim(who:getMaxVim())
-		return true
+		if not who:knowTalent(who.T_VIRULENT_DISEASE) then
+			who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
+		end
+		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+		who:addTemporaryValue("all_damage_convert_percent", 50)
 	end,
 	info = function(self, t)
-		local tl = t.bonusTalentLevel(self, t)
-		return ([[You infuse blighted energies into all of your summons, granting them a new talent (at talent level %d):
-		- War Hound: Curse of Defenselessness
-		- Jelly: Vimsense
-		- Minotaur: Life Tap
-		- Golem: Bone Spear
-		- Alchemy Golems: Corrupted Strength (level 3) and the Reaving Combat tree
-		- Ritch: Drain
-		- Hydra: Blood Spray
-		- Rimebark: Poison Storm
-		- Fire Drake: Darkfire
-		- Turtle: Curse of Impotence
-		- Spider: Corrosive Worm
-		- Skeletons: Bone Grab or Bone Spear
-		- Bone Giants: Bone Shield
-		- Ghouls: Blood Lock
-		- Ghoul Rot ghoul: Rend
-		- Vampires / Liches: Darkfire
-		- Ghosts / Wights: Blood Boil
-		- Shadows: Empathic Hex
-		- Thought-Forms: Flame of Urh'Rok
-		- Treants: Corrosive Worm
-		- Yeek Wayists: Dark Portal
-		- Bloated Oozes: Bone Shield (level %d)
-		- Mucus Oozes: Virulent Disease
-		- Temporal Hounds: Elemental Discord
+		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield and Virulent Disease at talent level 3 and causing 50%% of their damage to be converted to Blight.
 		Your necrotic minions and wild-summons get a bonus to Magic equal to yours.
-		The talent levels increase with your level, and other race- or object-based summons may also be affected.
-		]]):format(tl,math.ceil(tl*2/3))
+		]]):format()
 	end,
--- Note: Choker of Dread Vampire, and Mummified Egg-sac of Ungolë spiders handled by default
--- Crystal Shard summons use specified talent
 }
 
 uberTalent{
