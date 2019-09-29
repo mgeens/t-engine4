@@ -185,7 +185,6 @@ function setupSummon(self, m, x, y, no_control)
 		end
 	end
 
-	self:attr("summoned_times", 1)
 end
 
 load("/data/talents/gifts/call.lua")

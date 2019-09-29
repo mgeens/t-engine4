@@ -208,8 +208,6 @@ newTalent{
 		ghoul.unused_generics = 0
 		ghoul.unused_talents_types = 0
 
-		self:attr("summoned_times", 1)
-
 		game.zone:addEntity(game.level, ghoul, "actor", x, y)
 		game.level.map:particleEmitter(target.x, target.y, 1, "slime")
 		game:playSoundNear(target, "talents/slime")

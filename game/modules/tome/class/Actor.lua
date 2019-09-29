@@ -7420,6 +7420,10 @@ end
 function _M:addedToLevel(level, x, y)
 	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
 	local summoner = self.summoner
+	if summoner then
+		if summoner.alchemy_golem then summoner:attr("summoned_times", 100) -- Special case more permanent summons
+		else summoner:attr("summoned_times", 1) end -- Count summons times
+	end
 	if summoner and summoner:knowTalent(summoner.T_BLIGHTED_SUMMONING) then -- apply blighted summoning
 		summoner:callTalent(summoner.T_BLIGHTED_SUMMONING, "doBlightedSummon", self)
 	end

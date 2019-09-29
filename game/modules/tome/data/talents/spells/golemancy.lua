@@ -27,7 +27,6 @@ function getGolem(self)
 end
 
 function makeAlchemistGolem(self)
-	self:attr("summoned_times", 100)
 	local g = require("mod.class.NPC").new{
 		type = "construct", subtype = "golem",
 		name = "golem",
