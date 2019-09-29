@@ -703,10 +703,6 @@ newEntity{ base = "BASE_STAFF",
 			crystal:forgetInven(crystal.INVEN_INVEN)
 
 			local setupSummon = getfenv(who:getTalentFromId(who.T_SPIDER).action).setupSummon
-			if who:knowTalent(who.T_BLIGHTED_SUMMONING) then
-				crystal:incIncStat("mag", who:getMag())
-				crystal.summon_time=15
-			end
 			setupSummon(who, crystal, x, y)
 			game:playSoundNear(who, "talents/ice")
 		end

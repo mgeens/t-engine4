@@ -171,6 +171,10 @@ uberTalent{
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
 				if act ~= self and act.summoner == self then
+					if act:getMag() < self:getMag() then
+						act:incIncStat("mag", self:getMag() - act:getMag())
+					end
+					act:incVim(act:getMaxVim())
 					if not act:knowTalent(act.T_BONE_SHIELD) then
 						act:learnTalent(act.T_BONE_SHIELD, true, 3, {no_unlearn=true})
 						act:forceUseTalent(act.T_BONE_SHIELD, {ignore_energy=true})
@@ -187,6 +191,10 @@ uberTalent{
 	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
+		if who:getMag() < self:getMag() then
+			who:incIncStat("mag", self:getMag() - who:getMag())
+		end
+		who:incVim(who:getMaxVim())
 		if not who:knowTalent(who.T_BONE_SHIELD) then
 			who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
 			who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
@@ -199,7 +207,7 @@ uberTalent{
 	end,
 	info = function(self, t)
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield and Virulent Disease at talent level 3 and causing 50%% of their damage to be converted to Blight.
-		Your necrotic minions and wild-summons get a bonus to Magic equal to yours.
+		Your summons with Magic lower than yours will have their Magic set to equal yours.
 		]]):format()
 	end,
 }
