@@ -170,10 +170,10 @@ uberTalent{
 	on_learn = function(self, t)
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
-				if act ~= self and act.summoner == self then
-					if act:getMag() < self:getMag() then
-						act:incIncStat("mag", self:getMag() - act:getMag())
-					end
+				if act ~= self and act.summoner == self and not act.is_blighted_summon then
+					act:incIncStat("mag", self:getMag())
+					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+					act:addTemporaryValue("all_damage_convert_percent", 50)
 					act:incVim(act:getMaxVim())
 					if not act:knowTalent(act.T_BONE_SHIELD) then
 						act:learnTalent(act.T_BONE_SHIELD, true, 3, {no_unlearn=true})
@@ -182,19 +182,18 @@ uberTalent{
 					if not act:knowTalent(act.T_VIRULENT_DISEASE) then
 						act:learnTalent(act.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 					end
-					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-					act:addTemporaryValue("all_damage_convert_percent", 50)
+					act.is_blighted_summon = true
 				end
 			end
 		end
 	end,
 	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
-		if not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
-		if who:getMag() < self:getMag() then
-			who:incIncStat("mag", self:getMag() - who:getMag())
-		end
+		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
+		who:incIncStat("mag", self:getMag())
 		who:incVim(who:getMaxVim())
+		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+		who:addTemporaryValue("all_damage_convert_percent", 50)
 		if not who:knowTalent(who.T_BONE_SHIELD) then
 			who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
 			who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
@@ -202,12 +201,11 @@ uberTalent{
 		if not who:knowTalent(who.T_VIRULENT_DISEASE) then
 			who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 		end
-		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-		who:addTemporaryValue("all_damage_convert_percent", 50)
+		who.is_blighted_summon = true
 	end,
 	info = function(self, t)
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield and Virulent Disease at talent level 3 and causing 50%% of their damage to be converted to Blight.
-		Your summons with Magic lower than yours will have their Magic set to equal yours.
+		Your summons gain a bonus to Magic equal to yours.
 		]]):format()
 	end,
 }
