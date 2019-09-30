@@ -154,6 +154,8 @@ function makeAlchemistGolem(self)
 		g:learnTalentType("golem/drolem", true)
 	end
 
+	self:attr("summoned_times", 99)
+
 	return g
 end
 
