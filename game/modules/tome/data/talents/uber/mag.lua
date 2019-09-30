@@ -173,7 +173,6 @@ uberTalent{
 				if act ~= self and act.summoner == self and not act.is_blighted_summon then
 					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 					act:addTemporaryValue("all_damage_convert_percent", 50)
-					act:incVim(act:getMaxVim())
 					if not act:knowTalent(act.T_BONE_SHIELD) then
 						act:learnTalent(act.T_BONE_SHIELD, true, 3, {no_unlearn=true})
 						act:forceUseTalent(act.T_BONE_SHIELD, {ignore_energy=true})
@@ -189,7 +188,6 @@ uberTalent{
 	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
-		who:incVim(who:getMaxVim())
 		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 		who:addTemporaryValue("all_damage_convert_percent", 50)
 		if not who:knowTalent(who.T_BONE_SHIELD) then
