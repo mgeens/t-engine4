@@ -171,7 +171,6 @@ uberTalent{
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
 				if act ~= self and act.summoner == self and not act.is_blighted_summon then
-					act:incIncStat("mag", self:getMag())
 					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 					act:addTemporaryValue("all_damage_convert_percent", 50)
 					act:incVim(act:getMaxVim())
@@ -190,7 +189,6 @@ uberTalent{
 	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
-		who:incIncStat("mag", self:getMag())
 		who:incVim(who:getMaxVim())
 		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 		who:addTemporaryValue("all_damage_convert_percent", 50)
@@ -205,7 +203,7 @@ uberTalent{
 	end,
 	info = function(self, t)
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield and Virulent Disease at talent level 3 and causing 50%% of their damage to be converted to Blight.
-		Your summons gain a bonus to Magic equal to yours.
+		Your summons gain a bonus to spellpower equal to your magic.
 		]]):format()
 	end,
 }

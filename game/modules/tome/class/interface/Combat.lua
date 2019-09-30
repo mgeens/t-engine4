@@ -1765,6 +1765,9 @@ function _M:combatSpellpower(mod, add)
 	if self:hasEffect(self.EFF_BLOODLUST) then
 		add = add + self:hasEffect(self.EFF_BLOODLUST).spellpower * self:hasEffect(self.EFF_BLOODLUST).stacks
 	end
+	if self.summoner and self.summoner:knowTalent(self.summoner.T_BLIGHTED_SUMMONING) then
+		add = add + self.summoner:getMag()
+	end
 
 	local am = 1
 	if self:attr("spellpower_reduction") then am = 1 / (1 + self:attr("spellpower_reduction")) end
