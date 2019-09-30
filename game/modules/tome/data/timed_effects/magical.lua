@@ -25,7 +25,7 @@ local Chat = require "engine.Chat"
 local Map = require "engine.Map"
 local Level = require "engine.Level"
 
----------- Item specific 
+---------- Item specific
 
 
 -- Use a word other than disease because diseases are associated with damage
@@ -497,7 +497,7 @@ newEffect{
 	name = "BANE_CONFUSED", image = "effects/bane_confused.png",
 	desc = "Bane of Confusion",
 	long_desc = function(self, eff) return ("The target is confused, acting randomly (chance %d%%), unable to perform complex actions and takes %0.2f darkness damage per turn."):format(eff.power, eff.dam) end,
-	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,
 	type = "magical",
 	subtype = { bane=true, confusion=true },
 	status = "detrimental",
@@ -1370,19 +1370,24 @@ newEffect{
 	name = "DIVINE_GLYPHS", image = "talents/glyph_of_explosion.png",
 	desc = "Divine Glyphs",
 	long_desc = function(self, eff)
-		return ("A divine glyph recently triggered, providing %d%% light and darkness affinity and resistence."):format(math.min(eff.maxStacks, eff.glyphstacks or 1)*5)
+		return ("A divine glyph recently triggered, providing %d%% light and darkness affinity and resistence."):format(eff.power)
 	end,
 	type = "magical",
 	subtype = {light=true, darkness=true},
 	status = "beneficial",
 	paramters ={},
 	activate = function(self, eff)
-		local power = math.min(eff.maxStacks, eff.glyphstacks or 1)*5
-		self:effectTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
-		self:effectTemporaryValue(eff, "resists", {[DamageType.LIGHT]=power, [DamageType.DARKNESS]=power})
+		eff.power = math.min(eff.maxStacks, eff.glyphstacks or 1)*5
+		eff.aff = self:addTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=eff.power, [DamageType.DARKNESS]=eff.power})
+		eff.res = self:addTemporaryValue(eff, "resists", {[DamageType.LIGHT]=eff.power, [DamageType.DARKNESS]=eff.power})
 	end,
 	on_merge = function(self, old_eff, new_eff)
+		removeTemporaryValue("damage_affinity", old_eff.aff)
+		removeTemporaryValue("resists", old_eff.res)
 		old_eff.glyphstacks = (old_eff.glyphstacks or 0) + 1
+		old_eff.power = math.min(old_eff.maxStacks, old_eff.glyphstacks or 1)*5
+		old_eff.aff = self:addTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=old_eff.power, [DamageType.DARKNESS]=old_eff.power})
+		old_eff.res = self:addTemporaryValue(eff, "resists", {[DamageType.LIGHT]=old_eff.power, [DamageType.DARKNESS]=old_eff.power})
 		old_eff.dur = new_eff.dur
 		return old_eff
 	end,
@@ -4350,7 +4355,7 @@ newEffect{
 	name = "EMPATHIC_HEX", image = "talents/empathic_hex.png",
 	desc = "Empathic Hex",
 	long_desc = function(self, eff) return ("The target is hexed, creating an empathic bond with its victims. It takes %d%% feedback damage from all damage done."):format(eff.power) end,
-	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,	
+	charges = function(self, eff) return (tostring(math.floor(eff.power)).."%") end,
 	type = "magical",
 	subtype = { hex=true, dominate=true },
 	status = "detrimental",
