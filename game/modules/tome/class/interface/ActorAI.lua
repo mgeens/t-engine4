@@ -686,7 +686,9 @@ function _M:aiGridDamage(gx, gy)
 
 	if g.DamageType and not self:attr("invulnerable") then -- check for damaging terrain
 		if not g.faction or self:reactionToward(g) < 0 then
-			dam = ((g.maxdam or 0) + (g.mindam or 0))/2 * (100 - self:combatGetResist(g.DamageType)-self:combatGetAffinity(g.DamageType))/100
+			if type(g.maxdam) == "table" or type(g.mindam) == "table" then dam = 0
+			else dam = ((g.maxdam or 0) + (g.mindam or 0))/2 * (100 - self:combatGetResist(g.DamageType)-self:combatGetAffinity(g.DamageType))/100
+			end
 		end
 	end
 	if config.settings.log_detail_ai > 3 then print(("[aiGridDamage] for %s (%d, %d) dam: %s, air: %s"):format(self.name, gx, gy, dam, air)) end

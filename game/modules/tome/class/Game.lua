@@ -2004,6 +2004,11 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			local f, err = loadfile("/data/general/events/spellblaze-scar.lua")
+			print(f, err)
+			setfenv(f, setmetatable({level=self.level, zone=self.zone}, {__index=_G}))
+			print(pcall(f))
+do return end
 			package.loaded["mod.dialogs.Donation"] = nil
 			self:registerDialog(require("mod.dialogs.Donation").new())
 do return end
@@ -2018,11 +2023,6 @@ do return end
 			if m and x then
 				game.zone:addEntity(game.level, m, "actor", x, y)
 			end
-do return end
-			local f, err = loadfile("/data/general/events/fearscape-portal.lua")
-			print(f, err)
-			setfenv(f, setmetatable({level=self.level, zone=self.zone}, {__index=_G}))
-			print(pcall(f))
 		end end,
 		[{"_f","ctrl"}] = function() if config.settings.cheat then
 			local m = game.zone:makeEntityByName(game.level, "actor", "NPC_HUMANOID_KROG")
