@@ -2390,11 +2390,13 @@ function _M:onTakeHit(value, src, death_note)
 			self.damage_shield_absorb = 0
 		end
 		game:delayedLogDamage(src, self, 0, ("#SLATE#(%d absorbed)#LAST#"):format(adjusted_value), false)
-		if reflection and reflect_damage and reflection > 0 and reflect_damage > 0 and src.y and src.x and not src.dead then
+		if reflection and reflect_damage and reflection > 0 and reflect_damage > 0 and src.y and src.x and not src.dead and not self.__damage_shield_reflect_running then
 			local a = game.level.map(src.x, src.y, Map.ACTOR)
 			if a and self:reactionToward(a) < 0 then
 				local reflected = reflect_damage * reflection
+				self.__damage_shield_reflect_running = true
 				a:takeHit(reflected, self)
+				self.__damage_shield_reflect_running = nil
 				game:delayedLogDamage(self, src, reflected, ("#SLATE#%d reflected#LAST#"):format(reflected), false)
 				game:delayedLogMessage(self, src, "reflection" ,"#CRIMSON##Source# reflects damage back to #Target#!#LAST#")
 			end
