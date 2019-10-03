@@ -7307,6 +7307,7 @@ newEntity{ base = "BASE_GREATMAUL",
 					target_x, target_y = lx, ly
 					lx, ly = l:step(true)
 				end
+				if not target_x then return end
 				local tg = {type="beam", range=5, selffire=false}
 				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "earth_beam", {tx=target_x-who.x, ty=target_y-who.y})
 				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "shadow_beam", {tx=target_x-who.x, ty=target_y-who.y})
