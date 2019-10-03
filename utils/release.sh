@@ -1,7 +1,7 @@
 #!/bin/sh
 
-if test $# -lt 3 ; then
-	echo "Usage: release.sh [engine version for teae] [tome version for team] [version for public]"
+if test $# -lt 1 ; then
+	echo "Usage: release.sh [version] [beta, if any]"
 	exit
 fi
 
@@ -37,8 +37,9 @@ fi
 echo "...done"
 
 ever="$1"
-tver="$2"
-ver="$3"
+tver="$1"
+ver="$1"
+beta="$2"
 
 rm -rf tmp
 mkdir tmp
@@ -62,6 +63,9 @@ find . -name '*~' -or -name '.svn' -or -name '.keep' | xargs rm -rf
 # stamp the releases
 echo "version_desc = '$ver'" >> game/engines/default/modules/boot/init.lua
 echo "version_desc = '$ver'" >> game/modules/tome/init.lua
+if test -n "$beta"; then
+	echo "return '$beta'" > game/engines/default/engine/version_beta.lua
+fi
 
 # create teae/teams
 cd game/engines
