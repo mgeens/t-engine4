@@ -2061,7 +2061,7 @@ newDamageType{
 	name = "item darkness numbing", type = "ITEM_DARKNESS_NUMBING",
 	text_color = "#GREY#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2093,7 +2093,7 @@ newDamageType{
 	name = "item expose", type = "ITEM_MIND_EXPOSE",
 	text_color = "#GREY#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2125,7 +2125,7 @@ newDamageType{
 	name = "item temporal energize", type = "ITEM_TEMPORAL_ENERGIZE",
 	text_color = "#LIGHT_STEEL_BLUE#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2157,7 +2157,7 @@ newDamageType{
 newDamageType{
 	name = "item acid corrode", type = "ITEM_ACID_CORRODE", text_color = "#GREEN#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2188,7 +2188,7 @@ newDamageType{
 newDamageType{
 	name = "item blight disease", type = "ITEM_BLIGHT_DISEASE", text_color = "#DARK_GREEN#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2198,7 +2198,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40))
+		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40)) or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce strength, dexterity, and constitution by #VIOLET#%d#LAST#%s")
 			:format(dam, val, parens )
 	end,
@@ -2221,7 +2221,7 @@ newDamageType{
 newDamageType{
 	name = "item manaburn arcane", type = "ITEM_ANTIMAGIC_MANABURN", text_color = "#PURPLE#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2248,7 +2248,7 @@ newDamageType{
 newDamageType{
 	name = "item nature slow", type = "ITEM_NATURE_SLOW", text_color = "#LIGHT_GREEN#",
 	tdesc = function(dam, oldDam, src)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2281,7 +2281,7 @@ newDamageType{
 newDamageType{
 	name = "item antimagic scouring", type = "ITEM_ANTIMAGIC_SCOURING", text_color = "#ORCHID#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2310,7 +2310,7 @@ newDamageType{
 	name = "item lightning daze", type = "ITEM_LIGHTNING_DAZE",
 	text_color = "#ROYAL_BLUE#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2342,7 +2342,7 @@ newDamageType{
 	name = "item light blind", type = "ITEM_LIGHT_BLIND",
 	text_color = "#YELLOW#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -2376,7 +2376,7 @@ newDamageType{
 	name = "item mind gloom", type = "ITEM_MIND_GLOOM",
 	text_color = "#YELLOW#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
@@ -3906,7 +3906,7 @@ newDamageType{
 	name = "pestilent blight", type = "PESTILENT_BLIGHT",
 	text_color = "#GREEN#",
 	tdesc = function(dam, oldDam)
-		parens = ""
+		local parens = ""
 		dam = dam or 0
 		if oldDam then
 			diff = dam - oldDam
