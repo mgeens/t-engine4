@@ -454,7 +454,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 	--== LIFE ==--
 	local life -- fraction of maximum life
 	local life_regen, psi_regen = self:regenLife(true) -- regeneration, accounting for caps
-	life_regen, psi_regen = life_regen/self.global_speed, psi_regen/self.global_speed
+	life_regen, psi_regen = (life_regen or 0)/self.global_speed, (psi_regen or 0)/self.global_speed
 	local effect_life, life_range = self.life - self.die_at, self.max_life - self.die_at -- effective total life and maximum used by buff/disable calculation
 	
 	-- Note: The want function defined in the psi resource definition adjusts for Solipsism
