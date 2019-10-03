@@ -28,7 +28,8 @@ local Textbox = require "engine.ui.Textbox"
 module(..., package.seeall, class.inherit(Dialog))
 
 function _M:init(errs)
-	table.insert(errs, 1, "Game version: "..game.__mod_info.version_name)
+	local beta = engine.version_hasbeta()
+	table.insert(errs, 1, "Game version: "..game.__mod_info.version_name..(beta and "-"..beta or ""))
 	local addons = {}
 	for name, data in pairs(game.__mod_info.addons or {}) do
 		local extra = ""
