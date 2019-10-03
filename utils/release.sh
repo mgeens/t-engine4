@@ -211,5 +211,5 @@ echo "*********** Publish release? (Y/n)"
 cd ..
 read ok
 if test "$ok" '!=' 'n'; then
-	sh utils/publish_release.sh "$ver" tmp/t-engine4-linux64-"$ver"/all.md5
+	sh utils/publish_release.sh "$ver" ~/.t-engine/4.0/tome/all.md5
 fi
