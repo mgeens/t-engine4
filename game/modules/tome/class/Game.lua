@@ -2224,7 +2224,6 @@ do return end
 			self.player:playerTakeoff()
 		end,
 		USE_ITEM = not_wild(function()
-			error("plopfafaf")
 			if self.player.no_inventory_access then return end
 			self.player:playerUseItem()
 		end),
