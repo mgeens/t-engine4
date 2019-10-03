@@ -865,7 +865,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 			local dist_weight, want_closer = aitarget and 1 or 0.1
 			want_closer = util.bound((want.closein or 0)*(self.ai_tactic.closein or 1) + (want.attack or 0)*(self.ai_tactic.attack or 1) - (want.escape or 0)*(self.ai_tactic.excape or 1), -1, 1)
 			grid = self.ai_state.safe_grid
-			if not (grid and grid.path and #grid.path > 1 and core.fov.distance(self.x, self.y, grid.path[1].x, grid.path[1].y) == 1) then -- find a safer grid if needed/possible
+			if not (self.x and grid and grid.path and #grid.path > 1 and grid.path[1] and grid.path[1].x and core.fov.distance(self.x, self.y, grid.path[1].x, grid.path[1].y) == 1) then -- find a safer grid if needed/possible
 				grid = self:aiFindSafeGrid(10, want.life, want.air, dist_weight, want_closer)
 			else
 				grid.start_haz = self:aiGridHazard()
