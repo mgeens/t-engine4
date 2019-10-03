@@ -56,7 +56,7 @@ newTalent{
 			if target and target ~= self then
 				-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 				local shield, shield_combat = self:hasShield()
-				local weapon = self:hasMHWeapon().combat
+				local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat
 				if not shield then
 					self:attackTarget(target, DamageType.ICE, t.damagemult(self, t), true)
 				else

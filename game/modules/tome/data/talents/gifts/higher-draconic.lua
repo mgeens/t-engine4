@@ -50,7 +50,7 @@ newTalent{
 		-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 		local attack_mode = function(self, target, dt, dam)
 			local shield, shield_combat = self:hasShield()
-			local weapon = self:hasMHWeapon().combat
+			local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat
 			if not shield then
 				self:attackTarget(target, dt, dam, true)
 			else
