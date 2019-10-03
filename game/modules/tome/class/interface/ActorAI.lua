@@ -1598,7 +1598,7 @@ function _M:aiTalentTactics(t, aitarget, target_list, tactic, tg, wt_mod)
 									else -- calculate status immunity
 										_, status_chance = act:canBe(effect_type) --Status immunity
 										if log_detail > 2 then print("\t\t--- status_chance", effect_type, status_chance) end
-										res = 100 - status_chance
+										res = 100 - status_chance or 0
 									end
 									if type(effect_wt) == "table" then -- sum the list of statuses and weights that can affect the actor
 										local e_wt = 0
