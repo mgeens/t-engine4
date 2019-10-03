@@ -2189,6 +2189,7 @@ do return end
 			end
 		end,
 		REST = function()
+		error("plop5464654657899232")
 			self.player:restInit()
 		end,
 		PICKUP_FLOOR = not_wild(function()

@@ -866,6 +866,7 @@ function _M:sendError(what, err)
 		err=err,
 		module=game.__mod_info.short_name,
 		version=version,
+		charuuid=game:getPlayer(true) and game:getPlayer(true).__te4_uuid,
 		addons=table.concat(addons, ", "),
 	})
 end
