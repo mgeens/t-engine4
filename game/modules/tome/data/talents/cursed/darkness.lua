@@ -202,7 +202,12 @@ newTalent{
 	createDark = function(summoner, x, y, damage, duration, creep, creepChance, initialCreep)
 		local e = Object.new{
 			name = summoner.name:capitalize() .. "'s creeping dark",
-			block_sight=true,
+			block_sight=function(self, x, y, who)
+				if who and who.attr and who:attr("pierce_creeping_darkness") and x and who.x and core.fov.distance(x, y, who.x, who.y) <= who:attr("pierce_creeping_darkness") then
+					return false
+				end
+				return true
+			end,
 			canAct = false,
 			canCreep = true,
 			x = x, y = y,
@@ -354,6 +359,9 @@ newTalent{
 	range = 10,
 	getMovementSpeedChange = function(self, t)
 		return self:combatTalentScale(t, 0.75, 2.5, 0.75)
+	end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "pierce_creeping_darkness", self:getTalentRange(t))
 	end,
 	info = function(self, t)
 		local range = self:getTalentRange(t)

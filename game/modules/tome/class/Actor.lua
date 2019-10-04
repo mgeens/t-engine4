@@ -7061,48 +7061,17 @@ function _M:hasLOS(x, y, what, range, source_x, source_y)
 	if range and core.fov.distance(source_x, source_y, x, y) <= range then range = nil end
 	local lx, ly, is_corner_blocked
 	local last_x, last_y = source_x, source_y
-	if what == "block_sight" then
-		local darkVisionRange
-		if self:knowTalent(self.T_DARK_VISION) then
-			local t = self:getTalentFromId(self.T_DARK_VISION)
-			darkVisionRange = self:getTalentRange(t)
+	local l = core.fov.line(source_x, source_y, x, y, what)
+	lx, ly, is_corner_blocked = l:step()
+	while lx and ly and not is_corner_blocked do
+		-- Check for the range
+		if range and core.fov.distance(source_x, source_y, lx, ly) > range then
+			break
 		end
+		last_x, last_y = lx, ly
+		if game.level.map:checkAllEntities(lx, ly, what) then break end
 
-		local l = core.fov.line(source_x, source_y, x, y, "block_sight")
-		local inCreepingDark = false
 		lx, ly, is_corner_blocked = l:step()
-		while lx and ly and not is_corner_blocked do
-			-- Check for the range
-			if range and core.fov.distance(source_x, source_y, lx, ly) > range then
-				break
-			end
-			last_x, last_y = lx, ly
-			if game.level.map:checkAllEntities(lx, ly, "block_sight") then
-				if darkVisionRange and game.level.map:checkAllEntities(lx, ly, "creepingDark") then
-					inCreepingDark = true
-				else
-					break
-				end
-			end
-			if inCreepingDark and darkVisionRange and core.fov.distance(source_x, source_y, lx, ly) > darkVisionRange then
-				break
-			end
-
-			lx, ly, is_corner_blocked = l:step()
-		end
-	else
-		local l = core.fov.line(source_x, source_y, x, y, what)
-		lx, ly, is_corner_blocked = l:step()
-		while lx and ly and not is_corner_blocked do
-			-- Check for the range
-			if range and core.fov.distance(source_x, source_y, lx, ly) > range then
-				break
-			end
-			last_x, last_y = lx, ly
-			if game.level.map:checkAllEntities(lx, ly, what) then break end
-
-			lx, ly, is_corner_blocked = l:step()
-		end
 	end
 
 	if last_x == x and last_y == y then return true, last_x, last_y end
