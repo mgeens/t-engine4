@@ -101,8 +101,15 @@ function _M:use(item, a)
 			return
 		end
 	end
-	if a.jump and not self.killed then
-		self.cur_id = a.jump
+	local new_id
+	if type(a.jump) == "function" then
+	    new_id = a.jump(self.npc, self.player)
+	else
+	    new_id = a.jump
+	end
+
+	if new_id and not self.killed then
+		self.cur_id = new_id
 		self:regen()
 	else
 		game:unregisterDialog(self)
