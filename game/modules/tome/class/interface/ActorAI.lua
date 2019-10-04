@@ -150,7 +150,7 @@ function _M.AI_InitializeData()
 				want = "constant:"..tostring(swant)
 			end
 		end
-		print(("\t* %-15s\t%s\t\t%s"):format(tact, _M.AI_TACTICS[tact], want))
+		print(("\t* %-15s\t%s\t\t%s"):format(tact, tostring(_M.AI_TACTICS[tact]), want))
 	end
 end
 

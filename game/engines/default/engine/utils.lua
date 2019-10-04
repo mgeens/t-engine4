@@ -2551,6 +2551,18 @@ function core.fov.set_vision_shape(val)
 	return val
 end
 
+function core.fov.lineIterator(sx, sy, tx, ty, what)
+	what = what or "block_move"
+	local l = core.fov.line(sx, sy, tx, ty, what)
+	local lx, ly = l:step()
+	return function()
+		if not lx or not ly then return nil end
+		local rx, ry = lx, ly
+		lx, ly = l:step()
+		return rx, ry
+	end
+end
+
 --- create a basic bresenham line (or hex equivalent)
 line = {}
 function line.new(sx, sy, tx, ty)
