@@ -3745,13 +3745,26 @@ newEffect{
 	on_gain = function(self, err) return "#Target#'s morale has been lowered.", "+Intimidated" end,
 	on_lose = function(self, err) return "#Target# has regained its confidence.", "-Intimidated" end,
 	parameters = { power=1 },
+	on_merge = function(self, old_eff, new_eff, e)
+		self:removeTemporaryValue("combat_dam", old_eff.damid)
+		self:removeTemporaryValue("combat_spellpower", old_eff.spellid)
+		self:removeTemporaryValue("combat_mindpower", old_eff.mindid)
+		old_eff.damid = self:addTemporaryValue("combat_dam", -new_eff.power)
+		old_eff.spellid = self:addTemporaryValue("combat_spellpower", -new_eff.power)
+		old_eff.mindid = self:addTemporaryValue("combat_mindpower", -new_eff.power)
+		old_eff.dur = new_eff.dur
+		return old_eff
+	end,
 	activate = function(self, eff)
 		eff.damid = self:addTemporaryValue("combat_dam", -eff.power)
 		eff.spellid = self:addTemporaryValue("combat_spellpower", -eff.power)
 		eff.mindid = self:addTemporaryValue("combat_mindpower", -eff.power)
-		game.level.map:particleEmitter(self.x, self.y, 1, "flame")
+		if core.shader.active() then
+			eff.particle = self:addParticles(Particles.new("circle", 1, {oversize=1, a=80, shader=true, appear=12, img="blood_vengeance_lightningshield", speed=0, base_rot=180, radius=0}))
+		end
 	end,
 	deactivate = function(self, eff)
+		if eff.particle then self:removeParticles(eff.particle) end
 		self:removeTemporaryValue("combat_dam", eff.damid)
 		self:removeTemporaryValue("combat_spellpower", eff.spellid)
 		self:removeTemporaryValue("combat_mindpower", eff.mindid)
