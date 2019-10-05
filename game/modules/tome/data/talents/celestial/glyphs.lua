@@ -26,6 +26,7 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	mode = "sustained",
+	cooldown = 5,
 	sustain_positive = 5,
 	sustain_negative = 5,
 	range = function(self, t) return 10 end,
@@ -67,7 +68,7 @@ newTalent{
 		if p.glyphs_last_turn and ((game.turn - p.glyphs_last_turn) / 10) < t.getGlyphCD(self, t) then return end
 		p.glyphs_last_turn = game.turn
 -- find a target
-		
+
 		-- Invalidate any target with a glyph adjacent
 		local valid_for_glyph = function(target)
 			local grids = core.fov.circle_grids(target.x, target.y, 1, true)
@@ -81,7 +82,7 @@ newTalent{
 
 		-- Prioritize self, else pick a random valid target
 		local target
-		if valid_for_glyph(self) then 
+		if valid_for_glyph(self) then
 			target = self
 		else
 			local tgts = {}
@@ -104,7 +105,7 @@ newTalent{
 		-- Grab all adjacent coordinates that don't have an existing trap or something that blocks movement
 		self:project(tg, target.x, target.y, function(px, py)
 			local trap = game.level.map(px, py, Map.TRAP)
-			if not game.level.map:checkEntity(px, py, Map.TERRAIN, "block_move") and not (trap and trap.is_glyph) then glyphgrids[#glyphgrids+1] = {x=px, y=py} end		
+			if not game.level.map:checkEntity(px, py, Map.TERRAIN, "block_move") and not (trap and trap.is_glyph) then glyphgrids[#glyphgrids+1] = {x=px, y=py} end
 		end)
 
 		local dam = self:spellCrit(t.getGlyphDam(self, t))
@@ -304,7 +305,7 @@ local function makeTwilightGlyph()
 end
 ----------------------------------------------------------------
 -- END - Define Glyph Traps - END
-----------------------------------------------------------------		
+----------------------------------------------------------------
 		for _, spot in pairs(glyphgrids) do
 			local trap2
 			local trap = rng.table{"sun", "star", "twilight"}
@@ -351,7 +352,7 @@ end
 		Glyph of Sunlight - Bind sunlight into a glyph. When triggered it will release a brilliant light, dealing %0.2f light damage and healing you for %d.
 		Glyph of Moonlight - Bind moonlight into a glyph. When triggered it will release a fatiguing darkness,  dealing %0.2f darkness damage and reducing the foes damage dealt by %d%% for %d turns.
 		Glyph of Twilight - Bind twilight into a glyph. When triggered it will release a burst of twilight, dealing %0.2f light and %0.2f darkness damage and knocking the foe back %d tiles.
-		]]):format(self:getTalentRange(t), t.getDuration(self, t), t.getGlyphCD(self, t), 
+		]]):format(self:getTalentRange(t), t.getDuration(self, t), t.getGlyphCD(self, t),
 			damDesc(self, DamageType.LIGHT, dam), heal,
 			damDesc(self, DamageType.DARKNESS, dam), numb, numbDur,
 			damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2), dist)
