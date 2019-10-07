@@ -77,7 +77,14 @@ function _M:loaded()
 		if t.sub_particle then sub_particle = t.sub_particle end
 		if t.sub_particle_args then sub_particle_args = t.sub_particle_args end
 		if t.can_shift then self.can_shift = true end
-	else error("unsupported particle type: "..type(self.def))
+	else
+		if not config.settings.cheat then
+			print("[PARTICLES] unsupported particle type: "..type(self.def).."; replacing with dummy")
+			self.def = "dummy"
+			return self:loaded()
+		else
+			error("unsupported particle type: "..type(self.def))
+		end
 	end
 
 	gl = gl or "particle"
