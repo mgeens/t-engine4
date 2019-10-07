@@ -52,7 +52,7 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
 		local radius = self:getTalentRadius(t)
-		return ([[Creates a circle of radius %d at your feet; the circle increases your defense and all saves by %d while dealing %0.2f darkness damage per turn to everyone else with in its radius. The circle lasts %d turns.
+		return ([[Creates a circle of radius %d at your feet; the circle increases your defense and all saves by %d while dealing %0.2f darkness damage per turn to everyone else within its radius. The circle lasts %d turns.
 		The damage will increase with your Spellpower.]]):
 		format(radius, damage, (damDesc (self, DamageType.DARKNESS, damage)), duration)
 	end,
