@@ -83,9 +83,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Rush toward a target spot with incredible speed.
-		If the spot is reached and occupied, you will perform a free melee attack against the target there.
-		This attack does 120% weapon damage and can daze the target for 3 turns if it hits.
+		return ([[Rush toward a target enemy with incredible speed and perform a melee attack for 120% weapon damage that can daze the target for 3 turns if it hits.
 		You must rush from at least 2 tiles away.]])
 	end,
 }
