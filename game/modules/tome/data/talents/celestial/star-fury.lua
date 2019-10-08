@@ -68,7 +68,6 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=self:spellFriendlyFire()}
 	end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 10, 120)/2 end,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 120) end,
 	getDuration = function(self, t) return math.min(9, math.floor(self:combatTalentScale(t, 2.8, 6))) end,
 	action = function(self, t)
@@ -81,7 +80,7 @@ newTalent{
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, t.getDuration(self, t),
-			DamageType.DARKNESS, dam,
+			DamageType.DARKNESS, dam/2,
 			self:getTalentRadius(t),
 			5, nil,
 			{type="shadow_zone", overlay_particle={zdepth=6, only_one=true, type="circle", args={oversize=0.7, a=60, appear=8, speed=-0.5, img="moon_circle", radius=self:getTalentRadius(t)}}},
@@ -95,11 +94,10 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		local damageonspot = t.getDamageOnSpot(self, t)
 		local duration = t.getDuration(self, t)
 		return ([[Invokes a blast of shadows that deals %0.2f darkness damage, and leaves a radius 3 field that does %0.2f darkness damage per turn for %d turns.
 		The damage dealt will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.DARKNESS, damage),damDesc(self, DamageType.DARKNESS, damageonspot),duration)
+		format(damDesc(self, DamageType.DARKNESS, damage),damDesc(self, DamageType.DARKNESS, damage/2),duration)
 	end,
 }
 
