@@ -28,7 +28,7 @@ end
 
 -- This file describes artifacts not bound to a special location, they can be found anywhere
 
-newEntity{ base = "BASE_GEM", 
+newEntity{ base = "BASE_GEM",
 	power_source = {arcane=true},
 	unique = true,
 	unided_name = "windy gem",
@@ -179,7 +179,7 @@ newEntity{ base = "BASE_RING",
 		name = function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("summon a radius %d tidal wave that expands slowly over %d turns, dealing %0.2f cold and %0.2f physical damage (based on Willpower) each turn, knocking opponents back, and lowering their stun resistance"):
-			format(self.use_power:radius(who), self.use_power.duration(self, who), who:damDesc(engine.DamageType.COLD, dam/2), who:damDesc(engine.DamageType.PHYSICAL, dam/2)) 
+			format(self.use_power:radius(who), self.use_power.duration(self, who), who:damDesc(engine.DamageType.COLD, dam/2), who:damDesc(engine.DamageType.PHYSICAL, dam/2))
 		end,
 		power = 60,
 		radius = function(self, who) return 1 end,
@@ -308,7 +308,7 @@ newEntity{ base = "BASE_AMULET", define_as = "SET_GARKUL_TEETH",
 			[Stats.STAT_CON] = 6,
 		},
 		talents_types_mastery = {
-			["technique/strength-of-the-berserker"] = 0.1,  
+			["technique/strength-of-the-berserker"] = 0.1,
 			["technique/2hweapon-assault"] = 0.1,
 			["technique/warcries"] = 0.1,
 			["technique/bloodthirst"] = 0.1,
@@ -416,7 +416,7 @@ newEntity{ base = "BASE_LITE",
 	desc = [[This dark red heart still beats despite being separated from its owner.  It also snuffs out any light source that comes near it.]],
 	special_desc = function(self) return "The heart seems to absorb light when you deal darkness damage. Standing on unlit tiles, you feel stronger." end,
 	cost = math.random(400,650),
-	
+
 	wielder = {
 		lite = -1000,
 		infravision = 7,
@@ -425,16 +425,16 @@ newEntity{ base = "BASE_LITE",
 		},
 		resists_cap = { [DamageType.LIGHT] = 10 },
 		resists = { [DamageType.LIGHT] = 30 },
-		talents_types_mastery = { 
+		talents_types_mastery = {
 		["cunning/stealth"] = 0.2,
 		["cursed/darkness"] = 0.2
 		},
 		combat_dam = 7,
 		melee_project={[DamageType.DARKNESS] = 20},
 	},
-	
+
 	talent_on_spell = { {chance=15, talent=Talents.T_INVOKE_DARKNESS, level=4}},
-	
+
 	on_wear = function(self, who)
 		self.worn_by = who
 		who:attr("darkness_darkens", 1)
@@ -444,11 +444,11 @@ newEntity{ base = "BASE_LITE",
 		self.worn_by = nil
 	end,
 	act = function(self)
-		local who=self.worn_by 
+		local who=self.worn_by
 		if not self.worn_by then return end
-		if who.x and who.y and not game.level.map.lites(who.x, who.y) then 
+		if who.x and who.y and not game.level.map.lites(who.x, who.y) then
 			who:setEffect(who.EFF_UNLIT_HEART, 1,  { dam = 15, res = 10})
-		else 
+		else
 			if who.x and who.y and game.level.map.lites(who.x, who.y) and who:hasEffect(who.EFF_UNLIT_HEART) then
 				who:removeEffect(who.EFF_UNLIT_HEART)
 			end
@@ -620,7 +620,7 @@ newEntity{ base = "BASE_SHIELD",
 	on_block = {desc = "Up to once per turn, pull an attacker up to 15 spaces away into melee range, pinning and asphyxiating it", fct = function(self, who, src, type, dam, eff)
 		if not src then return end
 		if who.turn_procs.black_mesh then return end
- 
+
 		who:logCombat(src, "#ORCHID#Black tendrils from #Source# grab #Target#!")
 		local kb = src:canBe("knockback")
 		if kb then
@@ -656,7 +656,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	on_takeoff = function(self, who)
 		self.worn_by = nil
 	end,
-	special_desc = function(self) return "Transfers a bleed, poison, or wound to its source or a nearby enemy every 4 turns." 
+	special_desc = function(self) return "Transfers a bleed, poison, or wound to its source or a nearby enemy every 4 turns."
 	end,
 	wielder = {
 		combat_def = 6,
@@ -668,7 +668,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	},
 	act = function(self)
 		self:useEnergy()
-	
+
 		if not self.worn_by then return end -- items act even when not equipped
 		local who = self.worn_by
 
@@ -676,27 +676,27 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 		-- This should be redundant but whatever
 		local o, item, inven_id = who:findInAllInventoriesBy("define_as", "ROGUE_PLIGHT")
 		if not o or not who:getInven(inven_id).worn then return end
-		
+
 		local Map = require "engine.Map"
-		
+
 		for eff_id, p in pairs(who.tmp) do
 			-- p only has parameters, we need to get the effect definition (e) to check subtypes
 			local e = who.tempeffect_def[eff_id]
-			if e.status == "detrimental" and e.subtype and (e.subtype.bleed or e.subtype.poison or e.subtype.wound) then	
-				
+			if e.status == "detrimental" and e.subtype and (e.subtype.bleed or e.subtype.poison or e.subtype.wound) then
+
 				-- Copy the effect parameters then change only the source
 				-- This will preserve everything passed to the debuff in setEffect but will use the new source for +damage%, etc
 				local effectParam = who:copyEffect(eff_id)
 				effectParam.src = who
-					
+
 				if p.src and p.src.setEffect and not p.src.dead then -- Most debuffs don't define a source
 					p.src:setEffect(eff_id, p.dur, effectParam)
 					who:removeEffect(eff_id)
 					game.logPlayer(who, "#CRIMSON#Rogue Plight transfers an effect to its source!")
 					return true
-				else 
+				else
 					-- If there is no source move the debuff to an adjacent enemy instead
-					-- If there is no source or adjacent enemy the effect fails		
+					-- If there is no source or adjacent enemy the effect fails
 					for _, coor in pairs(util.adjacentCoords(who.x, who.y)) do
 						local act = game.level.map(coor[1], coor[2], Map.ACTOR)
 						if act then
@@ -704,12 +704,12 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 							who:removeEffect(eff_id)
 							game.logPlayer(who, "#CRIMSON#Rogue Plight transfers an effect to a nearby enemy!")
 							return true
-						end		
+						end
 					end
 				end
 			end
-		end	
-		return true	
+		end
+		return true
 	end,
 }
 
@@ -1010,7 +1010,7 @@ newEntity{ base = "BASE_MACE", define_as = "CROOKED_CLUB",
 			target:setEffect(target.EFF_CROOKED, 5, { power = 5 })
 		end},
 	},
-	wielder = {		
+	wielder = {
 		combat_atk = 12,
 	},
 }
@@ -1065,7 +1065,7 @@ newEntity{ base = "BASE_HELM", define_as = "HELM_KROLTAR",
 		inc_damage={
 			[DamageType.PHYSICAL] = 10,
 			[DamageType.FIRE] = 10,
-		},		
+		},
 		talents_types_mastery = { ["wild-gift/fire-drake"] = 0.2, },
 		combat_def = 5,
 		combat_armor = 9,
@@ -1117,7 +1117,7 @@ newEntity{ base = "BASE_HELM",
 		self.worn_by = who
 		if who.descriptor and who.descriptor.race == "Halfling" then
 			local Stats = require "engine.interface.ActorStats"
-			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CUN] = 7, [Stats.STAT_STR] = 7, }) 
+			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_CUN] = 7, [Stats.STAT_STR] = 7, })
 			game.logPlayer(who, "#LIGHT_BLUE#As you don the %s, you gain understanding of the might of your race.", self:getName({no_add_name = true, do_color = true}))
 		end
 	end,
@@ -1379,7 +1379,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 	end,
 	act = function(self)
 		self:useEnergy()
-		self:regenPower()	
+		self:regenPower()
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by=nil return end
 		if self.worn_by:attr("dead") then return end
@@ -1445,9 +1445,9 @@ newEntity{ base = "BASE_CLOTH_ARMOR", define_as = "SET_TEMPORAL_ROBE",
 			[DamageType.TEMPORAL] = 10,
 			[DamageType.PHYSICAL] = 10,
 		},
-		resists_pen = { 
+		resists_pen = {
 			[DamageType.TEMPORAL] = 20,
-			[DamageType.PHYSICAL] = 20, 
+			[DamageType.PHYSICAL] = 20,
 		},
 		on_melee_hit={
 			[DamageType.TEMPORAL] = 10,
@@ -3684,7 +3684,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 	desc = [[These once brilliant voratun gauntlets have fallen into a deep decay. Originally used in the spellhunt, they were often used to destroy arcane artifacts, curing the world of their influence.]],
 	special_desc = function(self) return "Can't be worn by those with arcane powers." end,
 --	material_level = 1, --Special: this artifact can appear anywhere and adjusts its material level to the zone
-	level_range = {1, nil}, 
+	level_range = {1, nil},
 	rarity = 550, -- Extra rare to make it not ALWAYS appear.
 	addedToLevel = function(self, level, x, y) -- generated on a level
 		local mat_level = util.getval(game.zone.min_material_level) or 1
@@ -4042,7 +4042,7 @@ newEntity{ base = "BASE_SHIELD",
 	},
 }
 
-newEntity{ base = "BASE_LEATHER_BOOT", 
+newEntity{ base = "BASE_LEATHER_BOOT",
 	power_source = {psionic=true},
 	unique = true,
 	name = "Wanderer's Rest", image = "object/artifact/wanderers_rest.png",--Thanks Grayswandir! (just for the name this time!)
@@ -4085,12 +4085,12 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks Grayswandir!
 	wielder = {
 		combat_def = 12,
 		combat_spellpower = 5,
-		
+
 		inc_damage={[DamageType.COLD] = 10},
 		resists={[DamageType.COLD] = 15},
 		resists_pen={[DamageType.COLD] = 8},
 		on_melee_hit={[DamageType.COLD] = 10,},
-		
+
 		movement_speed=0.15,
 		talents_types_mastery = {
 			["spell/water"] = 0.3,
@@ -4124,7 +4124,7 @@ newEntity{ base = "BASE_WHIP", --Thanks Grayswandir!
 			[DamageType.BLEED] = 50,
 		},
 		talent_on_hit = { [Talents.T_BONE_GRAB] = {level=3, chance=10}, [Talents.T_BONE_SPEAR] = {level=4, chance=20} },
-		
+
 	},
 	wielder = {
 		combat_def = 12,
@@ -4228,7 +4228,7 @@ newEntity{ base = "BASE_LEATHER_BOOT", --Thanks Grayswandir!
 			}
 			local tx, ty = who:getTarget(tg)
 			if not tx or not ty or core.fov.distance(who.x, who.y, tx, ty) <=1 then return nil end
-			
+
 			local _ _, x, y = who:canProject(tg, tx, ty)
 			if not x or not y then return {id=true} end
 
@@ -4237,7 +4237,7 @@ newEntity{ base = "BASE_LEATHER_BOOT", --Thanks Grayswandir!
 			game.level.map:particleEmitter(who.x, who.y, 1, "teleport")
 			who:teleportRandom(x, y, rad)
 			game.level.map:particleEmitter(who.x, who.y, 1, "teleport")
-			
+
 			return {id=true, used=true}
 		end
 	},
@@ -4278,14 +4278,14 @@ newEntity{ base = "BASE_GREATSWORD", -- Thanks Alex!
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by=nil return end
 		if self.worn_by:attr("dead") then return end
-		
+
 		local size = self.worn_by.size_category-3
 		local str = self.worn_by:getStr()
 		self.combat.physspeed=util.bound(1.8-(str-10)*0.02-size*0.1, 0.80, 1.8)
 	end,
 	on_wear = function(self, who)
 		self.worn_by = who
-		
+
 		local size = self.worn_by.size_category-3
 		local str = self.worn_by:getStr()
 		self.combat.physspeed=util.bound(1.8-(str-10)*0.02-size*0.1, 0.80, 1.8)
@@ -4373,16 +4373,16 @@ newEntity{ base = "BASE_LITE", --Thanks Frumple!
 	act = function(self)
 		self:useEnergy()
 		self:regenPower()
-		
+
 		local who=self.worn_by --Make sure you can actually act!
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by = nil return end
 		if self.worn_by:attr("dead") then return end
-		
+
 		who:project({type="ball", range=0, radius=self.wielder.lite}, who.x, who.y, function(px, py) -- The main event!
 			local is_lit = game.level.map.lites(px, py)
 			if is_lit then return end
-			
+
 			if not self.max_charge then
 				self.charge = self.charge + 1
 				if self.charge == 200 then
@@ -4405,7 +4405,7 @@ newEntity{ base = "BASE_LITE", --Thanks Frumple!
 		lite = 5,
 		combat_mindpower=10,
 		combat_mentalresist=10,
-		
+
 		inc_damage = {[DamageType.LIGHT]=15, [DamageType.DARKNESS]=15},
 		resists = {[DamageType.DARKNESS]=20},
 		resists_pen = {[DamageType.DARKNESS]=10},
@@ -4443,7 +4443,7 @@ newEntity{ base = "BASE_LITE", --Thanks Frumple!
 			game.level.map:particleEmitter(who.x, who.y, tg.radius, "breath_dark", {radius=tg.radius, tx=x-who.x, ty=y-who.y})
 			self.max_charge=nil -- Reset charge.
 			self.charge=0
-			
+
 			local p = self.power
 			who:onTakeoff(self, who.INVEN_LITE, true)
 			self.wielder.lite = 5
@@ -4468,11 +4468,11 @@ newEntity{ base = "BASE_LITE", --Thanks Grayswandir!
 	wielder = {
 		lite = 5,
 		combat_spellpower=10,
-		
+
 		inc_damage = {[DamageType.COLD]=15},
 		resists = {[DamageType.COLD]=20},
 		resists_pen = {[DamageType.COLD]=10},
-		
+
 		talent_cd_reduction = {
 			[Talents.T_CHILL_OF_THE_TOMB] = 2,
 		},
@@ -4528,7 +4528,7 @@ newEntity{ base = "BASE_LITE", --Thanks Grayswandir!
 				inc_damage = table.clone(who.inc_damage),
 				resists_pen = table.clone(who.resists_pen),
 				resolvers.talents{[Talents.T_WILL_O__THE_WISP_EXPLODE] = 1,},
-				
+
 				faction = who.faction,
 				summoner = who, summoner_gain_exp=true,
 				summon_time = 20,
@@ -4645,7 +4645,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 					[Talents.T_OOZE_SPIT]={base=5, every=10},
 					[Talents.T_TENTACLE_GRAB]={base=1, every=6,},
 				},
-				
+
 				faction = who.faction,
 				summoner = who, summoner_gain_exp=true,
 				summon_time=10,
@@ -4777,7 +4777,7 @@ newEntity{ base = "BASE_SHIELD", --Thanks SageAcrin!
 			if not target or target:attr("dead") or not target.x or not target.y then return end
 
 			local burst = {type="cone", range=0, radius=4, force_target=target, selffire=false,}
-		
+
 			who:project(burst, target.x, target.y, engine.DamageType.ICE, 30)
 			game.level.map:particleEmitter(who.x, who.y, burst.radius, "breath_cold", {radius=burst.radius, tx=target.x-who.x, ty=target.y-who.y})
 			who:logCombat(target, "A wave of icy water sprays out from #Source# towards #Target#!")
@@ -4928,7 +4928,7 @@ newEntity{ base = "BASE_GREATMAUL",
 				target:removeEffect(d.id)
 				is_shield=true
 			end
-			
+
 			if target:attr("disruption_shield") then
 				target:forceUseTalent(target.T_DISRUPTION_SHIELD, {ignore_energy=true})
 				is_shield = true
@@ -5030,7 +5030,6 @@ newEntity{ base = "BASE_GLOVES", --Thanks SageAcrin /AND/ Edge2054!
 		inc_damage={[DamageType.DARKNESS] = 8, [DamageType.TEMPORAL] = 8},
 		resists_pen={[DamageType.DARKNESS] = 10, [DamageType.TEMPORAL] = 10},
 		negative_regen=0.2,
-		negative_regen_ref_mod=0.2,
 		combat = {
 			dam = 13,
 			apr = 3,
@@ -5177,7 +5176,7 @@ newEntity{ base = "BASE_TOOL_MISC", --Sorta Thanks Donkatsu!
 			if who.ai_tactic then
 				if math.max(who.ai_tactic.closein or 1, who.ai_tactic.escape or 1) > (who.ai_tactic.defend or 1) then return end
 			end
-			return true 
+			return true
 		end,
 		no_npc_use = function(self, who) return who:attr("undead") or self:restrictAIUseObject(who) end,
 		use = function(self, who)
@@ -5247,10 +5246,10 @@ newEntity{ base = "BASE_LIGHT_ARMOR", --Thanks SageAcrin!
 		combat_def = 18,
 		combat_armor = 18,
 		combat_armor_hardiness=15,
-		inc_stats = { 
-			[Stats.STAT_MAG] = 5, 
-			[Stats.STAT_CUN] = 5, 
-			[Stats.STAT_DEX] = 5, 
+		inc_stats = {
+			[Stats.STAT_MAG] = 5,
+			[Stats.STAT_CUN] = 5,
+			[Stats.STAT_DEX] = 5,
 		},
 		on_melee_hit = {[DamageType.DARKNESS]=15, [DamageType.COLD]=15},
 		inc_stealth=10,
@@ -5275,7 +5274,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR", --Thanks SageAcrin!
 		power = 50,
 		tactical = {DEFEND = 2, ESCAPE = 2},
 		on_pre_use_ai = function(self, who, silent, fake)
-			return not who:hasEffect(who.EFF_INVISIBILITY) 
+			return not who:hasEffect(who.EFF_INVISIBILITY)
 		end,
 		invispower = function(self, who) return 10+who:getCun()/6+who:getMag()/6 end,
 		use = function(self, who)
@@ -5356,13 +5355,13 @@ newEntity{ base = "BASE_TOOL_MISC", --Thanks Alex!
 		power = 20,
 		tactical = function(self, who, aitarget)
 			if not aitarget then return end
-			
+
 			local tac = {}
 				if self.direction > 0 then tac.buff = self.position/10 end
 				if self.direction < 0 then tac.escape = -self.position/20 end
 				if self.direction < 0 then tac.closein = -self.position/20 end
 				if self.direction < 0 then tac.defend = -self.position/10 end
-				
+
 			if true then return tac end
 		end,
 		on_pre_use_ai = function(self, who, silent, fake)
@@ -5403,7 +5402,7 @@ newEntity{ base = "BASE_TOOL_MISC", --Thanks Alex!
 		if self.finished == true then return end
 		local power = self.power
 		who:onTakeoff(self, who.INVEN_TOOL, true)
-		
+
 		self.position = self.position + direction
 
 		if self.position <= -4 then
@@ -5472,12 +5471,12 @@ newEntity{ base = "BASE_TOOL_MISC", --And finally, Thank you, Darkgod, for makin
 	unided_name = "golden telescope",
 	color = colors.GOLD,
 	level_range = {28, 40},
-	desc = [[This finely crafted telescope once belonged to the explorer and adventurer Kestin Highfin. With this tool in hand he traveled in search of treasures all across Maj'Eyal, and before his death it was said his collection was incredibly vast. He often credited this telescope with his luck, saying that as long as he had it, he could escape any situation, no matter how dangerous. It is said he died confronting a demon seeking revenge for a stolen sword. 
+	desc = [[This finely crafted telescope once belonged to the explorer and adventurer Kestin Highfin. With this tool in hand he traveled in search of treasures all across Maj'Eyal, and before his death it was said his collection was incredibly vast. He often credited this telescope with his luck, saying that as long as he had it, he could escape any situation, no matter how dangerous. It is said he died confronting a demon seeking revenge for a stolen sword.
 
 His last known words were "Somehow this feels like an ending, yet I know there is so much more to find."]],
 	cost = 350,
 	material_level = 4,
-	wielder = {		
+	wielder = {
 		inc_stats = {[Stats.STAT_LCK] = 10, [Stats.STAT_CUN] = 5,},
 		combat_atk=12,
 		combat_apr=12,
@@ -5699,7 +5698,7 @@ newEntity{ base = "BASE_LONGSWORD",
 			[DamageType.FIRE] = 20,
 		},
 		resists_pen = {
-			[DamageType.FIRE] = 15,	
+			[DamageType.FIRE] = 15,
 		},
 		inc_stats = { [Stats.STAT_STR] = 7, [Stats.STAT_WIL] = 7 },
 	},
@@ -5736,8 +5735,6 @@ newEntity{ base = "BASE_STAFF",
 			[DamageType.PHYSICAL] = 15,
 			[DamageType.TEMPORAL] = 15,
 		},
-		positive_regen_ref_mod=0.1,
-		negative_regen_ref_mod=0.1,
 		positive_regen=0.1,
 		negative_regen=0.1,
 		talent_cd_reduction = {
@@ -5794,9 +5791,9 @@ newEntity{ base = "BASE_CLOAK",
 	wielder = {
 		combat_def = 15,
 		combat_spellpower = 20,
-		inc_stats = { 
-			[Stats.STAT_MAG] = 10, 
-			[Stats.STAT_CUN] = 10, 
+		inc_stats = {
+			[Stats.STAT_MAG] = 10,
+			[Stats.STAT_CUN] = 10,
 		},
 		inc_damage = { [DamageType.LIGHT]= 25 },
 		resists_cap = { [DamageType.LIGHT] = 10, },
@@ -5824,10 +5821,10 @@ newEntity{ base = "BASE_HEAVY_BOOTS",
 		combat_def = 8,
 		fatigue = 12,
 		combat_dam = 10,
-		inc_stats = { 
-			[Stats.STAT_STR] = 20, 
-			[Stats.STAT_CON] = 10, 
-			[Stats.STAT_DEX] = -6, 
+		inc_stats = {
+			[Stats.STAT_STR] = 20,
+			[Stats.STAT_CON] = 10,
+			[Stats.STAT_DEX] = -6,
 		},
 		knockback_immune=1,
 		combat_armor_hardiness = 20,
@@ -5841,7 +5838,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR",
 	unique = true, sentient=true,
 	name = "The Untouchable", color = colors.BLUE, image = "object/artifact/the_untouchable.png",
 	unided_name = "tough leather coat",
-	desc = [[This rugged jacket is the subject of many a rural legend. 
+	desc = [[This rugged jacket is the subject of many a rural legend.
 Some say it was fashioned by an adventurous mage turned rogue, in times before the Spellblaze, but was since lost.
 All manner of shady gamblers have since claimed to have worn it at one point or another. To fail, but live, is what it means to be untouchable, they said.]],
 	level_range = {20, 30},
@@ -5865,17 +5862,17 @@ All manner of shady gamblers have since claimed to have worn it at one point or 
 	end,
 	special_desc = function(self) return "When you take a hit of more than 20% of your max life a shield is created equal to 130% the damage taken." end,
 	act = function(self)
-		self:useEnergy()	
+		self:useEnergy()
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by = nil return end
 		if self.worn_by:attr("dead") then return end
 		local hp_diff = (self.wearer_hp - self.worn_by.life/self.worn_by.max_life)
-		
+
 		if hp_diff >= 0.2 and not self.worn_by:hasEffect(self.worn_by.EFF_DAMAGE_SHIELD) then
 			self.worn_by:setEffect(self.worn_by.EFF_DAMAGE_SHIELD, 4, {power = (hp_diff * self.worn_by.max_life)*1.3})
 			game.logPlayer(self.worn_by, "#LIGHT_BLUE#A barrier bursts from the leather jacket!")
-		end		
-		
+		end
+
 		self.wearer_hp = self.worn_by.life/self.worn_by.max_life
 	end,
 }
@@ -5898,7 +5895,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 		resists={[DamageType.NATURE] = 10,},
 		life_regen=0.15,
 		healing_factor=0.1,
-		
+
 		learn_talent = {[Talents.T_BATTLE_TRANCE] = 1},
 	},
 }
@@ -6054,10 +6051,10 @@ The heart which wishes that it be unseen.]],
 		combat_mentalresist = 10,
 		hate_per_kill = 5,
 		hate_per_crit = 5,
-		inc_stats = { 
-			[Stats.STAT_WIL] = 8, 
-			[Stats.STAT_CUN] = 6, 
-			[Stats.STAT_DEX] = 4, 
+		inc_stats = {
+			[Stats.STAT_WIL] = 8,
+			[Stats.STAT_CUN] = 6,
+			[Stats.STAT_DEX] = 4,
 		},
 		inc_damage = { all = 4 },
 		resists = {[DamageType.DARKNESS] = 10, [DamageType.MIND] = 10,},
@@ -6194,7 +6191,7 @@ newEntity{ base = "BASE_RING",
 		talents_types_mastery = {
 			["psionic/mentalism"]=0.2,
 		},
-		psi_regen=0.5,	
+		psi_regen=0.5,
 	},
 	max_power = 30, power_regen = 1,
 	use_talent = { id = Talents.T_MENTAL_SHIELDING, level = 2, power = 30 },
@@ -6287,7 +6284,7 @@ newEntity{ base = "BASE_LONGSWORD",
 	running=false,
 	special_desc = function(self)
 		local maxp = self:min_power_to_trigger()
-		return ("Enter Rampage if health falls below 20%%%s"):format(self.power < maxp and (" (cooling down: %d turns)"):format(maxp - self.power) or "") 
+		return ("Enter Rampage if health falls below 20%%%s"):format(self.power < maxp and (" (cooling down: %d turns)"):format(maxp - self.power) or "")
 	end,
 	combat = {
 		dam = 48,
@@ -6360,8 +6357,8 @@ newEntity{ base = "BASE_CLOAK",
 	wielder = {
 		combat_spellcrit = 6,
 		combat_def = 10,
-		inc_stats = { 
-			[Stats.STAT_MAG] = 8, 
+		inc_stats = {
+			[Stats.STAT_MAG] = 8,
 		},
 		talents_types_mastery = {
 			["spell/arcane"] = 0.2,
@@ -6468,7 +6465,7 @@ newEntity{ base = "BASE_GLOVES",
 		poison_immune=0.2,
 		talents_types_mastery = {
 			["wild-gift/slime"] = 0.2,
-		},		
+		},
 		combat = {
 			dam = 6,
 			apr = 7,
@@ -6695,7 +6692,7 @@ newEntity{ base = "BASE_ARROW",
 		apr = 100,
 		physcrit = 10,
 		dammod = {dex=0.5, str=0.7},
-		siege_impact=0.25,		
+		siege_impact=0.25,
 	},
 }
 
@@ -6745,7 +6742,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks SageAcrin!
 		combat_mindcrit = 9,
 		psi_regen=0.2,
 		psi_on_crit = 4,
-		hate_on_crit = 4, 
+		hate_on_crit = 4,
 		hate_per_kill = 2,
 		resists_pen={all = 20},
 		on_melee_hit={[DamageType.MIND] = 35, [DamageType.RANDOM_GLOOM] = 10},
@@ -6812,7 +6809,7 @@ In the case of opponents who weren't alone, he had to improvise.]],
 			local x, y = who:aiSeeTargetPos(aitarget)
 			ok, nb, nb, x, y = who:canProject(tg, x, y)
 			nb = 0
-			if ok then who:project(o.use_power.target(o, who), x, y, function(px, py) 
+			if ok then who:project(o.use_power.target(o, who), x, y, function(px, py)
 				local target = game.level.map(px, py, engine.Map.ACTOR)
 				if not target then return end
 				if target.summoner then
@@ -6908,39 +6905,39 @@ newEntity{ base = "BASE_KNIFE", --Shibari's #1
 				while p do
 					local DamageType = require "engine.DamageType"
 					if p.src and p.src:reactionToward(who) >= 0 then return end -- Let's not destroy friendly projectiles
-					if p.name then 
+					if p.name then
 						game.logPlayer(who, "#GREEN#Lightning strikes the " .. p.name .. "!")
 					else
 						game.logPlayer(who, "#GREEN#Shantiz strikes down a projectile!")
 					end
-					
+
 					p:terminate(x, y)
 					game.level:removeEntity(p, true)
 					p.dead = true
 					game.level.map:particleEmitter(x, y, 5, "ball_lightning_beam", {radius=5, tx=x, ty=y})
-				   
+
 					local tg = {type="ball", radius=5, friendlyfire=false} -- Let's not kill pets or escorts with uncontrolled AoE
 					local dam = 3*who:getDex()
 
 					who:project(tg, x, y, DamageType.LIGHTNING, dam)
-				   
+
 					who:project(tg, x, y, function(tx, ty)
 							local target = game.level.map(tx, ty, engine.Map.ACTOR)
 							if not target or target == who then return end
 							target:setEffect(target.EFF_DAZED, 3, {apply_power=who:combatAttack()})
 					end)
-   
+
 					i = i + 1
 					p = game.level.map(x, y, engine.Map.PROJECTILE+i)
-				end end end    
-			return          
+				end end end
+			return
 			end
 		},
 	},
 	wielder = {
 		inc_stats = { [Stats.STAT_DEX] = 20 },
-		slow_projectiles = 40, 
-		quick_weapon_swap = 1, 
+		slow_projectiles = 40,
+		quick_weapon_swap = 1,
 	},
 }
 
@@ -6972,9 +6969,9 @@ newEntity{ base = "BASE_KNIFE",
 		combat_def = 15,
 		disarm_immune=0.5,
 		combat_physresist = 15,
-		inc_stats = { 
-			[Stats.STAT_DEX] = 8, 
-			[Stats.STAT_CUN] = 8, 
+		inc_stats = {
+			[Stats.STAT_DEX] = 8,
+			[Stats.STAT_CUN] = 8,
 		},
 		combat_armor_hardiness = 20,
 		learn_talent = { [Talents.T_DAGGER_BLOCK] = 1, },
@@ -7028,7 +7025,7 @@ newEntity{ base = "BASE_GREATMAUL",
 		-- You'll want to color this and such
 		if not self.Gem then return ("No gem") end
 		return ("%s: %s"):format(self.Gem.name:capitalize(), self.gemDesc or ("Write a description for this gem's properties!"))
-	end,	
+	end,
 	cost = 1000,
 	material_level = 2, -- Changes to gem material level on socket
 	level_range = {1, 30},
@@ -7066,7 +7063,7 @@ newEntity{ base = "BASE_GREATMAUL",
 						old_hotkey=i
 					end
 				end
-				
+
 				-- Recycle the old gem
 				local old_gem=self.Gem
 				if gem then
@@ -7079,13 +7076,13 @@ newEntity{ base = "BASE_GREATMAUL",
 
 					local _, _, inven_id = who:findInAllInventoriesByObject(self)
 					who:onTakeoff(self, inven_id)
-	
+
 					self.Gem = gem
 					self.gemDesc = "something has gone wrong"
-					
+
 					self.sentient = false
 					self.act = mod.class.Object.act
-					
+
 					self.talent_on_spell = nil
 
 					local scalingFactor = gem.material_level
@@ -7181,7 +7178,7 @@ newEntity{ base = "BASE_GLOVES", define_as = "SET_GLOVE_DESTROYER",
 		if self.set_complete then
 			num=6
 		end
-		return ("Increases all damage by %d%% of current vim \nCurrent Bonus: %d%%"):format(num, num*0.01*(game.player:getVim() or 0)) 
+		return ("Increases all damage by %d%% of current vim \nCurrent Bonus: %d%%"):format(num, num*0.01*(game.player:getVim() or 0))
 	end,
 	wielder = {
 		inc_stats = { [Stats.STAT_STR] = 9, [Stats.STAT_MAG] = 9, [Stats.STAT_CUN] = 3, },
@@ -7234,7 +7231,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SET_ARMOR_MASOCHISM",
 		if self.set_complete then
 			num=10
 		end
-		return ("Reduces all damage by %d%% of current vim or 50%% of the damage, whichever is lower; but at the cost of vim equal to 5%% of the damage blocked. \nCurrent Bonus: %d"):format(num, num*0.01*(game.player:getVim() or 0)) 
+		return ("Reduces all damage by %d%% of current vim or 50%% of the damage, whichever is lower; but at the cost of vim equal to 5%% of the damage blocked. \nCurrent Bonus: %d"):format(num, num*0.01*(game.player:getVim() or 0))
 	end,
 	wielder = {
 		inc_stats = {[Stats.STAT_MAG] = 9, [Stats.STAT_CUN] = 3, },
@@ -7451,7 +7448,7 @@ newEntity{ base = "BASE_MASSIVE_ARMOR",
 	require = { stat = { str=52 }, },
 	cost = 500,
 	material_level = 4,
-	special_desc = function(self, who) 
+	special_desc = function(self, who)
 		local resist = who and self.worn_by == who and self:set_resist(who) or 0
 		return ("When your effective movement speed (global speed times movement speed) is less than 100%%, reduces all incoming damage by a percent equal to the speed detriment (up to 70%%).\nCurrent reduction bonus: %d%%"):format(resist) end,
 	wielder = {
@@ -7597,7 +7594,7 @@ newEntity{ base = "BASE_LEATHER_BOOT",
 	act = function(self)
 		self:useEnergy()
 		self:regenPower()
-		
+
 		local who=self.worn_by --Make sure you can actually act!
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by = nil return end
@@ -7716,7 +7713,7 @@ newEntity{ base = "BASE_MASSIVE_ARMOR",
 	act = function(self)
 		self:useEnergy()
 		self:regenPower()
-		
+
 		local who=self.worn_by --Make sure you can actually act!
 		if not self.worn_by then return end
 		if game.level and not game.level:hasEntity(self.worn_by) and not self.worn_by.player then self.worn_by = nil return end
@@ -7855,7 +7852,7 @@ newEntity{ base = "BASE_WIZARD_HAT",
 	material_level = 1,
 	special_desc = function(self) return "A small storm cloud follows you, dealing 15 lightning damage to all enemies in a radius of 3 each turn." end,
 	wielder = {
-		resists = { 
+		resists = {
 			[DamageType.COLD]	= 10,
 			[DamageType.LIGHTNING]	= 10,
 		},
@@ -7893,7 +7890,7 @@ newEntity{ base = "BASE_TOOL_MISC",
 	color = colors.BLUE,
 	level_range = {10, 20},
 	desc = [[This torque feels tingly to the touch, but seems to enhance your thinking.]],
-	special_desc = function(self) return [[Your mind is attuned to electricity. 
+	special_desc = function(self) return [[Your mind is attuned to electricity.
 Any lightning damage you do that is more than 10% of the victim's maximum life will attempt to brainlock the target.
 Upon taking lightning damage >10% of your max life, your mind fires back, dealing 30% of the original damage as mind and trying to brainlock the target.
 Upon taking mind damage >10% of your max life, you reflexively trigger the jolt, sending an arc of dazing lightning toward the target (damage based on mindpower).
@@ -7913,7 +7910,7 @@ This item can have up to 2 charges, with each charge having 4 turn cooldown.]] e
 		-- who.cooldown_mind = 4
 		-- who.cooldown_lightning = 4
 	end,
-	
+
 	onTakeoff = function(self)
 		self.worn_by = nil
 	end,
@@ -7924,8 +7921,8 @@ This item can have up to 2 charges, with each charge having 4 turn cooldown.]] e
 		-- who.cooldown_lightning = math.max(who.cooldown_lightning - 1, 0)
 		-- self:useEnergy()
 	-- end,
-	
-	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state) 
+
+	callbackOnTakeDamage = function(self, who, src, x, y, type, dam, state)
 		local dam2 = dam
 		if not self.worn_by or self.worn_by:attr("dead") then return end
 		if type == engine.DamageType.LIGHTNING then
@@ -7935,7 +7932,7 @@ This item can have up to 2 charges, with each charge having 4 turn cooldown.]] e
 				who:project(src, src.x, src.y, engine.DamageType.MIND, { dam = 0.3 * dam2, crossTierChance=25 })
 				end
 			end
-		else 
+		else
 			if type == engine.DamageType.MIND  then
 				if self.power >= 4 then
 					if dam > who.max_life *0.1 then
@@ -8139,7 +8136,7 @@ newEntity{ base = "BASE_KNIFE",
 	name = "Icy Kill", image = "object/artifact/icy_kill.png",
 	moddable_tile = "special/%s_icy_kill",
 	unided_name = "sharpened icicle",
-	desc = [[As any scryer knows, the link between the murderer and the murdered is the murder weapon, and a scryer can follow that link from the murdered to the weapon to the murderer. 
+	desc = [[As any scryer knows, the link between the murderer and the murdered is the murder weapon, and a scryer can follow that link from the murdered to the weapon to the murderer.
 One rather cold blooded killer thought of a way around this. By carving blades out of ice, they could kill as they wished and the link would just melt away.
 Their killing spree ended when one of the victims got lucky and managed to stab the murderer in the heart with the icey blade. After being united with the cold heart that created it, the final ice blade has never melted.]],
 	level_range = {30, 40},
@@ -8231,11 +8228,11 @@ newEntity{ base = "BASE_MACE",
 				local x2, y2 = x + rng.range(-4, 4), y - rng.range(5, 10)
 				game.level.map:particleEmitter(x, y, math.max(math.abs(x2-x), math.abs(y2-y)), "lightning", {tx=x2-x, ty=y2-y})
 				game:playSoundNear({x=x,y=y}, "talents/thunderstorm")
-			
+
 				who.turn_procs.auto_phys_crit = true
 				who:attackTarget(target, engine.DamageType.LIGHTNING, 1.0, true)
 				who.turn_procs.auto_phys_crit = nil
-				
+
 				if core.shader.active() then game.level.map:particleEmitter(x, y, 2, "ball_lightning_beam", {radius=2, tx=x, ty=y}, {type="lightning"})
 				else game.level.map:particleEmitter(x, y, 2, "ball_lightning_beam", {radius=2, tx=x, ty=y}) end
 			end
@@ -8286,7 +8283,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "KINETIC_FOCUS",
 	set_desc = {
 		trifocus = "You feel two unconnected psionic channels on this item.",
 	},
-	on_set_complete = { 
+	on_set_complete = {
 		multiple = true,
 		kinchar = function(self, who)
 			self:specialSetAdd({"wielder","combat_mindpower"}, 6, "kinchar")
@@ -8358,7 +8355,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "CHARGED_FOCUS",
 		learn_talent = { [Talents.T_PSIONIC_MAELSTROM] = 1,},
 	},
 	ms_set_psionic = true,
-	set_list = { 
+	set_list = {
 		multiple = true,
 		kinchar = {{"define_as", "KINETIC_FOCUS"},},
 		charther = {{"define_as", "THERMAL_FOCUS"},},
@@ -8367,7 +8364,7 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "CHARGED_FOCUS",
 	set_desc = {
 		trifocus = "You feel two unconnected psionic channels on this item.",
 	},
-	on_set_complete = { 
+	on_set_complete = {
 		multiple = true,
 		kinchar = function(self, who)
 			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "kinchar")
@@ -8439,16 +8436,16 @@ newEntity{ base = "BASE_MINDSTAR", define_as = "THERMAL_FOCUS",
 		learn_talent = { [Talents.T_PSIONIC_MAELSTROM] = 1,},
 	},
 	ms_set_psionic = true,
-	set_list = { 
+	set_list = {
 		multiple = true,
 		kinther = {{"define_as", "KINETIC_FOCUS"},},
-		charther = {{"define_as", "CHARGED_FOCUS"},}, 
+		charther = {{"define_as", "CHARGED_FOCUS"},},
 		resonating = {{"ms_set_resonating", true,},},
 	},
 	set_desc = {
 		trifocus = "You feel two unconnected psionic channels on this item.",
 	},
-	on_set_complete = { 
+	on_set_complete = {
 		multiple = true,
 		kinther = function(self, who)
 			self:specialSetAdd({"wielder","combat_mindpower"}, 2, "kinther")
