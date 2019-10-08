@@ -136,17 +136,16 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRange(t), friendlyfire=false, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 50) end,
+	getDamage = function(self, t) return 10 + self:combatTalentSpellDamage(t, 1, 50) end,
 	callbackOnLevelChange = function(self, eff)
 		self.firebeam_turns_remaining = nil
 	end,
 	callbackOnAct = function(self, t)
 		if not self.firebeam_turns_remaining then return end
+		if self.firebeam_turns_remaining == 3 then self.firebeam_turns_remaining = 2 return end --hacked turn_procs for 1st activation
 		if self.firebeam_turns_remaining <= 0 then self.firebeam_turns_remaining = nil return end
 
-		if self.firebeam_turns_remaining % 2 ~= 0 then
-			self:forceUseTalent(self.T_FIREBEAM, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
-		end
+		self:forceUseTalent(self.T_FIREBEAM, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
 
 		self.firebeam_turns_remaining = self.firebeam_turns_remaining - 1
 	end,
@@ -161,7 +160,7 @@ newTalent{
 		end)
 
 		if #tgts > 0 then table.sort(tgts, "distance") else return end
-		
+
 		local tgt, x, y = tgts[#tgts].tgt, tgts[#tgts].tgt.x, tgts[#tgts].tgt.y
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, x, y, DamageType.FIRE, dam)
@@ -170,7 +169,7 @@ newTalent{
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
 		game:playSoundNear(self, "talents/flame")
-		if not self.firebeam_turns_remaining then self.firebeam_turns_remaining = 4 end
+		if not self.firebeam_turns_remaining then self.firebeam_turns_remaining = 3 end
 		return true
 	end,
 	info = function(self, t)
