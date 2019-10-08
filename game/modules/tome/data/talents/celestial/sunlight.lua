@@ -34,14 +34,13 @@ newTalent{
 	reflectable = true,
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 17, 200) end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 17, 200)/2 end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), radius=1, talent=t}
-		local x, y = self:getTarget(tg)
+		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
+		local x, y, target = self:getTarget(tg)
 		if not x or not y then return nil end
 
 		local dam = self:spellCrit(t.getDamage(self, t))
-		self:project(tg, x, y, DamageType.LIGHT, dam, {type="light"})
+		if target then self:project(target, x, y, DamageType.LIGHT, dam, {type="light"}) end
 
 		local _ _, x, y = self:canProject(tg, x, y)
 		-- Add a lasting map effect
@@ -60,9 +59,9 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local damageonspot = t.getDamageOnSpot(self, t)
-		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a spot on the ground for 4 turns that does %d light damage to anyone within it.
+		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a radius 1 area of searing light on the ground for 4 turns that does %d light damage to anyone within it.
 		The damage dealt will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damageonspot))
+		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damage/2))
 	end,
 }
 
