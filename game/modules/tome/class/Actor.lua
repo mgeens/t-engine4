@@ -7172,17 +7172,21 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 		p.maximum = p.dur
 		p.minimum = p.min_dur or 0 --Default minimum duration is 0. Can specify something else by putting min_dur=foo in p when calling setEffect()
 		local save = self[p.apply_save or save_for_effects[e.type]](self)
-		local saved, savechance = self:checkHitOld(save, p.apply_power) -- get save and save chance
+		local saved, savechance = self:checkHit(save, p.apply_power, 0, 95) -- get save and save chance
+
+--[[
 		-- failed save tuning parameters: increase mean_fact to increase avg duration, std_dev for more randomness
 		local mean_fact, std_dev = 1.1, 50
 		local mean_pct = (100-savechance)*mean_fact -- mean % duration on a failed save
 		local percentage = util.bound(rng.normalFloat(mean_pct, std_dev)/100, 0, 2) -- fraction duration
-		
+]]
+		local percentage = 1 - ((save - p.apply_power)/20)
+
 		local desired = p.maximum * percentage
 		local fraction = desired % 1
 		desired = math.floor(desired) + (rng.percent(100*fraction) and 1 or 0)
 		local duration = math.min(p.maximum, desired)
-		print(("[on_set_temporary_effect] %s Save %d vs Power %d (%d%% save: %s) :: dur mult: %0.3f(%d%%) :: dur %s ==> %d"):format(self.name, save, p.apply_power, savechance, saved, percentage, mean_pct, p.dur, duration))
+		-- print(("[on_set_temporary_effect] %s Save %d vs Power %d (%d%% save: %s) :: dur mult: %0.3f(%d%%) :: dur %s ==> %d"):format(self.name, save, p.apply_power, savechance, saved, percentage, mean_pct, p.dur, duration))
 		p.dur = util.bound(duration, p.minimum or 0, p.maximum)
 		p.amount_decreased = p.maximum - p.dur
 		local save_type = nil
