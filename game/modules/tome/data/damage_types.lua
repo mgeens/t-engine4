@@ -2075,7 +2075,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 5, 40)) or 0
+		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 1, 35))+5 or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce damage dealt by #YELLOW#%d%%#LAST#%s")
 			:format(dam, val, parens)
 	end,
@@ -2086,7 +2086,7 @@ newDamageType{
 		if target then
 			if rng.percent(dam) then
 				local check = math.max(src:combatAttack(), src:combatSpellpower(), src:combatMindpower())
-				local reduction = math.floor(src:combatStatScale(src:combatMindpower(), 5, 40))
+				local reduction = math.floor(src:combatStatScale(src:combatMindpower(), 1, 35))+5
 				target:setEffect(target.EFF_ITEM_NUMBING_DARKNESS, 3, {reduce = reduction, apply_power=check, no_ct_effect=true})
 			end
 		end
@@ -2107,7 +2107,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 5, 50)) or 0
+		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 1, 45))+5 or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce all saves and defense by #YELLOW#%d#LAST#%s")
 			:format(dam, val, parens)
 	end,
@@ -2118,7 +2118,7 @@ newDamageType{
 		if target then
 			if rng.percent(dam) then
 				local check = math.max(src:combatAttack(), src:combatSpellpower(), src:combatMindpower())
-				local reduction = math.floor(src:combatStatScale(src:combatMindpower(), 5, 50))
+				local reduction = math.floor(src:combatStatScale(src:combatMindpower(), 1, 45))+5
 				target:setEffect(target.EFF_ITEM_EXPOSED, 3, {reduce = reduction, apply_power=check, no_ct_effect=true})
 			end
 		end
@@ -2171,7 +2171,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and src:combatStatScale(src:combatSpellpower(), 15, 50) or 0
+		local val = src and src:combatStatScale(src:combatSpellpower(), 10, 45)+5 or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce armor by #VIOLET#%d%%#LAST#%s")
 			:format(dam, val, parens)
 	end,
@@ -2182,7 +2182,7 @@ newDamageType{
 		if target then
 			if rng.percent(dam) then
 				local check = math.max(src:combatAttack(), src:combatSpellpower(), src:combatMindpower())
-				local reduction = src:combatStatScale(src:combatSpellpower(), 15, 50)
+				local reduction = src:combatStatScale(src:combatSpellpower(), 10, 45)+5
 				target:setEffect(target.EFF_ITEM_ACID_CORRODE, 3, {pct = reduction / 100, no_ct_effect = true, apply_power = check})
 			end
 		end
@@ -2202,7 +2202,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40)) or 0
+		local val = src and math.floor(src:combatStatScale(src:combatSpellpower(), 1, 35))+5 or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to reduce strength, dexterity, and constitution by #VIOLET#%d#LAST#%s")
 			:format(dam, val, parens )
 	end,
@@ -2214,7 +2214,7 @@ newDamageType{
 			if rng.percent(dam) then
 				if target:canBe("disease") then
 					local check = math.max(src:combatSpellpower(), src:combatMindpower(), src:combatAttack())
-					local disease_power = math.floor(src:combatStatScale(src:combatSpellpower(), 1, 40))
+					local disease_power = math.floor(src:combatStatScale(src:combatSpellpower(), 1, 35))+5
 					target:setEffect(target.EFF_ITEM_BLIGHT_ILLNESS, 3, {reduce = disease_power, no_ct_effect = true})
 				end
 			end
@@ -2262,7 +2262,7 @@ newDamageType{
 				parens = (" (#RED#%d%%#LAST#)"):format(diff)
 			end
 		end
-		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 30, 80) ) or 0
+		local val = src and math.floor(src:combatStatScale(src:combatMindpower(), 20, 70))+10 or 0
 		return ("* #LIGHT_GREEN#%d%%#LAST# chance to slow global speed by #YELLOW#%d%%#LAST#%s")
 			:format(dam or 0, val, parens)
 	end,
@@ -2271,7 +2271,7 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and rng.percent(dam) then
-			local slow_power = math.floor(src:combatStatScale(src:combatMindpower(), 30, 80) ) / 100
+			local slow_power = math.floor(src:combatStatScale(src:combatMindpower(), 20, 70))+10 / 100
 			target:setEffect(target.EFF_SLOW, 3, {power = slow_power, no_ct_effect=true})
 		end
 	end,
