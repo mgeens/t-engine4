@@ -225,6 +225,7 @@ newTalent{
 		return true
 	end,
 	callbackOnMove = function(self, t, moved, force, ox, oy)
+		if (self.x == ox and self.y == oy) or force then return end
 		local cooldown = self.talents_cd[t.id] or 0
 		if cooldown > 0 then
 			self.talents_cd[t.id] = math.max(cooldown - 1, 0)
