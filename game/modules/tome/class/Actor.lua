@@ -7875,7 +7875,7 @@ function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
 			((type(typ.selffire) == "number" and rng.percent(typ.selffire)) 
 			or 
 			(type(typ.selffire) ~= "number" and typ.selffire))
-			and (act == game.player and typ.player_selffire)  -- Disable friendlyfire for player projectiles unless explicitly overriden
+			and (act == game.player and (typ.player_selffire or act.allow_player_selffire))  -- Disable friendlyfire for player projectiles unless explicitly overriden
 			)
 			then
 		elseif act and self.reactionToward and (self:reactionToward(act) >= 0) and not ((type(typ.friendlyfire) == "number" and rng.percent(typ.friendlyfire)) or (type(typ.friendlyfire) ~= "number" and typ.friendlyfire)) then
