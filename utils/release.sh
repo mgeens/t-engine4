@@ -188,15 +188,15 @@ cp *zip *bz2 *dmg.gz /foreign/eyal/var/www/te4.org/htdocs/dl/t-engine
 
 echo
 echo "Download links:"
-echo "http://te4.org/dl/t-engine/t-engine4-windows-$ver.zip"
-echo "http://te4.org/dl/t-engine/t-engine4-src-$ver.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-linux32-$ver.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-linux64-$ver.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-windows-$ver-nomusic.zip"
-echo "http://te4.org/dl/t-engine/t-engine4-src-$ver-nomusic.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-linux32-$ver-nomusic.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-linux64-$ver-nomusic.tar.bz2"
-echo "http://te4.org/dl/t-engine/t-engine4-osx-$ver.zip"
+echo "https://te4.org/dl/t-engine/t-engine4-windows-$filever.zip"
+echo "https://te4.org/dl/t-engine/t-engine4-src-$filever.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-linux32-$filever.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-linux64-$filever.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-windows-$filever-nomusic.zip"
+echo "https://te4.org/dl/t-engine/t-engine4-src-$filever-nomusic.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-linux32-$filever-nomusic.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-linux64-$filever-nomusic.tar.bz2"
+echo "https://te4.org/dl/t-engine/t-engine4-osx-$filever.zip"
 
 ########## MD5
 echo "Computing MD5s..."
