@@ -58,7 +58,6 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		local damageonspot = t.getDamageOnSpot(self, t)
 		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a radius 1 area of searing light on the ground for 4 turns that does %d light damage to anyone within it.
 		The damage dealt will increase with your Spellpower.]]):
 		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damage/2))
