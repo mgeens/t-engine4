@@ -37,7 +37,7 @@ newTalent{
 	info = function(self, t)
 		return ([[You stand between the darkness and the light, allowing you to convert 15 positive energy into %d negative energy.
 		The negative energy gain will increase with your Cunning.]]):
-		format(t.getNegativeGain(self, t), t.getRestValue(self, t))
+		format(t.getNegativeGain(self, t))
 	end,
 }
 
