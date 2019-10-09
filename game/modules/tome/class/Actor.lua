@@ -7308,7 +7308,11 @@ end
 --- Called when we are the target of a projection
 function _M:on_project_acquire(tx, ty, who, t, x, y, damtype, dam, particles, is_projectile, mods)
 	if is_projectile and self:attr("projectile_evasion") and rng.percent(self.projectile_evasion) then
-		local spread = self.projectile_evasion_spread or 1
+		if self:knowTalent(self.T_SKIRMISHER_COUNTER_SHOT) then
+			local tal = self:getTalentFromId(self.T_SKIRMISHER_COUNTER_SHOT)
+			tal.doCounter(self, tal, who)
+		end
+      		local spread = self.projectile_evasion_spread or 1
 		mods.x = x + rng.range(-spread, spread)
 		mods.y = y + rng.range(-spread, spread)
 
