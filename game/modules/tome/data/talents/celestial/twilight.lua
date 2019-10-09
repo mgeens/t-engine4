@@ -30,10 +30,6 @@ newTalent{
 	range = 10,
 	getNegativeGain = function(self, t) return math.max(0, self:combatScale(self:getTalentLevel(t) * self:getCun(40, true), 24, 4, 220, 200, nil, nil, 40)) end,
 	action = function(self, t)
-		if self:isTalentActive(self.T_DARKEST_LIGHT) then
-			game.logPlayer(self, "You can't use Twilight while Darkest Light is active.")
-			return
-		end
 		self:incNegative(t.getNegativeGain(self, t))
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
