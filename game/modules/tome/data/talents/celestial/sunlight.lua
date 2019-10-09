@@ -50,7 +50,7 @@ newTalent{
 			1,
 			5, nil,
 			{type="light_zone"},
-			nil, self:spellFriendlyFire()
+			nil, false, false
 		)
 
 		game:playSoundNear(self, "talents/flame")
@@ -58,7 +58,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a radius 1 area of searing light on the ground for 4 turns that does %d light damage to anyone within it.
+		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a radius 1 area of searing light on the ground for 4 turns that does %d light damage to all foes within it.
 		The damage dealt will increase with your Spellpower.]]):
 		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damage/2))
 	end,
