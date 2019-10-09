@@ -397,10 +397,27 @@ newTalent{
 	points = 5,
 	mode = "passive",
 	getLightDamageIncrease = function(self, t) return self:combatTalentSpellDamage(t, 10, 30) end,
-	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 + 0.5 end,
+	getPos = function(self, t) return self:combatTalentScale(t, 2, 5) end,
+	getTurnLimit = function(self, t) return self:combatTalentScale(t, 0.5, 3) end,
+	callbackOnMeleeHit = function(self, t, src)
+		if not (self:isTalentActive(self.T_CHANT_OF_FORTRESS) or self:isTalentActive(self.T_CHANT_OF_FORTITUDE) or self:isTalentActive(self.T_CHANT_OF_RESISTANCE)) then return end
+		if src == self then return end
+		if self.turn_procs.chant_radiant and self.turn_procs.chant_radiant > t.getTurnLimit(self, t) then return end
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant or 0
+		self:incPositive(t.getPos(self, t))
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant + 1
+	end,
+	callbackOnArcheryHit = function(self, t, dam, src)
+		if not (self:isTalentActive(self.T_CHANT_OF_FORTRESS) or self:isTalentActive(self.T_CHANT_OF_FORTITUDE) or self:isTalentActive(self.T_CHANT_OF_RESISTANCE)) then return end
+		if src == self then return end
+		if self.turn_procs.chant_radiant and self.turn_procs.chant_radiant > t.getTurnLimit(self, t) then return end
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant or 0
+		self:incPositive(t.getPos(self, t))
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant + 1
+	end,
 	info = function(self, t)
 		return ([[Your passion for singing the praises of the Sun reaches its zenith.
-		Your Chanting now increases your light and fire damage by %d%%.
-		These values scale with your Spellpower.]]):format(t.getLightDamageIncrease(self, t))
+		Your Chanting now increases your light and fire damage by %d%% and up to %d times per turn, when you are hit by a weapon attack, you will gain %0.1f Positive.
+		These values scale with your Spellpower.]]):format(t.getLightDamageIncrease(self, t), t.getTurnLimit(self, t), t.getPos(self, t))
 	end,
 }
