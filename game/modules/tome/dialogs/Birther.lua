@@ -51,6 +51,7 @@ _M.cosmetic_options_config = {
 	tatoos = "single",
 	horns = "single",
 	special = "multiple",
+	golem = "single",
 }
 
 function _M:setSubclassIcon(t)
@@ -390,8 +391,10 @@ function _M:makeDefault()
 	self:setDescriptor("permadeath", "Adventure")
 	self:setDescriptor("race", "Human")
 	self:setDescriptor("subrace", "Cornac")
-	self:setDescriptor("class", "Warrior")
-	self:setDescriptor("subclass", "Berserker")
+	self:setDescriptor("class", "Mage")
+	self:setDescriptor("subclass", "Archmage")
+	-- self:setDescriptor("class", "Warrior")
+	-- self:setDescriptor("subclass", "Berserker")
 	__module_extra_info.no_birth_popup = true
 	self:atEnd("created")
 end

@@ -38,7 +38,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not target or not self:canProject(tg, x, y) then return nil end
-		
+
 		for i = 1,2 do
 			local speed, hit = self:attackTargetWith(target, weapon.combat, nil, self:combatTalentWeaponDamage(t, 0.5, 0.7))
 
@@ -87,7 +87,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local hit, x, y = self:canProject(tg, self:getTarget(tg))
 		if not hit or not x or not y then return nil end
-		
+
 		if self:canMove(x, y) then
 			self:move(x, y, true)
 		end
@@ -198,7 +198,7 @@ newTalent{
 	info = function(self, t)
 		return ([[Takes advantage of a wounded foe to perform a killing strike.  This attack is an automatic critical hit that does %0.1f%% extra weapon damage for each %% of life the target is below maximum.
 		(A victim with 30%% remaining life (70%% damaged) would take %0.1f%% weapon damage.)
-		If an enemy dies from this attack then two of your talent cooldowns are reduced by 2 turns and Execute's cooldown is reset.]]):
+		If an enemy dies from this attack then two of your talent cooldowns are reduced by 2 turns and Execution's cooldown is reset.]]):
 		format(t.getPower(self, t), 100 + t.getPower(self, t) * 70)
 	end,
 }

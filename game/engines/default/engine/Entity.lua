@@ -909,11 +909,11 @@ function _M:addTemporaryValue(prop, v, noupdate)
 				table.sort(b, function(a, b) return a[1] > b[1] end)
 				base[prop] = b[1] and b[1][2]
 			else
-if type(base[prop] or 0) ~= "number" or type(v) ~= "number" then
-	print("ERROR: Attempting to add value", v, "property", prop, "to", base[prop]) table.print(base[prop]) table.print(v)
-	print("Entity:", self) -- table.print(self)
-	game.debug._debug_entity = self
-end
+-- if type(base[prop] or 0) ~= "number" or type(v) ~= "number" then
+-- 	print("ERROR: Attempting to add value", v, "property", prop, "to", base[prop]) table.print(base[prop]) table.print(v)
+-- 	print("Entity:", self) -- table.print(self)
+-- 	game.debug._debug_entity = self
+-- end
 				base[prop] = (base[prop] or 0) + v
 			end
 			self:onTemporaryValueChange(prop, v, base)

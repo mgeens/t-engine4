@@ -106,3 +106,10 @@ function engine.version_patch_same(v, ev)
 	if v[3] >= ev[3] then return true end
 	return false
 end
+
+--- Check if we are running as beta
+function engine.version_hasbeta()
+	if fs.exists("/engine/version_beta.lua") then
+		return dofile("/engine/version_beta.lua")
+	end
+end

@@ -727,6 +727,11 @@ function _M:canLearnTalent(t, offset, ignore_special)
 				end
 			end
 		end
+		if req.birth_descriptors then
+			for _, d in ipairs(req.birth_descriptors) do
+				if not self.descriptor or self.descriptor[d[1]] ~= d[2] then return nil, ("is not %s"):format(d[2]) end
+			end
+		end
 	end
 
 	if not self:knowTalentType(t.type[1]) and not t.type_no_req then return nil, "unknown talent type" end
@@ -747,7 +752,7 @@ end
 function _M:getTalentReqDesc(t_id, levmod)
 	local t = _M.talents_def[t_id]
 	local req = t.require
-	if not req then return "" end
+	if not req then return tstring{}, nil end
 	if type(req) == "function" then req = req(self, t) end
 
 	local tlev = self:getTalentLevelRaw(t_id) + (levmod or 0)
@@ -797,8 +802,14 @@ function _M:getTalentReqDesc(t_id, levmod)
 			end
 		end
 	end
+	if req.birth_descriptors then
+		for _, d in ipairs(req.birth_descriptors) do
+			local c = self.descriptor and self.descriptor[d[1]] == d[2] and {"color", 0x00,0xff,0x00} or {"color", 0xff,0x00,0x00}
+			str:add(c, ("- is %s"):format(d[2]), true)
+		end
+	end
 
-	return str
+	return str, req
 end
 
 --- Return the full description of a talent

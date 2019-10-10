@@ -150,7 +150,7 @@ function _M.AI_InitializeData()
 				want = "constant:"..tostring(swant)
 			end
 		end
-		print(("\t* %-15s\t%s\t\t%s"):format(tact, _M.AI_TACTICS[tact], want))
+		print(("\t* %-15s\t%s\t\t%s"):format(tact, tostring(_M.AI_TACTICS[tact]), want))
 	end
 end
 
@@ -686,7 +686,9 @@ function _M:aiGridDamage(gx, gy)
 
 	if g.DamageType and not self:attr("invulnerable") then -- check for damaging terrain
 		if not g.faction or self:reactionToward(g) < 0 then
-			dam = ((g.maxdam or 0) + (g.mindam or 0))/2 * (100 - self:combatGetResist(g.DamageType)-self:combatGetAffinity(g.DamageType))/100
+			if type(g.maxdam) == "table" or type(g.mindam) == "table" then dam = 0
+			else dam = ((g.maxdam or 0) + (g.mindam or 0))/2 * (100 - self:combatGetResist(g.DamageType)-self:combatGetAffinity(g.DamageType))/100
+			end
 		end
 	end
 	if config.settings.log_detail_ai > 3 then print(("[aiGridDamage] for %s (%d, %d) dam: %s, air: %s"):format(self.name, gx, gy, dam, air)) end
@@ -1596,7 +1598,7 @@ function _M:aiTalentTactics(t, aitarget, target_list, tactic, tg, wt_mod)
 									else -- calculate status immunity
 										_, status_chance = act:canBe(effect_type) --Status immunity
 										if log_detail > 2 then print("\t\t--- status_chance", effect_type, status_chance) end
-										res = 100 - status_chance
+										res = 100 - status_chance or 0
 									end
 									if type(effect_wt) == "table" then -- sum the list of statuses and weights that can affect the actor
 										local e_wt = 0

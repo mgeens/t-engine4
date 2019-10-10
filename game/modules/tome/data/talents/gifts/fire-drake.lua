@@ -51,13 +51,13 @@ newTalent{
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		local state = {}
+		local shield, shield_combat = self:hasShield()
+		local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat
 		self:project(tg, x, y, function(px, py, tg, self)
 			local target = game.level.map(px, py, Map.ACTOR)
 			if target and target ~= self and not state[target] then				
 				-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 				state[target] = true
-				local shield, shield_combat = self:hasShield()
-				local weapon = self:hasMHWeapon().combat
 				if not shield then
 					self:attackTarget(target, DamageType.PHYSKNOCKBACK, t.getDamage(self, t), true)
 				else

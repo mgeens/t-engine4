@@ -130,7 +130,7 @@ newBirthDescriptor{
 		life_rating = -1,
 	},
 	cosmetic_options = {
-		special = {
+		golem = {
 			{name="Golem becomes a Drolem", on_actor=function(actor) actor.alchemist_golem_is_drolem = true end, unlock="cosmetic_class_alchemist_drolem"},
 		},
 	},

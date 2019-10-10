@@ -191,18 +191,12 @@ newTalent{
 	end,
 	info = function(self, t)
 		local rad = t.getRadius(self, t)
-		return ([[Summons a tornado that moves very slowly toward its target, following it if it changes position for up to 20 turns.
-		Each time it moves every foe within radius 2 takes %0.2f lightning damage and is knocked back 2 spaces.
-		When it reaches its target, it explodes in a radius of %d for %0.2f lightning damage and %0.2f physical damage. All affected creatures will be knocked back. The blast will ignore the talent user.
-		The tornado will last for %d turns, or until it reaches its target.
+		return ([[Summon a tornado that moves very slowly towards the target, following it if it changes position.
+		Each time it moves every foes within radius 2 takes %0.2f lightning damage and is knocked back 2 spaces.
+		When it reaches the target it explodes in a radius of %d, knocking back targets and dealing %0.2f lightning and %0.2f physical damage.
+		The tornado will move a maximum of 20 times.
 		Damage will increase with your Mindpower.
-		Each point in storm drake talents also increases your lightning resistance by 1%%.]]):format(
-			damDesc(self, DamageType.LIGHTNING, t.getMoveDamage(self, t)),
-			rad,
-			damDesc(self, DamageType.LIGHTNING, t.getDamage(self, t)),
-			damDesc(self, DamageType.PHYSICAL, t.getDamage(self, t)),
-			self:getTalentRange(t)
-		)
+		Each point in storm drake talents also increases your lightning resistance by 1%%.]]):format(damDesc(self, DamageType.LIGHTNING, t.getMoveDamage(self, t)), rad, damDesc(self, DamageType.LIGHTNING, t.getDamage(self, t)), damDesc(self, DamageType.PHYSICAL, t.getDamage(self, t)))
 	end,
 }
 
@@ -237,7 +231,7 @@ newTalent{
 		self:project(tg, x, y, function(tx, ty)
 			local target = game.level.map(tx, ty, Map.ACTOR)
 			if not target or target == self then return end
-			
+
 			DamageType:get(DamageType.LIGHTNING).projector(self, tx, ty, DamageType.LIGHTNING, damage)
 			if target:canBe("stun") then
 				target:setEffect(target.EFF_STUNNED, 3, {apply_power = self:combatMindpower()})

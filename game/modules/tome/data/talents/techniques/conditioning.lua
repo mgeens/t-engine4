@@ -104,6 +104,8 @@ newTalent{
 	getRadius = function(self, t) return 6 end,
 	getPenalty = function(self, t) return self:combatTalentPhysicalDamage(t, 5, 36) end,
 	do_daunting_presence = function(self, t)
+		if self.__do_daunting_presence_running then return end
+		self.__do_daunting_presence_running = true
 		local tg = {type="ball", range=0, radius=t.getRadius(self, t), friendlyfire=false, talent=t}
 		self:project(tg, self.x, self.y, function(px, py)
 			local target = game.level.map(px, py, engine.Map.ACTOR)
@@ -111,6 +113,7 @@ newTalent{
 				target:setEffect(target.EFF_INTIMIDATED, 2, {power=t.getPenalty(self, t)})
 			end
 		end)
+		self.__do_daunting_presence_running = nil
 	end,
 	callbackOnAct = function(self, t)
 		t.do_daunting_presence(self, t)

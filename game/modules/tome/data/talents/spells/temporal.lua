@@ -119,7 +119,7 @@ newTalent{
 	require = spells_req4,
 	points = 5,
 	mode = "sustained",
-	sustain_mana = 250,
+	sustain_mana = 180,
 	cooldown = 20,
 	tactical = { BUFF = 2 },
 	getHaste = function(self, t) return self:combatTalentLimit(t, 0.35, 0.05, 0.25) end,

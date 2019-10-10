@@ -22,6 +22,9 @@ local basetrap = function(self, t, x, y, dur, add)
 	local trap = {
 		id_by_type=true, unided_name = "trap",
 		display = '^',
+		disarmable = false,
+		no_disarm_message = true,
+		message = false,
 		faction = self.faction,
 		summoner = self, summoner_gain_exp = true,
 		temporary = dur,

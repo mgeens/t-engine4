@@ -155,7 +155,7 @@ newTalent{
 		
 		-- We need to alter behavior slightly to accomodate shields since they aren't used in attackTarget
 		local shield, shield_combat = self:hasShield()
-		local weapon = self:hasMHWeapon().combat
+		local weapon = self:hasMHWeapon() and self:hasMHWeapon().combat or self.combat
 		if not shield then
 			self:attackTarget(target, (self:getTalentLevel(t) >= 2) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)
 			self:attackTarget(target, (self:getTalentLevel(t) >= 4) and DamageType.ACID_BLIND or DamageType.ACID, t.getDamage(self, t), true)

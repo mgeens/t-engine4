@@ -658,7 +658,7 @@ newEntity{
 	display = '2', color=colors.UMBER,
 	store = {
 		purse = 25,
-		nb_fill = 20,
+		nb_fill = 2,
 		sell_percent = 300,
 		empty_before_restock = false,
 		minimum_level = 10,

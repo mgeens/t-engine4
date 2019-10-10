@@ -1798,9 +1798,11 @@ newEffect{
 	parameters = { pct = 1 },
 	callbackPriorities={callbackOnHeal = -5},
 	callbackOnHeal = function(self, eff, value, src, raw_value)
-		if raw_value > 0 and eff.src then
+		if raw_value > 0 and eff.src and not eff.src.__healing_nexus_running then
 			game:delayedLogMessage(eff.src, self, "healing_nexus"..(eff.src.uid or ""), "#YELLOW_GREEN##Source# steals healing from #Target#!")
+			eff.src.__healing_nexus_running = true
 			eff.src:heal(raw_value*eff.pct, src) -- use raw healing value to avoid compounding healing_factor
+			eff.src.__healing_nexus_running = nil
 			return {value = 0}
 		end
 	end,
@@ -4161,7 +4163,7 @@ newEffect{
 newEffect{
 	name = "SWIFT_SHOT", image = "talents/skirmisher_swift_shot.png",
 	desc = "Swift Shot",
-	long_desc = function(self, eff) return ("Increases attack speed by %d%%."):format(eff.speed) end,
+	long_desc = function(self, eff) return ("Increases attack speed by %d%%."):format(eff.speed * 100) end,
 	type = "physical",
 	subtype = { tactic=true },
 	status = "beneficial",
