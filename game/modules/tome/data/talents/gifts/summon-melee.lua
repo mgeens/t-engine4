@@ -71,7 +71,7 @@ newTalent{
 		return ([[%d%% chance to split upon taking a single hit dealing at least %d%% of your maximum life.]]):format(t.getChance(self, t), t.getDamage(self, t))
 	end,
 }
-	
+
 newTalent{
 	name = "War Hound",
 	type = {"wild-gift/summon-melee", 1},
@@ -110,10 +110,10 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			str=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
 			dex=15 + (fake and mp or self:mindCrit(mp)) * 1 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
-			con=15 
+			con=15
 		}
 	end,
 	action = function(self, t)
@@ -160,14 +160,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_TOTAL_THUGGERY]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -218,7 +219,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t, fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			con=10 + (fake and mp or self:mindCrit(mp)) * 1.6 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			str=10 + self:combatTalentScale(t, 2, 10, 0.75)
 		}
@@ -280,14 +281,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_JELLY_MITOTIC_SPLIT]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -337,7 +339,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 2, 0, 7, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			str=25 + (fake and mp or self:mindCrit(mp)) * 2.1 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
 			dex=10 + (fake and mp or self:mindCrit(mp)) * 1.8 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
 			con=10 + self:combatTalentScale(t, 2, 10, 0.75)
@@ -394,14 +396,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_RUSH]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -455,7 +458,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			str=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
 			dex=15 + (fake and mp or self:mindCrit(mp)) * 1.9 * self:combatTalentScale(t, 0.2, 1, 0.75) + self:combatTalentScale(t, 2, 10, 0.75),
 			con=10 + self:combatTalentScale(t, 2, 10, 0.75)
@@ -514,14 +517,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_DISARM]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,

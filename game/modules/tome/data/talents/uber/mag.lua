@@ -162,7 +162,7 @@ uberTalent{
 uberTalent{
 	name = "Blighted Summoning",
 	mode = "passive",
-	require = { special={desc="Have summoned at least 100 creatures affected by this talent. More permanent summons may count for more than 1.", fct=function(self)
+	require = { special={desc="Have summoned at least 100 creatures. More permanent summons may count as more than 1.", fct=function(self)
 		return self:attr("summoned_times") and self:attr("summoned_times") >= 100
 	end} },
 	cant_steal = true,
@@ -170,17 +170,8 @@ uberTalent{
 	on_learn = function(self, t)
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
-				if act ~= self and act.summoner == self and not act.is_blighted_summon then
-					act:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-					act:addTemporaryValue("all_damage_convert_percent", 50)
-					if not act:knowTalent(act.T_BONE_SHIELD) then
-						act:learnTalent(act.T_BONE_SHIELD, true, 3, {no_unlearn=true})
-						act:forceUseTalent(act.T_BONE_SHIELD, {ignore_energy=true})
-					end
-					if not act:knowTalent(act.T_VIRULENT_DISEASE) then
-						act:learnTalent(act.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
-					end
-					act.is_blighted_summon = true
+				if act ~= self and act.summoner == self then
+					self:callTalent(self.T_BLIGHTED_SUMMONING, "doBlightedSummon", act)
 				end
 			end
 		end
@@ -188,20 +179,84 @@ uberTalent{
 	-- Called by addedToLevel to Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
-		who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-		who:addTemporaryValue("all_damage_convert_percent", 50)
-		if not who:knowTalent(who.T_BONE_SHIELD) then
-			who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
-			who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
+		who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
+		who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
 		end
-		if not who:knowTalent(who.T_VIRULENT_DISEASE) then
+		if who.necrotic_minion then
+			if who.subtype == "giant" then
+				who:learnTalent(who.T_BONE_SPIKE, true, 3, {no_unlearn=true})
+				who:learnTalent(who.T_RUIN, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_RUIN, {ignore_energy=true})
+			elseif who.subtype == "vampire" or who.subtype == "lich" then
+				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
+				who:learnTalent(who.T_BLOOD_BOIL, true, 3, {no_unlearn=true})
+			elseif who.subtype == "ghost" or who.subtype == "wight" then
+				who:learnTalent(who.T_BLOOD_FURY, true, 3, {no_unlearn=true})
+				who:learnTalent(who.T_CURSE_OF_DEATH, true, 3, {no_unlearn=true})
+			elseif who.subtype == "ghoul" then
+				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
+			elseif who.name == "skeleton archer" or who.name == "skeleton master archer" then
+				who:learnTalent(who.T_BONE_SPIKE, true, 3, {no_unlearn=true})
+			elseif who.name == "skeleton mage" then
+				who:learnTalent(who.T_BONE_SPEAR, true, 3, {no_unlearn=true})
+			elseif who.name == "degenerated skeleton warrior" or who.name == "skeleton warrior" or who.name == "armoured skeleton warrior" then
+				who:learnTalent(who.T_RUIN, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_RUIN, {ignore_energy=true})
+			else
+				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+				who:addTemporaryValue("all_damage_convert_percent", 50)
+				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
+			end
+		elseif who.is_nature_summon then
+			if who.name == "war hound" then
+				who:learnTalent(who.T_GNAW, true, 3, {no_unlearn=true})
+			elseif who.subtype == "jelly" then
+				who:learnTalent(who.T_CURSE_OF_DEFENSELESSNESS, true, 3, {no_unlearn=true})
+			elseif who.name == "minotaur" then
+				who:learnTalent(who.T_RUIN, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_RUIN, {ignore_energy=true})
+			elseif who.name == "stone golem" then
+				who:learnTalent(who.T_ACID_BLOOD, true, 3, {no_unlearn=true})
+			elseif who.subtype == "ritch" then
+				who:learnTalent(who.T_LIFE_TAP, true, 3, {no_unlearn=true})
+			elseif who.type == "hydra" then
+				who:learnTalent(who.T_BLOOD_SPRAY, true, 3, {no_unlearn=true})
+			elseif who.name == "rimebark" then
+				who:learnTalent(who.T_POISON_STORM, true, 3, {no_unlearn=true})
+			elseif who.name == "fire drake" then
+				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true})
+			else
+				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+				who:addTemporaryValue("all_damage_convert_percent", 50)
+				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
+			end
+		else
+			who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
+			who:addTemporaryValue("all_damage_convert_percent", 50)
 			who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 		end
+		who:incVim(who:getMaxVim())
 		who.is_blighted_summon = true
 	end,
 	info = function(self, t)
-		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield and Virulent Disease at talent level 3 and causing 50%% of their damage to be converted to Blight.
-		Your summons gain a bonus to spellpower equal to your magic.
+		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield (level 3) and a bonus to Spellpower equal to your Magic.
+		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 50% Blight damage conversion and Virulent Disease (level 3).
+		#GREEN#Wilder Summons:#LAST#
+		War Hound: Gnaw
+		Jelly: Curse of Defencelessness
+		Minotaur: Ruin
+		Golem: Acid Blood
+		Ritch: Life Tap
+		Hydra: Blood Spray
+		Rimebark: Poison Storm
+		Fire Drake: Flame of Urh’Rok
+		Turtle: Elemental Discord
+		Spider: Blood Grasp
+		#GREY#Necrotic Minions:#LAST#
+		Skeleton Mages: Bone Spear
+		Skeleton Archers: Bone Spike
+		Skeleton Warriors: Ruin
+		Bone Giants: Bone Spike and Ruin
+		Ghouls: Virulent Disease
+		Vampires / Liches: Blood Grasp and  Blood Boil
+		Ghosts / Wights: Blood Fury and Curse of Death
 		]]):format()
 	end,
 }

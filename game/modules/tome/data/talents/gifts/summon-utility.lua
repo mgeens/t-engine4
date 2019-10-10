@@ -120,7 +120,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			con=15 + (fake and mp or self:mindCrit(mp)) * 2.1 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 18,
 			dex=10 + self:combatTalentScale(t, 2, 10, 0.75)
@@ -191,14 +191,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_BATTLE_CALL]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-			
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -247,7 +248,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			dex=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 18,
 			str=10 + self:combatTalentScale(t, 2, 10, 0.75),
@@ -304,14 +305,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.inscription("INFUSION:_INSIDIOUS_POISON", {cooldown=12, range=6, heal_factor=60, power=self:getTalentLevel(t) * 60})
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -370,7 +372,7 @@ newTalent{
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTargetLimited(tg)
-		if not target or target == self then return nil 
+		if not target or target == self then return nil
 
 		else
 			target:setEffect(target.EFF_SUMMON_CONTROL, t.getDur(self, t), {range=t.getRad(self,t), src=self})
