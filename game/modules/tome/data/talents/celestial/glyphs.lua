@@ -387,7 +387,7 @@ newTalent{
 	getMaxStacks = function(self, t) return self:combatTalentLimit(t, 6, 2, 5) end,
 	getTurns = function(self, t) return self:combatTalentLimit(t, 10, 1, 7) end,
 	info = function(self, t)
-		return ([[Up to 3 times pers turn when one of your glyphs triggers you feel a surge of celestial power, increasing your darkness and light resistance and affinity by 5%% for %d turns, stacking up to %d times.]]):format(t.getTurns(self, t), t.getMaxStacks(self, t))
+		return ([[Up to 3 times per turn when one of your glyphs triggers you feel a surge of celestial power, increasing your darkness and light resistance and affinity by 5%% for %d turns, stacking up to %d times.]]):format(t.getTurns(self, t), t.getMaxStacks(self, t))
 	end,
 }
 

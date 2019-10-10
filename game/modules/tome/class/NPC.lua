@@ -168,55 +168,12 @@ function _M:lineFOV(tx, ty, extra_block, block, sx, sy)
 	local sees_target = core.fov.distance(sx, sy, tx, ty) <= self.sight and game.level.map.lites(tx, ty) or
 		act and self:canSee(act) and core.fov.distance(sx, sy, tx, ty) <= math.min(self.sight, math.max(self.heightened_senses or 0, self.infravision or 0))
 
-	local darkVisionRange
-	if self:knowTalent(self.T_DARK_VISION) then
-		local t = self:getTalentFromId(self.T_DARK_VISION)
-		darkVisionRange = self:getTalentRange(t)
-	end
-	local inCreepingDark = false
-
 	extra_block = type(extra_block) == "function" and extra_block
 		or type(extra_block) == "string" and function(_, x, y) return game.level.map:checkAllEntities(x, y, extra_block) end
 
 	-- This block function can be called *a lot*, so every conditional statement we move outside the function helps
-	block = block or sees_target and (darkVisionRange and
-			-- target is seen and source actor has dark vision
-			function(_, x, y)
-				if game.level.map:checkAllEntities(x, y, "creepingDark") then
-					inCreepingDark = true
-				end
-				if inCreepingDark and core.fov.distance(sx, sy, x, y) > darkVisionRange then
-					return true
-				end
-				return game.level.map:checkAllEntities(x, y, "block_sight") or
-					game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "block_move") and not game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "pass_projectile") or
-					extra_block and extra_block(self, x, y)
-			end
-			-- target is seen and source actor does NOT have dark vision
-			or function(_, x, y)
-				return game.level.map:checkAllEntities(x, y, "block_sight") or
-					game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "block_move") and not game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "pass_projectile") or
-					extra_block and extra_block(self, x, y)
-			end)
-		or darkVisionRange and
-			-- target is NOT seen and source actor has dark vision (do we even need to check for creepingDark in this case?)
-			function(_, x, y)
-				if game.level.map:checkAllEntities(x, y, "creepingDark") then
-					inCreepingDark = true
-				end
-				if inCreepingDark and core.fov.distance(sx, sy, x, y) > darkVisionRange then
-					return true
-				end
-				if core.fov.distance(sx, sy, x, y) <= self.sight and game.level.map.lites(x, y) then
-					return game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "block_sight") or
-						game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "block_move") and not game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "pass_projectile") or
-						extra_block and extra_block(self, x, y)
-				else
-					return true
-				end
-			end
-		or
-			-- target is NOT seen and the source actor does NOT have dark vision
+	block = block or sees_target and 
+			-- target is NOT seen
 			function(_, x, y)
 				if core.fov.distance(sx, sy, x, y) <= self.sight and game.level.map.lites(x, y) then
 					return game.level.map:checkEntity(x, y, engine.Map.TERRAIN, "block_sight") or

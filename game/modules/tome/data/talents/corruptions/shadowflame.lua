@@ -165,8 +165,6 @@ newTalent{
 		local p = self:isTalentActive(t.id)
 		if not p then return end
 		p.drain_add = (p.drain_add or 0) + 1
-		self:removeTemporaryValue("vim_regen", p.vim_drain)
-		p.vim_drain = self:addTemporaryValue("vim_regen", -p.drain_add)
 	end,
 	activate = function(self, t)
 		if game.zone.is_demon_plane then
@@ -279,7 +277,6 @@ newTalent{
 		if not self.on_die then return true end
 		
 		if p.particle then self:removeParticles(p.particle) end
-		self:removeTemporaryValue("vim_regen", p.vim_drain)
 
 		game:onTickEnd(function()
 			-- Collect objects

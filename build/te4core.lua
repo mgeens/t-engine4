@@ -37,7 +37,7 @@ project "TEngine"
 	if _OPTIONS.steam then
 		files { "../steamworks/luasteam.c", }
 	end
-	links { "physfs", "lua".._OPTIONS.lua, "fov", "luasocket", "luaprofiler", "lpeg", "tcodimport", "lxp", "expatstatic", "luamd5", "luazlib", "luabitop", "te4-bzip", "te4-wfc" }
+	links { "physfs", "lua".._OPTIONS.lua, "fov", "luasocket", "luaprofiler", "lpeg", "tcodimport", "lxp", "expatstatic", "luamd5", "luazlib", "luabitop", "te4-bzip", "te4-wfc", "utf8proc" }
 	if _OPTIONS.discord then defines { "DISCORD_TE4" } end
 	defines { "_DEFAULT_VIDEOMODE_FLAGS_='SDL_HWSURFACE|SDL_DOUBLEBUF'" }
 	defines { [[TENGINE_HOME_PATH='".t-engine"']], "TE4CORE_VERSION="..TE4CORE_VERSION }
@@ -552,6 +552,14 @@ project "te4-wfc"
 	cppconfig()
 
 	files { "../src/wfc/*.cpp", }
+
+project "utf8proc"
+	kind "StaticLib"
+	language "C"
+	targetname "utf8proc"
+	buildoptions { "-O2" }
+
+	files { "../src/utf8proc/utf8proc.c", }
 
 if _OPTIONS['web-awesomium'] and not _OPTIONS.wincross then
 project "te4-web"

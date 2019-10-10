@@ -233,7 +233,7 @@ ActorResource:defineResource("Psi", "psi", ActorTalents.T_PSI_POOL, "psi_regen",
 		tactical = { -- tactical AI
 			want_level = function(act, aitarget) -- compute want level for psi
 				local life_regen, psi_regen = act:regenLife(true) -- (includes Solipsism effect on psi_regen)
-				local depleted = 1-(act:getPsi() + math.max(0, psi_regen))/act.max_psi
+				local depleted = 1-(act:getPsi() + math.max(0, psi_regen or 0))/act.max_psi
 				-- use std resource formula, accounting for Solipsism regeneration
 				depleted = depleted/math.max(0.001, 1-depleted)*act.global_speed
 				return 10*(depleted/(depleted + 2.5))^2

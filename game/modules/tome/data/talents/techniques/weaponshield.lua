@@ -262,7 +262,7 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		self:project(tg, self.x, self.y, function(px, py, tg, self)
 			local target = game.level.map(px, py, Map.ACTOR)
-			if target then
+			if target and self:reactionToward(target) < 0 then
 				local damage = t.getShieldDamage(self, t)
 				local speed, hit = self:attackTargetWith(target, shield_combat, nil, damage)
 				if hit and self:getTalentFromId(game.player.T_RUSH) then self.talents_cd["T_RUSH"] = nil end

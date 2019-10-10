@@ -909,6 +909,9 @@ function _M:instanciate(mod, name, new_game, no_reboot, extra_module_info)
 	-- Make sure locale is correct
 	core.game.resetLocale()
 
+	-- Reset white space breaking
+	core.display.breakTextAllCharacter(false)
+
 	-- Turn based by default
 	core.game.setRealtime(0)
 

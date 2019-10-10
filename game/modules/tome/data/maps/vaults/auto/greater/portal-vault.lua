@@ -97,10 +97,10 @@ local trigger = function(self, who)
 			if not tx then
 				game.logPlayer(who, "#YELLOW#The Portal repels you briefly before becoming quiescent.  The other side seems to be blocked.")
 			else
-				require("engine.ui.Dialog"):yesnoPopup("Malevolant Portal", "An ominous aura emanates from this portal. Are you sure you want to go through?", function(ret) if ret then
+				require("engine.ui.Dialog"):yesnoPopup("Malevolent Portal", "An ominous aura emanates from this portal. Are you sure you want to go through?", function(ret) if ret then
 					game.logPlayer(who, "#YELLOW#You overcome intense #LIGHT_BLUE#REPULSIVE FORCES#LAST# as you traverse the Portal.")
 					game:playSoundNear(who, "talents/distortion")
-					who:move(tx, ty, true)					
+					who:move(tx, ty, true)
 				end end, "Teleport", "Cancel")
 			end
 		end

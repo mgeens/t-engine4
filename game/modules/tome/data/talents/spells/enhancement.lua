@@ -21,7 +21,7 @@
 newTalent{
 	name = "Arcane Strike",
 	short_name = "EARTHEN_BARRIER",
-	image = "talents/mana_strike_3.png",
+	image = "talents/arcane_strike.png",
 	type = {"spell/enhancement", 1},
 	points = 5,
 	cooldown = 4,

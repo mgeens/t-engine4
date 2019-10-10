@@ -757,6 +757,8 @@ function table.ruleMergeAppendAdd(dst, src, rules, state)
 	table.applyRules(dst, src, rules, state)
 end
 
+string.nextUTF = core.display.stringNextUTF
+
 function string.ordinal(number)
 	local suffix = "th"
 	number = tonumber(number)
@@ -845,6 +847,12 @@ function string.lpegSub(s, patt, repl)
 	return lpeg.match(patt, s)
 end
 
+function string.lpegSubT(s, patt, repl, fct)
+	patt = lpeg.Cmt(lpeg.P(patt), function(s, i, c) fct(c, i - #c, i - 1) return true end)
+	patt = lpeg.Cs((patt / repl + 1)^0)
+	return lpeg.match(patt, s)
+end
+
 function string.prefix(s, p)
 	if s:sub(1, #p) == p then return true end
 	return false
@@ -853,6 +861,23 @@ end
 function string.suffix(s, p)
 	if s:sub(#s - #p + 1) == p then return true end
 	return false
+end
+
+function string.iterateUTF(str, pos, get_char)
+	pos = pos or 1
+	return function()
+		if not pos then return nil end
+		local op = pos
+		pos = str:nextUTF(pos)
+		local np = pos
+		if not np then np = #str + 1 end
+		local s = nil
+		if get_char == "char" then s = str:sub(op, np-1)
+		elseif get_char == "to" then s = str:sub(1, np-1)
+		elseif get_char == "from" then s = str:sub(op)
+		end
+		return op, np-1, s
+	end
 end
 
 -- Those matching patterns are used both by splitLine and drawColorString*
@@ -870,8 +895,67 @@ function string.removeColorCodes(str)
 	return str:lpegSub("#" * (Puid + Pcolorcodefull + Pcolorname + Pfontstyle + Pextra) * "#", "")
 end
 
+function string.removeColorCodesT(str)
+	local posmap = {}
+	local last = 0
+	local res = str:lpegSubT("#" * (Puid + Pcolorcodefull + Pcolorname + Pfontstyle + Pextra) * "#", "", function(c, p1, p2)
+		for i = last + 1, p1 - 1 do
+			posmap[#posmap+1] = i
+		end
+		last = p2
+	end)
+
+	for i = last + 1, #str do
+		posmap[#posmap+1] = i
+	end
+
+	return res, posmap
+end
+
 function string.removeUIDCodes(str)
 	return str:lpegSub("#" * Puid * "#", "")
+end
+
+function string.splitAtSizeSimple(str, size, font)
+	local fontoldsize = font.simplesize or font.size
+	local left, right
+	local cs = 0
+
+	local oldleft
+	for pos, pos2, left in str:iterateUTF(1, "to") do
+		if not oldleft then oldleft = left end
+
+		local ps = fontoldsize(font, left)
+		if ps > size then
+			right = str:sub(pos)
+			return oldleft, fontoldsize(font, oldleft), right, fontoldsize(font, right)
+		end
+
+		oldleft = left
+	end
+	return str, fontoldsize(font, str), "", 0
+end
+
+function string.splitAtSize(bstr, size, font)
+	local str, posmap = bstr:removeColorCodesT()
+	local fontoldsize = font.simplesize or font.size
+	local left, right
+	local cs = 0
+
+	local oldpos2
+	for pos, pos2, left in str:iterateUTF(1, "to") do
+		if not oldpos2 then oldpos2 = pos2 end
+
+		local ps = fontoldsize(font, left)
+		if ps > size then
+			local left = bstr:sub(1, posmap[oldpos2])
+			right = bstr:sub(posmap[pos])
+			return left, fontoldsize(font, left), right, fontoldsize(font, right)
+		end
+
+		oldpos2 = pos2
+	end
+	return str, fontoldsize(font, str), "", 0
 end
 
 function string.splitLine(str, max_width, font)
@@ -880,19 +964,47 @@ function string.splitLine(str, max_width, font)
 	local lines = {}
 	local cur_line, cur_size = "", 0
 	local v
+	local break_all_chars = core.display.getBreakTextAllCharacter()
 	local ls = str:split(lpeg.S"\n ")
 	for i = 1, #ls do
 		local v = ls[i]
-		local shortv = v:lpegSub("#" * (Puid + Pcolorcodefull + Pcolorname + Pfontstyle + Pextra) * "#", "")
+		local shortv = v:removeColorCodes()
 		local w, h = fontoldsize(font, shortv)
 
 		if cur_size + space_w + w < max_width then
 			cur_line = cur_line..(cur_size==0 and "" or " ")..v
 			cur_size = cur_size + (cur_size==0 and 0 or space_w) + w
 		else
-			lines[#lines+1] = cur_line
-			cur_line = v
-			cur_size = w
+			-- Normal whitespace breaking
+			if not break_all_chars then
+				lines[#lines+1] = cur_line
+				cur_line = v
+				cur_size = w
+			-- Break on any characters
+			else
+				local left, left_size, right, right_size
+				while true do
+					left, left_size, right, right_size = v:splitAtSize(max_width - cur_size, font)
+
+					-- Add to current line
+					cur_line = cur_line..(cur_size==0 and "" or " ")..left
+					cur_size = cur_size + (cur_size==0 and 0 or space_w) + left_size
+					lines[#lines+1] = cur_line
+
+					-- If the right side can fit on a line, we're done, otherwise we split again
+					if right_size <= max_width then
+						break
+					else
+						cur_line = ""
+						cur_size = 0
+						v = right
+					end
+				end
+
+				-- Put the rest on new line
+				cur_line = right
+				cur_size = right_size
+			end
 		end
 	end
 	if cur_size > 0 then lines[#lines+1] = cur_line end
@@ -1329,11 +1441,14 @@ function tstring:toTString() return self end
 function tstring:format() return self end
 
 function tstring:splitLines(max_width, font, max_lines)
+	local break_all_chars = core.display.getBreakTextAllCharacter()
 	local fstyle = font:getStyle()
+	local old_fstyle = fstyle
 	local ret = tstring{}
 	local cur_size = 0
 	local max_w = 0
 	local v, tv
+	local mustexit = false
 	for i = 1, #self do
 		v = self[i]
 		tv = type(v)
@@ -1347,7 +1462,7 @@ function tstring:splitLines(max_width, font, max_lines)
 					cur_size = 0
 					if max_lines then
 						max_lines = max_lines - 1
-						if max_lines <= 0 then break end
+						if max_lines <= 0 then mustexit = true break end
 					end
 				else
 					local w, h = fontcachewordsize(font, fstyle, vv)
@@ -1355,17 +1470,47 @@ function tstring:splitLines(max_width, font, max_lines)
 						cur_size = cur_size + w
 						ret[#ret+1] = vv
 					else
-						ret[#ret+1] = true
-						max_w = math.max(max_w, cur_size)
-						if max_lines then
-							max_lines = max_lines - 1
-							if max_lines <= 0 then break end
+						-- Normal whitespace breaking
+						if not break_all_chars then
+							ret[#ret+1] = true
+							max_w = math.max(max_w, cur_size)
+							if max_lines then max_lines = max_lines - 1 if max_lines <= 0 then mustexit = true break end end
+							ret[#ret+1] = vv
+							cur_size = w
+						-- Break on any characters
+						else
+							local left, left_size, right, right_size
+							while true do
+								left, left_size, right, right_size = vv:splitAtSizeSimple(max_width - cur_size, font)
+
+								-- Add to current line
+								ret[#ret+1] = left
+								cur_size = cur_size + left_size
+								max_w = math.max(max_w, cur_size)
+
+								-- If the right side can fit on a line, we're done, otherwise we split again
+								if right_size <= max_width then
+									break
+								else
+									if max_lines then max_lines = max_lines - 1 if max_lines <= 0 then mustexit = true break end end
+									ret[#ret+1] = true
+									cur_size = 0
+									vv = right
+								end
+							end
+							if mustexit then break end
+
+							-- Put the rest on new line
+							if max_lines then max_lines = max_lines - 1 if max_lines <= 0 then mustexit = true break end end
+							ret[#ret+1] = true
+							ret[#ret+1] = right
+							cur_size = right_size
+							max_w = math.max(max_w, cur_size)
 						end
-						ret[#ret+1] = vv
-						cur_size = w
 					end
 				end
 			end
+			if mustexit then break end
 		elseif tv == "table" and v[1] == "font" then
 			font:setStyle(v[2])
 			fstyle = v[2]
@@ -1402,6 +1547,7 @@ function tstring:splitLines(max_width, font, max_lines)
 		end
 	end
 	max_w = math.max(max_w, cur_size)
+	if fstyle ~= old_fstyle then font:setStyle(old_fstyle) end
 	return ret, max_w
 end
 
@@ -2403,6 +2549,18 @@ function core.fov.set_vision_shape(val)
 	end
 	core.fov.set_vision_shape_base(val)
 	return val
+end
+
+function core.fov.lineIterator(sx, sy, tx, ty, what)
+	what = what or "block_move"
+	local l = core.fov.line(sx, sy, tx, ty, what)
+	local lx, ly = l:step()
+	return function()
+		if not lx or not ly then return nil end
+		local rx, ry = lx, ly
+		lx, ly = l:step()
+		return rx, ry
+	end
 end
 
 --- create a basic bresenham line (or hex equivalent)

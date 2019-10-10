@@ -145,6 +145,7 @@ end
 
 countHounds = function(self)
 	local hounds = 0
+	if not game.level then return 0 end
 	for _, e in pairs(game.level.entities) do
 		if e and e.summoner and e.summoner == self and e.name == "temporal hound" then 
 			hounds = hounds + 1 

@@ -620,6 +620,7 @@ newEntity{ base = "BASE_SHIELD",
 	on_block = {desc = "Up to once per turn, pull an attacker up to 15 spaces away into melee range, pinning and asphyxiating it", fct = function(self, who, src, type, dam, eff)
 		if not src then return end
 		if who.turn_procs.black_mesh then return end
+ 		if src.canBe then return end
 
 		who:logCombat(src, "#ORCHID#Black tendrils from #Source# grab #Target#!")
 		local kb = src:canBe("knockback")
@@ -7304,6 +7305,7 @@ newEntity{ base = "BASE_GREATMAUL",
 					target_x, target_y = lx, ly
 					lx, ly = l:step(true)
 				end
+				if not target_x then return end
 				local tg = {type="beam", range=5, selffire=false}
 				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "earth_beam", {tx=target_x-who.x, ty=target_y-who.y})
 				game.level.map:particleEmitter(who.x, who.y, math.max(math.abs(target_x-who.x), math.abs(target_y-who.y)), "shadow_beam", {tx=target_x-who.x, ty=target_y-who.y})

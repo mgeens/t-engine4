@@ -859,6 +859,8 @@ function _M:sendError(what, err)
 	end
 	local version = game.__mod_info.version_name
 	if game.__mod_info.version_desc then version = game.__mod_info.version_name.." ("..tostring(game.__mod_info.version_desc)..")" end
+	local beta = engine.version_hasbeta()
+	if beta then version = version.."-"..beta end
 	core.profile.pushOrder(table.serialize{
 		o="SendError",
 		login=self.login,
@@ -866,6 +868,7 @@ function _M:sendError(what, err)
 		err=err,
 		module=game.__mod_info.short_name,
 		version=version,
+		charuuid=game:getPlayer(true) and game:getPlayer(true).__te4_uuid,
 		addons=table.concat(addons, ", "),
 	})
 end

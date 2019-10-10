@@ -2048,19 +2048,19 @@ function _M:getTextualDesc(compare_with, use_actor)
 
 	local talents = {}
 	if self.talent_on_spell then
-		for _, data in ipairs(self.talent_on_spell) do
+		for _, data in ipairs(self.talent_on_spell) do if data.talent then
 			talents[data.talent] = {data.chance, data.level}
-		end
+		end end
 	end
 	for i, v in ipairs(compare_with or {}) do
-		for _, data in ipairs(v[field] and (v[field].talent_on_spell or {})or {}) do
+		for _, data in ipairs(v[field] and (v[field].talent_on_spell or {})or {}) do if data.talent then
 			local tid = data.talent
 			if not talents[tid] or talents[tid][1]~=data.chance or talents[tid][2]~=data.level then
 				desc:add({"color","RED"}, ("Talent on hit(spell): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, data.chance, data.level), {"color","LAST"}, true)
 			else
 				talents[tid][3] = true
 			end
-		end
+		end end
 	end
 	for tid, data in pairs(talents) do
 		desc:add(talents[tid][3] and {"color","GREEN"} or {"color","WHITE"}, ("Talent on hit(spell): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, talents[tid][1], talents[tid][2]), {"color","LAST"}, true)
@@ -2068,19 +2068,19 @@ function _M:getTextualDesc(compare_with, use_actor)
 
 	local talents = {}
 	if self.talent_on_wild_gift then
-		for _, data in ipairs(self.talent_on_wild_gift) do
+		for _, data in ipairs(self.talent_on_wild_gift) do if data.talent then
 			talents[data.talent] = {data.chance, data.level}
-		end
+		end end
 	end
 	for i, v in ipairs(compare_with or {}) do
-		for _, data in ipairs(v[field] and (v[field].talent_on_wild_gift or {})or {}) do
+		for _, data in ipairs(v[field] and (v[field].talent_on_wild_gift or {})or {}) do if data.talent then
 			local tid = data.talent
 			if not talents[tid] or talents[tid][1]~=data.chance or talents[tid][2]~=data.level then
 				desc:add({"color","RED"}, ("Talent on hit(nature): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, data.chance, data.level), {"color","LAST"}, true)
 			else
 				talents[tid][3] = true
 			end
-		end
+		end end
 	end
 	for tid, data in pairs(talents) do
 		desc:add(talents[tid][3] and {"color","GREEN"} or {"color","WHITE"}, ("Talent on hit(nature): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, talents[tid][1], talents[tid][2]), {"color","LAST"}, true)
@@ -2088,19 +2088,19 @@ function _M:getTextualDesc(compare_with, use_actor)
 
 	local talents = {}
 	if self.talent_on_mind then
-		for _, data in ipairs(self.talent_on_mind) do
+		for _, data in ipairs(self.talent_on_mind) do if data.talent then
 			talents[data.talent] = {data.chance, data.level}
-		end
+		end end
 	end
 	for i, v in ipairs(compare_with or {}) do
-		for _, data in ipairs(v[field] and (v[field].talent_on_mind or {})or {}) do
+		for _, data in ipairs(v[field] and (v[field].talent_on_mind or {})or {}) do if data.talent then
 			local tid = data.talent
 			if not talents[tid] or talents[tid][1]~=data.chance or talents[tid][2]~=data.level then
 				desc:add({"color","RED"}, ("Talent on hit(nature): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, data.chance, data.level), {"color","LAST"}, true)
 			else
 				talents[tid][3] = true
 			end
-		end
+		end end
 	end
 	for tid, data in pairs(talents) do
 		desc:add(talents[tid][3] and {"color","GREEN"} or {"color","WHITE"}, ("Talent on hit(mindpower): %s (%d%% chance level %d)."):format(self:getTalentFromId(tid).name, talents[tid][1], talents[tid][2]), {"color","LAST"}, true)

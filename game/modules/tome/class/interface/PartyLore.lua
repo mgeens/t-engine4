@@ -86,7 +86,12 @@ function _M:getLore(lore, silent)
 
 	if l.template then
 		local tpl = slt2.loadstring(l.lore)
-		l.lore = slt2.render(tpl, {player=self:findMember{main=true}, self=self, Lore=_M})
+		local ok, err = pcall(function()
+			l.lore = slt2.render(tpl, {player=self:findMember{main=true}, self=self, Lore=_M})
+		end)
+		if not ok and err then
+			error("Error while lore learning '"..tostring(lore).."' : "..tostring(err))
+		end
 	end	
 
 	return l
