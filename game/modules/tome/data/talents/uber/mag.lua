@@ -181,7 +181,6 @@ uberTalent{
 		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
 		who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
 		who:forceUseTalent(who.T_BONE_SHIELD, {ignore_energy=true})
-		end
 		if who.necrotic_minion then
 			if who.subtype == "giant" then
 				who:learnTalent(who.T_BONE_SPIKE, true, 3, {no_unlearn=true})
@@ -190,7 +189,7 @@ uberTalent{
 				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
 				who:learnTalent(who.T_BLOOD_BOIL, true, 3, {no_unlearn=true})
 			elseif who.subtype == "ghost" or who.subtype == "wight" then
-				who:learnTalent(who.T_BLOOD_FURY, true, 3, {no_unlearn=true})
+				who:learnTalent(who.T_BLOOD_FURY, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_BLOOD_FURY, {ignore_energy=true})
 				who:learnTalent(who.T_CURSE_OF_DEATH, true, 3, {no_unlearn=true})
 			elseif who.subtype == "ghoul" then
 				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
