@@ -422,6 +422,11 @@ newTalent{
 		shadow:feed()
 		game.level.map:particleEmitter(x, y, 1, "teleport_in")
 
+		-- Reduce power of shadows for low level rares
+		if self.inc_damage and self.inc_damage.all and self.inc_damage.all < 0 then
+			shadow.inc_damage.all = (shadow.inc_damage.all or 0) + self.inc_damage.all
+		end
+
 		shadow.no_party_ai = true
 		shadow.unused_stats = 0
 		shadow.unused_talents = 0
