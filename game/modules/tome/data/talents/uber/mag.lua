@@ -176,7 +176,7 @@ uberTalent{
 			end
 		end
 	end,
-	-- Called by addedToLevel to Actor.lua
+	-- Called by addedToLevel Actor.lua
 	doBlightedSummon = function(self, t, who)
 		if who.is_blighted_summon or not self:knowTalent(self.T_BLIGHTED_SUMMONING) then return false end
 		who:learnTalent(who.T_BONE_SHIELD, true, 3, {no_unlearn=true})
@@ -238,24 +238,24 @@ uberTalent{
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield (level 3) and a bonus to Spellpower equal to your Magic.
 		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 50% Blight damage conversion and Virulent Disease (level 3).
 		#GREEN#Wilder Summons:#LAST#
-		War Hound: Gnaw
-		Jelly: Curse of Defencelessness
-		Minotaur: Ruin
-		Golem: Acid Blood
-		Ritch: Life Tap
-		Hydra: Blood Spray
-		Rimebark: Poison Storm
-		Fire Drake: Flame of Urh’Rok
-		Turtle: Elemental Discord
-		Spider: Blood Grasp
+		- War Hound: Gnaw
+		- Jelly: Curse of Defencelessness
+		- Minotaur: Ruin
+		- Golem: Acid Blood
+		- Ritch: Life Tap
+		- Hydra: Blood Spray
+		- Rimebark: Poison Storm
+		- Fire Drake: Flame of Urh’Rok
+		- Turtle: Elemental Discord
+		- Spider: Blood Grasp
 		#GREY#Necrotic Minions:#LAST#
-		Skeleton Mages: Bone Spear
-		Skeleton Archers: Bone Spike
-		Skeleton Warriors: Ruin
-		Bone Giants: Bone Spike and Ruin
-		Ghouls: Virulent Disease
-		Vampires / Liches: Blood Grasp and  Blood Boil
-		Ghosts / Wights: Blood Fury and Curse of Death
+		- Skeleton Mages: Bone Spear
+		- Skeleton Archers: Bone Spike
+		- Skeleton Warriors: Ruin
+		- Bone Giants: Bone Spike and Ruin
+		- Ghouls: Virulent Disease
+		- Vampires / Liches: Blood Grasp and Blood Boil
+		- Ghosts / Wights: Blood Fury and Curse of Death
 		]]):format()
 	end,
 }
