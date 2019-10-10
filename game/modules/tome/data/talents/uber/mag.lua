@@ -221,6 +221,10 @@ uberTalent{
 				who:learnTalent(who.T_POISON_STORM, true, 3, {no_unlearn=true})
 			elseif who.name == "fire drake" then
 				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_FLAME_OF_URH_ROK, {ignore_energy=true})
+			elseif who.name == "turtle" then
+				who:learnTalent(who.T_ELEMENTAL_DISCORD, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_ELEMENTAL_DISCORD, {ignore_energy=ture})
+			elseif who.subtype == "spider" then
+				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
 			else
 				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 				who:addTemporaryValue("all_damage_convert_percent", 50)
