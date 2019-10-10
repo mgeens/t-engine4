@@ -57,6 +57,8 @@ on_grant = function(self, who)
 
 	who:move(x, y, true)
 
+	if config.settings.cheat and __module_extra_info.no_birth_popup then return end
+
 	local Chat = require"engine.Chat"
 	local chat = Chat.new("tarelion-start-archmage", npc, who)
 	chat:invoke()
