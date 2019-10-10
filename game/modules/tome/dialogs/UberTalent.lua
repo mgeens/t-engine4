@@ -85,7 +85,13 @@ function _M:generateList()
 
 	for _, s in ipairs{"uber/strength", "uber/dexterity", "uber/constitution", "uber/magic", "uber/willpower", "uber/cunning"} do
 		local n = {}
-		table.sort(cols[s], function(a,b) return a.name < b.name end)
+		table.sort(cols[s], function(a,b)
+			if a.is_class_evolution ~= b.is_class_evolution then
+				return b.is_class_evolution and true or false
+			else
+				return a.name < b.name
+			end
+		end)
 
 		for i = 1, max do
 			if not cols[s][i] then
