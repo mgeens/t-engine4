@@ -220,7 +220,7 @@ uberTalent{
 			elseif who.name == "rimebark" then
 				who:learnTalent(who.T_POISON_STORM, true, 3, {no_unlearn=true})
 			elseif who.name == "fire drake" then
-				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true})
+				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_FLAME_OF_URH_ROK, {ignore_energy=true})
 			else
 				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
 				who:addTemporaryValue("all_damage_convert_percent", 50)
