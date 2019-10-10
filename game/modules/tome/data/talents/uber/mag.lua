@@ -236,7 +236,7 @@ uberTalent{
 	end,
 	info = function(self, t)
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield (level 3) and a bonus to Spellpower equal to your Magic.
-		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 50% Blight damage conversion and Virulent Disease (level 3).
+		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 50%% Blight damage conversion and Virulent Disease (level 3).
 		#GREEN#Wilder Summons:#LAST#
 		- War Hound: Gnaw
 		- Jelly: Curse of Defencelessness
