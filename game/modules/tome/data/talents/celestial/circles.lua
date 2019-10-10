@@ -100,7 +100,7 @@ newTalent{
 				if target:attr("has_arcane_knowledge") then return 2 end
 			end}
 	},
-	getDuration = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 4, 8))) end,
+	getDuration = function(self, t) return math.min(8, math.floor(self:combatTalentScale(t, 3, 6))) end,
 	range = 0,
 	radius = function(self, t) return math.min(5, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t) -- for AI only
