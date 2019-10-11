@@ -233,8 +233,10 @@ function _M:init(t, no_default)
 	t.life_regen = t.life_regen or 0.25 -- Life regen real slow
 	t.equilibrium_regen = t.equilibrium_regen or 0 -- Equilibrium does not regen
 	t.vim_regen = t.vim_regen or 0 -- Vim does not regen
-	t.positive_regen = t.positive_regen or 0.5 -- Positive energy slowly decays
-	t.negative_regen = t.negative_regen or 0.5 -- Positive energy slowly decays
+	t.positive_regen = t.positive_regen or 0.5 -- Positive energy regens
+	t.negative_regen = t.negative_regen or 0.5 -- Positive energy regens
+	t.positive_regen_ref = t.positive_regen_ref or 0.5 -- Largely depreciated
+	t.negative_regen_ref = t.negative_regen_ref or 0.5 -- Largely depreciated
 	t.paradox_regen = t.paradox_regen or 0 -- Paradox does not regen
 	t.psi_regen = t.psi_regen or 0.2 -- Energy regens slowly
 	t.hate_regen = t.hate_regen or 0 -- Hate does not regen
@@ -539,6 +541,7 @@ function _M:actBase()
 		t.updateRegen(self, t)
 	end
 
+	-- Largely depreciated
 	if self:attr("positive_at_rest") then
 		local v = self.positive_at_rest * self.max_positive / 100
 		if self:getPositive() > v or self:attr("positive_at_rest_disable") then self.positive_regen = -self.positive_regen_ref + (self.positive_regen_ref_mod or 0)
