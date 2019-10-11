@@ -26,7 +26,7 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	cooldown = 5,
-	positive = -10,
+	positive = -15,
 	range = 7,
 	radius = 1,
 	tactical = { ATTACK = {LIGHT = 2} },
@@ -81,7 +81,7 @@ newTalent{
 	range = 0,
 	radius = function(self, t) return math.min(8, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t), talent=t}
+		return {type="ball", range=self:getTalentRange(t), friendlyfire=false, selffire=false, radius=self:getTalentRadius(t), talent=t}
 	end,
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 250) end,
@@ -92,9 +92,9 @@ newTalent{
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		-- Temporarily turn on "friendlyfire" to lite all tiles
-		tg.selffire = true
+		tg.friendlyfire, tg.selffire = true
 		self:project(tg, self.x, self.y, DamageType.LITE, 1)
-		tg.selffire = false
+		tg.friendlyfire, tg.selffire = false
 		local grids = self:project(tg, self.x, self.y, DamageType.BLIND, t.getDuration(self, t))
 		self:project(tg, self.x, self.y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
 		if self:getTalentLevel(t) >= 3 then
@@ -229,6 +229,6 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Release a burst of sunlight beams, dealing %d light damage to %d random foes in radius %d and increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns.]]):format(damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRadius(t), t.getPower(self, t)*100, t.getDuration(self, t))
+		return ([[Release a burst of sunlight beams at %d random foes in radius %d, dealing %d damage to all foes hit and increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns.]]):format(t.getTargetCount(self, t), self:getTalentRadius(t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getPower(self, t)*100, t.getDuration(self, t))
 	end,
 }
