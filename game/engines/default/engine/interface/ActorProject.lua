@@ -75,7 +75,7 @@ function _M:project(t, x, y, damtype, dam, particles)
 		or function(_, bx, by) return false end
 
 	l:set_corner_block(block_corner)
-	local lx, ly, blocked_corner_x, blocked_corner_y = l:step()
+	local lx, ly, blocked_corner_x, blocked_corner_y = l:step(typ.force_max_range)
 
 	-- Being completely blocked by the corner of an adjacent tile is annoying, so let's make it a special case and hit it instead
 	if blocked_corner_x and game.level.map:isBound(blocked_corner_x, blocked_corner_y) then
@@ -110,7 +110,8 @@ function _M:project(t, x, y, damtype, dam, particles)
 			end
 
 			if block then break end
-			lx, ly, is_corner_blocked = l:step()
+			lx, ly, is_corner_blocked = l:step(typ.force_max_range)
+			if typ.force_max_range and core.fov.distance(typ.start_x, typ.start_y, lx, ly) > typ.range then break end
 		end
 	end
 
@@ -151,6 +152,26 @@ function _M:project(t, x, y, damtype, dam, particles)
 				addGrid(px, py)
 			end
 		)
+	end
+
+	if typ.widebeam and typ.widebeam > 0 then
+		single_target = false
+		core.fov.calc_wide_beam(
+			stop_radius_x,
+			stop_radius_y,
+			game.level.map.w,
+			game.level.map.h,
+			typ.start_x,
+			typ.start_y,
+			typ.widebeam,
+			function(_, px, py)
+				if typ.block_radius and typ:block_radius(px, py) then return true end
+			end,
+			function(_, px, py)
+				addGrid(px, py)
+			end,
+		nil)
+		addGrid(stop_x, stop_y)
 	end
 
 	if typ.cone and typ.cone > 0 then
@@ -283,7 +304,7 @@ function _M:canProject(t, x, y)
 		or function(_, bx, by) return false end
 
 	l:set_corner_block(block_corner)
-	local lx, ly, blocked_corner_x, blocked_corner_y = l:step()
+	local lx, ly, blocked_corner_x, blocked_corner_y = l:step(typ.force_max_range)
 
 	-- Being completely blocked by the corner of an adjacent tile is annoying, so let's make it a special case and hit it instead
 	if blocked_corner_x then
@@ -307,7 +328,8 @@ function _M:canProject(t, x, y)
 			end
 
 			if block then break end
-			lx, ly, is_corner_blocked = l:step()
+			lx, ly, is_corner_blocked = l:step(typ.force_max_range)
+			if typ.force_max_range and core.fov.distance(typ.start_x, typ.start_y, lx, ly) > typ.range then break end
 		end
 	end
 
@@ -484,6 +506,24 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
 			typ.start_y,
 			lx - typ.start_x,
 			ly - typ.start_y,
+			function(_, px, py)
+				if typ.block_radius and typ:block_radius(px, py) then return true end
+			end,
+			function(_, px, py)
+				-- Deal damage: cone
+				addGrid(px, py)
+			end,
+		nil)
+		addGrid(rx, ry)
+	elseif typ.widebeam and typ.widebeam > 0 then
+		core.fov.calc_wide_beam(
+			rx,
+			ry,
+			game.level.map.w,
+			game.level.map.h,
+			typ.start_x,
+			typ.start_y,
+			typ.widebeam,
 			function(_, px, py)
 				if typ.block_radius and typ:block_radius(px, py) then return true end
 			end,

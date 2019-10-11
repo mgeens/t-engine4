@@ -2504,6 +2504,35 @@ function core.fov.calc_triangle(x, y, w, h, points, mode, block, apply)
 end
 
 
+-- Very naive implementation, this will do for now
+function core.fov.calc_wide_beam(x, y, w, h, sx, sy, radius, block, apply)
+	local tgts = {}
+	local dist = core.fov.distance(sx, sy, x, y)
+
+	-- Compute the line
+	local path = {}
+	local l = core.fov.line(sx, sy, x, y)
+	local lx, ly = l:step()
+	while lx and ly do
+		path[#path+1] = {x=lx, y=ly}
+		lx, ly = l:step()
+	end
+
+	for _, p in ipairs(path) do
+		if dist > 1 and p.x == x and p.y == y then
+		else
+			core.fov.calc_circle(p.x, p.y, w, h, radius, block, function(_, ppx, ppy)
+				tgts[ppy*game.level.map.w+ppx] = {x=ppx, y=ppy}
+			end, nil)
+		end
+	end
+
+	for _, p in pairs(tgts) do
+		apply(nil, p.x, p.y)
+	end
+end
+
+
 function core.fov.set_corner_block(l, block_corner)
 	block_corner = type(block_corner) == "function" and block_corner or
 		block_corner == false and function(_, x, y) return end or
