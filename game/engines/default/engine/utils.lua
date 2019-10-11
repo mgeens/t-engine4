@@ -2441,6 +2441,69 @@ function core.fov.beam_any_angle_grids(x, y, radius, angle, source_x, source_y, 
 	return grids
 end
 
+local function is_point_in_triangle(P, A, B, C)
+	-- local as_x = s.x-a.x
+	-- local as_y = s.y-a.y
+
+	-- local s_ab = (b.x-a.x)*as_y-(b.y-a.y)*as_x > 0
+
+	-- if (c.x-a.x)*as_y-(c.y-a.y)*as_x > 0 == s_ab then return false end
+
+	-- if (c.x-b.x)*(s.y-b.y)-(c.y-b.y)*(s.x-b.x) > 0 ~= s_ab then return false end
+
+	-- return true;
+
+	local s1 = C.y - A.y;
+	local s2 = C.x - A.x;
+	local s3 = B.y - A.y;
+	local s4 = P.y - A.y;
+
+	local w1 = (A.x * s1 + s4 * s2 - P.x * s1) / (s3 * s2 - (B.x-A.x) * s1);
+	local w2 = (s4- w1 * s3) / s1;
+	return w1 >= 0 and w2 >= 0 and (w1 + w2) <= 1
+end
+
+-- Very naive implementation, this will do for now
+function core.fov.calc_triangle(x, y, w, h, points, mode, block, apply)
+	local p1 = {x=x+points[1].x, y=y+points[1].y}
+	local p2 = {x=x+points[2].x, y=y+points[2].y}
+	local p3 = {x=x+points[3].x, y=y+points[3].y}
+
+	local mx, Mx = math.min(p1.x, p2.x, p3.x), math.max(p1.x, p2.x, p3.x)
+	local my, My = math.min(p1.y, p2.y, p3.y), math.max(p1.y, p2.y, p3.y)
+
+	local checkline = function(fx, fy, i, j)
+		local l = core.fov.line(fx, fy, i, j)
+		while true do
+			local lx, ly = l:step(true)
+			if not lx then break end
+			if lx == i and ly == j then return true end
+			if block(_, lx, ly) then break end
+		end
+		return false
+	end
+
+	local check
+	if mode == "corners" then
+		check = function(i, j)
+			return checkline(p1.x, p1.y, i, j) or checkline(p2.x, p2.y, i, j) or checkline(p3.x, p3.y, i, j)
+		end
+	else
+		check = function(i, j)
+			return checkline(x, y, i, j)
+		end
+	end
+
+	for i = mx, Mx do if i >= 0 and i < w then
+		for j = my, My do if j >= 0 and j < h then
+			if is_point_in_triangle({x=i,y=j}, {x=p1.x, y=p1.y}, {x=p2.x, y=p2.y}, {x=p3.x, y=p3.y}) and check(i, j) then
+				apply(nil, i, j)
+			end
+		end end
+	end end
+end
+
+
 function core.fov.set_corner_block(l, block_corner)
 	block_corner = type(block_corner) == "function" and block_corner or
 		block_corner == false and function(_, x, y) return end or

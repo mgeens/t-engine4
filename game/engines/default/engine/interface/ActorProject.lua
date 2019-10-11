@@ -134,6 +134,25 @@ function _M:project(t, x, y, damtype, dam, particles)
 		addGrid(stop_x, stop_y)
 	end
 
+	if typ.triangle then
+		single_target = false
+		core.fov.calc_triangle(
+			stop_radius_x,
+			stop_radius_y,
+			game.level.map.w,
+			game.level.map.h,
+			typ.triangle,
+			typ.triangle_mode or "center",
+			function(_, px, py)
+				if typ.block_radius and typ:block_radius(px, py) then return true end
+			end,
+			function(_, px, py)
+				-- Deal damage: ball
+				addGrid(px, py)
+			end
+		)
+	end
+
 	if typ.cone and typ.cone > 0 then
 		single_target = false
 		--local dir_angle = math.deg(math.atan2(y - self.y, x - self.x))
@@ -494,6 +513,22 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
 				addGrid(px, py)
 			end,
 		nil)
+	elseif typ.triangle then
+		core.fov.calc_triangle(
+			rx,
+			rx,
+			game.level.map.w,
+			game.level.map.h,
+			typ.triangle,
+			typ.triangle_mode or "center",
+			function(_, px, py)
+				if typ.block_radius and typ:block_radius(px, py) then return true end
+			end,
+			function(_, px, py)
+				-- Deal damage: ball
+				addGrid(px, py)
+			end
+		)
 	else
 		-- Deal damage: single
 		addGrid(lx, ly)

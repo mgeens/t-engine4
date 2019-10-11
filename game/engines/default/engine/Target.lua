@@ -374,6 +374,27 @@ function _M:realDisplay(dispx, dispy, display_highlight)
 			nil)
 	end
 
+	if self.target_type.triangle then
+		core.fov.calc_triangle(
+			d.stop_radius_x,
+			d.stop_radius_y,
+			game.level.map.w,
+			game.level.map.h,
+			self.target_type.triangle,
+			self.target_type.triangle_mode or "center",
+			function(_, px, py)
+				if self.target_type.block_radius and self.target_type:block_radius(px, py, true) then return true end
+			end,
+			function(_, px, py)
+				if not self.target_type.no_restrict and not game.level.map.remembers(px, py) and not game.level.map.seens(px, py) then
+					d.display_highlight(self.syg, px, py)
+				else
+					d.display_highlight(self.sg, px, py)
+				end
+			end,
+			nil)
+	end
+
 	if self.target_type.cone and self.target_type.cone > 0 then
 		--local dir_angle = math.deg(math.atan2(self.target.y - self.source_actor.y, self.target.x - self.source_actor.x))
 		core.fov.calc_beam_any_angle(
@@ -581,7 +602,8 @@ _M.types_def = {
 		dest.wall = src.halflength
 		end,
 	bolt = function(dest, src) dest.stop_block = true end,
-	beam = function(dest, scr) dest.line = true end,
+	beam = function(dest, src) dest.line = true end,
+	triangle = function(dest, src) dest.triangle = src.tri_points dest.triangle_mode = src.tri_src end,
 }
 
 --- Interpret a targeting table, applying default fields needed by ActorProject and realDisplay
