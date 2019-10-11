@@ -73,7 +73,6 @@ You may select a spell for Arcane Combat to automatically trigger with melee att
 			end
 		end,
 	}
-	engine.interface.PlayerHotkeys:bindAllHotkeys(self.key, function(i) self:defineHotkey(i) end)
 	self.key:addBinds{
 		EXIT = function() game:unregisterDialog(self) end,
 	}

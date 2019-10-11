@@ -791,7 +791,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 			-- note: effect_life, life_range, calculated above for want.life
 			local aitarget_life, aitarget_life_range = (aitarget.life or 1) - (aitarget.die_at or 0), (aitarget.max_life or 1) - (aitarget.die_at or 0)
 			
-			if aitarget:knowTalent(aitarget.T_SOLIPSISM) then
+			if aitarget.knowTalent and aitarget:knowTalent(aitarget.T_SOLIPSISM) then
 				local ratio = aitarget:callTalent(aitarget.T_SOLIPSISM, "getConversionRatio")
 				aitarget_life = math.min(aitarget_life/(1 - ratio), aitarget_life + aitarget:getPsi())
 				aitarget_life_range = math.min(aitarget_life_range/(1 - ratio), aitarget_life_range + aitarget:getMaxPsi())

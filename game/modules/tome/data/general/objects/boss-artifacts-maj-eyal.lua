@@ -398,6 +398,7 @@ newEntity{ base = "BASE_LEATHER_BOOT",
 			else
 				e.x, e.y = who.x, who.y
 				e.duration = 50
+				e.grids_duration = e.grids_duration or {}
 				local ngrids = core.fov.circle_grids(who.x, who.y, 1, true)
 				for lx, ys in pairs(ngrids) do
 					for ly, _ in pairs(ys) do
