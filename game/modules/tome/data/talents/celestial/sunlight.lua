@@ -215,23 +215,20 @@ newTalent{
 
 		local dam = self:spellCrit(t.getDamage(self, t))
 
-		-- Randomly take targets
-		local tg = {type="hit", range=self:getTalentRadius(t), talent=t}
 		for i = 1, t.getTargetCount(self, t) do
 			if #tgts <= 0 then break end
 			local a, id = rng.table(tgts)
 			table.remove(tgts, id)
-
-			self:project(tg, a.x, a.y, DamageType.LIGHT, dam)
+			table.remove(tgts)
+			self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, a.x, a.y, DamageType.LIGHT, dam)
 			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "light_beam", {tx=a.x-self.x, ty=a.y-self.y})
-
-			game:playSoundNear(self, "talents/spell_generic")
 		end
+
+		game:playSoundNear(self, "talents/spell_generic")
 
 		return true
 	end,
 	info = function(self, t)
-		return ([[Release a furious burst of sunlight, increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns and dealing %0.2f light damage to %d random foes in radius %d.]]):
-			format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRadius(t))
+		return ([[Release a burst of sunlight beams, dealing %d light damage to %d random foes in radius %d and increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns.]]):format(damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRadius(t), t.getPower(self, t)*100, t.getDuration(self, t))
 	end,
 }
