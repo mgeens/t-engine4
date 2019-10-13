@@ -355,7 +355,7 @@ newTalent{
 			local hit = self:attackTarget(target, DamageType.NATURE, dam, true)
 			if hit then t.applyVenomousEffects(self, t, target) end
 		else
-			local targets = self:archeryAcquireTargets(nil, {one_shot=true})
+			local targets = self:archeryAcquireTargets(nil, {no_energy=true, one_shot=true})
 			if not targets then return end
 			local hit = self:archeryShoot(targets, t, nil, {mult=dam, damtype=DamageType.NATURE})
 		end
