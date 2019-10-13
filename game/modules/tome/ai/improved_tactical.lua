@@ -481,7 +481,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 
 	--== PROTECT ==--
 	-- like LIFE but for SELF's summoner
-	if self.summoner and self.summoner.ai_target.actor then
+	if self.summoner then
 		local life = math.max(0, self.summoner.life)/(self.summoner.max_life - self.summoner.die_at/2)
 		life = (1 - life)/(math.max(.001, life)) -- modified life loss
 		want.protect = 10*(life*ally_compassion/(life*ally_compassion + 2.5))^2

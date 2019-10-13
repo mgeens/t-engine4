@@ -23,7 +23,7 @@ newTalent{
 	points = 1,
 	cooldown = 5,
 	requires_target = false,
-	tactical = { PROTECT = 2 },
+	tactical = { PROTECT = 10 },
 	range = 0,
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 4, 8)) end,
 	action = function(self, t)
@@ -198,6 +198,8 @@ newTalent{
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
+
+		m:forceUseTalent(m.T_TAUNT, {ignore_energy=true})
 			
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
