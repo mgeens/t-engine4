@@ -402,7 +402,11 @@ newTalent{
 		local tx, ty = self:getTarget(tg)
 		if not tx or not ty then return nil end
 		local _ _, _, _, x, y = self:canProject(tg, tx, ty)
-		if game.level.map(x, y, Map.ACTOR) or game.level.map:checkEntity(x, y, game.level.map.TERRAIN, "block_move") then return nil end
+		if game.level.map(x, y, Map.ACTOR) or game.level.map:checkEntity(x, y, game.level.map.TERRAIN, "block_move") then
+			local fx, fy = util.findFreeGrid(x, y, 3, true, {[Map.ACTOR]=true})
+			if not fx then return nil end
+			x, y = fx, fy
+		end
 
 		-- select the item
 		if not self.cursed_sentry or not self:findInInventoryByObject(inven, self.cursed_sentry) or not t.filterObject(self, t, self.cursed_sentry) then
