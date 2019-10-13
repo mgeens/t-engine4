@@ -1702,6 +1702,7 @@ function _M:reactionToward(target, no_reflection)
 	while rtarget.summoner do rtarget = rtarget.summoner end
 
 	-- Neverending hatred
+	if target.attr and target:attr("hated_by_summoner") and target.summoner == rsrc then return -100 end
 	if rtarget.attr and rtarget:attr("hated_by_everybody") and rtarget ~= rsrc then return -100 end
 	if rsrc.attr and rsrc:attr("hates_everybody") and rtarget ~= rsrc then return -100 end
 	if rsrc.attr and rtarget.attr and rsrc:attr("hates_arcane") and rtarget:attr("has_arcane_knowledge") and not rtarget:attr("forbid_arcane") then return -100 end

@@ -89,6 +89,18 @@ function ripairs(t)
 	end
 end
 
+function table.weak_keys(t)
+	t = t or {}
+	setmetatable(t, {__mode="k"})
+	return t
+end
+
+function table.weak_values(t)
+	t = t or {}
+	setmetatable(t, {__mode="v"})
+	return t
+end
+
 function table.empty(t)
 	while next(t) do t[next(t)] = nil end
 end

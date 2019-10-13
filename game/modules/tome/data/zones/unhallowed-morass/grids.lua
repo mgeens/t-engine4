@@ -44,7 +44,7 @@ newEntity{
 	change_level_check = function()
 		game:onLevelLoad("town-point-zero-1", function(zone, level)
 			game:onTickEnd(function()
-				local npc = game.zone:makeEntityByName(level, "actor", "TEMPORAL_DEFILER")
+				local npc = game.zone:makeEntityByName(level, "actor", "TEMPORAL_DEFILER", true)
 				local spot = level:pickSpot{type="pop", subtype="defiler"}
 				game.zone:addEntity(level, npc, "actor", spot.x, spot.y)
 				npc:setTarget(game.player)
