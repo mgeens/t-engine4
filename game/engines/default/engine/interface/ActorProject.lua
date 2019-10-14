@@ -342,6 +342,25 @@ function _M:canProject(t, x, y)
 	return is_hit, stop_x, stop_y, stop_radius_x, stop_radius_y
 end
 
+function _M:projectCollect(t, x, y, kind, cond, tgts)
+	tgts = tgts or {}
+	self:project(t, x, y, function(px, py)
+		local tgt = game.level.map(px, py, kind)
+		if not tgt then return end
+		local ok = false
+		if kind == Map.ACTOR and type(cond) ~= "function" then
+			if cond == "hostile" and self:reactionToward(tgt) < 0 then ok = true
+			elseif cond == "friend" and self:reactionToward(tgt) > 0 then ok = true
+			elseif cond == nil then ok = true
+			end
+		else
+			if cond(tgt, px, py) then ok = true end
+		end
+		if ok then tgts[tgt] = {x=px, y=py, dist=core.fov.distance(self.x, self.y, px, py)} end
+	end)
+	return tgts
+end
+
 --- Calls :getTarget and :canProject to limit the results and returns the same as getTarget
 function _M:getTargetLimited(t)
 	local x, y = self:getTarget(t)
