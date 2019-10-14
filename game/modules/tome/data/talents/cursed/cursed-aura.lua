@@ -485,7 +485,8 @@ newTalent{
 				-- Add weapon to inventory
 				local _, item, id = self:findInAllInventoriesByObject(self.cursed_item)
 				if item then self:removeObject(id, item) end
-				self.summoner:addObject(self.summoner.INVEN_INVEN, self.cursed_item )
+				self.summoner:addObject(self.summoner.INVEN_INVEN, self.cursed_item)
+				game.logPlayer(self.summoner, "#ffa0ff#%s returns to your bags!", self.cursed_item:getName{do_color=1})
 			end,
 		}
 
@@ -504,14 +505,6 @@ newTalent{
 		end
 
 		o.__special_boss_drop = nil  -- lol @ artifact transmutation
-		o.old_auto_pickup = o.auto_pickup
-		o.auto_pickup = true  -- allow to reautopickup
-		o.old_on_pickup = o.on_pickup
-		o.on_pickup = function(self, who)
-			self.auto_pickup = self.old_auto_pickup
-			self.on_pickup = self.old_on_pickup
-			if self.old_on_pickup then self.old_on_pickup(self, who) end
-		end
 		local charges = o.power --don't cool down any activatable abilities :)
 		result = sentry:wearObject(o, true, false)
 		o.power = charges
@@ -571,7 +564,7 @@ newTalent{
 		sentry.cursed_item = o
 		if game.party:hasMember(self) then
 			sentry.remove_from_party_on_death = true
-			game.party:addMember(sentry, { control="no", type="summon", title="Summon"})
+			game.party:addMember(sentry, { control="no", type="summon", title="Cursed Sentry"})
 		end
 
 		game:playSoundNear(self, "talents/spell_generic")
