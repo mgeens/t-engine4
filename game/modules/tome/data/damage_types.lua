@@ -1332,6 +1332,10 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local chance = 25
 		if _G.type(dam) == "table" then chance, dam = dam.chance, dam.dam end
+
+		local target = game.level.map(x, y, Map.ACTOR)
+		if target and target:hasEffect(target.EFF_WET) then dam = dam * 1.3 chance = 50 end
+
 		local realdam = DamageType:get(DamageType.COLD).projector(src, x, y, DamageType.COLD, dam, state)
 		if rng.percent(chance) then
 			DamageType:get(DamageType.FREEZE).projector(src, x, y, DamageType.FREEZE, {dur=2, hp=70+dam*1.5}, state)
