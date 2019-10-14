@@ -139,7 +139,7 @@ newTalent{
 	mode = "sustained",
 	require = corrs_req4,
 	points = 5,
-	sustain_vim = 60,
+	sustain_vim = 30,
 	cooldown = 30,
 	tactical = { BUFF = 2 },
 	on_crit = function(self, t)
