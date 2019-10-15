@@ -154,7 +154,7 @@ newTalent{
 			return {type="ball", nolock=true, pass_terrain=true, nowarning=true, range=20, radius=20, requires_knowledge=false, selffire=false, block_path=false, block_radius=false}
 		else -- always hit the primary target
 			local tgt = self.ai_target.actor
-			if tgt then return {type="hit", range=self:getTalentRange(t), talent=t, x=tgt.x, y=tgt.y} end
+			return {type="hit", range=self:getTalentRange(t), talent=t, x=tgt and tgt.x, y=tgt and tgt.y}
 		end
 	end,
 	range = 5,
@@ -347,6 +347,7 @@ newTalent{
 
 			game.logPlayer(game.player, "#LIGHT_RED#You are brought back from the Fearscape!")
 		end)
+			util.show_backtrace()
 
 		return true
 	end,
