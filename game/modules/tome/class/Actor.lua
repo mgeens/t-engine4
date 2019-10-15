@@ -1929,7 +1929,7 @@ function _M:tooltip(x, y, seen_by)
 		ts:add({"color", 0, 255, 128}, ("Iceblock: %d"):format(eff.hp), {"color", "WHITE"}, true)
 	end
 	if game.player:knowTalent(self.T_VIM_POOL) then
-		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.3 + 1) * self.rank), {"color", "WHITE"}, true)
+		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.5 + 1) * self.rank), {"color", "WHITE"}, true)
 	end
 
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
@@ -3244,7 +3244,7 @@ function _M:die(src, death_note)
 	-- Increase vim
 	if src and src.knowTalent and src:knowTalent(src.T_VIM_POOL) and src:reactionToward(self) <= 0 then
 		game:onTickEnd(function() -- Do it on tick end to make sure Vim is spent by the talent code before being gained, otherwise it feels weird when you expect to spend life
-			src:incVim((src:getWil() * 0.3 + 1) * self.rank)
+			src:incVim((src:getWil() * 0.5 + 1) * self.rank)
 		end)
 	end
 	if src and src.attr and src:attr("vim_on_death") and not self:attr("undead") then src:incVim(src:attr("vim_on_death")) end
