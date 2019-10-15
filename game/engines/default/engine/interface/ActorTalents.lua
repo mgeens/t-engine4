@@ -179,6 +179,7 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 			game.logPlayer(who, "%s is still on cooldown for %d turns.", ab.name:capitalize(), self.talents_cd[ab.id])
 			return false
 		end
+		if ignore_cd == "ignore_check_only" then ignore_cd = nil end
 		co = coroutine.create(function() -- coroutine to run sustainable talent code
 			if cancel then
 				success = false

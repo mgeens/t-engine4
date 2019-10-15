@@ -6313,7 +6313,7 @@ end
 -- Remove an effect or sustain.
 function _M:removeModifier(id)
 	if 'T_' == id:sub(1, 2) then
-		self:forceUseTalent(id, {ignore_energy=true})
+		self:forceUseTalent(id, {ignore_energy=true, ignore_cd="ignore_check_only", no_talent_fail=true})
 	elseif 'EFF_' == id:sub(1, 4) then
 		self:removeEffect(id)
 	end
