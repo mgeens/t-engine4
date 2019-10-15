@@ -6503,17 +6503,18 @@ function _M:getTalentFullDescription(t, addlevel, config, fake_mastery)
 				end
 			end
 		end
-		local is_a = {}
-		for is, desc in pairs(engine.interface.ActorTalents.is_a_type) do
-			if t[is] then is_a[#is_a+1] = desc end
-		end
-		if #is_a > 0 then
-			d:add({"color",0x6f,0xff,0x83}, "Is: ", {"color",0xFF,0xFF,0xFF}, table.concatNice(is_a, ", ", " and "), true)
-		end
 	else
 		if not config.ignore_ressources then
 			if self:getTalentCooldown(t) then d:add({"color",0x6f,0xff,0x83}, ("%sCooldown: "):format(t.fixed_cooldown and "Fixed " or ""), {"color",0xFF,0xFF,0xFF}, ""..self:getTalentCooldown(t), true) end
 		end
+	end
+	
+	local is_a = {}
+	for is, desc in pairs(engine.interface.ActorTalents.is_a_type) do
+		if t[is] then is_a[#is_a+1] = desc end
+	end
+	if #is_a > 0 then
+		d:add({"color",0x6f,0xff,0x83}, "Is: ", {"color",0xFF,0xFF,0xFF}, table.concatNice(is_a, ", ", " and "), true)
 	end
 
 	if t.mode == 'sustained' then
