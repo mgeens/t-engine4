@@ -23,7 +23,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 15,
 	charm_power_def = {add=3, max=200, floor=true},
-	resolvers.charm("setup a psionic shield, reducing all damage taken %d for 5 turns", 25, function(self, who)
+	resolvers.charm("setup a psionic shield, reducing all damage taken by %d for 5 turns", 25, function(self, who)
 		who:setEffect(who.EFF_PSIONIC_SHIELD, 5, {kind="all", power=self:getCharmPower(who)})
 		game.logSeen(who, "%s uses %s!", who.name:capitalize(), self:getName{no_add_name=true, do_color=true})
 		return {id=true, used=true}
@@ -72,7 +72,7 @@ newEntity{
 	charm_power_def = {add=0, max=800, floor=true},
 	resolvers.charm(
 		function(self, who)
-			local dam = who:damDesc(engine.DamageType.Mind, self.use_power.damage(self, who))
+			local dam = who:damDesc(engine.DamageType.PHYSICAL, self.use_power.damage(self, who))
 			return ("project a gust of wind in a cone knocking enemies back %d spaces and dealing %d damage"):format(self.use_power.knockback(self, who), dam)
 		end,
 		15,

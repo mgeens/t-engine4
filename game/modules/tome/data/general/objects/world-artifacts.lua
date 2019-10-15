@@ -5045,6 +5045,7 @@ newEntity{ base = "BASE_GLOVES", --Thanks SageAcrin /AND/ Edge2054!
 	talent_on_spell = { {chance=10, talent=Talents.T_DUST_TO_DUST, level=2} },
 }
 
+-- Display on this is kinda screwy since talent_on_spell doesn't go in wielder tables, imbues special case adding it
 newEntity{ base = "BASE_GEM", --Thanks SageAcrin and Graziel!
 	power_source = {arcane=true},
 	unique = true,
@@ -5079,7 +5080,8 @@ newEntity{ base = "BASE_GEM", --Thanks SageAcrin and Graziel!
 		},
 		talent_on_spell = { {chance=10, talent=Talents.T_GOLEM_BEAM, level=2} },
 	},
-	--special_desc = function(self) return "Casts lasers on spellcast when worn or imbued." end,
+	talent_on_spell = { {chance=10, talent=Talents.T_GOLEM_BEAM, level=2} },
+	special_desc = function(self) return "Casts lasers on spellcast when worn or imbued." end,
 
 }
 
