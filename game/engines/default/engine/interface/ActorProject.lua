@@ -361,6 +361,25 @@ function _M:projectCollect(t, x, y, kind, cond, tgts)
 	return tgts
 end
 
+function _M:projectApply(t, x, y, kind, fct, cond)
+	tgts = tgts or {}
+	self:project(t, x, y, function(px, py)
+		local tgt = game.level.map(px, py, kind)
+		if not tgt then return end
+		local ok = false
+		if kind == Map.ACTOR and type(cond) ~= "function" then
+			if cond == "hostile" and self:reactionToward(tgt) < 0 then ok = true
+			elseif cond == "friend" and self:reactionToward(tgt) > 0 then ok = true
+			elseif cond == nil then ok = true
+			end
+		else
+			if cond(tgt, px, py) then ok = true end
+		end
+		if ok then fct(tgt, px, py) end
+	end)
+	return tgts
+end
+
 --- Calls :getTarget and :canProject to limit the results and returns the same as getTarget
 function _M:getTargetLimited(t)
 	local x, y = self:getTarget(t)
