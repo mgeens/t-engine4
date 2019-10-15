@@ -499,6 +499,19 @@ function _M:numberKnownTalent(type, exclude_id, limit_type)
 	return nb
 end
 
+--- Returns how many levels talents of this type the actor knows
+-- @param type the talent type to count
+-- @param exclude_id if not nil the count will ignore this talent id
+-- @param limit_type if not nil the count will ignore talents with talent category level equal or higher that this
+function _M:numberKnownTalentLevels(type, exclude_id, limit_type)
+	local nb = 0
+	for id, lvl in pairs(self.talents) do
+		local t = _M.talents_def[id]
+		if t.type[1] == type and (not exclude_id or exclude_id ~= id) and (not limit_type or not t.type[2] or t.type[2] < limit_type) then nb = nb + lvl end
+	end
+	return nb
+end
+
 --- Actor learns a talent
 -- @param t_id the id of the talent to learn
 -- @param force if true do not check canLearnTalent

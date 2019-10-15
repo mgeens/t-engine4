@@ -76,7 +76,10 @@ function _M:generateList()
 	local list = {}
 	for tid, t in pairs(self.actor.talents_def) do
 		if t.uber and not t.not_listed then
-			if not t.is_class_evolution or (self.actor.descriptor and self.actor.descriptor.subclass == t.is_class_evolution) then
+			if 
+			    (not t.is_class_evolution or (self.actor.descriptor and self.actor.descriptor.subclass == t.is_class_evolution)) and
+			    (not t.requires_unlock or profile.mod.allow_build[t.requires_unlock])
+			    then
 				cols[t.type[1]] = cols[t.type[1]] or {}
 				local c = cols[t.type[1]]
 				c[#c+1] = t
