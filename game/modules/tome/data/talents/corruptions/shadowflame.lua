@@ -347,7 +347,6 @@ newTalent{
 
 			game.logPlayer(game.player, "#LIGHT_RED#You are brought back from the Fearscape!")
 		end)
-			util.show_backtrace()
 
 		return true
 	end,
