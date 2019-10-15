@@ -806,7 +806,7 @@ function _M:getTalentReqDesc(t_id, levmod)
 	if req.birth_descriptors then
 		for _, d in ipairs(req.birth_descriptors) do
 			local c = self.descriptor and self.descriptor[d[1]] == d[2] and {"color", 0x00,0xff,0x00} or {"color", 0xff,0x00,0x00}
-			str:add(c, ("- is %s"):format(d[2]), true)
+			str:add(c, ("- Is %s"):format(d[2]), true)
 		end
 	end
 
