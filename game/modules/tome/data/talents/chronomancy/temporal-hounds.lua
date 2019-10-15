@@ -64,6 +64,10 @@ summonTemporalHound = function(self, t)
 	m.no_inventory_access = true
 	m.no_points_on_levelup = true
 	
+	-- Never flee
+	m.ai_tactic = m.ai_tactic or {}
+	m.ai_tactic.escape = 0
+
 	m:resolve()
 	m:resolve(nil, true)
 	
