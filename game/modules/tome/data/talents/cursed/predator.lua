@@ -72,7 +72,7 @@ newTalent{
 	points = 5,
 	cooldown = 10,
 	radius = function(self, t) return 4 end,
-	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 4, 8) end,
+	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 4, 7) end,
 	getDamage = function(self, t) return self:combatTalentMindDamage(t, 0, 60) end,
 	getChance = function(self, t) return self:combatTalentScale(t, 5, 15) end,
 	passives = function(self, t, p)
@@ -213,10 +213,11 @@ newTalent{
 	end,
 	callbackOnMeleeAttack = function(self, t, target, hitted, critted)
 		if hitted and critted and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma")) then
+			local miasma_count = 0
 			local damage = self:mindCrit(t.getDamage(self, t))
 			local x, y = self.x, self.y
+			if t.canCreep(x, y) then t.createDark(self, x, y, damage, rng.range(7,9), 8, 100, 0) miasma_count=1 end
 			local locations = {}
-			t.createDark(self, self.x, self.y, damage, rng.range(7,9), 8, 100, 0)
 			local grids = core.fov.circle_grids(x, y, 4, true)
 			for darkX, yy in pairs(grids) do for darkY, _ in pairs(grids[darkX]) do
 				local l = line.new(x, y, darkX, darkY)
@@ -233,7 +234,6 @@ newTalent{
 				end
 			end end
 
-			local miasma_count = 0
 			repeat
 				if #locations <= 0 then break end
 				local location, id = rng.table(locations)

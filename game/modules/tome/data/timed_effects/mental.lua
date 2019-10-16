@@ -626,7 +626,6 @@ newEffect{
 	parameters = { chance=5 },
 	on_gain = function(self, err) return "#Target# is surrounded by a cursed miasma.", "+Cursed Miasma" end,
 	on_lose = function(self, err) return "The cursed miasma around #target# dissipates.", "-Cursed Miasma" end,
-	charges = function(self, eff) return -eff.sight end,
 	activate = function(self, eff)
 		if rng.percent(eff.chance) then
 			self:setTarget(nil) -- Reset target to grab a random new one
