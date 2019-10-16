@@ -396,6 +396,7 @@ newEntity{ base = "BASE_LEATHER_BOOT",
 					end, true
 				)
 			else
+				if not e.grids_duration then return end
 				e.x, e.y = who.x, who.y
 				e.duration = 50
 				local ngrids = core.fov.circle_grids(who.x, who.y, 1, true)
@@ -414,7 +415,7 @@ newEntity{ base = "BASE_LEATHER_BOOT",
 		combat_armor = 4,
 		combat_def = 1,
 		fatigue = 7,
-		movement_speed = 0.1,
+		movement_speed = 0.2,
 		inc_damage = {
 			[DamageType.COLD] = 15,
 		},

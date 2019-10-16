@@ -47,7 +47,7 @@ newEntity{
 
 newEntity{
 	name = " of lightning storm", addon=true, instant_resolve=true,
-	keywords = {lightning_storm=true},
+	keywords = {['lightning storm']=true},
 	level_range = {1, 50},
 	rarity = 10,
 

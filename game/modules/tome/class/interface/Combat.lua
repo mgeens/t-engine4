@@ -2496,6 +2496,22 @@ function _M:combatShieldBlock()
 	if combat2 then block = block + (combat2.block or 0) end
 
 	if self:attr("block_bonus") then block = block + self:attr("block_bonus") end
+	if self:attr("shield_windwall") then
+		local found = false
+
+		local grids = core.fov.circle_grids(self.x, self.y, 10, true)
+		for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
+			local i = 0
+			local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+			while p do
+				if p.src and p.src:reactionToward(self) >= 0 then return end  
+				i = i + 1
+				p = game.level.map(x, y, engine.Map.PROJECTILE+i)
+				found = true
+			end end end
+
+		if found then block = block + self:attr("shield_windwall") end
+	end
 	return block
 end
 

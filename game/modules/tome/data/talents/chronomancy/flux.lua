@@ -110,7 +110,7 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 25, 290, getParadoxSpellpower(self, t)) end,
 	getDuration = function(self, t) return getExtensionModifier(self, t, 4) end,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), nowarning=true, talent=t}
+		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), nowarning=true, can_autoaccept=true, talent=t}
 	end,
 	requires_target = true,
 	direct_hit = true,

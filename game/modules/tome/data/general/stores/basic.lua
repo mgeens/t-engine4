@@ -828,9 +828,10 @@ newEntity{
 		sell_percent = 300,
 		minimum_level = 10,
 		filters = {
-			{type="weapon", subtype="sling", id=true, tome_drops="store"},
-			{type="weapon", subtype="longbow", id=true, tome_drops="store"},
-			{type="ammo", id=true, tome_drops="store"},
+			{type="weapon", subtype="staff", id=true, tome_drops="store"},
+			{type="weapon", subtype="staff", id=true, tome_drops="store"},
+			{type="weapon", subtype="staff", id=true, tome_drops="store"},
+			{type="charm", subtype="wand", id=true, tome_drops="store"},
 		},
 		post_filter = function(e)
 			if e.greater_ego and e.greater_ego > 1 then return true else return false end

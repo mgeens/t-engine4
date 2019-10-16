@@ -91,7 +91,8 @@ newBirthDescriptor{
 		end,
 		zone_tiers = {
 			{name="tier1", "trollmire", "norgos-lair", "scintillating-caves", "rhaloren-camp", "heart-gloom", "ruins-kor-pul"},
-			{name="tier2", "sandworm-lair", "old-forest", "maze", "daikara", "halfling-ruins"}
+			{name="tier2", "sandworm-lair", "old-forest", "maze", "daikara", "halfling-ruins"},
+			{name="tier3", "dreadfell", "reknor", "unremarkable-cave", "vor-armoury", "briagh-lair"}
 		}		
 	},
 }

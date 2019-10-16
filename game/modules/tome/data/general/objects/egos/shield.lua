@@ -380,45 +380,8 @@ newEntity{
 		inc_stats = {
 			[Stats.STAT_WIL] = resolvers.mbonus_material(5, 1),
 		},
-	},
-	on_block = {
-		desc=function(self, who, special)
-			local dam = special.shield_windwall(who)
-			return ("Blasts a radius 10 area dealing #YELLOW#%d#LAST# physical damage to enemies and destroying any hostile projectiles"):format(dam)
-		end,
-		shield_windwall=function(who)
-			local dam = math.max(15, math.floor(who:combatStatScale(who:combatMindpower(), 1, 150)))
-			return dam
-		end,
-		fct=function(self, who, target, type, dam, eff, special)
-			if who.turn_procs and who.turn_procs.shield_windwall then return end
-			who.turn_procs.shield_windwall = true
-			local DamageType = require "engine.DamageType"
-			local dam = special.shield_windwall(who)
-			who:project({type="ball", radius=10, friendlyfire=false, selffire=false}, who.x, who.y, DamageType.PHYSICAL, dam)
-			game.level.map:particleEmitter(who.x, who.y, 10, "shout",
-				{additive=true, life=10, size=3, distorion_factor=0.0, radius=10, nb_circles=4, rm=0.8, rM=1, gm=0, gM=0, bm=0.8, bM=1.0, am=0.4, aM=0.6})
-
-			local grids = core.fov.circle_grids(who.x, who.y, 10, true)
-			for x, yy in pairs(grids) do for y, _ in pairs(grids[x]) do
-				local i = 0
-				local p = game.level.map(x, y, engine.Map.PROJECTILE+i)
-				while p do
-					if p.src and p.src:reactionToward(who) >= 0 then return end
-					if p.name then 
-						game.logPlayer(who, "#GREEN#"..p.name .. "is blown away!#LAST#")
-					else
-						game.logPlayer(who, "#GREEN#A projectile is blown away!!#LAST#")
-					end
-					
-					p:terminate(x, y)
-					game.level:removeEntity(p, true)
-					p.dead = true
-   
-					i = i + 1
-					p = game.level.map(x, y, engine.Map.PROJECTILE+i)
-				end end end
-		end,
+		slow_projectiles = resolvers.mbonus_material(30, 10),
+		shield_windwall = resolvers.mbonus_material(100, 10),
 	},
 }
 

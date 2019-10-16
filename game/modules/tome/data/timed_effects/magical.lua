@@ -2370,6 +2370,7 @@ newEffect{
 newEffect{
 	name = "BLOOD_GRASP", image = "talents/blood_grasp.png",
 	desc = "Sanguine Infusion",
+	charges = function(self, eff) return  math.floor(eff.life) end,
 	long_desc = function(self, eff) return ("Maximum life increased by %d."):format(eff.life) end,
 	type = "magical",
 	subtype = {corruption=true},

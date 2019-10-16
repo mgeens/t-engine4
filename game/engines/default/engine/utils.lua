@@ -89,6 +89,18 @@ function ripairs(t)
 	end
 end
 
+function table.weak_keys(t)
+	t = t or {}
+	setmetatable(t, {__mode="k"})
+	return t
+end
+
+function table.weak_values(t)
+	t = t or {}
+	setmetatable(t, {__mode="v"})
+	return t
+end
+
 function table.empty(t)
 	while next(t) do t[next(t)] = nil end
 end
@@ -2440,6 +2452,98 @@ function core.fov.beam_any_angle_grids(x, y, radius, angle, source_x, source_y, 
 
 	return grids
 end
+
+local function is_point_in_triangle(P, A, B, C)
+	-- local as_x = s.x-a.x
+	-- local as_y = s.y-a.y
+
+	-- local s_ab = (b.x-a.x)*as_y-(b.y-a.y)*as_x > 0
+
+	-- if (c.x-a.x)*as_y-(c.y-a.y)*as_x > 0 == s_ab then return false end
+
+	-- if (c.x-b.x)*(s.y-b.y)-(c.y-b.y)*(s.x-b.x) > 0 ~= s_ab then return false end
+
+	-- return true;
+
+	local s1 = C.y - A.y;
+	local s2 = C.x - A.x;
+	local s3 = B.y - A.y;
+	local s4 = P.y - A.y;
+
+	local w1 = (A.x * s1 + s4 * s2 - P.x * s1) / (s3 * s2 - (B.x-A.x) * s1);
+	local w2 = (s4- w1 * s3) / s1;
+	return w1 >= 0 and w2 >= 0 and (w1 + w2) <= 1
+end
+
+-- Very naive implementation, this will do for now
+function core.fov.calc_triangle(x, y, w, h, points, mode, block, apply)
+	local p1 = {x=x+points[1].x, y=y+points[1].y}
+	local p2 = {x=x+points[2].x, y=y+points[2].y}
+	local p3 = {x=x+points[3].x, y=y+points[3].y}
+
+	local mx, Mx = math.min(p1.x, p2.x, p3.x), math.max(p1.x, p2.x, p3.x)
+	local my, My = math.min(p1.y, p2.y, p3.y), math.max(p1.y, p2.y, p3.y)
+
+	local checkline = function(fx, fy, i, j)
+		local l = core.fov.line(fx, fy, i, j)
+		while true do
+			local lx, ly = l:step(true)
+			if not lx then break end
+			if lx == i and ly == j then return true end
+			if block(_, lx, ly) then break end
+		end
+		return false
+	end
+
+	local check
+	if mode == "corners" then
+		check = function(i, j)
+			return checkline(p1.x, p1.y, i, j) or checkline(p2.x, p2.y, i, j) or checkline(p3.x, p3.y, i, j)
+		end
+	else
+		check = function(i, j)
+			return checkline(x, y, i, j)
+		end
+	end
+
+	for i = mx, Mx do if i >= 0 and i < w then
+		for j = my, My do if j >= 0 and j < h then
+			if is_point_in_triangle({x=i,y=j}, {x=p1.x, y=p1.y}, {x=p2.x, y=p2.y}, {x=p3.x, y=p3.y}) and check(i, j) then
+				apply(nil, i, j)
+			end
+		end end
+	end end
+end
+
+
+-- Very naive implementation, this will do for now
+function core.fov.calc_wide_beam(x, y, w, h, sx, sy, radius, block, apply)
+	local tgts = {}
+	local dist = core.fov.distance(sx, sy, x, y)
+
+	-- Compute the line
+	local path = {}
+	local l = core.fov.line(sx, sy, x, y)
+	local lx, ly = l:step()
+	while lx and ly do
+		path[#path+1] = {x=lx, y=ly}
+		lx, ly = l:step()
+	end
+
+	for _, p in ipairs(path) do
+		if dist > 1 and p.x == x and p.y == y then
+		else
+			core.fov.calc_circle(p.x, p.y, w, h, radius, block, function(_, ppx, ppy)
+				tgts[ppy*game.level.map.w+ppx] = {x=ppx, y=ppy}
+			end, nil)
+		end
+	end
+
+	for _, p in pairs(tgts) do
+		apply(nil, p.x, p.y)
+	end
+end
+
 
 function core.fov.set_corner_block(l, block_corner)
 	block_corner = type(block_corner) == "function" and block_corner or
