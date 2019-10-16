@@ -617,22 +617,26 @@ newEffect{
 }
 
 newEffect{
-	name = "OVERWHELMED", image = "talents/frenzy.png",
-	desc = "Overwhelmed",
-	long_desc = function(self, eff) return ("The target has been overwhemed by a furious assault, reducing attack by %d."):format( -eff.attackChange) end,
+	name = "CURSED_MIASMA", image = "talents/savage_hunter.png",
+	desc = "Cursed Miasma",
+	long_desc = function(self, eff) return ("The target is enveloped in a cursed miasma."):format(eff.sight) end,
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
-	parameters = { damageChange=0.1 },
-	on_gain = function(self, err) return "#Target# has been overwhelmed.", "+Overwhelmed" end,
-	on_lose = function(self, err) return "#Target# is no longer overwhelmed.", "-Overwhelmed" end,
+	parameters = { chance=5 },
+	on_gain = function(self, err) return "#Target# is surrounded by a cursed miasma.", "+Cursed Miasma" end,
+	on_lose = function(self, err) return "The cursed miasma around #target# dissipates.", "-Cursed Miasma" end,
+	charges = function(self, eff) return -eff.sight end,
 	activate = function(self, eff)
-		eff.attackChangeId = self:addTemporaryValue("combat_atk", eff.attackChange)
-		eff.particle = self:addParticles(Particles.new("overwhelmed", 1))
+		if rng.percent(eff.chance) then
+			self:setTarget(nil) -- Reset target to grab a random new one
+			self:effectTemporaryValue(eff, "hates_everybody", 1)
+		end
+		if core.shader.active() then
+			self:effectParticles(eff, {type="shader_shield", args={size_factor=1.5, img="shadow_shot_debuff_tentacles"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=2000, noup=0.0}})
+		end
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("combat_atk", eff.attackChangeId)
-		self:removeParticles(eff.particle)
 	end,
 }
 
@@ -2096,247 +2100,6 @@ newEffect{
 			game.logPlayer(self, "#F53CBE#You feel your rampage slowing down. (-1 duration)")
 		end
 	end,
-}
-
-newEffect{
-	name = "PREDATOR", image = "effects/predator.png",
-	desc = "Predator",
-	no_stop_enter_worlmap = true,
-	decrease = 0,
-	no_remove = true,
-	cancel_on_level_change = true,
-	long_desc = function(self, eff)
-		local desc = ([[The target is hunting creatures of type / sub-type: %s / %s with %d%% effectiveness. Kills: %d / %d kills, Damage: %+d%% / %+d%%]]):format(eff.type, eff.subtype, (eff.effectiveness * 100) or 0, eff.typeKills, eff.subtypeKills, (eff.typeDamageChange * 100) or 0, (eff.subtypeDamageChange * 100) or 0)
-		if eff.subtypeAttackChange or 0 > 0 then
-			desc = desc..([[, Attack: %+d / %+d, Stun: -- / %0.1f%%, Outmaneuver: %0.1f%% / %0.1f%%]]):format(eff.typeAttackChange or 0, eff.subtypeAttackChange or 0, eff.subtypeStunChance or 0, eff.typeOutmaneuverChance or 0, eff.subtypeOutmaneuverChance or 0)
-		end
-		return desc
-	end,
-	type = "mental",
-	subtype = { predator=true },
-	status = "beneficial",
-	parameters = { power=10 },
-	on_gain = function(self, eff) return ("#Target# begins hunting %s / %s."):format(eff.type, eff.subtype) end,
-	on_lose = function(self, eff) return ("#Target# is no longer hunting %s / %s."):format(eff.type, eff.subtype) end,
-	activate = function(self, eff)
-		local e = self.tempeffect_def[self.EFF_PREDATOR]
-		e.updateEffect(self, eff)
-	end,
-	deactivate = function(self, eff)
-	end,
-	addKill = function(self, target, e, eff)
-		if target.type == eff.type then
-			local isSubtype = (target.subtype == eff.subtype)
-			if isSubtype then
-				eff.subtypeKills = eff.subtypeKills + 1
-				eff.killExperience = eff.killExperience + 1
-			else
-				eff.typeKills = eff.typeKills + 1
-				eff.killExperience = eff.killExperience + 0.25
-			end
-
-			e.updateEffect(self, eff)
-
-			-- apply hate bonus
-			if isSubtype and self:knowTalent(self.T_HATE_POOL) then
-				self:incHate(eff.hateBonus)
-				game.logPlayer(self, "#F53CBE#The death of your prey feeds your hate. (+%d hate)", eff.hateBonus)
-			end
-
-			-- apply mimic effect
-			if isSubtype and self:knowTalent(self.T_MIMIC) then
-				local tMimic = self:getTalentFromId(self.T_MIMIC)
-				self:setEffect(self.EFF_MIMIC, 1, { target = target, maxIncrease = math.ceil(tMimic.getMaxIncrease(self, tMimic) * eff.effectiveness) })
-			end
-		end
-	end,
-	updateEffect = function(self, eff)
-		local tMarkPrey = self:getTalentFromId(self.T_MARK_PREY)
-		eff.maxKillExperience = tMarkPrey.getMaxKillExperience(self, tMarkPrey)
-		eff.effectiveness = math.min(1, eff.killExperience / eff.maxKillExperience)
-		eff.subtypeDamageChange = tMarkPrey.getSubtypeDamageChange(self, tMarkPrey) * eff.effectiveness
-		eff.typeDamageChange = tMarkPrey.getTypeDamageChange(self, tMarkPrey) * eff.effectiveness
-
-		local tAnatomy = self:getTalentFromId(self.T_ANATOMY)
-		if tAnatomy and self:getTalentLevelRaw(tAnatomy) > 0 then
-			eff.subtypeAttackChange = tAnatomy.getSubtypeAttackChange(self, tAnatomy) * eff.effectiveness
-			eff.typeAttackChange = tAnatomy.getTypeAttackChange(self, tAnatomy) * eff.effectiveness
-			eff.subtypeStunChance = tAnatomy.getSubtypeStunChance(self, tAnatomy) * eff.effectiveness
-		else
-			eff.subtypeAttackChange = 0
-			eff.typeAttackChange = 0
-			eff.subtypeStunChance = 0
-		end
-
-		local tOutmaneuver = self:getTalentFromId(self.T_OUTMANEUVER)
-		if tOutmaneuver and self:getTalentLevelRaw(tOutmaneuver) > 0 then
-			eff.typeOutmaneuverChance = tOutmaneuver.getTypeChance(self, tOutmaneuver) * eff.effectiveness
-			eff.subtypeOutmaneuverChance = tOutmaneuver.getSubtypeChance(self, tOutmaneuver) * eff.effectiveness
-		else
-			eff.typeOutmaneuverChance = 0
-			eff.subtypeOutmaneuverChance = 0
-		end
-
-		eff.hateBonus = tMarkPrey.getHateBonus(self, tMarkPrey)
-	end,
-}
-
-newEffect{
-	name = "OUTMANEUVERED", image = "talents/outmaneuver.png",
-	desc = "Outmaneuvered",
-	long_desc = function(self, eff)
-		local desc = ("The target has been outmaneuvered. (%d%% physical resistance, "):format(eff.physicalResistChange)
-		local first = true
-		for id, value in pairs(eff.incStats) do
-			if not first then desc = desc..", " end
-			first = false
-			desc = desc..("%+d %s"):format(value, Stats.stats_def[id].name:capitalize())
-		end
-		desc = desc..")"
-		return desc
-	end,
-	type = "mental",
-	subtype = { predator=true },
-	status = "detrimental",
-	on_gain = function(self, eff) return "#Target# is outmaneuvered." end,
-	on_lose = function(self, eff) return "#Target# is no longer outmaneuvered." end,
-	addEffect = function(self, eff)
-		if eff.physicalResistId then self:removeTemporaryValue("resists", eff.physicalResistId) end
-		eff.physicalResistId = self:addTemporaryValue("resists", { [DamageType.PHYSICAL]=eff.physicalResistChange })
-
-		local maxId
-		local maxValue = 0
-		for id, def in ipairs(self.stats_def) do
-			if def.id ~= self.STAT_LCK then
-				local value = self:getStat(id, nil, nil, false)
-				if value > maxValue then
-					maxId = id
-					maxValue = value
-				end
-			end
-		end
-		if eff.incStatsId then self:removeTemporaryValue("inc_stats", eff.incStatsId) end
-		eff.incStats = eff.incStats or {}
-		eff.incStats[maxId] = (eff.incStats[maxId] or 0) - eff.statReduction
-		eff.incStatsId = self:addTemporaryValue("inc_stats", eff.incStats)
-		game.logSeen(self, ("%s has lost %d %s."):format(self.name:capitalize(), eff.statReduction, Stats.stats_def[maxId].name:capitalize()))
-	end,
-	activate = function(self, eff)
-		self.tempeffect_def[self.EFF_OUTMANEUVERED].addEffect(self, eff)
-	end,
-	deactivate = function(self, eff)
-		if eff.physicalResistId then self:removeTemporaryValue("resists", eff.physicalResistId) end
-		if eff.incStatsId then self:removeTemporaryValue("inc_stats", eff.incStatsId) end
-	end,
-	on_merge = function(self, old_eff, new_eff)
-		-- spread old effects over new duration
-		old_eff.physicalResistChange = math.min(50, new_eff.physicalResistChange + (old_eff.physicalResistChange * old_eff.dur / new_eff.dur))
-		for id, value in pairs(old_eff.incStats) do
-			old_eff.incStats[id] = math.ceil(value * old_eff.dur / new_eff.dur)
-		end
-		old_eff.dur = new_eff.dur
-
-		-- add new effect
-		self.tempeffect_def[self.EFF_OUTMANEUVERED].addEffect(self, old_eff)
-
-		return old_eff
-	end,
-}
-
-newEffect{
-	name = "MIMIC", image = "talents/mimic.png",
-	desc = "Mimic",
-	long_desc = function(self, eff)
-		if not eff.incStatsId then return "The target is mimicking a previous victim. (no gains)." end
-
-		local desc = "The target is mimicking a previous victim. ("
-		local first = true
-		for id, value in pairs(eff.incStats) do
-			if not first then desc = desc..", " end
-			first = false
-			desc = desc..("%+d %s"):format(value, Stats.stats_def[id].name:capitalize())
-		end
-		desc = desc..")"
-		return desc
-	end,
-	type = "mental",
-	subtype = { predator=true },
-	status = "beneficial",
-	no_stop_enter_worlmap = true,
-	decrease = 0,
-	no_remove = true,
-	cancel_on_level_change = true,
-	parameters = { },
-	on_lose = function(self, eff) return "#Target# is no longer mimicking a previous victim." end,
-	activate = function(self, eff)
-		-- old version used difference from target stats and self stats; new version just uses target stats
-		local sum = 0
-		local values = {}
-		for id, def in ipairs(self.stats_def) do
-			if def.id and def.id ~= self.STAT_LCK then
-				--local diff = eff.target:getStat(def.id, nil, nil, true) - self:getStat(def.id, nil, nil, true)
-				local diff = eff.target:getStat(def.id, nil, nil, false)
-				if diff > 0 then
-					table.insert(values, { def.id, diff })
-					sum = sum + diff
-				end
-			end
-		end
-
-		if sum > 0 then
-			eff.incStats = {}
-			if sum <= eff.maxIncrease then
-				-- less than maximum; apply all stat differences
-				for i, value in ipairs(values) do
-					eff.incStats[value[1]] = value[2]
-				end
-			else
-				-- distribute stats based on fractions and calculate what the remainder will be
-				local sumIncrease = 0
-				for i, value in ipairs(values) do
-					value[2] = eff.maxIncrease * value[2] / sum
-					sumIncrease = sumIncrease + math.floor(value[2])
-				end
-				local remainder = eff.maxIncrease - sumIncrease
-
-				-- sort on fractional amount for distributing the remainder points
-				table.sort(values, function(a,b) return a[2] % 1 > b[2] % 1 end)
-
-				-- convert fractions to stat increases and apply remainder
-				for i, value in ipairs(values) do
-					eff.incStats[value[1]] = math.floor(value[2]) + (i <= remainder and 1 or 0)
-				end
-			end
-			eff.incStatsId = self:addTemporaryValue("inc_stats", eff.incStats)
-		end
-
-		if not eff.incStatsId then
-			self:logCombat(eff.target, "#Source# is mimicking #Target#. (no gains).")
-		else
-			local desc = "#Source# is mimicking #Target#. ("
-			local first = true
-			for id, value in pairs(eff.incStats) do
-				if not first then desc = desc..", " end
-				first = false
-				desc = desc..("%+d %s"):format(value, Stats.stats_def[id].name:capitalize())
-			end
-			desc = desc..")"
-			self:logCombat(eff.target, desc)
-		end
-	end,
-	deactivate = function(self, eff)
-		if eff.incStatsId then self:removeTemporaryValue("inc_stats", eff.incStatsId) end
-		eff.incStats = nil
-	end,
-	on_merge = function(self, old_eff, new_eff)
-		if old_eff.incStatsId then self:removeTemporaryValue("inc_stats", old_eff.incStatsId) end
-		old_eff.incStats = nil
-		old_eff.incStatsId = nil
-
-		self.tempeffect_def[self.EFF_MIMIC].activate(self, new_eff)
-
-		return new_eff
-	end
 }
 
 newEffect{

@@ -456,6 +456,21 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
+		-- Mark Prey: reduces damage from subtype of marked prey
+		if target.knowTalent and target:knowTalent(target.T_MARK_PREY) and src.subtype then
+			local tMarkPrey = target:getTalentFromId(target.T_MARK_PREY)
+			for i = 1, tMarkPrey.getCount(target, tMarkPrey) do
+				if target.mark_prey and target.mark_prey[game.level.id] and target.mark_prey[game.level.id][i] then
+					if target.mark_prey[game.level.id][i].subtype and target.mark_prey[game.level.id][i].subtype == src.subtype then
+						dam = dam * (100 - tMarkPrey.getPower(target, tMarkPrey)) / 100
+						break
+					end
+				end
+			end
+		end
+
+
+
 		-- Psychic Projection
 		if src.attr and src:attr("is_psychic_projection") and not game.zone.is_dream_scape then
 			if (target.subtype and target.subtype == "ghost") or mind_linked then
@@ -3454,6 +3469,23 @@ newDamageType{
 			--slow
 			if rng.chance(10) then
 				target:setEffect(target.EFF_SLOW, 3, {power=0.3})
+			end
+		end
+	end,
+}
+
+-- cursed/predator/savage hunter/cursed miasma effect damage type
+newDamageType{
+	name = "cursed miasma", type = "CURSED_MIASMA",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		local target = game.level.map(x, y, Map.ACTOR)
+		if target then
+			if src:reactionToward(target) < 0 then
+				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
+				local chance = src.callTalent and src:callTalent(src.T_SAVAGE_HUNTER, "getChance")
+				target:setEffect(target.EFF_CURSED_MIASMA, 1, {chance=chance, no_ct_effect=true})
 			end
 		end
 	end,

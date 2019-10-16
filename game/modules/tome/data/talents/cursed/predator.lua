@@ -17,166 +17,297 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+local Level = require "engine.Level"
+local Object = require "engine.Object"
+local Map = require "engine.Map"
+
 newTalent{
-	name = "Mark Prey",
+	name = "Predator",
 	type = {"cursed/predator", 1},
 	require = cursed_lev_req1,
+	mode = "passive",
 	points = 5,
-	tactical = { ATTACK = 3 },
-	cooldown = 5,
-	range = 10,
-	no_energy = true,
-	getMaxKillExperience = function(self, t)
-		local total = 0
-
-		if t then total = total + self:getTalentLevelRaw(t) end
-		local t = self:getTalentFromId(self.T_ANATOMY)
-		if t then total = total + self:getTalentLevelRaw(t) end
-		local t = self:getTalentFromId(self.T_OUTMANEUVER)
-		if t then total = total + self:getTalentLevelRaw(t) end
-		local t = self:getTalentFromId(self.T_MIMIC)
-		if t then total = total + self:getTalentLevelRaw(t) end
-
-		return self:combatLimit(total, 0, 19.5, 1, 10, 20) --  Limit > 0
+	getATK = function(self, t) return self:combatTalentScale(t, 0.5, 2) end,
+	-- ATK bonus handled in Combat.lua with comment: -- Predator apr bonus
+	getAPR = function(self, t) return self:combatTalentScale(t, 0.25, 1) end,
+	-- APR bonus handled in Combat.lua with comment: -- Predator apr bonus
+	getTypeKillMax = function(self, t) return math.floor(self:combatTalentLimit(t, 40, 10, 30)) end,
+	callbackOnKill = function(self, t, target)
+		local killmax = t.getTypeKillMax(self, t)
+		local type = target.type
+		-- Make a table with key/value pair == type/count
+		self.pred_type_tbl = self.pred_type_tbl or {}
+		self.pred_type_tbl[type] = self.pred_type_tbl[type] or 0
+		self.pred_type_tbl[type] = math.min(self.pred_type_tbl[type] + 1, killmax)
 	end,
-	getSubtypeDamageChange = function(self, t)
-		return math.pow(self:getTalentLevel(t), 0.5) * 0.15
-	end,
-	getTypeDamageChange = function(self, t)
-		return math.pow(self:getTalentLevel(t), 0.5) * 0.065
-	end,
-	getHateBonus = function(self, t) return self:combatTalentScale(t, 3, 10, "log")	end,
-	target = function(self, t) return {type="hit", range=self:getTalentRange(t), talent=t} end,
-	on_pre_use_ai = function(self, t, silent, fake)
-		local aitarget = self.ai_target.actor
-		if not aitarget then return end
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		return not (eff and eff.type == aitarget.type and eff.subtype == aitarget.subtype)
-	end,
-	action = function(self, t)
-		local tg = self:getTalentTarget(t)
-		local x, y, target = self:getTarget(tg)
-		if not target or not self:canProject(tg, x, y) then return nil end
-
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		if eff and eff.type == target.type and eff.subtype == target.subtype then
-			return false
+	callbackOnMeleeAttack = function(self, t, target, hitted)
+		-- Let NPCs use this with type/count generated the first time they attack that type
+		if not self == game.player and target and target.type then
+			self.pred_type_tbl = self.pred_type_tbl or {}
+			local type = target.type
+			if not self.pred_type_tbl[type] then
+				local killmax = t.getTypeKillMax(self, t)
+				local killfloor = math.floor(rank^2)
+				self.pred_type_tbl[type] = rng.range(killfloor, killmax)
+			end
 		end
-		if eff then self:removeEffect(self.EFF_PREDATOR, true, true) end
-		self:setEffect(self.EFF_PREDATOR, 1, { type=target.type, subtype=target.subtype, killExperience = 0, subtypeKills = 0, typeKills = 0 })
+		-- Hate gain for early game
+		if hitted and target then
+			local killmax = t.getTypeKillMax(self, t)
+			if target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] and self.pred_type_tbl[target.type] >= killmax then return
+			else self:incHate(1) end
+		end
+	end,
+	info = function(self, t)
+		return ([[Improve your predation by learning from past hunts. You gain %0.2f accuracy and %0.2f armor penetration against foes for each foe of that type you have previously slain, up to %d of the type killed (%d accuracy and %d apr).
+		Additionally, you will gain 1 hate every time you attack a foe of a type you have killed less than %d of.]]):format(t.getATK(self, t), t.getAPR(self, t), t.getTypeKillMax(self, t), t.getATK(self, t) * t.getTypeKillMax(self, t), t.getAPR(self, t) * t.getTypeKillMax(self, t), t.getTypeKillMax(self, t))
+	end,
+}
+
+newTalent{
+	name = "Savage Hunter",
+	type = {"cursed/predator", 2},
+	mode = "sustained",
+	require = cursed_lev_req2,
+	points = 5,
+	cooldown = 10,
+	radius = function(self, t) return 4 end,
+	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 4, 8) end,
+	getDamage = function(self, t) return self:combatTalentMindDamage(t, 0, 60) end,
+	getChance = function(self, t) return self:combatTalentScale(t, 5, 15) end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "pierce_cursed_miasma", 10)
+	end,
+	canCreep = function(x, y, ignoreCreepingDark)
+		-- not on map
+		if not game.level.map:isBound(x, y) then return false end
+		 -- already dark
+		 if not ignoreCreepingDark then
+			if game.level.map:checkAllEntities(x, y, "cursedMiasma") then return false end
+		end
+		 -- allow objects and terrain to block, but not actors
+		if game.level.map:checkAllEntities(x, y, "block_move") and not game.level.map(x, y, Map.ACTOR) then return false end
 
 		return true
 	end,
-	on_unlearn = function(self, t)
-		if not self:knowTalent(t) then
-			local ef = self.tempeffect_def.EFF_PREDATOR
-			ef.no_remove = false
-			self:removeEffect(self.EFF_PREDATOR)
-			ef.no_remove = true
+	doCreep = function(tCreepingDarkness, self, useCreep)
+		local start = rng.range(0, 8)
+		for i = start, start + 8 do
+			local x = self.x + (i % 3) - 1
+			local y = self.y + math.floor((i % 9) / 3) - 1
+			if not (x == self.x and y == self.y) and tCreepingDarkness.canCreep(x, y) then
+				-- add new dark
+				local newCreep
+				if useCreep then
+					 -- transfer some of our creep to the new dark
+					newCreep = self.creep --math.ceil(self.creep / 2)
+					--self.creep = self.creep - 1
+				else
+					-- just clone our creep
+					newCreep = self.creep
+				end
+				tCreepingDarkness.createDark(self.summoner, x, y, self.damage, self.duration, newCreep, self.creepChance, 0)
+				return true
+			end
+
+			-- nowhere to creep
+			return false
+		end
+	end,
+	createDark = function(summoner, x, y, damage, duration, creep, creepChance, initialCreep)
+		local e = Object.new{
+			name = summoner.name:capitalize() .. "'s cursed miasma",
+			block_sight=function(self, x, y, who)
+				if who and who.attr and who:attr("pierce_cursed_miasma") and x and who.x and core.fov.distance(x, y, who.x, who.y) <= 10 then
+					return false
+				end
+				return true
+			end,
+			canAct = false,
+			canCreep = true,
+			x = x, y = y,
+			damage = damage,
+			originalDuration = duration,
+			duration = duration,
+			creep = creep,
+			creepChance = creepChance,
+			summoner = summoner,
+			summoner_gain_exp = true,
+			act = function(self)
+				local Map = require "engine.Map"
+
+				self:useEnergy()
+
+				-- apply damage to anything inside the darkness
+				local actor = game.level.map(self.x, self.y, Map.ACTOR)
+				if actor then
+					self.summoner:project({type="hit", range=10, talent=self.summoner:getTalentFromId(self.summoner.T_SAVAGE_HUNTER)}, actor.x, actor.y, engine.DamageType.CURSED_MIASMA, self.damage)
+				end
+
+				if self.duration <= 0 then
+					-- remove
+					if self.particles then game.level.map:removeParticleEmitter(self.particles) end
+					game.level.map:remove(self.x, self.y, Map.TERRAIN+3)
+					game.level:removeEntity(self, true)
+					self.cursedMiasma = nil
+					game.level.map:scheduleRedisplay()
+				else
+					self.duration = self.duration - 1
+
+					local tCreepingDarkness = self.summoner:getTalentFromId(self.summoner.T_SAVAGE_HUNTER)
+
+					if self.canCreep and self.creep > 0 and rng.percent(self.creepChance) then
+						if not tCreepingDarkness.doCreep(tCreepingDarkness, self, true) then
+							-- doCreep failed..pass creep on to a neighbor and stop creeping
+							self.canCreep = false
+							local start = rng.range(0, 8)
+							for i = start, start + 8 do
+								local x = self.x + (i % 3) - 1
+								local y = self.y + math.floor((i % 9) / 3) - 1
+								if not (x == self.x and y == self.y) and tCreepingDarkness.canCreep(x, y) then
+									local dark = game.level.map:checkAllEntities(x, y, "cursedMiasma")
+									if dark and dark.canCreep then
+										-- transfer creep
+										dark.creep = dark.creep + self.creep
+										tCreepingDarkness.doCreep(tCreepingDarkness, dark, true)
+										self.creep = 0
+										return
+									end
+								end
+							end
+						end
+					end
+				end
+			end,
+		}
+		e.cursedMiasma = e -- used for checkAllEntities to return the cursed miamsa Object itself
+		game.level:addEntity(e)
+		game.level.map(x, y, Map.TERRAIN+3, e)
+
+		-- add particles
+		e.particles = Particles.new("cursed_miasma", 1, {is_ascii = config.settings.tome.gfx.tiles == "ascii" or config.settings.tome.gfx.tiles == "ascii_full"})
+		e.particles.x = x
+		e.particles.y = y
+		game.level.map:addParticleEmitter(e.particles)
+
+		-- do some initial creeping
+		if initialCreep > 0 then
+			local tCreepingDarkness = summoner:getTalentFromId(summoner.T_SAVAGE_HUNTER)
+			while initialCreep > 0 do
+				if not tCreepingDarkness.doCreep(tCreepingDarkness, e, false) then
+					e.canCreep = false
+					e.initialCreep = 0
+					break
+				end
+				initialCreep = initialCreep - 1
+			end
+		end
+	end,
+
+	activate = function(self, t)
+		local ret = {}
+		return ret
+	end,
+	deactivate = function(self, t)
+		return true
+	end,
+	callbackOnMeleeAttack = function(self, t, target, hitted, critted)
+		if hitted and critted and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma")) then
+			local damage = self:mindCrit(t.getDamage(self, t))
+			local x, y = self.x, self.y
+			local locations = {}
+			t.createDark(self, self.x, self.y, damage, rng.range(7,9), 8, 100, 0)
+			local grids = core.fov.circle_grids(x, y, 4, true)
+			for darkX, yy in pairs(grids) do for darkY, _ in pairs(grids[darkX]) do
+				local l = line.new(x, y, darkX, darkY)
+				local lx, ly = l()
+				while lx and ly do
+					if game.level.map:checkAllEntities(lx, ly, "block_move") and not game.level.map(x, y, Map.ACTOR) then break end
+
+					lx, ly = l()
+				end
+				if not lx and not ly then lx, ly = darkX, darkY end
+
+				if lx == darkX and ly == darkY and t.canCreep(darkX, darkY) then
+					locations[#locations+1] = {darkX, darkY}
+				end
+			end end
+
+			local miasma_count = 0
+			repeat
+				if #locations <= 0 then break end
+				local location, id = rng.table(locations)
+				table.remove(locations, id)
+				if t.canCreep(location[1], location[2]) then
+					t.createDark(self, location[1], location[2], damage, rng.range(7,9), 8, 100, 0)
+					miasma_count = miasma_count + 1
+				end
+			until miasma_count >= t.getMiasmaCount(self, t)
 		end
 	end,
 	info = function(self, t)
-		local maxKillExperience = t.getMaxKillExperience(self, t)
-		local subtypeDamageChange = t.getSubtypeDamageChange(self, t)
-		local typeDamageChange = t.getTypeDamageChange(self, t)
-		local hateDesc = ""
-		if self:knowTalent(self.T_HATE_POOL) then
-			local hateBonus = t.getHateBonus(self, t)
-			hateDesc = (" Every kill of a marked sub-type gives you an additional +%d hate regardless of your current effectiveness."):format(hateBonus)
-		end
-		return ([[Mark a single opponent as your prey, gaining bonuses against the targeted creature's type and sub-type. Bonuses scale with the experience you gain from killing your marked type (+0.25 kill experience) and marked sub-type (+1 kill experience). At %0.1f kill experience, you reach 100%% effectiveness. Combat attacks against the marked type gain +%d%% damage, while those against the marked sub-type gain +%d%% damage.%s
-		Each point in Mark Prey reduces the kill experience required to reach 100%% effectivess as a Predator.]]):format(maxKillExperience, typeDamageChange * 100, subtypeDamageChange * 100, hateDesc)
+		return ([[Upon making a critical melee attack the savagery of your predation causes a cursed miasma begins to permeate your hunting grounds.
+		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage and blocks sight.
+		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)), t.getChance(self, t))
 	end,
 }
 
 newTalent{
-	name = "Anatomy",
-	type = {"cursed/predator", 2},
+	name = "Shrouded Hunter",
+	type = {"cursed/predator", 3},
 	mode = "passive",
 	require = cursed_lev_req2,
 	points = 5,
-	getSubtypeAttackChange = function(self, t) return self:combatTalentScale(t, 5, 15.4, 0.75) end,
-	getTypeAttackChange = function(self, t) return self:combatTalentScale(t, 2, 6.2, 0.75) end,
-	getSubtypeStunChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^0.5, 100, 3.1, 1, 6.93, 2.23) end, -- Limit < 100%
-	on_learn = function(self, t)
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		if eff then
-			self.tempeffect_def[self.EFF_PREDATOR].updateEffect(self, eff)
+	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 80) end,
+	getCritResist = function(self, t) return self:combatTalentScale(t, 0, 20) end,
+	passives = function(self, t, p)
+		if self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma") then
+			self:talentTemporaryValue(p, "ignore_direct_crits", t.getCritResist(self, t))
+			self:talentTemporaryValue(p, "stealth", t.getStealthPower(self, t))
+			if self.updateMainShader then self:updateMainShader() end
 		end
 	end,
-	on_unlearn = function(self, t)
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		if eff then
-			self.tempeffect_def[self.EFF_PREDATOR].updateEffect(self, eff)
-		end
+	callbackOnActEnd = function(self, t)
+		self:updateTalentPassives(t.id)
 	end,
 	info = function(self, t)
-		local subtypeAttackChange = t.getSubtypeAttackChange(self, t)
-		local typeAttackChange = t.getTypeAttackChange(self, t)
-		local subtypeStunChance = t.getSubtypeStunChance(self, t)
-		return ([[Your knowledge of your prey allows you to strike with extra precision. Attacks against the marked type gain +%d Accuracy, while those against the marked sub-type gain +%d Accuracy. Melee hits also gain a %0.1f%% chance to stun the marked sub-type for 3 turns with each attack.
-		Each point in Anatomy reduces the kill experience required to reach 100%% effectivess as a Predator.]]):format(typeAttackChange, subtypeAttackChange, subtypeStunChance)
+		return ([[While shrouded in cursed miasma you gain stealth (%d power) and %d%% chance to shrug off critical hits.]]):format(t.getStealthPower(self, t), t.getCritResist(self, t))
 	end,
 }
 
 newTalent{
-	name = "Outmaneuver",
-	type = {"cursed/predator", 3},
-	mode = "passive",
-	require = cursed_lev_req3,
-	points = 5,
-	getDuration = function(self, t)
-		return 10
-	end,
-	on_learn = function(self, t)
-	end,
-	on_unlearn = function(self, t)
-	end,
-	getSubtypeChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^0.5, 100, 10, 1, 22.3, 2.23) end, -- Limit <100%
-	getTypeChance = function(self, t) return self:combatLimit(self:getTalentLevel(t)^0.5, 100, 4, 1, 8.94, 2.23) end, -- Limit <100%
-	getPhysicalResistChange = function(self, t) return -self:combatLimit(self:getTalentLevel(t)^0.5, 100, 8, 1, 17.9, 2.23) end, -- Limit <100%
-	getStatReduction = function(self, t)
-		return math.floor(math.sqrt(self:getTalentLevel(t)) * 4.3)
-	end,
-	on_learn = function(self, t)
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		if eff then
-			self.tempeffect_def[self.EFF_PREDATOR].updateEffect(self, eff)
-		end
-	end,
-	on_unlearn = function(self, t)
-		local eff = self:hasEffect(self.EFF_PREDATOR)
-		if eff then
-			self.tempeffect_def[self.EFF_PREDATOR].updateEffect(self, eff)
-		end
-	end,
-	info = function(self, t)
-		local subtypeChance = t.getSubtypeChance(self, t)
-		local typeChance = t.getTypeChance(self, t)
-		local physicalResistChange = t.getPhysicalResistChange(self, t)
-		local statReduction = t.getStatReduction(self, t)
-		local duration = t.getDuration(self, t)
-		return ([[Each melee hit gives you a chance to outmaneuver your marked prey, lowering their physical resistance by %d%% and reducing their highest statistic by %d. Subject to your effectiveness against the marked prey, there is a %0.1f%% chance to outmaneuver your marked type and a %0.1f%% maximum chance to outmaneuver your marked sub-type. The effects last for %d turns, and can accumulate.
-		Each point in Outmaneuver reduces the kill experience required to reach 100%% effectivess as a Predator.]]):format(-physicalResistChange, statReduction, typeChance, subtypeChance, duration)
-	end,
-}
-
-newTalent{
-	name = "Mimic",
+	name = "Mark Prey",
 	type = {"cursed/predator", 4},
 	mode = "passive",
 	require = cursed_lev_req4,
 	points = 5,
-	getMaxIncrease = function(self, t) return self:combatTalentScale(t, 7, 21.6, 0.75) end,
-	on_learn = function(self, t)
-		self:removeEffect(self.EFF_MIMIC, true, true)
-	end,
-	on_unlearn = function(self, t)
-		self:removeEffect(self.EFF_MIMIC, true, true)
+	no_npc_use = true,
+	getPower = function(self, t) return self:combatTalentScale(t, 5, 15) end, --damage reduction handled in damage-types.lua
+	getCount = function(self, t) return math.floor(1 + self:getTalentLevel(t) / 2) end, --vision handled in player.lua
+	callbackOnChangeLevel = function(self, t)
+		if self:hasEffect(self.EFF_PREDATOR) then self:removeEffect(self.EFF_PREDATOR) end
+		if not self.mark_prey then self.mark_prey = {} end
+		if not self.mark_prey[game.level.id] then
+			self.mark_prey[game.level.id] = {}
+			local marks = {}
+			for __, e in pairs(game.level.entities) do
+				if e.rank >= 3.2 and self:reactionToward(e) < 0 then
+					marks[#marks+1] = {e=e, rank=e.rank, subtype=e.subtype}
+				end
+			end
+			if #marks > 0 then table.sort(marks, "rank") else return end
+			for i = 1, t.getCount(self, t) do
+				if #marks > 0 then
+					self.mark_prey[game.level.id][i] = marks[#marks].e
+					table.remove(marks)
+				else break
+				end
+			end
+		end
+		local power = t.getPower(self, t)
+		self:setEffect(self.EFF_PREDATOR, 1, {power=power, count=t.getCount(self, t)})
 	end,
 	info = function(self, t)
-		local maxIncrease = t.getMaxIncrease(self, t)
-		return ([[You learn to mimic the strengths of your prey. Killing a marked sub-type raises your stats to match the strengths of the victim (up to a maximum of %d total points, subject to your current effectiveness). The effect lasts indefinitely, but only the effects of the latest kill will be applied.
-		Each point in Mimic reduces the kill experience required to reach 100%% effectivess as a Predator.]]):format(maxIncrease)
+		return([[Focus your predation on the most worthy prey. Upon entering a level for the first time, up to %d foes are marked as your prey. You gain vision of them, wherever they are. Additionally, all damage you receive from their subtype is reduced by %d%%.]]):format(t.getCount(self, t), t.getPower(self, t))
 	end,
 }

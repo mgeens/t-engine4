@@ -1931,6 +1931,10 @@ function _M:tooltip(x, y, seen_by)
 	if game.player:knowTalent(self.T_VIM_POOL) then
 		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.3 + 1) * self.rank), {"color", "WHITE"}, true)
 	end
+	if game.player:knowTalent(self.T_PREDATOR) then
+		local predatorcount = game.player.pred_type_tbl and game.player.pred_type_tbl[self.type] or 0
+		ts:add({"color", 0, 255, 128}, ("#ffa0ff#Predator Count: %d#LAST#"):format(predatorcount), {"color", "WHITE"}, true)
+	end
 
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
 	--if #resists > 0 then ts:add("Resists: ", table.concat(resists, ','), true) end
@@ -3149,14 +3153,6 @@ function _M:die(src, death_note)
 	if effStalked and not effStalked.src.dead and effStalked.src:hasEffect(self.EFF_STALKER) then
 		local t = effStalked.src:getTalentFromId(effStalked.src.T_STALK)
 		t.on_targetDied(effStalked.src, t, self)
-	end
-
-	if src and src.hasEffect and src:hasEffect(self.EFF_PREDATOR) then
-		local eff = src:hasEffect(self.EFF_PREDATOR)
-		if self.type == eff.type then
-			local e = self.tempeffect_def[self.EFF_PREDATOR]
-			e.addKill(src, self, e, eff)
-		end
 	end
 
 	if src and src.knowTalent and src:knowTalent(src.T_BLOODRAGE) then
