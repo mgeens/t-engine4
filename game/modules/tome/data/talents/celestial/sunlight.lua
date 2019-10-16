@@ -38,11 +38,11 @@ newTalent{
 		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
 		local x, y, target = self:getTarget(tg)
 		if not x or not y then return nil end
+		local _ _, x, y = self:canProject(tg, x, y)
 
 		local dam = self:spellCrit(t.getDamage(self, t))
 		if target then self:project(target, x, y, DamageType.LIGHT, dam, {type="light"}) end
 
-		local _ _, x, y = self:canProject(tg, x, y)
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, 4,
