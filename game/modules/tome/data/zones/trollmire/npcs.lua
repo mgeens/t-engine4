@@ -80,11 +80,7 @@ newEntity{ define_as = "TROLL_PROX",
 	ai_tactic = resolvers.tactic"melee",
 
 	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
-	on_added_to_level = function(self)
-		if self.level <= 16 then
-			self.ai_tactic.escape = 0
-		end
-	end,
+	low_level_tactics_override = {escape=0},
 
 	-- Drop the note when near death (but before death, so that Kill bill achievement is possible)
 	on_takehit = function(self, val)
@@ -150,11 +146,7 @@ newEntity{ define_as = "TROLL_SHAX",
 	ai_tactic = resolvers.tactic"melee",
 
 	-- Override the recalculated AI tactics to avoid problematic kiting in the early game
-	on_added_to_level = function(self)
-		if self.level <= 16 then
-			self.ai_tactic.escape = 0
-		end
-	end,
+	low_level_tactics_override = {escape=0},
 	
 	-- Drop the note when near death (but before death, so that Kill bill achievement is possible)
 	on_takehit = function(self, val)

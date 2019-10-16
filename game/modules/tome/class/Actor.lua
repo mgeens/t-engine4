@@ -7440,6 +7440,16 @@ function _M:addedToLevel(level, x, y)
 		end
 	end
 
+	if self.low_level_tactics_override then
+		local level = 16
+		if self.low_level_tactics_override.level then level = self.low_level_tactics_override.level end
+		if self.level <= level then
+			for k, v in pairs(self.low_level_tactics_override) do if k ~= "level" then
+				self.ai_tactic[k] = v
+			end end
+		end
+	end
+
 	self:check("on_added_to_level", level, x, y)
 end
 
