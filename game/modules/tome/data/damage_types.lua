@@ -2271,7 +2271,7 @@ newDamageType{
 		useImplicitCrit(src, state)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and rng.percent(dam) then
-			local slow_power = math.floor(src:combatStatScale(src:combatMindpower(), 20, 70))+10 / 100
+			local slow_power = math.floor(src:combatStatScale(src:combatMindpower(), 20, 70)+10) / 100
 			target:setEffect(target.EFF_SLOW, 3, {power = slow_power, no_ct_effect=true})
 		end
 	end,
