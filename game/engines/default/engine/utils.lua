@@ -56,6 +56,16 @@ function math.scale(i, imin, imax, dmin, dmax)
 	return bi * dm / bm + dmin
 end
 
+function math.triangle_area(p1, p2, p3)
+	local u = {x=p2.x - p1.x, y=p2.y - p1.y}
+	local v = {x=p3.x - p1.x, y=p3.y - p1.y}
+	local au = math.atan2(u.y, u.x)
+	local av = math.atan2(v.y, v.x)
+	local lu = math.sqrt(u.x*u.x + u.y*u.y)
+	local lv = math.sqrt(v.x*v.x + v.y*v.y)
+	return math.abs(0.5 * lu * lv * math.sin(av - au))
+end
+
 function lpeg.anywhere (p)
 	return lpeg.P{ p + 1 * lpeg.V(1) }
 end
