@@ -717,7 +717,11 @@ end
 function _M:updateCurrentChar()
 	if not self.party then return end
 	local player = self.party:findMember{main=true}
-	profile:currentCharacter(self.__mod_info.full_version_string, ("%s the level %d %s %s"):format(player.name, player.level, player.descriptor.subrace, player.descriptor.subclass), player.__te4_uuid)
+
+	local class_evo = ""
+	if self.descriptor and self.descriptor.class_evolution then class_evo = " ("..self.descriptor.class_evolution..")" end
+	profile:currentCharacter(self.__mod_info.full_version_string, ("%s the level %d %s %s"):format(player.name, player.level, player.descriptor.subrace, player.descriptor.subclass..class_evo), player.__te4_uuid)
+
 	if core.discord and self.zone then
 		local all_kills_kind = player.all_kills_kind or {}
 
@@ -742,7 +746,7 @@ function _M:updateCurrentChar()
 
 		local info = {}
 		info.zone = self:getZoneName()
-		info.char = ("Lvl %d %s %s"):format(player.level, player.descriptor.subrace, player.descriptor.subclass)
+		info.char = ("Lvl %d %s %s"):format(player.level, player.descriptor.subrace, player.descriptor.subclass..class_evo)
 		info.splash = "default"
 		info.splash_text = ("%d elite/%d rare/%d boss kills; playtime %s"):format(all_kills_kind.elite or 0, all_kills_kind.rare or 0, all_kills_kind.boss or 0, playtime)
 		
