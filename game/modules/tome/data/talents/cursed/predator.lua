@@ -87,7 +87,6 @@ newTalent{
 		end
 		 -- allow objects and terrain to block, but not actors
 		if game.level.map:checkAllEntities(x, y, "block_move") and not game.level.map(x, y, Map.ACTOR) then return false end
-
 		return true
 	end,
 	doCreep = function(tCreepingDarkness, self, useCreep)
@@ -98,18 +97,10 @@ newTalent{
 			if not (x == self.x and y == self.y) and tCreepingDarkness.canCreep(x, y) then
 				-- add new dark
 				local newCreep
-				if useCreep then
-					 -- transfer some of our creep to the new dark
-					newCreep = self.creep --math.ceil(self.creep / 2)
-					--self.creep = self.creep - 1
-				else
-					-- just clone our creep
-					newCreep = self.creep
-				end
+				newCreep = self.creep
 				tCreepingDarkness.createDark(self.summoner, x, y, self.damage, self.duration, newCreep, self.creepChance, 0)
 				return true
 			end
-
 			-- nowhere to creep
 			return false
 		end
@@ -214,9 +205,9 @@ newTalent{
 	callbackOnMeleeAttack = function(self, t, target, hitted, critted)
 		if hitted and critted and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma")) then
 			local miasma_count = 0
-			local damage = self:mindCrit(t.getDamage(self, t))
+			local damage = self:mindCrit(t.getDamage(self, t))/2
 			local x, y = self.x, self.y
-			if t.canCreep(x, y) then t.createDark(self, x, y, damage, rng.range(7,9), 8, 100, 0) miasma_count=1 end
+			if t.canCreep(x, y) then t.createDark(self, x, y, damage, rng.range(7,8), 6, 100, 0) miasma_count=1 end
 			local locations = {}
 			local grids = core.fov.circle_grids(x, y, 4, true)
 			for darkX, yy in pairs(grids) do for darkY, _ in pairs(grids[darkX]) do
@@ -239,7 +230,7 @@ newTalent{
 				local location, id = rng.table(locations)
 				table.remove(locations, id)
 				if t.canCreep(location[1], location[2]) then
-					t.createDark(self, location[1], location[2], damage, rng.range(7,9), 8, 100, 0)
+					t.createDark(self, location[1], location[2], damage, rng.range(7,8), 6, 100, 0)
 					miasma_count = miasma_count + 1
 				end
 			until miasma_count >= t.getMiasmaCount(self, t)
@@ -247,8 +238,9 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Upon making a critical melee attack the savagery of your predation causes a cursed miasma begins to permeate your hunting grounds.
-		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage and blocks sight.
-		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)), t.getChance(self, t))
+		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage split between darkness and mind and blocks sight.
+		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.
+		This will not occur if you are in cursed miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
 	end,
 }
 
@@ -258,7 +250,7 @@ newTalent{
 	mode = "passive",
 	require = cursed_lev_req2,
 	points = 5,
-	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 80) end,
+	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 70) end,
 	getCritResist = function(self, t) return self:combatTalentScale(t, 0, 20) end,
 	passives = function(self, t, p)
 		if self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma") then
@@ -271,7 +263,8 @@ newTalent{
 		self:updateTalentPassives(t.id)
 	end,
 	info = function(self, t)
-		return ([[While shrouded in cursed miasma you gain stealth (%d power) and %d%% chance to shrug off critical hits.]]):format(t.getStealthPower(self, t), t.getCritResist(self, t))
+		return ([[While shrouded in cursed miasma you gain stealth (%d power) and %d%% chance to shrug off critical hits.
+		The stealth power will increase with your mindpower.]]):format(t.getStealthPower(self, t), t.getCritResist(self, t))
 	end,
 }
 
