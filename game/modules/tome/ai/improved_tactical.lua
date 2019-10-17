@@ -481,7 +481,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 
 	--== PROTECT ==--
 	-- like LIFE but for SELF's summoner
-	if self.summoner and self.summoner.ai_target.actor then
+	if self.summoner then
 		local life = math.max(0, self.summoner.life)/(self.summoner.max_life - self.summoner.die_at/2)
 		life = (1 - life)/(math.max(.001, life)) -- modified life loss
 		want.protect = 10*(life*ally_compassion/(life*ally_compassion + 2.5))^2
@@ -791,7 +791,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 			-- note: effect_life, life_range, calculated above for want.life
 			local aitarget_life, aitarget_life_range = (aitarget.life or 1) - (aitarget.die_at or 0), (aitarget.max_life or 1) - (aitarget.die_at or 0)
 			
-			if aitarget:knowTalent(aitarget.T_SOLIPSISM) then
+			if aitarget.knowTalent and aitarget:knowTalent(aitarget.T_SOLIPSISM) then
 				local ratio = aitarget:callTalent(aitarget.T_SOLIPSISM, "getConversionRatio")
 				aitarget_life = math.min(aitarget_life/(1 - ratio), aitarget_life + aitarget:getPsi())
 				aitarget_life_range = math.min(aitarget_life_range/(1 - ratio), aitarget_life_range + aitarget:getMaxPsi())

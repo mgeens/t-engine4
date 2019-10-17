@@ -68,11 +68,7 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	mana = 14,
-	cooldown = function(self, t)
-		local mod = 1
-		if self:attr("freeze_next_cd_reduce") then mod = 1 - self.freeze_next_cd_reduce self:attr("freeze_next_cd_reduce", -self.freeze_next_cd_reduce) end
-		return math.floor(self:combatTalentLimit(t, 20, 8, 12, true)) * mod
-	end, -- Limit cooldown <20
+	cooldown = function(self, t) return math.floor(self:combatTalentLimit(t, 20, 8, 12, true)) end, -- Limit cooldown <20
 	tactical = { ATTACK = { COLD = 2.5 }, DISABLE = { stun = 1.5 } },
 	range = 10,
 	direct_hit = true,
@@ -93,7 +89,7 @@ newTalent{
 		self:project(tg, x, y, DamageType.FREEZE, {dur=t.getDuration(self, t), hp=70 + dam * 1.5})
 
 		if target and self:reactionToward(target) >= 0 then
-			self:attr("freeze_next_cd_reduce", 0.5)
+			game:onTickEnd(function() self:alterTalentCoolingdown(t.id, -math.floor((self.talents_cd[t.id] or 0) * 0.33)) end)
 		end
 
 		game:playSoundNear(self, "talents/water")
@@ -102,7 +98,7 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		return ([[Condenses ambient water on a target, freezing it for %d turns and damaging it for %0.2f.
-		If this is used on a friendly target the cooldown is halved.
+		If this is used on a friendly target the cooldown is reduced by 33%%.
 		The damage will increase with your Spellpower.]]):format(t.getDuration(self, t), damDesc(self, DamageType.COLD, damage))
 	end,
 }
@@ -186,10 +182,17 @@ newTalent{
 	info = function(self, t)
 		local power = t.getPower(self, t)
 		local dur = t.getDuration(self, t)
+
+		local t_is = self:getTalentFromId(self.T_ICE_STORM)
+		local icestorm = self:getTalentFullDescription(t_is, self:getTalentLevelRaw(t))
+
 		return ([[You absorb latent cold around you, turning into an ice elemental - a shivgoroth - for %d turns.
 		While transformed, you do not need to breathe, gain access to the Ice Storm talent at level %d, gain %d%% resistance to cuts and stuns, gain %d%% cold resistance, and all cold damage heals you for %d%% of the damage done.
-		The power will increase with your Spellpower.]]):
-		format(dur, self:getTalentLevelRaw(t), power * 100, power * 100 / 2, 50 + power * 100)
+		The power will increase with your Spellpower.
+
+		#AQUAMARINE#Ice storm:#LAST#
+		%s]]):
+		format(dur, self:getTalentLevelRaw(t), power * 100, power * 100 / 2, 50 + power * 100, tostring(icestorm or ""))
 	end,
 }
 
@@ -231,7 +234,7 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local duration = t.getDuration(self, t)
-		return ([[A furious ice storm rages around the caster ,doing %0.2f cold damage in a radius of 3 each turn for %d turns.
+		return ([[A furious ice storm rages around the caster, doing %0.2f cold damage in a radius of 3 each turn for %d turns.
 		It has a 25%% chance to freeze damaged targets.
 		If the target is wet the damage increases by 30%% and the freeze chance increases to 50%%.
 		The damage and duration will increase with your Spellpower.]]):format(damDesc(self, DamageType.COLD, damage), duration)

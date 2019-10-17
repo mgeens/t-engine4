@@ -251,7 +251,7 @@ newTalent{
 		return ([[Gnaw your target for %d%% damage.  If your attack hits, the target may be infected with Ghoul Rot for %d turns.
 		Each turn, Ghoul Rot inflicts %0.2f blight damage.
 		Targets suffering from Ghoul Rot rise as friendly ghouls when slain.
-		Ghouls last for %d turns and can use Gnaw, Ghoulish Leap, Stun, and Rotting Disease.  Some of these talents will increase with level.
+		Ghouls last for %d turns and can use Gnaw, Ghoulish Leap, Stun, and Rotting Disease.
 		The blight damage scales with your Constitution.]]):
 		format(100 * damage, duration, damDesc(self, DamageType.BLIGHT, disease_damage), ghoul_duration)
 	end,

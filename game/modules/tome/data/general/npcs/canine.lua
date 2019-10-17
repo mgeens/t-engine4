@@ -153,7 +153,9 @@ newEntity{ base = "BASE_NPC_CANINE",
 	combat = { dam=resolvers.levelup(20, 1, 1.3), atk=20, apr=16 },
 
 	ai = "tactical",
-
+	auto_classes={
+		{class="Brawler", start_level=20, level_rate=75},
+	},
 	resolvers.drops{chance=100, nb=1, {defined="RUNGOF_FANG"} },
 
 	make_escort = {

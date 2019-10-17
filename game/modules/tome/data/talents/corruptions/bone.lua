@@ -151,10 +151,9 @@ newTalent{
 	end,
 	callbackOnTalentPost = function(self, t, ab, ret, silent)
 		if ab.no_energy then return end
-		if ab.mode ~= "active" then return end
+		if ab.mode ~= "activated" then return end
 		if self.turn_procs.bone_spike then return end
 		self.turn_procs.bone_spike = true
-		
 		local tg = self:getTalentTarget(t)
 		local dam = t.getDamage(self, t)
 		local did_crit = false

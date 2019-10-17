@@ -32,7 +32,7 @@ newTalent{
 	tactical = { ATTACK = { weapon = 1, stun = 1 }, CLOSEIN = 3 },
 	requires_target = true,
 	is_melee = true,
-	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), nolock=true, nowarning=true, requires_knowledge=false, stop__block=true} end,
+	target = function(self, t) return {type="bolt", range=self:getTalentRange(t), requires_knowledge=false, stop__block=true} end,
 	range = function(self, t) return math.floor(self:combatTalentScale(t, 6, 10)) end,
 	on_pre_use = function(self, t)
 		if self:attr("never_move") then return false end

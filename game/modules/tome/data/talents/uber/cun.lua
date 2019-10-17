@@ -212,7 +212,9 @@ uberTalent{
 		return o1 and o2 and o3
 	end} },
 	cant_steal = true,
+	np_npc_use = true,
 	on_learn = function(self, t)
+		if not game.party:hasMember(self) then return end
 		local list = mod.class.Object:loadList("/data/general/objects/special-artifacts.lua")
 		local o = game.zone:makeEntityByName(game.level, list, "TELOS_SPIRE", true)
 		if o then
