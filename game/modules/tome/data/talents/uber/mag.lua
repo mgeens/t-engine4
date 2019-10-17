@@ -222,7 +222,7 @@ uberTalent{
 			elseif who.name == "fire drake" then
 				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_FLAME_OF_URH_ROK, {ignore_energy=true})
 			elseif who.name == "turtle" then
-				who:learnTalent(who.T_ELEMENTAL_DISCORD, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_ELEMENTAL_DISCORD, {ignore_energy=ture})
+				who:learnTalent(who.T_ELEMENTAL_DISCORD, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_ELEMENTAL_DISCORD, {ignore_energy=true})
 			elseif who.subtype == "spider" then
 				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
 			else
@@ -232,7 +232,7 @@ uberTalent{
 			end
 		else
 			who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-			who:addTemporaryValue("all_damage_convert_percent", 50)
+			who:addTemporaryValue("all_damage_convert_percent", 10)
 			who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 		end
 		who:incVim(who:getMaxVim())
@@ -240,7 +240,7 @@ uberTalent{
 	end,
 	info = function(self, t)
 		return ([[You infuse blighted energies into all of your summons, granting them Bone Shield (level 3) and a bonus to Spellpower equal to your Magic.
-		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 50%% Blight damage conversion and Virulent Disease (level 3).
+		Your Wilder Summons and Necrotic Minions will gain special corrupted talents (level 3), other summons will gain 10%% Blight damage conversion and Virulent Disease (level 3).
 		#GREEN#Wilder Summons:#LAST#
 		- War Hound: Gnaw
 		- Jelly: Curse of Defencelessness
