@@ -237,7 +237,7 @@ newTalent{
 		end
 	end,
 	info = function(self, t)
-		return ([[Upon making a critical melee attack the savagery of your predation causes a cursed miasma begins to permeate your hunting grounds.
+		return ([[Upon making a critical melee attack the savagery of your predation causes a cursed miasma to begin permeating your hunting grounds.
 		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage split between darkness and mind and blocks sight.
 		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.
 		This will not occur if you are in cursed miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
