@@ -89,7 +89,7 @@ function _M:generateOne()
 			x = spot.x y = spot.y
 			if m.unique then -- make room for the boss
 				local a = self.level.map(x, y, Map.ACTOR)
-				if not a.unique then a:die() end
+				if a and not a.unique then a:die() end
 			end
 			tries = tries + 1
 		end
