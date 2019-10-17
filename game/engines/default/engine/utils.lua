@@ -2474,25 +2474,30 @@ function core.fov.beam_any_angle_grids(x, y, radius, angle, source_x, source_y, 
 end
 
 local function is_point_in_triangle(P, A, B, C)
-	-- local as_x = s.x-a.x
-	-- local as_y = s.y-a.y
+	local vector = require "vector"
+	local P, A, B, C = vector.newFrom(P), vector.newFrom(A), vector.newFrom(B), vector.newFrom(C)
 
-	-- local s_ab = (b.x-a.x)*as_y-(b.y-a.y)*as_x > 0
+	if P == A or P == B or P == C then return true end
 
-	-- if (c.x-a.x)*as_y-(c.y-a.y)*as_x > 0 == s_ab then return false end
+	-- Compute vectors
+	local v0 = C - A
+	local v1 = B - A
+	local v2 = P - A
 
-	-- if (c.x-b.x)*(s.y-b.y)-(c.y-b.y)*(s.x-b.x) > 0 ~= s_ab then return false end
+	-- Compute dot products
+	local dot00 = v0:dot(v0)
+	local dot01 = v0:dot(v1)
+	local dot02 = v0:dot(v2)
+	local dot11 = v1:dot(v1)
+	local dot12 = v1:dot(v2)
 
-	-- return true;
+	-- Compute barycentric coordinates
+	local invDenom = 1 / (dot00 * dot11 - dot01 * dot01)
+	local u = (dot11 * dot02 - dot01 * dot12) * invDenom
+	local v = (dot00 * dot12 - dot01 * dot02) * invDenom
 
-	local s1 = C.y - A.y;
-	local s2 = C.x - A.x;
-	local s3 = B.y - A.y;
-	local s4 = P.y - A.y;
-
-	local w1 = (A.x * s1 + s4 * s2 - P.x * s1) / (s3 * s2 - (B.x-A.x) * s1);
-	local w2 = (s4- w1 * s3) / s1;
-	return w1 >= 0 and w2 >= 0 and (w1 + w2) <= 1
+	-- Check if point is in triangle
+	return (u >= 0) and (v >= 0) and (u + v < 1)
 end
 
 -- Very naive implementation, this will do for now
