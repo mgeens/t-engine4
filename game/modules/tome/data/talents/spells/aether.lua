@@ -104,9 +104,10 @@ newTalent{
 				self.list.i = util.boundWrap(self.list.i + 1, 1, #self.list)
 
 				local tg = {type="beam", x=self.x, y=self.y, range=self.rad, selffire=self.summoner:spellFriendlyFire()}
+				print()
 				self.summoner.__project_source = self
 				self.summoner:project(tg, self.x, self.y, engine.DamageType.ARCANE, self.dam/10, nil)
-				self:project(tg, x, y, function(tx, ty)
+				self.summoner:project(tg, x, y, function(tx, ty)
 					-- In rare circumstances this can hit the same target 4-7 times so we need to sanity check it
 					local target = game.level.map(tx, ty, engine.Map.ACTOR)
 					if not target then return end
