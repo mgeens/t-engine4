@@ -2202,6 +2202,16 @@ function util.getval(val, ...)
 	end
 end
 
+function util.finalize(init, uninit, fct)
+	return function(...)
+		local myenv = {}
+		init(myenv, ...)
+		local rets = {fct(myenv, ...)}
+		uninit(myenv, ...)
+		return unpack(rets)
+	end
+end
+
 function fs.reset()
 	local list = fs.getSearchPath(true)
 	for i, m in ipairs(list) do
