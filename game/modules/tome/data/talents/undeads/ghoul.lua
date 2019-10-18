@@ -208,12 +208,6 @@ newTalent{
 		ghoul.unused_generics = 0
 		ghoul.unused_talents_types = 0
 
-		if self:knowTalent(self.T_BLIGHTED_SUMMONING) then
-			ghoul:incIncStat("mag", self:getMag())
-			ghoul.blighted_summon_talent = self.T_REND
-		end
-		self:attr("summoned_times", 1)
-
 		game.zone:addEntity(game.level, ghoul, "actor", x, y)
 		game.level.map:particleEmitter(target.x, target.y, 1, "slime")
 		game:playSoundNear(target, "talents/slime")

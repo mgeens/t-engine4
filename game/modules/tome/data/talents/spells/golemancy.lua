@@ -27,7 +27,6 @@ function getGolem(self)
 end
 
 function makeAlchemistGolem(self)
-	self:attr("summoned_times", 100)
 	local g = require("mod.class.NPC").new{
 		type = "construct", subtype = "golem",
 		name = "golem",
@@ -155,6 +154,8 @@ function makeAlchemistGolem(self)
 		g:learnTalentType("golem/drolem", true)
 	end
 
+	self:attr("summoned_times", 99)
+
 	return g
 end
 
@@ -172,7 +173,7 @@ newTalent{
 		if not self.alchemy_golem then return end
 
 		local on_level = false
-		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do 
+		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
 			local act = game.level.map(x, y, Map.ACTOR)
 			if act and act == self.alchemy_golem then on_level = true break end
 		end end
@@ -214,11 +215,6 @@ newTalent{
 	on_learn = function(self, t)
 		if self:getTalentLevelRaw(t) == 1 and not self.innate_alchemy_golem then
 			t.invoke_golem(self, t)
-			if self:knowTalent(self.T_BLIGHTED_SUMMONING) then
-				local golem = self.alchemy_golem
-				golem:learnTalentType("corruption/reaving-combat", true)
-				golem:learnTalent(golem.T_CORRUPTED_STRENGTH, true, 3)
-			end
 		end
 	end,
 	on_unlearn = function(self, t)
@@ -274,7 +270,7 @@ newTalent{
 		local ammo = self:hasAlchemistWeapon()
 
 		local on_level = false
-		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do 
+		for x = 0, game.level.map.w - 1 do for y = 0, game.level.map.h - 1 do
 			local act = game.level.map(x, y, Map.ACTOR)
 			if act and act == self.alchemy_golem then on_level = true break end
 		end end

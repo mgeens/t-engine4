@@ -119,7 +119,7 @@ newTalent{
 		self:project(tg, x, y, DamageType.ACID, self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 430)))
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_acid", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		game:playSoundNear(self, "talents/breath")
-		
+
 		self:startTalentCooldown(self.T_ACID_SPIT_HYDRA, 8)
 		return true
 	end,
@@ -149,7 +149,7 @@ newTalent{
 		if not x or not y then return nil end
 		self:project(tg, x, y, DamageType.ACID, self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 430)), {type="acid"})
 		game:playSoundNear(self, "talents/breath")
-		
+
 		self:startTalentCooldown(self.T_ACID_BREATH, 8)
 		return true
 	end,
@@ -184,7 +184,7 @@ newTalent{
 		else game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_lightning", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		end
 		game:playSoundNear(self, "talents/lightning")
-		
+
 		self:startTalentCooldown(self.T_LIGHTNING_SPIT_HYDRA, 8)
 		return true
 	end,
@@ -219,7 +219,7 @@ newTalent{
 		local dam = self:combatTalentStatDamage(t, "wil", 30, 500)
 		self:project(tg, x, y, DamageType.LIGHTNING, self:mindCrit(rng.avg(dam / 3, dam, 3)), {type="lightning_explosion"})
 		game:playSoundNear(self, "talents/lightning")
-		
+
 		self:startTalentCooldown(self.T_LIGHTNING_BREATH_HYDRA, 8)
 		return true
 	end,
@@ -255,7 +255,7 @@ newTalent{
 		self:project(tg, x, y, DamageType.POISON, {dam=self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 460)), apply_power=self:combatMindpower()})
 		game.level.map:particleEmitter(self.x, self.y, tg.radius, "breath_slime", {radius=tg.radius, tx=x-self.x, ty=y-self.y})
 		game:playSoundNear(self, "talents/breath")
-		
+
 		self:startTalentCooldown(self.T_POISON_SPIT_HYDRA, 8)
 		return true
 	end,
@@ -285,7 +285,7 @@ newTalent{
 		if not x or not y then return nil end
 		self:project(tg, x, y, DamageType.POISON, {dam=self:mindCrit(self:combatTalentStatDamage(t, "wil", 30, 460)), apply_power=self:combatMindpower(), {type="slime"}})
 		game:playSoundNear(self, "talents/breath")
-		
+
 		self:startTalentCooldown(self.T_POISON_BREATH, 8)
 		return true
 	end,
@@ -415,7 +415,7 @@ newTalent{
 	end,
 	incStats = function(self, t, fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			cun=15 + (fake and mp or self:mindCrit(mp)) * 1.7 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			con=10
@@ -472,14 +472,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m] = resolvers.talents{ [self.T_WILD_RITCH_FLAMESPITTER_BOLT]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -540,7 +541,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 1.6 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			str = 18,
 			con=10 + self:combatTalentScale(t, 2, 10, 0.75)
@@ -599,14 +600,15 @@ newTalent{
 			m[#m+1] = resolvers.talents{ [self.T_ACID_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
 			m[#m+1] = resolvers.talents{ [self.T_POISON_SPIT_HYDRA]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -657,7 +659,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 5, 0, 10, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			wil=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			cun=15 + (fake and mp or self:mindCrit(mp)) * 1.6 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			con=10
@@ -715,14 +717,15 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_WINTER_S_GRASP]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife
 			m.life = m.max_life
 		end
-		
+
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
@@ -787,7 +790,7 @@ newTalent{
 				inc_stats = { -- No crit chance for escorts
 					str=15 + self:combatMindpower(2) * self:combatTalentScale(t, 1/6, 5/6, 0.75),
 					wil=38,
-					con=20 + self:combatMindpower(1.5) * self:combatTalentScale(t, 1/6, 5/6, 0.75), 
+					con=20 + self:combatMindpower(1.5) * self:combatTalentScale(t, 1/6, 5/6, 0.75),
 				},
 				level_range = {self.level, self.level}, exp_worth = 0,
 
@@ -805,8 +808,9 @@ newTalent{
 				summon_time = m.summon_time,
 				ai_target = {actor=m.ai_target.actor}
 			}
+			m.is_nature_summon = true
 			setupSummon(self, mh, x, y)
-			
+
 			if self:knowTalent(self.T_RESILIENCE) then
 				local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 				m.max_life = m.max_life * incLife
@@ -817,7 +821,7 @@ newTalent{
 	summonTime = function(self, t) return math.floor(self:combatScale(self:getTalentLevel(t), 2, 0, 7, 5)) + self:callTalent(self.T_RESILIENCE, "incDur") end,
 	incStats = function(self, t,fake)
 		local mp = self:combatMindpower()
-		return{ 
+		return{
 			str=15 + (fake and mp or self:mindCrit(mp)) * 2 * self:combatTalentScale(t, 0.2, 1, 0.75),
 			wil = 38,
 			con=20 + (fake and mp or self:mindCrit(mp)) * 1.5 * self:combatTalentScale(t, 0.2, 1, 0.75)
@@ -876,8 +880,9 @@ newTalent{
 			m.name = m.name.." (wild summon)"
 			m[#m+1] = resolvers.talents{ [self.T_AURA_OF_SILENCE]=self:getTalentLevelRaw(t) }
 		end
+		m.is_nature_summon = true
 		setupSummon(self, m, x, y)
-		
+
 		if self:knowTalent(self.T_RESILIENCE) then
 			local incLife = self:callTalent(self.T_RESILIENCE, "incLife") + 1
 			m.max_life = m.max_life * incLife

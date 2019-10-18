@@ -239,10 +239,6 @@ function necroSetupSummon(self, m, x, y, level, no_control, no_decay)
 	-- Summons never flee
 	m.ai_tactic = m.ai_tactic or {}
 	m.ai_tactic.escape = 0
-
-	if self:knowTalent(self.T_BLIGHTED_SUMMONING) then m:incVim(m:getMaxVim()) end
-
-	self:attr("summoned_times", 1)
 end
 
 function necroEssenceDead(self, checkonly)

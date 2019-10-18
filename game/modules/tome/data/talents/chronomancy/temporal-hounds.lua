@@ -144,7 +144,6 @@ summonTemporalHound = function(self, t)
 		})
 	end
 	
-	self:attr("summoned_times", 1)
 end
 
 countHounds = function(self)

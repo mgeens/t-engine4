@@ -150,7 +150,7 @@ function setupSummon(self, m, x, y, no_control)
 			type="summon",
 			title="Summon",
 			orders = {target=true, leash=true, anchor=true, talents=true},
-		}) 
+		})
 	end
 	m:resolve() m:resolve(nil, true)
 	m:forceLevelup(self.level)
@@ -185,9 +185,6 @@ function setupSummon(self, m, x, y, no_control)
 		end
 	end
 
-	if self:knowTalent(self.T_BLIGHTED_SUMMONING) then m:incIncStat("mag", self:getMag()) m:incVim(m:getMaxVim()) end
-
-	self:attr("summoned_times", 1)
 end
 
 load("/data/talents/gifts/call.lua")
