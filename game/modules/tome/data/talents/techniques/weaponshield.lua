@@ -82,6 +82,9 @@ newTalent{
 	getCritInc = function(self, t)
 		return self:combatTalentIntervalDamage(t, "dex", 10, 50)
 	end,
+	passives = function(self, t, p)
+		self:talentTemporaryValue(p, "allow_incomplete_blocks", 1)
+	end,
 	info = function(self, t)
 		local inc = t.getDurInc(self, t)
 		return ([[Improves your ability to perform counterstrikes after blocks in the following ways:

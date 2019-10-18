@@ -4177,6 +4177,7 @@ newEffect{
 
 		local equi = self:getEquilibrium() - self:getMinEquilibrium()
 		if equi > 0 then
+			self:alterTalentCoolingdown(self.T_BLOCK, -1000)
 			self:incMana(equi)
 			self:incEquilibrium(-equi)
 			self:project({type="ball", radius=eff.radius, friendlyfire=false}, self.x, self.y, DamageType.ARCANE, math.min(equi, eff.maxdam))
