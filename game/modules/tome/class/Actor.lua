@@ -5584,7 +5584,7 @@ function _M:preUseTalent(ab, silent, fake)
 			rname = res_def.short_name
 			cost = ab[rname]
 			if cost then
-				cost = (util.getval(cost, self, ab) or 0) * (util.getval(res_def.cost_factor, self, ab, true) or 1)
+				cost = (util.getval(cost, self, ab) or 0) * (util.getval(res_def.cost_factor, self, ab, true, cost) or 1)
 				cost = self:alterTalentCost(ab, rname, cost)
 				if cost ~= 0 then
 					rmin, rmax = self[res_def.getMinFunction](self), self[res_def.getMaxFunction](self)
@@ -6190,7 +6190,7 @@ function _M:postUseTalent(ab, ret, silent)
 			cost = self:alterTalentCost(ab, rname, cost)
 			if cost ~= 0 then
 				trigger = true
-				cost = cost * (util.getval(res_def.cost_factor, self, ab) or 1)
+				cost = cost * (util.getval(res_def.cost_factor, self, ab, false, cost) or 1)
 				if res_def.invert_values then
 					self[res_def.incFunction](self, cost)
 				else
@@ -6434,7 +6434,7 @@ function _M:getTalentFullDescription(t, addlevel, config, fake_mastery)
 				local cost = t[res_def.short_name] and util.getval(t[res_def.short_name], self, t) or 0
 				cost = self:alterTalentCost(t, res_def.short_name, cost)
 				if cost ~= 0 then
-					cost = cost * (util.getval(res_def.cost_factor, self, t) or 1)
+					cost = cost * (util.getval(res_def.cost_factor, self, t, false, cost) or 1)
 					d:add({"color",0x6f,0xff,0x83}, ("%s %s: "):format(res_def.name:capitalize(), cost >= 0 and "cost" or "gain"), res_def.color or {"color",0xff,0xa8,0xa8}, ""..math.round(math.abs(cost), .1), true)
 				end
 				-- list sustain cost
