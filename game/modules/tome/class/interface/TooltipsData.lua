@@ -89,12 +89,10 @@ It is increased by Willpower.
 
 TOOLTIP_POSITIVE = [[#GOLD#Positive Energy#LAST#
 Positive energy represents your reserve of positive "celestial" power, most closely associated with the Sun.
-It slowly decreases and is replenished by using some talents.
 ]]
 
 TOOLTIP_NEGATIVE = [[#GOLD#Negative Energy#LAST#
 Negative energy represents your reserve of negative "celestial" power, most closely associated with the Moon.
-It slowly decreases and is replenished by using some talents.
 ]]
 
 TOOLTIP_VIM = [[#GOLD#Vim#LAST#
