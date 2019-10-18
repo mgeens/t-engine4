@@ -89,10 +89,10 @@ function _M:simpleWaiterTip(title, text, tip, width, count, max)
 end
 
 --- Requests a simple, press any key, dialog
-function _M:listPopup(title, text, list, w, h, fct)
+function _M:listPopup(title, text, list, w, h, fct, select_fct)
 	local d = new(title, 1, 1)
 	local desc = require("engine.ui.Textzone").new{width=w, auto_height=true, text=text, scrollbar=true}
-	local l = require("engine.ui.List").new{width=w, height=h-16 - desc.h, list=list, fct=function() d.key:triggerVirtual("ACCEPT") end}
+	local l = require("engine.ui.List").new{width=w, height=h-16 - desc.h, list=list, fct=function() d.key:triggerVirtual("ACCEPT") end, select=function(item) if select_fct then select_fct(item) end end}
 	d:loadUI{
 		{left = 3, top = 3, ui=desc},
 		{left = 3, top = 3 + desc.h + 3, ui=require("engine.ui.Separator").new{dir="vertical", size=w - 12}},
