@@ -617,6 +617,28 @@ newEffect{
 }
 
 newEffect{
+	name = "OVERWHELMED", image = "talents/frenzy.png",
+	desc = "Overwhelmed",
+	long_desc = function(self, eff) return ("The target has been overwhemed by a furious assault, reducing defence by %d."):format( -eff.defenseChange) end,
+	type = "mental",
+	subtype = { fear=true },
+	status = "detrimental",
+	parameters = { damageChange=0.1 },
+	on_gain = function(self, err) return "#Target# has been overwhelmed.", "+Overwhelmed" end,
+	on_lose = function(self, err) return "#Target# is no longer overwhelmed.", "-Overwhelmed" end,
+	parameters = { chance=5 },
+	activate = function(self, eff)
+		eff.defenseChangeId = self:addTemporaryValue("combat_atk", eff.defenseChange)
+		eff.particle = self:addParticles(Particles.new("overwhelmed", 1))
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("combat_def", eff.defenseChangeId)
+		self:removeParticles(eff.particle)
+ end,
+}
+
+
+newEffect{
 	name = "CURSED_MIASMA", image = "talents/savage_hunter.png",
 	desc = "Cursed Miasma",
 	long_desc = function(self, eff) return ("The target is enveloped in a cursed miasma."):format(eff.sight) end,
