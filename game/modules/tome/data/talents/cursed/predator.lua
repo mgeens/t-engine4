@@ -248,7 +248,7 @@ newTalent{
 	name = "Shrouded Hunter",
 	type = {"cursed/predator", 3},
 	mode = "passive",
-	require = cursed_lev_req2,
+	require = cursed_lev_req3,
 	points = 5,
 	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 70) end,
 	getCritResist = function(self, t) return self:combatTalentScale(t, 0, 20) end,

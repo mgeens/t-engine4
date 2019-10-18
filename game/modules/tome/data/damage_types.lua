@@ -3484,6 +3484,7 @@ newDamageType{
 		if target then
 			if src:reactionToward(target) < 0 then
 				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
+				DamageType:get(DamageType.MIND).projector(src, x, y, DamageType.MIND, dam, state)
 				local chance = src.callTalent and src:callTalent(src.T_SAVAGE_HUNTER, "getChance")
 				target:setEffect(target.EFF_CURSED_MIASMA, 1, {chance=chance, no_ct_effect=true})
 			end
