@@ -26,6 +26,7 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	mode = "sustained",
+	cooldown = 5,
 	sustain_positive = 5,
 	sustain_negative = 5,
 	range = function(self, t) return 10 end,

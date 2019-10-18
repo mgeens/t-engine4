@@ -147,15 +147,17 @@ ActorResource:defineResource("Vim", "vim", ActorTalents.T_VIM_POOL, "vim_regen",
 	randomboss_enhanced = true,
 	Minimalist = {shader_params = {color = {0x90/255, 0x40/255, 0x10/255}}} --parameters for the Minimalist uiset
 })
-ActorResource:defineResource("Positive energy", "positive", ActorTalents.T_POSITIVE_POOL, "positive_regen", "Positive energy represents your reserve of positive power. It slowly decreases.", nil, nil, {
+ActorResource:defineResource("Positive energy", "positive", ActorTalents.T_POSITIVE_POOL, "positive_regen", "Positive energy represents your reserve of positive power. It slowly increases.", nil, nil, {
 	color = "#ffd700#",
+	wait_on_rest = true,
 	randomboss_enhanced = true,
 	--cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
 	Minimalist = {highlight = function(player, vc, vn, vm, vr) return vc >=0.7*vm end},
 })
-ActorResource:defineResource("Negative energy", "negative", ActorTalents.T_NEGATIVE_POOL, "negative_regen", "Negative energy represents your reserve of negative power. It slowly decreases.", nil, nil, {
+ActorResource:defineResource("Negative energy", "negative", ActorTalents.T_NEGATIVE_POOL, "negative_regen", "Negative energy represents your reserve of negative power. It slowly increases.", nil, nil, {
 	color = "#7f7f7f#",
 	randomboss_enhanced = true,
+	wait_on_rest = true,
 	--cost_factor = function(self, t) return (100 + self:combatFatigue()) / 100 end,
 	Minimalist = {highlight = function(player, vc, vn, vm, vr) return vc >=0.7*vm end},
 })

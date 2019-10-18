@@ -26,7 +26,7 @@ newTalent{
 	random_ego = "attack",
 	points = 5,
 	cooldown = 5,
-	positive = -10,
+	positive = -15,
 	range = 7,
 	radius = 1,
 	tactical = { ATTACK = {LIGHT = 2} },
@@ -34,16 +34,15 @@ newTalent{
 	reflectable = true,
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 17, 200) end,
-	getDamageOnSpot = function(self, t) return self:combatTalentSpellDamage(t, 17, 200)/2 end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), radius=1, talent=t}
-		local x, y = self:getTarget(tg)
+		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
+		local x, y, target = self:getTarget(tg)
 		if not x or not y then return nil end
+		local _ _, x, y = self:canProject(tg, x, y)
 
 		local dam = self:spellCrit(t.getDamage(self, t))
-		self:project(tg, x, y, DamageType.LIGHT, dam, {type="light"})
+		if target then self:project(target, x, y, DamageType.LIGHT, dam, {type="light"}) end
 
-		local _ _, x, y = self:canProject(tg, x, y)
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			x, y, 4,
@@ -51,7 +50,7 @@ newTalent{
 			1,
 			5, nil,
 			{type="light_zone"},
-			nil, self:spellFriendlyFire()
+			nil, false, false
 		)
 
 		game:playSoundNear(self, "talents/flame")
@@ -59,10 +58,9 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		local damageonspot = t.getDamageOnSpot(self, t)
-		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a spot on the ground for 4 turns that does %d light damage to anyone within it.
+		return ([[Calls the power of the Sun into a searing lance, doing %d damage to the target and leaving a radius 1 area of searing light on the ground for 4 turns that does %d light damage to all foes within it.
 		The damage dealt will increase with your Spellpower.]]):
-		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damageonspot))
+		format(damDesc(self, DamageType.LIGHT, damage), damDesc(self, DamageType.LIGHT, damage/2))
 	end,
 }
 
@@ -83,7 +81,7 @@ newTalent{
 	range = 0,
 	radius = function(self, t) return math.min(8, math.floor(self:combatTalentScale(t, 2.5, 4.5))) end,
 	target = function(self, t)
-		return {type="ball", range=self:getTalentRange(t), selffire=false, radius=self:getTalentRadius(t), talent=t}
+		return {type="ball", range=self:getTalentRange(t), friendlyfire=false, selffire=false, radius=self:getTalentRadius(t), talent=t}
 	end,
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 250) end,
@@ -94,9 +92,9 @@ newTalent{
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		-- Temporarily turn on "friendlyfire" to lite all tiles
-		tg.selffire = true
+		tg.friendlyfire, tg.selffire = true
 		self:project(tg, self.x, self.y, DamageType.LITE, 1)
-		tg.selffire = false
+		tg.friendlyfire, tg.selffire = false
 		local grids = self:project(tg, self.x, self.y, DamageType.BLIND, t.getDuration(self, t))
 		self:project(tg, self.x, self.y, DamageType.LIGHT, self:spellCrit(t.getDamage(self, t)))
 		if self:getTalentLevel(t) >= 3 then
@@ -136,17 +134,16 @@ newTalent{
 	target = function(self, t)
 		return {type="ball", radius=self:getTalentRange(t), friendlyfire=false, talent=t}
 	end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 50) end,
+	getDamage = function(self, t) return 10 + self:combatTalentSpellDamage(t, 1, 50) end,
 	callbackOnLevelChange = function(self, eff)
 		self.firebeam_turns_remaining = nil
 	end,
 	callbackOnAct = function(self, t)
 		if not self.firebeam_turns_remaining then return end
+		if self.firebeam_turns_remaining == 3 then self.firebeam_turns_remaining = 2 return end --hacked turn_procs for 1st activation
 		if self.firebeam_turns_remaining <= 0 then self.firebeam_turns_remaining = nil return end
 
-		if self.firebeam_turns_remaining % 2 ~= 0 then
-			self:forceUseTalent(self.T_FIREBEAM, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
-		end
+		self:forceUseTalent(self.T_FIREBEAM, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
 
 		self.firebeam_turns_remaining = self.firebeam_turns_remaining - 1
 	end,
@@ -161,7 +158,7 @@ newTalent{
 		end)
 
 		if #tgts > 0 then table.sort(tgts, "distance") else return end
-		
+
 		local tgt, x, y = tgts[#tgts].tgt, tgts[#tgts].tgt.x, tgts[#tgts].tgt.y
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, x, y, DamageType.FIRE, dam)
@@ -170,7 +167,7 @@ newTalent{
 		game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(x-self.x), math.abs(y-self.y)), "light_beam", {tx=x-self.x, ty=y-self.y})
 
 		game:playSoundNear(self, "talents/flame")
-		if not self.firebeam_turns_remaining then self.firebeam_turns_remaining = 4 end
+		if not self.firebeam_turns_remaining then self.firebeam_turns_remaining = 3 end
 		return true
 	end,
 	info = function(self, t)
@@ -218,23 +215,20 @@ newTalent{
 
 		local dam = self:spellCrit(t.getDamage(self, t))
 
-		-- Randomly take targets
-		local tg = {type="hit", range=self:getTalentRadius(t), talent=t}
 		for i = 1, t.getTargetCount(self, t) do
 			if #tgts <= 0 then break end
 			local a, id = rng.table(tgts)
 			table.remove(tgts, id)
-
-			self:project(tg, a.x, a.y, DamageType.LIGHT, dam)
+			table.remove(tgts)
+			self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, a.x, a.y, DamageType.LIGHT, dam)
 			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "light_beam", {tx=a.x-self.x, ty=a.y-self.y})
-
-			game:playSoundNear(self, "talents/spell_generic")
 		end
+
+		game:playSoundNear(self, "talents/spell_generic")
 
 		return true
 	end,
 	info = function(self, t)
-		return ([[Release a furious burst of sunlight, increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns and dealing %0.2f light damage to %d random foes in radius %d.]]):
-			format(t.getPower(self, t)*100, t.getDuration(self, t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getTargetCount(self, t), self:getTalentRadius(t))
+		return ([[Release a burst of sunlight beams at %d random foes in radius %d, dealing %d damage to all foes hit and increasing your bonus light damage by %d%% of your bonus darkness damage for %d turns.]]):format(t.getTargetCount(self, t), self:getTalentRadius(t), damDesc(self, DamageType.LIGHT, t.getDamage(self, t)), t.getPower(self, t)*100, t.getDuration(self, t))
 	end,
 }

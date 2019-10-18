@@ -45,27 +45,25 @@ newTalent{
 		self:talentTemporaryValue(ret, "combat_mentalresist", power)
 		self:talentTemporaryValue(ret, "max_life", t.getLifePct(self, t)*self.max_life)
 		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
-		
+
 		if self:knowTalent(self.T_CHANT_ILLUMINATE) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ILLUMINATE)
 			self:talentTemporaryValue(ret, "on_melee_hit", {[DamageType.LIGHT]=t2.getDamageOnMeleeHit(self, t2)})
 			self:talentTemporaryValue(ret, "mana_regen", t2.getBonusRegen(self, t2))
 			self:talentTemporaryValue(ret, "stamina_regen", t2.getBonusRegen(self, t2))
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_ADEPT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ADEPT)
 			self:talentTemporaryValue(ret, "lite", t2.getBonusLight(self, t2))
 			t2.doCure(self, t2, "mental")
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_RADIANT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_RADIANT)
 			self:talentTemporaryValue(ret, "inc_damage", {[DamageType.LIGHT] = t2.getLightDamageIncrease(self, t2), [DamageType.FIRE] = t2.getLightDamageIncrease(self, t2)})
-			self:talentTemporaryValue(ret, "positive_regen", t2.getBonusRegen(self, t2))
-			self:talentTemporaryValue(ret, "positive_regen_ref_mod", t2.getBonusRegen(self, t2))
 		end
-		
+
 		return ret
 	end,
 	deactivate = function(self, t, p)
@@ -108,27 +106,25 @@ newTalent{
 		self:talentTemporaryValue(ret, "combat_armor", t.getPhysicalResistance(self, t))
 		self:talentTemporaryValue(ret, "combat_armor_hardiness", 15)
 		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
-		
+
 		if self:knowTalent(self.T_CHANT_ILLUMINATE) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ILLUMINATE)
 			self:talentTemporaryValue(ret, "on_melee_hit", {[DamageType.LIGHT]=t2.getDamageOnMeleeHit(self, t2)})
 			self:talentTemporaryValue(ret, "mana_regen", t2.getBonusRegen(self, t2))
 			self:talentTemporaryValue(ret, "stamina_regen", t2.getBonusRegen(self, t2))
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_ADEPT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ADEPT)
 			self:talentTemporaryValue(ret, "lite", t2.getBonusLight(self, t2))
 			t2.doCure(self, t2, "physical")
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_RADIANT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_RADIANT)
 			self:talentTemporaryValue(ret, "inc_damage", {[DamageType.LIGHT] = t2.getLightDamageIncrease(self, t2), [DamageType.FIRE] = t2.getLightDamageIncrease(self, t2)})
-			self:talentTemporaryValue(ret, "positive_regen", t2.getBonusRegen(self, t2))
-			self:talentTemporaryValue(ret, "positive_regen_ref_mod", t2.getBonusRegen(self, t2))
 		end
-		
+
 		return ret
 	end,
 	deactivate = function(self, t, p)
@@ -189,27 +185,25 @@ newTalent{
 		})
 		self:talentTemporaryValue(ret, "combat_spellresist", spell)
 		ret.particle = self:addParticles(Particles.new("golden_shield", 1))
-		
+
 		if self:knowTalent(self.T_CHANT_ILLUMINATE) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ILLUMINATE)
 			self:talentTemporaryValue(ret, "on_melee_hit", {[DamageType.LIGHT]=t2.getDamageOnMeleeHit(self, t2)})
 			self:talentTemporaryValue(ret, "mana_regen", t2.getBonusRegen(self, t2))
 			self:talentTemporaryValue(ret, "stamina_regen", t2.getBonusRegen(self, t2))
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_ADEPT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_ADEPT)
 			self:talentTemporaryValue(ret, "lite", t2.getBonusLight(self, t2))
 			t2.doCure(self, t2, "magical")
 		end
-		
+
 		if self:knowTalent(self.T_CHANT_RADIANT) then
 			local t2 = self:getTalentFromId(self.T_CHANT_RADIANT)
 			self:talentTemporaryValue(ret, "inc_damage", {[DamageType.LIGHT] = t2.getLightDamageIncrease(self, t2), [DamageType.FIRE] = t2.getLightDamageIncrease(self, t2)})
-			self:talentTemporaryValue(ret, "positive_regen", t2.getBonusRegen(self, t2))
-			self:talentTemporaryValue(ret, "positive_regen_ref_mod", t2.getBonusRegen(self, t2))
 		end
-		
+
 		return ret
 	end,
 	deactivate = function(self, t, p)
@@ -403,15 +397,27 @@ newTalent{
 	points = 5,
 	mode = "passive",
 	getLightDamageIncrease = function(self, t) return self:combatTalentSpellDamage(t, 10, 30) end,
-	getBonusRegen = function(self, t) return self:combatTalentScale(t, 0.7, 4.0, 0.75) / 10 + 0.5 end,
-	callbackOnRest = function(self, t)
-		if not self:knowTalent(self.T_POSITIVE_POOL) then return false end
-		if self.positive_regen > 0 and self.positive < self.max_positive then return true end
-		return false
+	getPos = function(self, t) return self:combatTalentScale(t, 2, 5) end,
+	getTurnLimit = function(self, t) return self:combatTalentScale(t, 0.5, 3) end,
+	callbackOnMeleeHit = function(self, t, src)
+		if not (self:isTalentActive(self.T_CHANT_OF_FORTRESS) or self:isTalentActive(self.T_CHANT_OF_FORTITUDE) or self:isTalentActive(self.T_CHANT_OF_RESISTANCE)) then return end
+		if src == self then return end
+		if self.turn_procs.chant_radiant and self.turn_procs.chant_radiant > t.getTurnLimit(self, t) then return end
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant or 0
+		self:incPositive(t.getPos(self, t))
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant + 1
+	end,
+	callbackOnArcheryHit = function(self, t, dam, src)
+		if not (self:isTalentActive(self.T_CHANT_OF_FORTRESS) or self:isTalentActive(self.T_CHANT_OF_FORTITUDE) or self:isTalentActive(self.T_CHANT_OF_RESISTANCE)) then return end
+		if src == self then return end
+		if self.turn_procs.chant_radiant and self.turn_procs.chant_radiant > t.getTurnLimit(self, t) then return end
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant or 0
+		self:incPositive(t.getPos(self, t))
+		self.turn_procs.chant_radiant = self.turn_procs.chant_radiant + 1
 	end,
 	info = function(self, t)
 		return ([[Your passion for singing the praises of the Sun reaches its zenith.
-		Your Chanting now increases your light and fire damage by %d%% and increases your positive energy regeneration by %0.2f per turn.
-		These values scale with your Spellpower.]]):format(t.getLightDamageIncrease(self, t), t.getBonusRegen(self, t))
+		Your Chanting now increases your light and fire damage by %d%% and up to %d times per turn, when you are hit by a weapon attack, you will gain %0.1f Positive.
+		These values scale with your Spellpower.]]):format(t.getLightDamageIncrease(self, t), t.getTurnLimit(self, t), t.getPos(self, t))
 	end,
 }

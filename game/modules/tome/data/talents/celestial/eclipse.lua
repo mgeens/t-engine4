@@ -40,8 +40,8 @@ newTalent{
 	points = 5,
 	cooldown = 30,
 	tactical = { BUFF = 2 },
-	positive = 10,
-	negative = 10,
+	positive = 15,
+	negative = 15,
 	fixed_cooldown = true,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 5, 9)) end,
 	getResistancePenetration = function(self, t) return self:combatLimit(self:getCun()*self:getTalentLevel(t), 100, 5, 0, 55, 500) end, -- Limit to <100%
@@ -72,9 +72,9 @@ newTalent{
 	mode = "sustained",
 	require = divi_req3,
 	points = 5,
-	proj_speed = 3,
+	proj_speed = 4,
 	range = 6,
-	cooldown = 30,
+	cooldown = 10,
 	tactical = { BUFF = 2 },
 	sustain_negative = 10,
 	sustain_positive = 10,
@@ -141,8 +141,8 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	cooldown = 15,
-	positive = 15,
-	negative = 15,
+	positive = 25,
+	negative = 25,
 	tactical = { ATTACKAREA = {LIGHT = 2} },
 	range = 0,
 	radius = 10,
@@ -151,8 +151,8 @@ newTalent{
 		return {type="ball", range=self:getTalentRange(t), radius=self:getTalentRadius(t), friendlyfire=false, talent=t}
 	end,
 	getDotDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 50) end,
-	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.1, 0.7)) end,
-	getDuration = function(self, t) return 6 end,
+	getConversion = function(self, t) return math.min(1, self:combatTalentScale(t, 0.1, 0.55)) end,
+	getDuration = function(self, t) return 5 end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
 		self:project(tg, self.x, self.y, function(px, py)
