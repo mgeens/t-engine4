@@ -2985,6 +2985,9 @@ function _M:die(src, death_note)
 			chat:invoke()
 			self.self_resurrect_chat = nil
 		end
+
+		self:checkTwoHandedPenalty()
+		
 		self.in_resurrect = nil
 		return
 	end

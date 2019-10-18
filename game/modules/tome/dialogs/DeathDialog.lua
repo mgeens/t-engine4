@@ -158,6 +158,8 @@ function _M:resurrectBasic(actor)
 
 	actor.changed = true
 	game.paused = true
+
+	self.actor:checkTwoHandedPenalty()
 end
 
 --- Send the party to the Eidolon Plane
@@ -186,6 +188,8 @@ function _M:eidolonPlane()
 		game.log("#LIGHT_RED#From the brink of death you seem to be yanked to another plane.")
 		game.player:updateMainShader()
 		if not config.settings.cheat then game:saveGame() end
+
+		self.actor:checkTwoHandedPenalty()
 	end)
 	return true
 end
