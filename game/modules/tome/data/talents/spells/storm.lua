@@ -114,6 +114,7 @@ newTalent{
 			return radius
 		end,
 	do_hurricane = function(self, t, target)
+		if not self:isTalentActive(t.id) then return end
 		if target.dead then return end
 		if not rng.percent(t.getChance(self, t)) then return end
 

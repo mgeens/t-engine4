@@ -373,7 +373,7 @@ function _M:projectApply(t, x, y, kind, fct, cond)
 			elseif cond == nil then ok = true
 			end
 		else
-			if cond(tgt, px, py) then ok = true end
+			if not cond or cond(tgt, px, py) then ok = true end
 		end
 		if ok then fct(tgt, px, py) end
 	end)

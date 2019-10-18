@@ -26,6 +26,7 @@ newTalent{
 	points = 5,
 	mana = 15,
 	cooldown = 6,
+	is_body_of_stone_affected = true,
 	range = function(self, t) return math.min(10, math.floor(self:combatTalentScale(t, 3, 7))) end,
 	tactical = { ATTACK = {PHYSICAL = 2} },
 	direct_hit = true,
@@ -114,12 +115,13 @@ newTalent{
 
 newTalent{
 	name = "Mudslide",
-    type = {"spell/earth",3},
+	type = {"spell/earth",3},
 	require = spells_req3,
 	points = 5,
 	random_ego = "attack",
 	mana = 20,
 	cooldown = 12,
+	is_body_of_stone_affected = true,
 	direct_hit = true,
 	tactical = { ATTACKAREA = { PHYSICAL = 2 }, DISABLE = { knockback = 2 }, ESCAPE = { knockback = 1 } },
 	range = 0,
