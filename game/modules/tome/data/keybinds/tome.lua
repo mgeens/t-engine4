@@ -240,3 +240,10 @@ defineAction{
 	group = "action",
 	name = "Toggle automatic talent usage",
 }
+
+defineAction{
+	default = { },
+	type = "TOGGLE_AUTOACCEPT_TARGET",
+	group = "action",
+	name = "Toggle automatic accept target option",
+}

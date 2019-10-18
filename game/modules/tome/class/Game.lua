@@ -2256,6 +2256,11 @@ do return end
 			game.log("#GOLD#Automatic talent usage: %s", not self.player.no_automatic_talents and "#LIGHT_GREEN#enabled" or "#LIGHT_RED#disabled")
 		end,
 
+		TOGGLE_AUTOACCEPT_TARGET = function()
+			config.settings.auto_accept_target = not config.settings.auto_accept_target
+			game:saveSettings("auto_accept_target", ("auto_accept_target = %s\n"):format(tostring(config.settings.auto_accept_target)))
+		end,
+
 		SAVE_GAME = function()
 			self:saveGame()
 		end,
