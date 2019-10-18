@@ -415,17 +415,15 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 		mult = mult * t.getStalkedDamageMultiplier(self, t, effStalker.bonus)
 	end
 
-	-- add marked prey damage and attack bonus
-	local effPredator = self:hasEffect(self.EFF_PREDATOR)
-	if effPredator and effPredator.type == target.type then
-		if effPredator.subtype == target.subtype then
-			mult = mult + effPredator.subtypeDamageChange
-			atk = atk + effPredator.subtypeAttackChange
-		else
-			mult = mult + effPredator.typeDamageChange
-			atk = atk + effPredator.typeAttackChange
+	-- Predator atk bonus
+	if self:knowTalent(self.T_PREDATOR) then
+		if target and target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] then
+			local typebonus = self.pred_type_tbl[target.type]
+			local t = self:getTalentFromId(self.T_PREDATOR)
+			atk = atk + t.getATK(self, t) * typebonus
 		end
 	end
+
 
 	local dam, apr, armor = force_dam or self:combatDamage(weapon), self:combatAPR(weapon), target:combatArmor()
 	print("[ATTACK] to ", target.name, "dam/apr/atk/mult ::", dam, apr, atk, mult, "vs. armor/def", armor, def)
@@ -526,6 +524,15 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 				dam = dam - g_deflect; deflect = deflect + g_deflect
 			end
 			print("[ATTACK] after GESTURE_OF_GUARDING", dam)
+		end
+
+		-- Predator apr bonus
+		if self:knowTalent(self.T_PREDATOR) then
+			if target and target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] then
+				local typebonus = self.pred_type_tbl[target.type]
+				local t = self:getTalentFromId(self.T_PREDATOR)
+				apr = apr + t.getAPR(self, t) * typebonus
+			end
 		end
 
 		if self:isAccuracyEffect(weapon, "knife") then
@@ -1064,32 +1071,6 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 			eff.critHit = true
 			eff.actualDuration = eff.actualDuration + 1
 			eff.dur = eff.dur + 1
-		end
-	end
-
-	-- Marked Prey
-	if hitted and not target.dead and effPredator and effPredator.type == target.type then
-		if effPredator.subtype == target.subtype then
-			-- Anatomy stun
-			if effPredator.subtypeStunChance > 0 and rng.percent(effPredator.subtypeStunChance) then
-				if target:canBe("stun") then
-					target:setEffect(target.EFF_STUNNED, 3, {})
-				else
-					game.logSeen(target, "%s resists the stun!", target.name:capitalize())
-				end
-			end
-
-			-- Outmaneuver
-			if effPredator.subtypeOutmaneuverChance > 0 and rng.percent(effPredator.subtypeOutmaneuverChance) then
-				local t = self:getTalentFromId(self.T_OUTMANEUVER)
-				target:setEffect(target.EFF_OUTMANEUVERED, t.getDuration(self, t), { physicalResistChange=t.getPhysicalResistChange(self, t), statReduction=t.getStatReduction(self, t) })
-			end
-		else
-			-- Outmaneuver
-			if effPredator.typeOutmaneuverChance > 0 and rng.percent(effPredator.typeOutmaneuverChance) then
-				local t = self:getTalentFromId(self.T_OUTMANEUVER)
-				target:setEffect(target.EFF_OUTMANEUVERED, t.getDuration(self, t), { physicalResistChange=t.getPhysicalResistChange(self, t), statReduction=t.getStatReduction(self, t) })
-			end
 		end
 	end
 
