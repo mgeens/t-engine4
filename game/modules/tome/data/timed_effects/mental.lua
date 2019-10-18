@@ -1159,7 +1159,7 @@ newEffect{
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
-	parameters = {},
+	parameters = { tyrantDur=5, tyrantPower=2, maxStacks=7 },
 	on_gain = function(self, err) return "#F53CBE##Target# becomes paranoid!", "+Paranoid" end,
 	on_lose = function(self, err) return "#Target# is no longer paranoid", "-Paranoid" end,
 	activate = function(self, eff)
