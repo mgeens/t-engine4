@@ -72,7 +72,7 @@ newTalent{
 	points = 5,
 	cooldown = 10,
 	radius = function(self, t) return 4 end,
-	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 4, 7) end,
+	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 3, 6) end,
 	getDamage = function(self, t) return self:combatTalentMindDamage(t, 0, 60) end,
 	getChance = function(self, t) return self:combatTalentScale(t, 5, 15) end,
 	passives = function(self, t, p)
@@ -203,7 +203,10 @@ newTalent{
 		return true
 	end,
 	callbackOnMeleeAttack = function(self, t, target, hitted, critted)
-		if hitted and critted and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma")) then
+		if hitted and critted
+		and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma"))
+		and self:getHate() > 15 then
+			self:incHate(-15)
 			local miasma_count = 0
 			local damage = self:mindCrit(t.getDamage(self, t))/2
 			local x, y = self.x, self.y
@@ -237,10 +240,10 @@ newTalent{
 		end
 	end,
 	info = function(self, t)
-		return ([[Upon making a critical melee attack the savagery of your predation causes a cursed miasma to begin permeating your hunting grounds.
-		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage split between darkness and mind and blocks sight.
+		return ([[Upon making a critical melee attack the savagery of your predation causes a Cursed Miasma to begin permeating your hunting grounds.
+		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage split between Darkness and Mind and blocks sight.
 		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.
-		This will not occur if you are in cursed miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
+		Savage Hunter costs 15 Hate on trigger and does not trigger when you're in Cursed Miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
 	end,
 }
 
