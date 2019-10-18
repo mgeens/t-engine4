@@ -1933,7 +1933,7 @@ function _M:tooltip(x, y, seen_by)
 		ts:add({"color", 0, 255, 128}, ("%sVim Value: %d#LAST#"):format(self.resources_def.vim.color, (game.player:getWil() * 0.5 + 1) * self.rank), {"color", "WHITE"}, true)
 	end
 	if game.player:knowTalent(self.T_PREDATOR) then
-		local predatorcount = game.player.pred_type_tbl and game.player.pred_type_tbl[self.type] or 0
+		local predatorcount = game.player.predator_type_history and game.player.predator_type_history[self.type] or 0
 		ts:add({"color", 0, 255, 128}, ("#ffa0ff#Predator Count: %d#LAST#"):format(predatorcount), {"color", "WHITE"}, true)
 	end
 

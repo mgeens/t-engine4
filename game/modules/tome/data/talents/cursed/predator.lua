@@ -34,27 +34,27 @@ newTalent{
 	getTypeKillMax = function(self, t) return math.floor(self:combatTalentLimit(t, 40, 10, 30)) end,
 	callbackOnKill = function(self, t, target)
 		local killmax = t.getTypeKillMax(self, t)
-		local type = target.type
+		local type = tostring(target.type)
 		-- Make a table with key/value pair == type/count
-		self.pred_type_tbl = self.pred_type_tbl or {}
-		self.pred_type_tbl[type] = self.pred_type_tbl[type] or 0
-		self.pred_type_tbl[type] = math.min(self.pred_type_tbl[type] + 1, killmax)
+		self.predator_type_history = self.predator_type_history or {}
+		self.predator_type_history[type] = self.predator_type_history[type] or 0
+		self.predator_type_history[type] = math.min(self.predator_type_history[type] + 1, killmax)
 	end,
 	callbackOnMeleeAttack = function(self, t, target, hitted)
 		-- Let NPCs use this with type/count generated the first time they attack that type
-		if not self == game.player and target and target.type then
-			self.pred_type_tbl = self.pred_type_tbl or {}
-			local type = target.type
-			if not self.pred_type_tbl[type] then
+		if not game.party:hasMember(self) and target and target.type then
+			self.predator_type_history = self.predator_type_history or {}
+			local type = tostring(target.type)
+			if not self.predator_type_history[type] then
 				local killmax = t.getTypeKillMax(self, t)
-				local killfloor = math.floor(rank^2)
-				self.pred_type_tbl[type] = rng.range(killfloor, killmax)
+				local killfloor = math.floor((target.rank or 1)^2)
+				self.predator_type_history[type] = rng.range(killfloor, killmax)
 			end
 		end
 		-- Hate gain for early game
 		if hitted and target then
 			local killmax = t.getTypeKillMax(self, t)
-			if target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] and self.pred_type_tbl[target.type] >= killmax then return
+			if target.type and self.predator_type_history and self.predator_type_history[target.type] and self.predator_type_history[target.type] >= killmax then return
 			else self:incHate(1) end
 		end
 	end,
@@ -287,7 +287,7 @@ newTalent{
 			self.mark_prey[game.level.id] = {}
 			local marks = {}
 			for __, e in pairs(game.level.entities) do
-				if e.rank >= 3.2 and self:reactionToward(e) < 0 then
+				if e.rank and e.rank >= 3.2 and self:reactionToward(e) < 0 then
 					marks[#marks+1] = {e=e, rank=e.rank, subtype=e.subtype}
 				end
 			end

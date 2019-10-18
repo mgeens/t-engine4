@@ -1918,12 +1918,12 @@ newEffect{
 			if self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] and self.mark_prey[game.level.id][i].subtype then
 				for j = 1, i do
 					if self.mark_prey[game.level.id][j] and self.mark_prey[game.level.id][j].subtype and j ~= i and self.mark_prey[game.level.id][i].subtype == self.mark_prey[game.level.id][j].subtype then
-						eff.unqiue_subtype = false break
+						eff.unique_subtype = false break
 					else
-						eff.unqiue_subtype = true
+						eff.unique_subtype = true
 					end
 				end
-				if eff.unqiue_subtype and eff.unqiue_subtype == true then
+				if eff.unique_subtype and eff.unique_subtype == true then
 					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(self.mark_prey[game.level.id][i].subtype:capitalize())
 				end
 			end

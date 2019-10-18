@@ -417,8 +417,8 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 
 	-- Predator atk bonus
 	if self:knowTalent(self.T_PREDATOR) then
-		if target and target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] then
-			local typebonus = self.pred_type_tbl[target.type]
+		if target and target.type and self.predator_type_history and self.predator_type_history[target.type] then
+			local typebonus = self.predator_type_history[target.type]
 			local t = self:getTalentFromId(self.T_PREDATOR)
 			atk = atk + t.getATK(self, t) * typebonus
 		end
@@ -528,8 +528,8 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 
 		-- Predator apr bonus
 		if self:knowTalent(self.T_PREDATOR) then
-			if target and target.type and self.pred_type_tbl and self.pred_type_tbl[target.type] then
-				local typebonus = self.pred_type_tbl[target.type]
+			if target and target.type and self.predator_type_history and self.predator_type_history[target.type] then
+				local typebonus = self.predator_type_history[target.type]
 				local t = self:getTalentFromId(self.T_PREDATOR)
 				apr = apr + t.getAPR(self, t) * typebonus
 			end
