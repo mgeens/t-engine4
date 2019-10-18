@@ -3773,10 +3773,10 @@ function _M:levelup()
 		if self.extra_generic_point_every and self.level % self.extra_generic_point_every == 0 then self.unused_generics = self.unused_generics + 1 end
 
 		-- At levels 10, 20 and 36 and then every 30 levels, we gain a new talent type
-		if self.level == 10 or self.level == 20 or self.level == 36 or (self.level > 50 and (self.level - 6) % 30 == 0) then
+		if self.level == 10 or self.level == 20 or self.level == 34 or (self.level > 50 and (self.level - 6) % 30 == 0) then
 			self.unused_talents_types = self.unused_talents_types + 1
 		end
-		if self.level == 30 or self.level == 42 then
+		if self.level == 25 or self.level == 42 then
 			self.unused_prodigies = self.unused_prodigies + 1
 			if self.player and not config.settings.cheat and not self.silent_levelup then
 				Dialog:simpleLongPopup("Prodigy!", ("You have achieved #LIGHT_GREEN#level %d#WHITE# and gained a #LIGHT_GREEN#prodigy point#LAST#!\n\nProdigies are powerful talents with unique requirements that cannot be unlearned."):format(self.level), 400)

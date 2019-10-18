@@ -151,6 +151,7 @@ end
 
 --- Is the entity on the level?
 function _M:hasEntity(e)
+	if not e then return nil end
 	if e._fake_level_entity then return e._fake_level_entity(self, "has") end
 	return self.entities[e.uid]
 end
