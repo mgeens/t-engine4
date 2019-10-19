@@ -313,7 +313,7 @@ _M.aiSubstDamtypes = {
 
 -- Still count grids we can potentially shove or swap our way into
 function _M:aiPathingBlockCheck(x, y, actor_checking)
-	return not self:block_move(x, y, actor_checking) or not actor_checking:canBumpDisplace(self)
+	return not self:block_move(x, y, actor_checking) or not actor_checking.canBumpDisplace or not actor_checking:canBumpDisplace(self)
 end
 
 -- Can an NPC shove or swap positions with a space occupied by another NPC?
@@ -346,7 +346,7 @@ function _M:moveDirection(x, y, force)
 
 		-- Find all possible directions to move, including towards friendly targets
 		local target = game.level.map(lx, ly, engine.Map.ACTOR)
-		if target and self:reactionToward(target) > 0 and self:canBumpDisplace(target) then l[#l+1] = {lx,ly, core.fov.distance(x,y,lx,ly)/2+rng.float(0, .1), target} end -- Add straight ahead if shoveable
+		if target and self:reactionToward(target) > 0 and self.canBumpDisplace and self:canBumpDisplace(target) then l[#l+1] = {lx,ly, core.fov.distance(x,y,lx,ly)/2+rng.float(0, .1), target} end -- Add straight ahead if shoveable
 		local dir = util.getDir(lx, ly, self.x, self.y)
 		local sides = util.dirSides(dir, self.x, self.y)
 		for _, dir in pairs(sides) do -- sides
@@ -356,7 +356,7 @@ function _M:moveDirection(x, y, force)
 				l[#l+1] = {dx,dy, core.fov.distance(x,y,dx,dy)}
 			else
 				target = game.level.map(dx, dy, engine.Map.ACTOR)
-				if target and self:reactionToward(target) > 0 and self:canBumpDisplace(target) then
+				if target and self:reactionToward(target) > 0 and self.canBumpDisplace and self:canBumpDisplace(target) then
 					l[#l+1] = {dx,dy, core.fov.distance(x,y,dx,dy)/2+rng.float(0, .1), target}
 				end
 			end
