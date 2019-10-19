@@ -132,6 +132,7 @@ newEntity{ base = "BASE_NPC_XORN",
 		end)
 	end,
 	on_die = function(self, who)
+		if not self.all_fragments then return end
 		local nb_alive = 0
 		-- Buff others
 		for _, m in ipairs(self.all_fragments) do

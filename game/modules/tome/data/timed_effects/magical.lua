@@ -1382,8 +1382,8 @@ newEffect{
 		eff.res = self:addTemporaryValue(eff, "resists", {[DamageType.LIGHT]=eff.power, [DamageType.DARKNESS]=eff.power})
 	end,
 	on_merge = function(self, old_eff, new_eff)
-		removeTemporaryValue("damage_affinity", old_eff.aff)
-		removeTemporaryValue("resists", old_eff.res)
+		self:removeTemporaryValue("damage_affinity", old_eff.aff)
+		self:removeTemporaryValue("resists", old_eff.res)
 		old_eff.glyphstacks = (old_eff.glyphstacks or 0) + 1
 		old_eff.power = math.min(old_eff.maxStacks, old_eff.glyphstacks or 1)*5
 		old_eff.aff = self:addTemporaryValue(eff, "damage_affinity", {[DamageType.LIGHT]=old_eff.power, [DamageType.DARKNESS]=old_eff.power})
