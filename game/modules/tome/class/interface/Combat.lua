@@ -371,7 +371,8 @@ end
 function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
 	-- if insufficient resources, try to use unarmed or cancel attack
 	local unarmed = self:getObjectCombat(nil, "barehand")
-	if (weapon or unarmed).use_resources and not self:useResources((weapon or unarmed).use_resources) then
+	local weapon_or_unarmed = weapon or unarmed
+	if weapon_or_unarmed and weapon_or_unarmed.use_resources and not self:useResources(weapon_or_unarmed.use_resources) then
 		if unarmed == weapon then
 			print("[attackTargetWith] (unarmed) against ", target.name, "unarmed attack fails due to resources")
 			return self:combatSpeed(unarmed), false, 0
