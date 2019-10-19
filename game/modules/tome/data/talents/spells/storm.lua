@@ -58,7 +58,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		local damage = t.getDamage(self, t))
+		local damage = t.getDamage(self, t)
 		local radius = self:getTalentRadius(t)
 		return ([[Lightning emanates from you in a circular wave with radius %d, doing %0.2f to %0.2f lightning damage (%0.2f average) and possibly dazing anyone affected (75%% chance).
 		The damage will increase with your Spellpower.]]):format(radius,
