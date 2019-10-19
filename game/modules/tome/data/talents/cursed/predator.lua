@@ -241,7 +241,7 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Upon making a critical melee attack the savagery of your predation causes a Cursed Miasma to begin permeating your hunting grounds.
-		The miasma will seep from %d locations, including your own, within radius %d, deals %d damage split between Darkness and Mind and blocks sight.
+		The miasma will seep from %d locations, including your own, within radius %d, deals %0.2f damage split between Darkness and Mind and blocks sight.
 		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.
 		Savage Hunter costs 15 Hate on trigger and does not trigger when you're in Cursed Miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
 	end,
