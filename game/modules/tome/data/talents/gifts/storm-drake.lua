@@ -232,7 +232,7 @@ newTalent{
 			local target = game.level.map(tx, ty, Map.ACTOR)
 			if not target or target == self then return end
 
-			DamageType:get(DamageType.LIGHTNING).projector(self, tx, ty, DamageType.LIGHTNING, damage)
+			DamageType:get(DamageType.LIGHTNING).projector(self, tx, ty, DamageType.LIGHTNING, rng.avg(damage/3, damage, 3))
 			if target:canBe("stun") then
 				target:setEffect(target.EFF_STUNNED, 3, {apply_power = self:combatMindpower()})
 			else
@@ -253,12 +253,12 @@ newTalent{
 	end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
-		return ([[You breathe lightning in a frontal cone of radius %d. Any target caught in the area will take %0.2f to %0.2f lightning damage and be stunned for 3 turns.
+		return ([[You breathe lightning in a frontal cone of radius %d. Any target caught in the area will take %0.2f to %0.2f lightning damage (%0.2f average) and be stunned for 3 turns.
 		The damage will increase with your Strength, and the critical chance is based on your Mental crit rate, and the Stun apply power is based on your Mindpower.
 		Each point in storm drake talents also increases your lightning resistance by 1%%.]]):format(
 			self:getTalentRadius(t),
 			damDesc(self, DamageType.LIGHTNING, damage / 3),
-			damDesc(self, DamageType.LIGHTNING, damage)
-		)
+			damDesc(self, DamageType.LIGHTNING, damage),
+			damDesc(self, DamageType.LIGHTNING, (damage + damage / 3) / 2))
 	end,
 }
