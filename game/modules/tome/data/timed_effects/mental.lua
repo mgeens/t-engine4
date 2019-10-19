@@ -426,7 +426,7 @@ newEffect{
 	long_desc = function(self, eff)
 		local t = self:getTalentFromId(self.T_STALK)
 		local effStalked = eff.target:hasEffect(eff.target.EFF_STALKED)
-		local desc = ([[Stalking %s. Bonus level %d: +%d attack, +%d%% melee damage, +%0.2f hate/turn prey was hit.]]):format(
+		local desc = ([[Stalking %s. Bonus level %d: +%d accuracy, +%d%% melee damage, +%0.2f hate/turn prey was hit.]]):format(
 			eff.target.name, eff.bonus, t.getAttackChange(self, t, eff.bonus), t.getStalkedDamageMultiplier(self, t, eff.bonus) * 100 - 100, t.getHitHateChange(self, t, eff.bonus))
 		if effStalked and effStalked.damageChange and effStalked.damageChange > 0 then
 			desc = desc..("Prey damage modifier: %d%%."):format(effStalked.damageChange)
@@ -457,7 +457,7 @@ newEffect{
 		local effStalker = eff.src:hasEffect(eff.src.EFF_STALKER)
 		if not effStalker then return "Being stalked." end
 		local t = self:getTalentFromId(eff.src.T_STALK)
-		local desc = ([[Being stalked by %s. Stalker bonus level %d: +%d attack, +%d%% melee damage, +%0.2f hate/turn prey was hit.]]):format(
+		local desc = ([[Being stalked by %s. Stalker bonus level %d: +%d accuracy, +%d%% melee damage, +%0.2f hate/turn prey was hit.]]):format(
 			eff.src.name, effStalker.bonus, t.getAttackChange(eff.src, t, effStalker.bonus), t.getStalkedDamageMultiplier(eff.src, t, effStalker.bonus) * 100 - 100, t.getHitHateChange(eff.src, t, effStalker.bonus))
 		if eff.damageChange and eff.damageChange > 0 then
 			desc = desc..(" Prey damage modifier: %d%%."):format(eff.damageChange)
