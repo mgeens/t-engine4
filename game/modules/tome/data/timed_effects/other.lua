@@ -1651,7 +1651,7 @@ newEffect{
 					DamageType.NIGHTMARE, 1,
 					radius,
 					5, nil,
-					engine.MapEffect.new{zdepth=7, alpha=100, color_br=134, color_bg=60, color_bb=134, effect_shader="shader_images/darkness_effect.png"},
+					engine.MapEffect.new{alpha=93, color_br=134, color_bg=60, color_bb=134, effect_shader="shader_images/darkness_effect.png"},
 					function(e, update_shape_only) if not update_shape_only then
 						-- attempt one summon per turn
 						if not e.src:canBe("summon") then return end
