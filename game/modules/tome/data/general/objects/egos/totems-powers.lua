@@ -64,7 +64,7 @@ newEntity{
 	charm_power_def = {add=0, max=800, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
-			return ("instantly sting an enemy dealing %d nature damage over 7 turns and reducing their healing by 50%%%%"):format(dam, 50)
+			return ("sting an enemy dealing %d nature damage over 7 turns and reducing their healing by 50%%%%"):format(dam, 50)
 		end,
 		15,
 		function(self, who)
