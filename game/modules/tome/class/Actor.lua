@@ -2905,7 +2905,13 @@ end
 function _M:cloneActor(post_copy, alt_nodes)
 	local a, post_copy = engine.Actor.cloneActor(self, post_copy, alt_nodes)
 	a.immune_possession = 1
+	a:fireTalentCheck("callbackOnCloned", "actor", self, post_copy, alt_nodes)
 	return a, post_copy
+end
+function _M:cloneFull(post_copy)
+	local a = engine.Actor.cloneFull(self, post_copy)
+	a:fireTalentCheck("callbackOnCloned", "full", self, post_copy)
+	return a
 end
 
 --- Remove certain effects when cloned
@@ -5812,6 +5818,7 @@ local sustainCallbackCheck = {
 	callbackOnPartyAdd = "talents_on_party_add",
 	callbackOnPartyRemove = "talents_on_party_remove",
 	callbackOnTargeted = "talents_on_targeted",
+	callbackOnCloned = "talents_on_cloned",
 }
 _M.sustainCallbackCheck = sustainCallbackCheck
 
