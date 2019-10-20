@@ -172,6 +172,7 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 
 			-- Everything went ok? then start cooldown if any
 			if not ignore_cd and (not special or not special.ignore_cd) then self:startTalentCooldown(ab) end
+			if ab.post_action then ab.post_action(who, ab) end
 			return ret
 		end)
 	elseif ab.mode == "sustained" and ab.activate and ab.deactivate then
@@ -218,6 +219,7 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 						table.insert(list, id)
 					end
 				end
+				if ab.post_action then ab.post_action(who, ab) end
 			else -- deactivating
 				if self.deactivating_sustain_talent == ab.id then return end
 
@@ -262,6 +264,7 @@ function _M:useTalent(id, who, force_level, ignore_cd, force_target, silent, no_
 						table.removeFromList(list, id)
 					end
 				end
+				if ab.post_action then ab.post_action(who, ab) end
 			end
 			return ret
 		end)
