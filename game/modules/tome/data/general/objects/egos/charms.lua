@@ -55,7 +55,7 @@ newEntity{
 
 newEntity{
 	name = "quick ", prefix=true,
-	keywords = {quick_greater=true},
+	keywords = {quick=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_quick",
 	greater_ego = 1,
@@ -104,7 +104,7 @@ newEntity{
 
 newEntity{
 	name = "supercharged ", prefix=true,
-	keywords = {['supercharged_greater']=true},
+	keywords = {['supercharged']=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_supercharged",
 	greater_ego = 1,
@@ -153,7 +153,7 @@ newEntity{
 
 newEntity{
 	name = "overpowered ", prefix=true,
-	keywords = {['overpower_greater']=true},
+	keywords = {['overpower']=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_overpowered",
 	greater_ego = 1,
@@ -194,7 +194,7 @@ newEntity{
 
 newEntity{
 	name = "focusing ", prefix=true,
-	keywords = {focusing_greater=true},
+	keywords = {focusing=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_focusing",
 	greater_ego = 1,
@@ -239,7 +239,7 @@ newEntity{
 
 newEntity{
 	name = "extending ", prefix=true,
-	keywords = {extending_greater=true},
+	keywords = {extending=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_extending",
 	greater_ego = 1,
@@ -284,7 +284,7 @@ newEntity{
 
 newEntity{
 	name = "evasive ", prefix=true,
-	keywords = {evasive_greater=true},
+	keywords = {evasive=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_evasive",
 	greater_ego = 1,
@@ -319,7 +319,7 @@ newEntity{
 
 newEntity{
 	name = "soothing ", prefix=true,
-	keywords = {soothing_greater=true},
+	keywords = {soothing=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_soothing",
 	greater_ego = 1,
@@ -354,7 +354,7 @@ newEntity{
 
 newEntity{
 	name = "cleansing ", prefix=true,
-	keywords = {cleansing_greater=true},
+	keywords = {cleansing=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_cleansing",
 	greater_ego = 1,
@@ -387,7 +387,7 @@ newEntity{
 
 newEntity{
 	name = "piercing ", prefix=true,
-	keywords = {piercing_greater=true},
+	keywords = {piercing=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_piercing",
 	greater_ego = 1,
@@ -420,7 +420,7 @@ newEntity{
 
 newEntity{
 	name = "powerful ", prefix=true,
-	keywords = {powerful_greater=true},
+	keywords = {powerful=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_powerful",
 	greater_ego = 1,
@@ -454,7 +454,7 @@ newEntity{
 
 newEntity{
 	name = "innervating ", prefix=true,
-	keywords = {innervating_greater=true},
+	keywords = {innervating=true},
 	level_range = {1, 50},
 	unique_ego = "charm_proc_innervating",
 	greater_ego = 1,

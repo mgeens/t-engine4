@@ -19,7 +19,7 @@
 
 newEntity{
 	name = " of psionic shield", addon=true, instant_resolve=true,
-	keywords = {psionicshield=true},
+	keywords = {['psionic shield']=true},
 	level_range = {1, 50},
 	rarity = 15,
 	charm_power_def = {add=3, max=200, floor=true},
