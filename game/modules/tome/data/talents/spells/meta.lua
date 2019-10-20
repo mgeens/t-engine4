@@ -25,6 +25,7 @@ newTalent{
 	random_ego = "utility",
 	mana = 40,
 	cooldown = 25,
+	no_energy = function(self, t) return self:getTalentLevel(t) >= 7 and true or false end,
 	tactical = { CURE = function(self, t, aitarget)
 			local nb = 0
 			for eff_id, p in pairs(self.tmp) do
@@ -111,7 +112,9 @@ newTalent{
 	info = function(self, t)
 		local count = t.getRemoveCount(self, t)
 		return ([[Removes up to %d magical effects (good effects from foes, and bad effects from friends) from the target.
-		At level 3, it can be targeted.]]):
+		At level 3, it can be targeted.
+		At level 7, it takes no turn to cast.
+		]]):
 		format(count)
 	end,
 }
