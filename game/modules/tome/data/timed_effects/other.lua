@@ -988,7 +988,6 @@ newEffect{
 		bonusLevel >= 3 and "#WHITE#" or "#GREY#", def.getRetchCD(math.max(level, 3)), def.getRetchLevel(math.max(level, 3)), def.getLivingDeathFactor(math.max(level, 3)) * 100,
 		bonusLevel >= 4 and "#WHITE#" or "#GREY#", def.getReprieveChance(math.max(level, 4)))
 	end,
-	charges = function(self, eff) return (tostring(eff.level)) end,
 	activate = function(self, eff)
 		local def, level, bonusLevel = self.tempeffect_def[self.EFF_CURSE_OF_CORPSES], eff.level, math.min(eff.unlockLevel, eff.level)
 
@@ -1154,7 +1153,6 @@ newEffect{
 		bonusLevel >= 3 and "#WHITE#" or "#GREY#", def.getConspiratorChance(math.max(level, 3)),
 		bonusLevel >= 4 and "#WHITE#" or "#GREY#", def.getManiaDamagePercent(math.max(level, 4)))
 	end,
-	charges = function(self, eff) return (tostring(eff.level)) end,
 	activate = function(self, eff)
 		local def, level, bonusLevel = self.tempeffect_def[self.EFF_CURSE_OF_MADNESS], eff.level, math.min(eff.unlockLevel, eff.level)
 
@@ -1361,7 +1359,6 @@ newEffect{
 		bonusLevel >= 3 and "#WHITE#" or "#GREY#", def.getShroudResistsAllChange(math.max(level, 3)),
 		bonusLevel >= 4 and "#WHITE#" or "#GREY#", def.getShroudResistsAllChange(math.max(level, 4)))
 	end,
-	charges = function(self, eff) return (tostring(eff.level)) end,
 	activate = function(self, eff)
 		local def, level, bonusLevel = self.tempeffect_def[self.EFF_CURSE_OF_SHROUDS], eff.level, math.min(eff.unlockLevel, eff.level)
 
@@ -1521,7 +1518,6 @@ newEffect{
 		bonusLevel >= 3 and "#WHITE#" or "#GREY#", self:damDesc(DamageType.MIND, def.getHarrowDam(self, math.max(level, 3))), self:damDesc(DamageType.DARKNESS,  def.getHarrowDam(self, math.max(level, 3))),
 		bonusLevel >= 4 and "#WHITE#" or "#GREY#", eff.nightmareChance or 0, def.getNightmareRadius(math.max(level, 4)), def.getNightmareChance(math.max(level, 4)))
 	end,
-	charges = function(self, eff) return (tostring(eff.level)) end,
 	activate = function(self, eff)
 		local def, level, bonusLevel = self.tempeffect_def[self.EFF_CURSE_OF_NIGHTMARES], eff.level, math.min(eff.unlockLevel, eff.level)
 
@@ -1739,7 +1735,6 @@ newEffect{
 		bonusLevel >= 3 and "#WHITE#" or "#GREY#", def.getMissedOpportunities(math.max(level, 3)),
 		bonusLevel >= 4 and "#WHITE#" or "#GREY#", def.getUnfortunateEndIncrease(math.max(level, 4)))
 	end,
-	charges = function(self, eff) return (tostring(eff.level)) end,
 	activate = function(self, eff)
 		local def, level, bonusLevel = self.tempeffect_def[self.EFF_CURSE_OF_MISFORTUNE], eff.level, math.min(eff.unlockLevel, eff.level)
 
