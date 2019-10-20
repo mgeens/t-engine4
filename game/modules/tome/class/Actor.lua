@@ -3091,6 +3091,8 @@ function _M:die(src, death_note)
 						self:removeObject(inven, i, true)
 						game.level.map:addObject(dropx, dropy, o)
 						if game.level.map.attrs(dropx, dropy, "obj_seen") then game.level.map.attrs(dropx, dropy, "obj_seen", false) end
+
+						if o.tinker then self:doTakeoffTinker(o, o.tinker, true) end
 					else
 						o:removed()
 					end
@@ -7698,6 +7700,7 @@ function _M:doTakeoffTinker(base_o, oldo, only_remove)
 
 	local _, base_inven
 	local mustwear = base_o.wielded
+	print("!!!!!!!!!!!!!!!!!!!!!!!!!!", mustwear)
 	if mustwear then
 		_, _, base_inven = self:findInAllInventoriesByObject(base_o)
 		self:onTakeoff(base_o, base_inven, true)
