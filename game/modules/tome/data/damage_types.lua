@@ -1346,7 +1346,8 @@ newDamageType{
 		state = initState(state)
 		useImplicitCrit(src, state)
 		local chance = 25
-		if _G.type(dam) == "table" then chance, dam = dam.chance, dam.dam end
+		local do_wet = false
+		if _G.type(dam) == "table" then chance, dam, do_wet = dam.chance, dam.dam, dam.do_wet end
 
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and target:hasEffect(target.EFF_WET) then dam = dam * 1.3 chance = 50 end
@@ -1354,6 +1355,9 @@ newDamageType{
 		local realdam = DamageType:get(DamageType.COLD).projector(src, x, y, DamageType.COLD, dam, state)
 		if rng.percent(chance) then
 			DamageType:get(DamageType.FREEZE).projector(src, x, y, DamageType.FREEZE, {dur=2, hp=70+dam*1.5}, state)
+		end
+		if target and do_wet and not target:hasEffect(target.EFF_FROZEN) then
+			target:setEffect(target.EFF_WET, 3, {apply_power=math.max(src:combatSpellpower(), src:combatMindpower()), min_dur=1})
 		end
 		return realdam
 	end,
@@ -1927,6 +1931,7 @@ newDamageType{
 				if newfeat then
 					game.level.map(x, y, Map.TERRAIN, newfeat)
 					src.dug_times = (src.dug_times or 0) + 1
+					if src.turn_procs then src.turn_procs.has_dug = (src.turn_procs.has_dug or 0) + 1 end
 					game.nicer_tiles:updateAround(game.level, x, y)
 					if not silence then
 						game.logSeen({x=x,y=y}, "%s turns into %s.", feat.name:capitalize(), newfeat.name)

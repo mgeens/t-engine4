@@ -4494,3 +4494,18 @@ newEffect{
 	deactivate = function(self, eff)
 	end,
 }
+
+newEffect{
+	name = "AUGER_OF_DESTRUCTION", image = "talents/dig.png",
+	desc = "Auger of Destruction",
+	long_desc = function(self, eff) return ("Physical damage increased by %d%%."):format(eff.power) end,
+	type = "magical",
+	subtype = { physical=true,},
+	status = "beneficial",
+	parameters = {power=10},
+	on_gain = function(self, err) return nil, true end,
+	on_lose = function(self, err) return nil, true end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "inc_damage", {[DamageType.PHYSICAL] = eff.power})
+	end,
+}
