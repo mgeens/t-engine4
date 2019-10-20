@@ -2008,24 +2008,7 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
-			game.log("====CLEANING")
-			local list = {[game]=true}
-			local seen = {[game]=true}
-			while next(list) do
-				local t = next(list)
-				list[t] = nil
-				seen[t] = true
-
-				if t._tact_wt_cache then t._tact_wt_cache = nil end
-				if t._ai_tactical then t._ai_tactical = nil end
-				for k, e in pairs(t) do
-					if type(k) == "table" and not seen[k] then list[k] = true end
-					if type(e) == "table" and not seen[e] then list[e] = true end
-				end
-			end
-			game.log("====CLEANED!")
-do return end
-				self:changeLevel(1, "tareyal+bamboo-forest")
+			self:changeLevel(1, "tareyal+bamboo-forest")
 do return end
 			if self.zone.short_name ~= "test" then
 				self:changeLevel(1, "test")
