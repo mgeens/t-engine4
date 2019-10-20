@@ -199,8 +199,8 @@ newTalent{
 		return {type="cone", range=self:getTalentRange(t), radius=self:getTalentRadius(t), selffire=false, talent=t}
 	end,
 	getDamage = function(self, t)
-		local bonus = self:knowTalent(self.T_CHROMATIC_FURY) and self:combatTalentStatDamage(t, "wil", 30, 850) or 0
-		return self:combatTalentStatDamage(t, "str", 30, 850) + bonus
+		local bonus = self:knowTalent(self.T_CHROMATIC_FURY) and self:combatTalentStatDamage(t, "wil", 30, 650) or 0
+		return self:combatTalentStatDamage(t, "str", 30, 650) + bonus
 	end,  -- Higher damage because no debuff and delayed
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
