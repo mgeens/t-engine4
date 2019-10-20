@@ -811,7 +811,7 @@ end
 -- returns true/false (grid found?), grid x, grid y
 function _M:aiCanFleeDmapKeepLos()
 	if self:attr("never_move") then return false end -- Dont move, dont flee
-	if self.ai_target.actor then
+	if self.ai_target.actor and self.ai_target.actor.distanceMap then
 		local act = self.ai_target.actor
 		local ax, ay = self:aiSeeTargetPos(act)
 		local dir, c
