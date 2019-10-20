@@ -217,7 +217,7 @@ newTalent{
 		local ressistpen = t.getResistPenalty(self, t)
 		local regen = t.getRegen(self, t)
 		return ([[Surround yourself with natural forces, ignoring %d%% acid resistance of your targets.
-		In addition, the acid will nurish your bloated oozes, giving them an additional %0.1f life regeneration per turn.]])
+		In addition, the acid will nourish your bloated oozes, giving them an additional %0.1f life regeneration per turn.]])
 		:format(ressistpen, regen)
 	end,
 }

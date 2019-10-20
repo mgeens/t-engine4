@@ -219,7 +219,6 @@ newTalent{
 			if #tgts <= 0 then break end
 			local a, id = rng.table(tgts)
 			table.remove(tgts, id)
-			table.remove(tgts)
 			self:project({type="beam", friendlyfire=false, selffire=false, talent=t, self.x, self.y}, a.x, a.y, DamageType.LIGHT, dam)
 			game.level.map:particleEmitter(self.x, self.y, math.max(math.abs(a.x-self.x), math.abs(a.y-self.y)), "light_beam", {tx=a.x-self.x, ty=a.y-self.y})
 		end
