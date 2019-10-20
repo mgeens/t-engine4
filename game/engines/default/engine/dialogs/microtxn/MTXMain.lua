@@ -27,7 +27,7 @@ module(..., package.seeall, class.inherit(Dialog))
 _M.force_ui_inside = "microtxn"
 
 function _M:init(mode)
-	self.base_title_text = game.__mod_info.long_name.." #GOLD#Purchsables#LAST#"
+	self.base_title_text = game.__mod_info.long_name.." #GOLD#Purchasables#LAST#"
 	Dialog.init(self, self.base_title_text, 200, game.h * 0.8)
 
 	local do_purchase = ButtonImage.new{alpha_unfocus=1, file="microtxn-ui/action_purchase.png", fct=function() game:unregisterDialog(self) game.key:triggerVirtual("MTXN_PURCHASE") end}
