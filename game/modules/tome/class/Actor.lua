@@ -75,6 +75,16 @@ _M._no_save_fields.resting = true
 -- No need to save __project_source either, it's a turn by turn thing
 _M._no_save_fields.__project_source = true
 
+-- Dont save the the AI caches
+_M._no_save_fields._tact_wt_cache = true
+_M._no_save_fields._turn_ai_tactical = true
+_M._no_save_fields.aiOHash = true
+_M._no_save_fields.aiDHash = true
+_M._no_save_fields.OHash = true
+_M._no_save_fields.OHashProps = true
+_M._no_save_fields.DHash = true
+_M._no_save_fields.DHashProps = true
+
 -- alt_node fields (controls fields copied with cloneActor by default)
 _M.clone_nodes = table.merge({running_fov=false, running_prev=false,
 	-- spawning/death fields:
@@ -649,6 +659,7 @@ function _M:act()
 	end
 
 	self.turn_procs = {}
+	self._turn_ai_tactical = nil
 	if temp then self.turn_procs.multi = temp end
 
 	-- Break some sustains if certain resources are too low
