@@ -571,7 +571,7 @@ end
 
 function _M:getMapSize()
 	local w, h = core.display.size()
-	return 0, 0, w, (self.map_h_stop or 80) - 16
+	return 0, 0, w, (self.map_h_stop or 80)
 end
 
 function _M:uiMoveResize(what, button, mx, my, xrel, yrel, bx, by, event, mode, on_change, add_text)
