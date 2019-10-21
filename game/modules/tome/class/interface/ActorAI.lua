@@ -674,6 +674,7 @@ function _M:aiGridDamage(gx, gy)
 	gx = gx or self.x
 	gy = gy or self.y
 	local g = game.level.map(gx, gy, engine.Map.TERRAIN)
+	if not g then return 0, 0 end
 	local dam, air = 0, 0
 	if not self:attr("no_breath") then -- check for suffocating terrain
 		local air_level, air_condition = g:check("air_level", gx, gy), g:check("air_condition", gx, gy)
