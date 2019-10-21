@@ -76,7 +76,7 @@ _M._no_save_fields.resting = true
 _M._no_save_fields.__project_source = true
 
 -- Dont save the the AI caches
-_M._no_save_fields._ai_tact_wt_cache = true
+_M._no_save_fields._ai_tact_wt_cache = true 
 _M._no_save_fields._turn_ai_tactical = true
 _M._no_save_fields.aiOHash = true
 _M._no_save_fields.aiDHash = true
