@@ -99,6 +99,7 @@ summonTemporalHound = function(self, t)
 	
 	-- Make sure to update sustain counter when we die
 	m.on_die = function(self)
+		if not self.summoner then return end
 		local p = self.summoner:isTalentActive(self.summoner.T_TEMPORAL_HOUNDS)
 		local tid = self.summoner:getTalentFromId(self.summoner.T_TEMPORAL_HOUNDS)
 		if p then
@@ -107,6 +108,7 @@ summonTemporalHound = function(self, t)
 	end
 	-- Make sure hounds stay close
 	m.on_act = function(self)
+		if not self.summoner then return end
 		local x, y = self.summoner.x, self.summoner.y
 		if game.level:hasEntity(self.summoner) and core.fov.distance(self.x, self.y, x, y) > 10 then
 			-- Clear it's targeting on teleport
@@ -122,6 +124,7 @@ summonTemporalHound = function(self, t)
 	end
 	-- Unravel?
 	m.on_takehit = function(self, value, src)
+		if not self.summoner then return end
 		if value >= self.life and self.summoner:knowTalent(self.summoner.T_TEMPORAL_VIGOUR) then
 			self.summoner:callTalent(self.summoner.T_TEMPORAL_VIGOUR, "doUnravel", self, value)
 		end

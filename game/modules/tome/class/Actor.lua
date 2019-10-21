@@ -76,7 +76,7 @@ _M._no_save_fields.resting = true
 _M._no_save_fields.__project_source = true
 
 -- Dont save the the AI caches
-_M._no_save_fields._tact_wt_cache = true
+_M._no_save_fields._ai_tact_wt_cache = true
 _M._no_save_fields._turn_ai_tactical = true
 _M._no_save_fields.aiOHash = true
 _M._no_save_fields.aiDHash = true
@@ -5599,7 +5599,8 @@ function _M:preUseTalent(ab, silent, fake)
 			rname = res_def.short_name
 			cost = ab[rname]
 			if cost then
-				cost = (util.getval(cost, self, ab) or 0) * (util.getval(res_def.cost_factor, self, ab, true, cost) or 1)
+				cost = util.getval(cost, self, ab) or 0
+				cost = cost * (util.getval(res_def.cost_factor, self, ab, true, cost) or 1)
 				cost = self:alterTalentCost(ab, rname, cost)
 				if cost ~= 0 then
 					rmin, rmax = self[res_def.getMinFunction](self), self[res_def.getMaxFunction](self)
