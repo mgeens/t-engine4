@@ -2916,11 +2916,15 @@ end
 function _M:cloneActor(post_copy, alt_nodes)
 	local a, post_copy = engine.Actor.cloneActor(self, post_copy, alt_nodes)
 	a.immune_possession = 1
+	a._ai_tact_wt_cache = nil
+	a._turn_ai_tactical = nil
 	a:fireTalentCheck("callbackOnCloned", "actor", self, post_copy, alt_nodes)
 	return a, post_copy
 end
 function _M:cloneFull(post_copy)
 	local a = engine.Actor.cloneFull(self, post_copy)
+	a._ai_tact_wt_cache = nil
+	a._turn_ai_tactical = nil
 	a:fireTalentCheck("callbackOnCloned", "full", self, post_copy)
 	return a
 end
