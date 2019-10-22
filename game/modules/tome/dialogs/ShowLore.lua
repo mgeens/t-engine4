@@ -23,12 +23,12 @@ local ListColumns = require "engine.ui.ListColumns"
 local TextzoneList = require "engine.ui.TextzoneList"
 local Separator = require "engine.ui.Separator"
 local Image = require "engine.ui.Image"
+local LorePopup = require "mod.dialogs.LorePopup"
 
 module(..., package.seeall, class.inherit(Dialog))
 
 function _M:init(title, actor)
 	self.actor = actor
-	print("Lore")
 	local total = #actor.lore_defs + actor.additional_lore_nb
 	local nb = 0
 	for id, data in pairs(actor.lore_known) do nb = nb + 1 end
@@ -44,7 +44,7 @@ function _M:init(title, actor)
 		{name="", width={40,"fixed"}, display_prop="order", sort="order"},
 		{name="Lore", width=60, display_prop="name", sort="name"},
 		{name="Category", width=40, display_prop="cat", sort="cat"},
-	}, list=self.list, fct=function(item) end, select=function(item, sel) self:select(item) end}
+	}, list=self.list, fct=function(item) self:popup(item) end, select=function(item, sel) self:select(item) end}
 
 	self:loadUI{
 		{left=0, top=0, ui=self.c_list},
@@ -66,12 +66,18 @@ function _M:generateList()
 	local i = 0
 	for id, _ in pairs(self.actor.lore_known) do
 		local l = self.actor:getLore(id)
-		list[#list+1] = { name=l.name, desc=util.getval(l.lore), cat=l.category, order=l.order, image=l.image }
+		list[#list+1] = { name=l.name, desc=util.getval(l.lore), cat=l.category, order=l.order, image=l.image, lore=l }
 		i = i + 1
 	end
 	-- Add known artifacts
 	table.sort(list, function(a, b) return a.order < b.order end)
 	self.list = list
+end
+
+function _M:popup(item)
+	if item then
+		LorePopup.new(item.lore, game.w * 0.6, 0.8)
+	end
 end
 
 function _M:select(item)
