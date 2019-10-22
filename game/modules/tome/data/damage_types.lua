@@ -3495,7 +3495,9 @@ newDamageType{
 				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				DamageType:get(DamageType.MIND).projector(src, x, y, DamageType.MIND, dam, state)
 				local chance = src.callTalent and src:callTalent(src.T_SAVAGE_HUNTER, "getChance")
-				target:setEffect(target.EFF_CURSED_MIASMA, 1, {chance=chance, no_ct_effect=true})
+				if rng.percent(chance) then
+					target:setEffect(target.EFF_CURSED_MIASMA, 1, {chance=chance, no_ct_effect=true})
+				end
 			end
 		end
 	end,

@@ -27,11 +27,11 @@ newTalent{
 	require = cursed_lev_req1,
 	mode = "passive",
 	points = 5,
-	getATK = function(self, t) return self:combatTalentScale(t, 0.5, 2) end,
+	getATK = function(self, t) return self:combatTalentScale(t, 0.18, 1.2) end,
 	-- ATK bonus handled in Combat.lua with comment: -- Predator apr bonus
-	getAPR = function(self, t) return self:combatTalentScale(t, 0.25, 1) end,
+	getAPR = function(self, t) return self:combatTalentScale(t, 0.09, 0.6) end,
 	-- APR bonus handled in Combat.lua with comment: -- Predator apr bonus
-	getTypeKillMax = function(self, t) return math.floor(self:combatTalentLimit(t, 40, 10, 30)) end,
+	getTypeKillMax = function(self, t) return 50 end,-- math.floor(self:combatTalentLimit(t, 40, 10, 30)) end,
 	callbackOnKill = function(self, t, target)
 		local killmax = t.getTypeKillMax(self, t)
 		local type = tostring(target.type)
@@ -52,15 +52,10 @@ newTalent{
 			end
 		end
 		-- Hate gain for early game
-		if hitted and target then
-			local killmax = t.getTypeKillMax(self, t)
-			if target.type and self.predator_type_history and self.predator_type_history[target.type] and self.predator_type_history[target.type] >= killmax then return
-			else self:incHate(1) end
-		end
+--		if hitted and target then self:incHate(1) end
 	end,
 	info = function(self, t)
-		return ([[Improve your predation by learning from past hunts. You gain %0.2f accuracy and %0.2f armor penetration against foes for each foe of that type you have previously slain, up to %d of the type killed (%d accuracy and %d apr).
-		Additionally, you will gain 1 hate every time you attack a foe of a type you have killed less than %d of.]]):format(t.getATK(self, t), t.getAPR(self, t), t.getTypeKillMax(self, t), t.getATK(self, t) * t.getTypeKillMax(self, t), t.getAPR(self, t) * t.getTypeKillMax(self, t), t.getTypeKillMax(self, t))
+		return ([[Improve your predation by learning from past hunts. You gain %0.2f accuracy and %0.2f armor penetration against foes for each foe of that type you have previously slain, to a maximum of %d accuracy and %d apr.]]):format(t.getATK(self, t), t.getAPR(self, t), t.getATK(self, t) * t.getTypeKillMax(self, t), t.getAPR(self, t) * t.getTypeKillMax(self, t), t.getTypeKillMax(self, t))
 	end,
 }
 
@@ -71,6 +66,7 @@ newTalent{
 	require = cursed_lev_req2,
 	points = 5,
 	cooldown = 10,
+	no_energy = true,
 	radius = function(self, t) return 4 end,
 	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 3, 6) end,
 	getDamage = function(self, t) return self:combatTalentMindDamage(t, 0, 60) end,
@@ -205,8 +201,8 @@ newTalent{
 	callbackOnMeleeAttack = function(self, t, target, hitted, critted)
 		if hitted and critted
 		and not (self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma"))
-		and self:getHate() > 15 then
-			self:incHate(-15)
+		and self:getHate() > 8 then
+			self:incHate(-8)
 			local miasma_count = 0
 			local damage = self:mindCrit(t.getDamage(self, t))/2
 			local x, y = self.x, self.y
@@ -243,7 +239,7 @@ newTalent{
 		return ([[Upon making a critical melee attack the savagery of your predation causes a Cursed Miasma to begin permeating your hunting grounds.
 		The miasma will seep from %d locations, including your own, within radius %d, deals %0.2f damage split between Darkness and Mind and blocks sight.
 		Prey lost within your miasma have a %d%% chance to lose track of you and may mistake friends for foe.
-		Savage Hunter costs 15 Hate on trigger and does not trigger when you're in Cursed Miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
+		Savage Hunter costs #ffa0ff#8 Hate#LAST# on trigger and does not trigger when you're in Cursed Miasma.]]):format(t.getMiasmaCount(self, t), self:getTalentRadius(t), self:damDesc(DamageType.DARKNESS, t.getDamage(self, t)/2) + self:damDesc(DamageType.MIND, t.getDamage(self, t)/2), t.getChance(self, t))
 	end,
 }
 
@@ -254,10 +250,10 @@ newTalent{
 	require = cursed_lev_req3,
 	points = 5,
 	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 70) end,
-	getCritResist = function(self, t) return self:combatTalentScale(t, 0, 20) end,
+	getPhysPower = function(self, t) return self:combatTalentMindDamage(t, 20, 70) end,
 	passives = function(self, t, p)
 		if self.x and self.y and game.level.map:checkAllEntities(self.x, self.y, "cursedMiasma") then
-			self:talentTemporaryValue(p, "ignore_direct_crits", t.getCritResist(self, t))
+			self:talentTemporaryValue(p, "combat_dam", t.getPhysPower(self, t))
 			self:talentTemporaryValue(p, "stealth", t.getStealthPower(self, t))
 			if self.updateMainShader then self:updateMainShader() end
 		end
@@ -266,8 +262,8 @@ newTalent{
 		self:updateTalentPassives(t.id)
 	end,
 	info = function(self, t)
-		return ([[While shrouded in cursed miasma you gain stealth (%d power) and %d%% chance to shrug off critical hits.
-		The stealth power will increase with your mindpower.]]):format(t.getStealthPower(self, t), t.getCritResist(self, t))
+		return ([[While shrouded in cursed miasma you gain stealth (%d power) and %d physical power.
+		The stealth power and physical power will increase with your mindpower.]]):format(t.getStealthPower(self, t), t.getPhysPower(self, t))
 	end,
 }
 

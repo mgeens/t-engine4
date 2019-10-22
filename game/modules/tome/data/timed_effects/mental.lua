@@ -649,10 +649,8 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is surrounded by a cursed miasma.", "+Cursed Miasma" end,
 	on_lose = function(self, err) return "The cursed miasma around #target# dissipates.", "-Cursed Miasma" end,
 	activate = function(self, eff)
-		if rng.percent(eff.chance) then
-			self:setTarget(nil) -- Reset target to grab a random new one
-			self:effectTemporaryValue(eff, "hates_everybody", 1)
-		end
+		self:setTarget(nil) -- Reset target to grab a random new one
+		self:effectTemporaryValue(eff, "hates_everybody", 1)
 		if core.shader.active() then
 			self:effectParticles(eff, {type="shader_shield", args={size_factor=1.5, img="shadow_shot_debuff_tentacles"}, shader={type="tentacles", wobblingType=0, appearTime=0.8, time_factor=2000, noup=0.0}})
 		end

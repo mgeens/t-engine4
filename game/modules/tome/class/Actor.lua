@@ -1945,7 +1945,10 @@ function _M:tooltip(x, y, seen_by)
 	end
 	if game.player:knowTalent(self.T_PREDATOR) then
 		local predatorcount = game.player.predator_type_history and game.player.predator_type_history[self.type] or 0
-		ts:add({"color", 0, 255, 128}, ("#ffa0ff#Predator Count: %d#LAST#"):format(predatorcount), {"color", "WHITE"}, true)
+		local tp = game.player:getTalentFromId(game.player.T_PREDATOR)
+		local predatorATK = tp.getATK(game.player, tp) * predatorcount
+		local predatorAPR = tp.getAPR(game.player, tp) * predatorcount
+		ts:add({"color", 0, 255, 128}, ("#ffa0ff#Predator: +%d acc, +%d apr#LAST#"):format(predatorATK, predatorAPR), {"color", "WHITE"}, true)
 	end
 
 	--ts:add(("Stats: %d / %d / %d / %d / %d / %d"):format(self:getStr(), self:getDex(), self:getCon(), self:getMag(), self:getWil(), self:getCun()), true)
