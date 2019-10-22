@@ -38,7 +38,6 @@ newTalent{
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		local empower = necroEssenceDead(self)
-		game.log("%d %d", x, y)
 		self:project(tg, x, y, function(px, py)
 			local actor = game.level.map(px, py, Map.ACTOR)
 			if actor and actor ~= self then
