@@ -48,7 +48,7 @@ newTalent{
 		if not x or not y then return nil end
 
 		if necroEssenceDead(self, true) then
-			self:projectApply(tg, x, y, Map.ACTOR, function(target) target:setEffect(target.EFF_WET, t.getDuration(self, t), {}) end)
+			self:projectApply(tg, x, y, Map.ACTOR, function(target) target:setEffect(target.EFF_WET, t.getDuration(self, t), {apply_power=self:combatSpellpower()}) end)
 			local empower = necroEssenceDead(self)
 			if empower then empower() end
 		end
