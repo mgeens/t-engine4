@@ -79,8 +79,10 @@ newTalent{
 		if core.fov.distance(self.x, self.y, target.x, target.y) > 1 then
 			-- Move first so we get the full benefit of Shadowstrike
 			target:move(sx, sy, true)
-			self:project(tg, target.x, target.y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
 		end
+		
+		self:project(tg, target.x, target.y, DamageType.DARKNESS, self:spellCrit(t.getDamage(self, t)))
+
 		if target:canBe("silence") then
 			target:setEffect(target.EFF_SILENCED, t.getDuration(self, t), {apply_power=self:combatAttack()})
 		else
