@@ -1175,6 +1175,7 @@ function _M:combatGetTraining(weapon)
 				end
 			end
 		end
+
 		return self:getTalentFromId(max_tid)
 	else
 		return self:getTalentFromId(_M.weapon_talents[weapon.talented])
@@ -1184,7 +1185,7 @@ end
 -- Gets the added damage for a weapon based on training.
 function _M:combatTrainingDamage(weapon)
 	local t = self:combatGetTraining(weapon)
-	if not t then return 0 end
+	if not t or not self:knowTalent(t) then return 0 end
 	if t.getDamage then return util.getval(t.getDamage, self, t, weapon.talented) end
 	return self:getTalentLevel(t) * 10
 end
@@ -1192,7 +1193,7 @@ end
 -- Gets the percent increase for a weapon based on training.
 function _M:combatTrainingPercentInc(weapon)
 	local t = self:combatGetTraining(weapon)
-	if not t then return 0 end
+	if not t or not self:knowTalent(t) then return 0 end
 	if t.getPercentInc then return util.getval(t.getPercentInc, self, t, weapon.talented) end
 	return math.sqrt(self:getTalentLevel(t) / 5) / 2
 end
