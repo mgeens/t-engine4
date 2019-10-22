@@ -259,7 +259,7 @@ function _M:display()
 		self:makeTexture("LEVELUP!", self.w - fw, h, colors.VIOLET.r, colors.VIOLET.g, colors.VIOLET.b, fw)
 		self.items[#self.items].glow = true
 		self:mouseTooltip(("#GOLD##{bold}#%s\n#WHITE##{normal}#Unused stats: %d\nUnused class talents: %d\nUnused generic talents: %d\nUnused categories: %d"):format(player.name, player.unused_stats, player.unused_talents, player.unused_generics, player.unused_talents_types), self.w, self.font_h, 0, h, function()
-			player:playerLevelup()
+			game.key:triggerVirtual("LEVELUP")
 		end)
 		h = h + self.font_h
 	end
