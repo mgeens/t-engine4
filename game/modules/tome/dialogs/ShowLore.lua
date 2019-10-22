@@ -20,6 +20,7 @@
 require "engine.class"
 local Dialog = require "engine.ui.Dialog"
 local ListColumns = require "engine.ui.ListColumns"
+local Textbox = require "engine.ui.Textbox"
 local TextzoneList = require "engine.ui.TextzoneList"
 local Separator = require "engine.ui.Separator"
 local Image = require "engine.ui.Image"
@@ -40,14 +41,17 @@ function _M:init(title, actor)
 
 	self:generateList()
 
-	self.c_list = ListColumns.new{width=math.floor(self.iw / 2 - vsep.w / 2), height=self.ih - 10, scrollbar=true, sortable=true, columns={
+	self.c_search = Textbox.new{title="Search: ", text="", chars=20, max_len=60, fct=function() end, on_change=function(text) self:search(text) end}
+
+	self.c_list = ListColumns.new{width=math.floor(self.iw / 2 - vsep.w / 2), height=self.ih - 10 - self.c_search.h, scrollbar=true, sortable=true, columns={
 		{name="", width={40,"fixed"}, display_prop="order", sort="order"},
 		{name="Lore", width=60, display_prop="name", sort="name"},
 		{name="Category", width=40, display_prop="cat", sort="cat"},
 	}, list=self.list, fct=function(item) self:popup(item) end, select=function(item, sel) self:select(item) end}
 
 	self:loadUI{
-		{left=0, top=0, ui=self.c_list},
+		{left=0, top=0, ui=self.c_search},
+		{left=0, top=self.c_search, ui=self.c_list},
 		{right=0, top=0, ui=self.c_desc},
 		{hcenter=0, top=5, ui=vsep},
 	}
@@ -60,18 +64,31 @@ function _M:init(title, actor)
 	}
 end
 
+function _M:search(text)
+	if text == "" then self.search_filter = nil
+	else self.search_filter = text end
+
+	self:generateList()
+end
+
+function _M:matchSearch(name)
+	if not self.search_filter then return true end
+	return name:lower():find(self.search_filter:lower(), 1, 1)
+end
+
 function _M:generateList()
 	-- Makes up the list
 	local list = {}
-	local i = 0
 	for id, _ in pairs(self.actor.lore_known) do
 		local l = self.actor:getLore(id)
-		list[#list+1] = { name=l.name, desc=util.getval(l.lore), cat=l.category, order=l.order, image=l.image, lore=l }
-		i = i + 1
+		if self:matchSearch(id) or self:matchSearch(l.name) or self:matchSearch(l.category) then
+			list[#list+1] = { name=l.name, desc=util.getval(l.lore), cat=l.category, order=l.order, image=l.image, lore=l }
+		end
 	end
 	-- Add known artifacts
 	table.sort(list, function(a, b) return a.order < b.order end)
 	self.list = list
+	if self.c_list then self.c_list:setList(list) end
 end
 
 function _M:popup(item)
