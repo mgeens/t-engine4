@@ -26,6 +26,7 @@ local basetrap = function(self, t, x, y, dur, add)
 		no_disarm_message = true,
 		message = false,
 		faction = self.faction,
+		canTrigger = function() return false end,
 		summoner = self, summoner_gain_exp = true,
 		temporary = dur,
 		x = x, y = y,
@@ -207,7 +208,6 @@ newTalent{
 		if not self:hasEffect(self.EFF_AETHER_AVATAR) then return end
 		if ab.mode == "sustained" then return end
 		if ab.use_only_arcane and self:getTalentLevel(t) >= ab.use_only_arcane then return end
-		if ab.type[1] == "spell/aegis" and self:hasEffect(self.EFF_AETHER_AVATAR).aegis then return end
 		if self.turn_procs.aether_avatar_penalty then return end
 		self:incMana(-50)
 		game.logSeen(self, "#VIOLET#%s loses 50 mana from using a non-Arcane talent!#LAST#", self.name:capitalize())
@@ -241,7 +241,10 @@ newTalent{
 	end,
 	action = function(self, t)
 		local aegis
-		self:setEffect(self.EFF_AETHER_AVATAR, t.getNb(self, t), {aegis = (self:getTalentLevel(t) > 4 )})
+		self:setEffect(self.EFF_AETHER_AVATAR, t.getNb(self, t), {})
+		if self:isTalentActive(self.T_PURE_AETHER) and self:getTalentLevel(self.T_PURE_AETHER) >= 5 then
+			self:removeEffectsFilter({type="physical", status="detrimental"}, self:callTalent(self.T_PURE_AETHER, "getNbRemove"))
+		end
 		game:playSoundNear(self, "talents/arcane")
 		return true
 	end,
@@ -266,6 +269,7 @@ newTalent{
 	cooldown = 30,
 	use_only_arcane = 1,
 	tactical = { BUFF = 2 },
+	getNbRemove = function(self, t) return math.floor(self:combatTalentScale(t, 1, 4)) end,
 	getDamageIncrease = function(self, t) return self:combatTalentScale(t, 2.5, 10) end,
 	getResistPenalty = function(self, t) return self:combatTalentLimit(t, 100, 17, 50, true) end, -- Limit < 100%	
 	activate = function(self, t)
@@ -294,7 +298,7 @@ newTalent{
 		local damageinc = t.getDamageIncrease(self, t)
 		local ressistpen = t.getResistPenalty(self, t)
 		return ([[Surround yourself with Pure Aether, increasing all your arcane damage by %0.1f%% and ignoring %d%% arcane resistance of your targets.
-		At level 4 it allows Aegis spells to be used while in Aether Avatar form without penalty.]])
-		:format(damageinc, ressistpen)
+		At level 5 casting Aether Avatar removes up to %d magical or physical detrimental effects.]])
+		:format(damageinc, ressistpen, t.getNbRemove(self, t))
 	end,
 }
