@@ -224,7 +224,7 @@ newTalent{
 		- Invoke Darkness: becomes a cone of darkness
 		- Shadow Tunnel: teleported minions will also be healed for 30%% of their max life
 		- Cold Flames: freeze chance increased to 100%%
-		- Ice Shards: each shard becomes a beam
+		- Freeze: becomes a ball of radius 2 and makes all targets wet
 		- Consume Soul: effect increased by 50%%]]):
 		format(nb)
 	end,

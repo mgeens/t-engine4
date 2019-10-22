@@ -32,13 +32,26 @@ newTalent{
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 12, 180) * t.cooldown(self,t) / 6 end, -- Gradually increase burst potential with c/d
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
+	target = function(self, t)
+		if necroEssenceDead(self, true) then
+			return {type="ball", radius=2, range=self:getTalentRange(t), talent=t}
+		else
+			return {type="hit", range=self:getTalentRange(t), talent=t}
+		end
+	end,
 	action = function(self, t)
-		local tg = {type="hit", range=self:getTalentRange(t), talent=t}
+		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
 		local target = game.level.map(x, y, Map.ACTOR)
 		if not x or not y then return nil end
+
+		if necroEssenceDead(self, true) then
+			self:projectApply(tg, x, y, Map.ACTOR, function(target) target:setEffect(target.EFF_WET, t.getDuration(self, t), {}) end)
+			local empower = necroEssenceDead(self)
+			if empower then empower() end
+		end
 
 		local dam = self:spellCrit(t.getDamage(self, t))
 		self:project(tg, x, y, DamageType.COLD, dam, {type="freeze"})
@@ -54,8 +67,8 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		return ([[Condenses ambient water on a target, freezing it for %d turns and damaging it for %0.2f.
-		If this is used on a friendly target the cooldown is reduced by 33%%.
-		The damage will increase with your Spellpower.]]):format(t.getDuration(self, t), damDesc(self, DamageType.COLD, damage))
+		If this is used on a friendly target the cooldown is reduced by 33%%.%s
+		The damage will increase with your Spellpower.]]):format(t.getDuration(self, t), damDesc(self, DamageType.COLD, damage), necroEssenceDead(self, true) and "\nAffects all creatures in radius 2." or "")
 	end,
 }
 
