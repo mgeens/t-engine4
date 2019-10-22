@@ -31,7 +31,7 @@ newTalent{
 	-- ATK bonus handled in Combat.lua with comment: -- Predator apr bonus
 	getAPR = function(self, t) return self:combatTalentScale(t, 0.09, 0.6) end,
 	-- APR bonus handled in Combat.lua with comment: -- Predator apr bonus
-	getTypeKillMax = function(self, t) return 50 end,-- math.floor(self:combatTalentLimit(t, 40, 10, 30)) end,
+	getTypeKillMax = function(self, t) return 50 end,
 	callbackOnKill = function(self, t, target)
 		local killmax = t.getTypeKillMax(self, t)
 		local type = tostring(target.type)
@@ -51,8 +51,6 @@ newTalent{
 				self.predator_type_history[type] = rng.range(killfloor, killmax)
 			end
 		end
-		-- Hate gain for early game
---		if hitted and target then self:incHate(1) end
 	end,
 	info = function(self, t)
 		return ([[Improve your predation by learning from past hunts. You gain %0.2f accuracy and %0.2f armor penetration against foes for each foe of that type you have previously slain, to a maximum of %d accuracy and %d apr.]]):format(t.getATK(self, t), t.getAPR(self, t), t.getATK(self, t) * t.getTypeKillMax(self, t), t.getAPR(self, t) * t.getTypeKillMax(self, t), t.getTypeKillMax(self, t))
