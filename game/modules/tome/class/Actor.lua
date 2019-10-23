@@ -1963,7 +1963,7 @@ function _M:tooltip(x, y, seen_by)
 	local resists = tstring{}
 	local first = true
 	ts:add({"color", "ANTIQUE_WHITE"}, "Resists: ")
-	for t, _ in table.orderedPairs2(self.resists, dt_order) do
+	for t, _ in table.orderedPairs2(self.resists or {}, dt_order) do
 		local v = self:combatGetResist(t)
 		if t == "all" or t == "absolute" then
 			ts:add({"color", "LIGHT_BLUE"}, tostring(math.floor(v)) .. "%", " ", {"color", "LAST"}, t..", ")
