@@ -100,7 +100,7 @@ Talents.is_a_type = {
 	is_nature = "a nature gift",
 	is_antimagic = "an antimagic ability",
 	is_summon = "a summon power",
-	use_only_arcane = "usable with Aether Avatar",
+	use_only_arcane = "usable during Aether Avatar",
 }
 
 Talents.damDesc = damDesc

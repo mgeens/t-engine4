@@ -6279,6 +6279,11 @@ function _M:postUseTalent(ab, ret, silent)
 		game.flyers:add(sx, sy - game.level.map.tile_h / 2, 20, rng.float(-0.1, 0.1), rng.float(-0.5,-0.8), name, colors.simple(colors.OLIVE_DRAB))
 	end
 
+	if self.shimmer_sustains_hide and self.shimmer_sustains_hide[ab.id] then
+		local ShimmerRemoveSustains = require "mod.dialogs.ShimmerRemoveSustains"
+		ShimmerRemoveSustains:removeAura(self, ab.id, ret)
+	end
+
 	return true
 end
 
