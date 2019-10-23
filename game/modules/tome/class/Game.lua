@@ -2008,6 +2008,9 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			package.loaded["mod.dialogs.ShimmerDemo"] = nil
+			self:registerDialog(require("mod.dialogs.ShimmerDemo").new(game.player, "iron throne couture: "))
+do return end
 			self:changeLevel(1, "tareyal+bamboo-forest")
 do return end
 			if self.zone.short_name ~= "test" then

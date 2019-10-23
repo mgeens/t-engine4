@@ -259,7 +259,7 @@ function _M:display(x, y, nb_keyframes, screen_x, screen_y, offset_x, offset_y, 
 		self.view:toScreen(x, y)
 	end
 
-	if self.loading < 1 then
+	if self.loading < 1 and not self.hide_loading then
 		self.loading_rotation = self.loading_rotation + nb_keyframes * 8
 		core.display.glMatrix(true)
 		core.display.glTranslate(x + self.loading_icon.w / 2, y + self.loading_icon.h / 2, 0)
