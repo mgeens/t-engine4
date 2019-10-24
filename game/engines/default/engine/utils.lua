@@ -20,9 +20,8 @@
 --- Utility functionality used by a lot of the base classes
 -- @script engine.utils
 
-if not core.game.stdout_write then
-	core.game.stdout_write = print
-end
+if not core.game.stdout_write then core.game.stdout_write = print end
+if not core.display.breakTextAllCharacter then core.display.breakTextAllCharacter = function()end end
 
 local lpeg = require "lpeg"
 
