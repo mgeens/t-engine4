@@ -20,6 +20,10 @@
 --- Utility functionality used by a lot of the base classes
 -- @script engine.utils
 
+if not core.game.stdout_write and io.write then
+	core.game.stdout_write = io.write
+end
+
 local lpeg = require "lpeg"
 
 function math.decimals(v, nb)
