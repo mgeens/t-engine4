@@ -209,7 +209,7 @@ newTalent{
 		local incStats = t.incStats(self, t, true)
 		return ([[Summon a Turtle for %d turns to distract your foes. Turtles are resilient, but not very powerful. However, they will periodically force any foes to attack them, and can protect themselves with their shell.
 		It will get %d Constitution, %d Dexterity and 18 willpower.
-		Your summons inherit some of your stats: increased damage%%, stun/pin/confusion/blindness resistance, armour penetration.
+		Your summons inherit some of your stats: increased damage%%, resistance penetration %%, stun/pin/confusion/blindness resistance, armour penetration.
 		Their Constitution will increase with your Mindpower.]])
 		:format(t.summonTime(self, t), incStats.con, incStats.dex)
 	end,
@@ -323,7 +323,7 @@ newTalent{
 		local incStats = t.incStats(self, t,true)
 		return ([[Summon a Spider for %d turns to harass your foes. Spiders can poison your foes and throw webs to pin them to the ground.
 		It will get %d Dexterity, %d Strength, 18 Willpower and %d Constitution.
-		Your summons inherit some of your stats: increased damage%%, stun/pin/confusion/blindness resistance, armour penetration.
+		Your summons inherit some of your stats: increased damage%%, resistance penetration %%, stun/pin/confusion/blindness resistance, armour penetration.
 		Their Dexterity will increase with your Mindpower.]])
 		:format(t.summonTime(self, t), incStats.dex, incStats.str, incStats.con)
 	end,
