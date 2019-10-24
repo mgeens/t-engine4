@@ -1372,7 +1372,11 @@ newInscription{
 -- update this to allow for escape tactic (after AI update)
 	action = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		local tg = {type="ball", nolock=true, pass_terrain=true, nowarning=true, range=data.range + data.inc_stat, radius=3, requires_knowledge=false}
+		--copy the block_path function from the engine so that we can call it for normal block_path checks
+		local old_block_path = engine.Target.defaults.block_path
+		--use an adjusted block_path to check if we have a tile in LOS; display targeting in yellow if we don't so we can warn the player their spell may fizzle
+		--note: we only use this if the original block_path would permit targeting 
+		local tg = {type="ball", nolock=true, pass_terrain=true, nowarning=true, range=data.range + data.inc_stat, radius=3, requires_knowledge=false, block_path=function(typ, lx, ly, for_highlights) if not self:hasLOS(lx, ly) and not old_block_path(typ, lx, ly, for_highlights) then return false, "unknown", true else return old_block_path(typ, lx, ly, for_highlights) end end}		
 		local x, y = self:getTarget(tg)
 		if not x then return nil end
 		-- Target code does not restrict the target coordinates to the range, it lets the project function do it
