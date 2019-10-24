@@ -135,5 +135,5 @@ function _M:innerDisplay(x, y, nb_keyframes)
 
 	core.display.drawQuad(-1000, -1000, 3000, 3000, 0x10, 0x0e, 0x10, 255)
 	-- core.display.drawQuad(-1000, -1000, 3000, 3000, 0x0e, 0x11, 0x11, 255)
-	self.actor:toScreen(nil, -50, -50, 100, 100)
+	self.actor:toScreen(nil, -50, -42, 100, 100)
 end
