@@ -201,8 +201,10 @@ echo "https://te4.org/dl/t-engine/t-engine4-osx-$filever.zip"
 ########## MD5
 echo "Computing MD5s..."
 cd t-engine4-linux64-"$filever"
-rm lib64/libopenal.so.1
-rm -f all.md5
+rm -rf lib64/ t-engine
+cp -r ../../../binaries-for-te4-md5/* .
+cp -r ../../../t-engine4.steam/game/dlcs/* game/addons/
+rm -f all.md5 ~/.t-engine/4.0/tome/all.md5
 while true; do
 	DISPLAY=:1 ./t-engine -Mtome -n -E'compute_md5_only="all.md5" sleep_on_auth=2' > /dev/null 2>&1
 	if test $? -eq 0; then break; fi
