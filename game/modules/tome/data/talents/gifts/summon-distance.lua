@@ -311,6 +311,8 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentStatDamage(t, "wil", 30, 120) end,
 	getDuration = function(self, t) return 4 end,
 	action = function(self, t)
+		local friendlyfire = true
+		if self.summoner and self.summoner:knowTalent(self.summoner.T_THROUGH_THE_CROWD) then friendlyfire = false end
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
 			self.x, self.y, t.getDuration(self, t),
@@ -323,7 +325,7 @@ newTalent{
 				e.y = e.src.y
 				return true
 			end,
-			false
+			false, friendlyfire
 		)
 		game:playSoundNear(self, "talents/ice")
 		return true
