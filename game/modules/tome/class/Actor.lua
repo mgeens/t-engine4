@@ -6280,7 +6280,7 @@ function _M:postUseTalent(ab, ret, silent)
 	end
 
 	if self.shimmer_sustains_hide and self.shimmer_sustains_hide[ab.id] then
-		local ShimmerRemoveSustains = require "mod.dialogs.ShimmerRemoveSustains"
+		local ShimmerRemoveSustains = require "mod.dialogs.shimmer.ShimmerRemoveSustains"
 		ShimmerRemoveSustains:removeAura(self, ab.id, ret)
 	end
 
