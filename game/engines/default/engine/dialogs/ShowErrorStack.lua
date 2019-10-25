@@ -29,6 +29,9 @@ module(..., package.seeall, class.inherit(Dialog))
 
 function _M:init(errs)
 	local beta = engine.version_hasbeta()
+	if game.getPlayer and game:getPlayer(true) and game:getPlayer(true).__created_in_version then
+		table.insert(errs, 1, "Game version (character creation): "..game:getPlayer(true).__created_in_version)
+	end
 	table.insert(errs, 1, "Game version: "..game.__mod_info.version_name..(beta and "-"..beta or ""))
 	local addons = {}
 	for name, data in pairs(game.__mod_info.addons or {}) do

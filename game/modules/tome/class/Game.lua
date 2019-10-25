@@ -231,6 +231,11 @@ function _M:newGame()
 
 		if config.settings.cheat then self.player.__cheated = true end
 
+		if game.__mod_info then
+			local beta = engine.version_hasbeta()
+			self.player.__created_in_version = game.__mod_info.version_name..(beta and "-"..beta or "")
+		end
+
 		self.player:recomputeGlobalSpeed()
 		self:rebuildCalendar()
 
