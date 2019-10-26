@@ -1378,3 +1378,13 @@ function resolvers.calc.birth_extra_tier1_zone(t, e)
 	game.state.birth.bonus_zone_tiers = game.state.birth.bonus_zone_tiers or {}
 	game.state.birth.bonus_zone_tiers[#game.state.birth.bonus_zone_tiers+1] = e[1]
 end
+
+--- Make robes great again
+function resolvers.robe_stats()
+	return {__resolver="robe_stats", __resolve_last=true}
+end
+function resolvers.calc.robe_stats(t, e)
+	e.wielder = e.wielder or {}
+	e.wielder.resists = e.wielder.resists or {}
+	e.wielder.resists.all = (e.wielder.resists.all or 0) + 5 + ((e.material_level or 1) * 2)
+end

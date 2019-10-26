@@ -1035,7 +1035,7 @@ newEntity{ base = "BASE_CLOTH_ARMOR",
 		combat_mindcrit = 5,
 		combat_spellresist = 10,
 		combat_physresist = 10,
-		inc_damage={[DamageType.NATURE] = 10, [DamageType.MIND] = 10, [DamageType.ACID] = 10},
+		inc_damage={[DamageType.NATURE] = 15, [DamageType.MIND] = 15, [DamageType.ACID] = 15},
 		resists={[DamageType.NATURE] = 30},
 		on_melee_hit={[DamageType.POISON] = 20, [DamageType.SLIME] = 20},
 	},
@@ -1318,7 +1318,7 @@ It was made by Humans for Humans; only they can harness the true power of the ro
 	cost = math.random(125,200),
 	material_level = 2,
 	wielder = {
-		inc_damage = {[DamageType.ARCANE]=10},
+		inc_damage = {[DamageType.ARCANE]=15},
 		inc_stats = { [Stats.STAT_MAG] = 6 },
 		combat_spellcrit = 15,
 		combat_spellpower = 15,
@@ -1330,7 +1330,7 @@ It was made by Humans for Humans; only they can harness the true power of the ro
 
 			self:specialWearAdd({"wielder","inc_stats"}, { [Stats.STAT_MAG] = 3, [Stats.STAT_CUN] = 9, })
 			self:specialWearAdd({"wielder","inc_damage"}, {[DamageType.ARCANE]=7})
-			self:specialWearAdd({"wielder","combat_spellcrit"}, 2)
+			self:specialWearAdd({"wielder","combat_spellcrit"}, 5)
 			game.logPlayer(who, "#LIGHT_BLUE#You feel as surge of power as you wear the vestments of the old Human Conclave!")
 		end
 	end,

@@ -2013,6 +2013,8 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
+			game.player:takeHit(5000, game.player)
+do return end
 			package.loaded["mod.dialogs.shimmer.ShimmerDemo"] = nil
 			self:registerDialog(require("mod.dialogs.shimmer.ShimmerDemo").new(game.player, "iron throne couture: "))
 do return end
