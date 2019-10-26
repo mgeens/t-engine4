@@ -3006,7 +3006,7 @@ newDamageType{
 				target:setEffect(target.EFF_SANCTITY, 1, {power=dam, no_ct_effect=true})
 			elseif target:canBe("silence") then
 				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
-				target:setEffect(target.EFF_SILENCED, 2, {apply_power=src:combatSpellpower(), min_dur=1}, true)
+				target:setEffect(target.EFF_SILENCED, 2, {apply_power=src:combatSpellpower(), min_dur=1, no_ct_effect=true}, true)
 			else
 				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				game.logSeen(target, "%s resists the silence!", target.name:capitalize())
@@ -3062,7 +3062,6 @@ newDamageType{
 				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				if target:checkHit(src:combatSpellpower(), target:combatPhysicalResist(), 0, 95, 15) and target:canBe("knockback") then
 					target:knockback(src.x, src.y, 1)
-					target:crossTierEffect(target.EFF_OFFBALANCE, src:combatSpellpower())
 					game.logSeen(target, "%s is knocked back!", target.name:capitalize())
 				else
 					game.logSeen(target, "%s resists the knockback!", target.name:capitalize())
