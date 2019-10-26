@@ -307,8 +307,9 @@ newTalent{
 		local tg = {type="ball", nolock=true, pass_terrain=false, nowarning=true, friendly_fire=true, default_target=self, range=range, radius=radius, talent=t}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		if t.canCreep(x, y) then t.createDark(self, x, y, damage, rng.range(5, 8), 4, 40, 0) end --creep target
+
 		local _ _, _, _, x, y = self:canProject(tg, x, y)
+		if t.canCreep(x, y) then t.createDark(self, x, y, damage, rng.range(5, 8), 4, 40, 0) end --creep target
 
 		-- get locations in line of movement from center
 		local locations = {}
