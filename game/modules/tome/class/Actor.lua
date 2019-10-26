@@ -7416,7 +7416,7 @@ function _M:addedToLevel(level, x, y)
 	if not self._rst_full then self:resetToFull() self._rst_full = true end -- Only do it once, the first time we come into being
 	local summoner = self.summoner
 	if summoner then summoner:attr("summoned_times", 1) end -- Count summons times (bonus summoned_times dealt with individually)
-	if summoner and summoner:knowTalent(summoner.T_BLIGHTED_SUMMONING) then -- apply blighted summoning
+	if summoner and summoner:knowTalent(summoner.T_BLIGHTED_SUMMONING) and not self.escort_quest then -- apply blighted summoning
 		summoner:callTalent(summoner.T_BLIGHTED_SUMMONING, "doBlightedSummon", self)
 	end
 

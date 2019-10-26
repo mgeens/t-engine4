@@ -163,14 +163,14 @@ uberTalent{
 	name = "Blighted Summoning",
 	mode = "passive",
 	require = { special={desc="Have summoned at least 100 creatures. More permanent summons may count as more than 1.", fct=function(self)
-		return self:attr("summoned_times") and self:attr("summoned_times") >= 100
+		return self:attr("summoned_times") and self:attr("summoned_times") >= 1
 	end} },
 	cant_steal = true,
 	-- Give the bonus to all summons immediately
 	on_learn = function(self, t)
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
-				if act ~= self and act.summoner == self then
+				if act ~= self and act.summoner == self and not act.escort_quest then
 					self:callTalent(self.T_BLIGHTED_SUMMONING, "doBlightedSummon", act)
 				end
 			end
