@@ -900,7 +900,7 @@ newEffect{
 newEffect{
 	name = "PRIMAL_ATTUNEMENT", image = "talents/infusion__wild.png",
 	desc = "Primal Attunement",
-	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%% and reducing a random debuff duration by %d%%."):format(eff.power, eff.reduce) end,
+	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%% and reducing a random debuff duration by %d each turn."):format(eff.power, eff.reduce) end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
