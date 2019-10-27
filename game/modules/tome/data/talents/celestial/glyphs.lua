@@ -66,9 +66,8 @@ newTalent{
 		local p = self:isTalentActive(self.T_GLYPHS)
 		if not p then return end
 		if p.glyphs_last_turn and ((game.turn - p.glyphs_last_turn) / 10) < t.getGlyphCD(self, t) then return end
-		p.glyphs_last_turn = game.turn
--- find a target
 
+		-- Find a target
 		-- Invalidate any target with a glyph adjacent
 		local valid_for_glyph = function(target)
 			local grids = core.fov.circle_grids(target.x, target.y, 1, true)
@@ -96,6 +95,9 @@ newTalent{
 			if #tgts < 1 then return nil end
 			target = rng.tableRemove(tgts)
 		end
+
+		-- Set cooldown after we think a glyph can be placed
+		p.glyphs_last_turn = game.turn
 
 --target glyphs
 		local tg = self:getTalentTarget(t)
