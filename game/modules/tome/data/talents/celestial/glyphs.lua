@@ -371,9 +371,9 @@ newTalent{
 	info = function(self, t)
 		local dam = t.getTriggerDam(self, t)
 		return ([[Your glyphs are imbued with celestial fury; they last %d turns longer and when triggered they will deal damage.
-		Glyph of Sunlight: Deals %0.2f light damage.
-		Glyph of Moonlight: Deals %0.2f darkness damage.
-		Glyph of Twilight: Deals %0.2f light and %0.2f darkness damage.]]):format(t.getPersistentDuration(self, t), damDesc(self, DamageType.LIGHT, dam), damDesc(self, DamageType.DARKNESS, dam), damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
+		#ffd700#Glyph of Sunlight#LAST#: Deals %0.2f light damage.
+		#7f7f7f#Glyph of Moonlight#LAST#: Deals %0.2f darkness damage.
+		#9D9DC9#Glyph of Twilight#LAST#: Deals %0.2f light and %0.2f darkness damage.]]):format(t.getPersistentDuration(self, t), damDesc(self, DamageType.LIGHT, dam), damDesc(self, DamageType.DARKNESS, dam), damDesc(self, DamageType.LIGHT, dam/2), damDesc(self, DamageType.DARKNESS, dam/2))
 	end,
 }
 
