@@ -628,7 +628,7 @@ newEffect{
 	on_lose = function(self, err) return "#Target# is no longer overwhelmed.", "-Overwhelmed" end,
 	parameters = { chance=5 },
 	activate = function(self, eff)
-		eff.defenseChangeId = self:addTemporaryValue("combat_atk", eff.defenseChange)
+		eff.defenseChangeId = self:addTemporaryValue("combat_def", -eff.defenseChange)
 		eff.particle = self:addParticles(Particles.new("overwhelmed", 1))
 	end,
 	deactivate = function(self, eff)
