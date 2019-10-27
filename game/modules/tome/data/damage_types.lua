@@ -1948,10 +1948,12 @@ newDamageType{
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
+		local dur = 7
+		if _G.type(dam) == "table" then dam, dur = dam.dam, dam.dur end
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			-- Freeze it, if we pass the test
-			target:setEffect(target.EFF_SLOW, 7, {power=dam, apply_power=src:combatSpellpower()})
+			target:setEffect(target.EFF_SLOW, dur, {power=dam, apply_power=src:combatSpellpower()})
 		end
 	end,
 }
