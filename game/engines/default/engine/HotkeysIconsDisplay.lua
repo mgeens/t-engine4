@@ -187,7 +187,7 @@ function _M:display()
 							color = {255,0,0}
 							angle = 360 * (1 - (a.talents_cd[t.id] / a:getTalentCooldown(t)))
 						end
-						txt = tostring(a:isTalentCoolingDown(t))
+						txt = tostring(math.ceil(a:isTalentCoolingDown(t)))
 					elseif a:isTalentActive(t.id) then
 						color = {255,255,0}
 						frame = "sustain"
@@ -216,7 +216,7 @@ function _M:display()
 						color = {255,0,0}
 						angle = 360 * (1 - (a.talents_cd[t.id] / a:getTalentCooldown(t)))
 						frame = "cooldown"
-						txt = tostring(a:isTalentCoolingDown(t))
+						txt = tostring(math.ceil(a:isTalentCoolingDown(t)))
 					end
 				elseif o and (o.use_talent or o.use_power) then
 					angle = 360 * ((o.power / o.max_power))
