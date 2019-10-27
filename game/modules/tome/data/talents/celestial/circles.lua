@@ -183,6 +183,13 @@ newTalent{
 	getSlow = function(self, t) return 50 end,
 	getDuration = function(self, t) return self:combatTalentLimit(t, 15, 1, 10) end,
 	getSlowDur = function(self, t) return self:combatTalentLimit(t, 7, 2, 5) end,
+	on_pre_use = function(self, t, silent)
+		if not game.level then return end
+		for i, e in ipairs(game.level.map.effects) do
+			if e.src and e.src == self and (e.damtype == DamageType.SHIFTINGSHADOWS or e.damtype == DamageType.SANCTITY or e.damtype == DamageType.WARDING or e.damtype == DamageType.BLAZINGLIGHT) then return true end
+		end
+		return false
+	end,
 	action = function(self, t)
 		local dur = t.getDuration(self, t)
 		self:setEffect(self.EFF_SURGING_CIRCLES, dur, {})
