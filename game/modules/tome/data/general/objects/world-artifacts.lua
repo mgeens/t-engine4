@@ -1690,7 +1690,8 @@ newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SKIN_OF_MANY",
 		talents_types_mastery = { ["cunning/stealth"] = -0.2, },
 	},
 	on_wear = function(self, who)
-		if who.descriptor and who.descriptor.race == "Undead" then
+		-- We cant use :attr("undead") as this can easily change so .. ugh :/
+		if who.descriptor and (who.descriptor.race == "Undead" or who.descriptor.race == "MinotaurUndead" or who.descriptor.race == "EmpireUndead") then
 			local Stats = require "engine.interface.ActorStats"
 			local DamageType = require "engine.DamageType"
 
