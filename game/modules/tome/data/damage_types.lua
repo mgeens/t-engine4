@@ -3905,7 +3905,7 @@ newDamageType{
 				game.logSeen(target, "%s resists the mind attack!", target.name:capitalize())
 			end
 
-			if src:hasEffect(src.EFF_TRANSCENDENT_TELEKINESIS) then
+			if src:hasEffect(src.EFF_TRANSCENDENT_ELECTROKINESIS) then
 				if target:canBe("blind") then
 					target:setEffect(target.EFF_BLINDED, 4, {apply_power=src:combatMindpower()})
 				end
