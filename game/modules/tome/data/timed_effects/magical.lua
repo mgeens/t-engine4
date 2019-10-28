@@ -1368,7 +1368,7 @@ newEffect{
 
 newEffect{
 	name = "DIVINE_GLYPHS", image = "talents/glyph_of_explosion.png",
-	desc = "Divine Glyphs",
+	desc = "Empowered Glyphs",
 	long_desc = function(self, eff)
 		return ("A divine glyph recently triggered, providing %d%% light and darkness affinity and resistence."):format(eff.power)
 	end,

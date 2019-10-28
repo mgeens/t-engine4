@@ -378,7 +378,7 @@ newTalent{
 }
 
 newTalent{
-	name = "Divine Glyphs",
+	name = "Empowered Glyphs", short_name = "DIVINE_GLYPHS",
 	type = {"celestial/glyphs", 3},
 	require = divi_req_high3,
 	random_ego = "attack",
