@@ -4266,3 +4266,14 @@ newDamageType{
 		end)
 	end,
 }
+
+-- Light + Darkness
+newDamageType{
+	name = "dark light", type = "DARKLIGHT", text_color = "#9D9DC9#",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam / 2, state)
+		DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.LIGHT, dam / 2, state)
+	end,
+}
