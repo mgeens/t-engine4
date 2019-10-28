@@ -1909,8 +1909,8 @@ newEffect{
 
 -- Predator is purely for the player's information
 newEffect{
-	name = "PREDATOR", image = "effects/predator.png",
-	desc = "Predator",
+	name = "PREDATOR", image = "talents/mark_prey.png",
+	desc = "Marked Prey",
 	no_stop_enter_worlmap = true,
 	decrease = 0,
 	cancel_on_level_change = true,
