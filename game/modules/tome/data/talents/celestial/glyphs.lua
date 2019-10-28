@@ -438,8 +438,7 @@ newTalent{
 						elseif trap.name == "glyph of moonlight" then
 							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.DARKNESS, dam, 0, 5, nil, {type="shadow_zone"}, nil, false, false)
 						else
-							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.LIGHT, dam/2, 0, 5, nil, {type="light_zone"}, nil, false, false)
-							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.DARKNESS, dam/2, 0, 5, nil, {type="shadow_zone"}, nil, false, false)
+							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.DARKLIGHT, dam, 0, 5, nil, {type="light_dark_zone"}, nil, false, false)
 						end
 					end
 				end
