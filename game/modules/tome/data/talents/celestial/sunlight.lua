@@ -173,7 +173,7 @@ newTalent{
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		return ([[Call forth the Sun to summon a fiery beam that pierces to the farthest enemy dealing %d fire damage to all enemies hit.
-		This spell will automatically cast again at the start of every other one of your turns up to twice.
+		This spell will automatically cast again at the start of your next two turns.
 		The damage done will increase with your Spellpower.]]):
 		format(damDesc(self, DamageType.FIRE, damage))
 	end,
