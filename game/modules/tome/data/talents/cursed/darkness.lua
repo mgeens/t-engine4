@@ -95,6 +95,9 @@ local function createDarkTendrils(summoner, x, y, target, damage, duration, pinD
 				self.target:setEffect(self.target.EFF_PINNED, self.pinDuration, {})
 
 				-- explode
+				if tCreepingDarkness.canCreep(self.x, self.y) then
+					tCreepingDarkness.createDark(self.summoner, self.x, self.y, self.damage, 3, 2, 33, 0)
+				end
 				local dark = game.level.map:checkAllEntities(self.x, self.y, "creepingDark")
 				if dark then
 					dark.duration = math.max(dark.duration, self.pinDuration + 1)
