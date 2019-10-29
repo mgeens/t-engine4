@@ -187,6 +187,7 @@ newEffect{
 				end,
 				leave_level = function(self, party_def) -- Cancel control and restore previous actor status.
 					local eff = self:hasEffect(self.EFF_DOMINANT_WILL)
+					if not eff then return end
 					local uid = self.uid
 					eff.survive_domination = true
 					self:removeTemporaryValue("inc_damage", eff.pid)

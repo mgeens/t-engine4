@@ -2013,7 +2013,10 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
-			game.player:takeHit(5000, game.player)
+			local f, err = loadfile("/data-cults/general/events/tentacle-tree.lua")
+			print(f, err)
+			setfenv(f, setmetatable({level=self.level, zone=self.zone}, {__index=_G}))
+			print(pcall(f))
 do return end
 			package.loaded["mod.dialogs.shimmer.ShimmerDemo"] = nil
 			self:registerDialog(require("mod.dialogs.shimmer.ShimmerDemo").new(game.player, "iron throne couture: "))
@@ -2025,11 +2028,6 @@ do return end
 			else
 				self:changeLevel(game.level.level + 1)
 			end
-do return end
-			local f, err = loadfile("/data/general/events/weird-pedestals.lua")
-			print(f, err)
-			setfenv(f, setmetatable({level=self.level, zone=self.zone}, {__index=_G}))
-			print(pcall(f))
 do return end
 			package.loaded["mod.dialogs.Donation"] = nil
 			self:registerDialog(require("mod.dialogs.Donation").new())
