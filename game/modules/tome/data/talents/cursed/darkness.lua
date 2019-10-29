@@ -386,7 +386,7 @@ newTalent{
 	hate = 8,
 	cooldown = 6,
 	tactical = { ATTACK = { DARKNESS = 2 }, DISABLE = { blind = 1 } },
-	range = 5,
+	range = 7,
 	direct_hit = true,
 	reflectable = true,
 	requires_target = true,
