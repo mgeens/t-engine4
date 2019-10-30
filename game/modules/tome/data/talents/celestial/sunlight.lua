@@ -33,7 +33,7 @@ newTalent{
 	direct_hit = true,
 	reflectable = true,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 17, 200) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 15, 170) end,
 	action = function(self, t)
 		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
 		local x, y, target = self:getTarget(tg)
