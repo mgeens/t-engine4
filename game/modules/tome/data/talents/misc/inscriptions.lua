@@ -234,13 +234,13 @@ newInscription{
 	action = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
 		local bonus = 1 + (1 - self.life / self.max_life)
-		self:setEffect(self.EFF_HEROISM, math.floor(data.dur * bonus), {die_at=data.die_at + data.inc_stat * 30 * bonus})
+		self:setEffect(self.EFF_HEROISM, math.floor(data.dur * bonus), {die_at=(data.die_at + data.inc_stat * 30) * bonus})
 		return true
 	end,
 	info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
 		local bonus = 1 + (1 - self.life / self.max_life)
-		local bonus1 = data.die_at + data.inc_stat * 30 * bonus
+		local bonus1 = (data.die_at + data.inc_stat * 30) * bonus
 		local bonus2 = math.floor(data.dur * bonus)
 		return ([[Activate the infusion to endure even the most grievous of wounds for %d turns.
 		While Heroism is active, you will only die when reaching -%d life.
