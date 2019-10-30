@@ -82,7 +82,7 @@ newBirthDescriptor{
 	game_state = {
 		force_town_respec = 1,
 		rare_minimum_level = 4,  -- Player level rare NPCs start appearing, handled by the actor generator defined by zones
-		random_boss_minimum_level = 7,   -- Player level random bosses above rare start spawning, handled by the actor generator typically defined by zones
+		random_boss_minimum_level = 8,   -- Player level random bosses above rare start spawning, handled by the actor generator typically defined by zones
 		fixedboss_class_minimum_level = 10,  -- Player level fixed bosses can gain levels in bonus classes, handled in Actor.levelupClass
 		default_fixedboss_class_level_rate = 0.5,  -- Default level rate of classes applied to fixedbosses, handled in NPC.addedToLevel
 		default_fixedboss_class_start_level_pct = 0.8, -- Default % of level to use as start level if not explicitly defined, handled in NPC.addedToLevel
