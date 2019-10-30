@@ -1017,12 +1017,12 @@ function _M:changeLevelFailure(lev, zone, params, level, old_zone, old_level)
 end
 
 function _M:changeLevelReal(lev, zone, params)
-	local oz, ol = self.zone, self.level
-
 	-- Unlock first!
-	if not params.temporary_zone_shift_back and self.zone and self.zone.temp_shift_zone and zone and zone == self.zone.short_name then
+	if not params.temporary_zone_shift_back and self.zone and self.zone.temp_shift_zone and zone and zone ~= self.zone.short_name then
 		self:changeLevelReal(1, "useless", {temporary_zone_shift_back=true})
 	end
+
+	local oz, ol = self.zone, self.level
 
 	local st = core.game.getTime()
 	local sti = 1
