@@ -894,7 +894,7 @@ newInscription{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Activate the rune to create up to 3 images of yourself that taunt nearby enemies.
+		return ([[Activate the rune to create up to 3 images of yourself that taunt nearby enemies each turn and immediately after being summoned.
 			Only one image can be created per enemy in radius 10 with the first being created near the closest enemy.
 			Images inherit all of your life, resistance, armor, defense, and armor hardiness.]])
 				:format(t.getInheritance(self, t)*100 )
