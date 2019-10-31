@@ -1074,6 +1074,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	if level_data.post_process_map then
 		level_data.post_process_map(level, self)
 		if level.force_recreate then
+			forceprint("[Zone:newLevel] post_process_map "..generator.__CLASSNAME.." forced recreation: ",level.force_recreate)
 			level:removed()
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
@@ -1125,6 +1126,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	if level_data.post_process then
 		level_data.post_process(level, self)
 		if level.force_recreate then
+			forceprint("[Zone:newLevel] post_process "..generator.__CLASSNAME.." forced recreation: ",level.force_recreate)
 			level:removed()
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
@@ -1135,7 +1137,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	if not level_data.no_level_connectivity then
 		print("[LEVEL GENERATION] checking entrance to exit A*", ux, uy, "to", dx, dy)
 		if ux and uy and dx and dy and (ux ~= dx or uy ~= dy) and not a:calc(ux, uy, dx, dy) then
-			forceprint("Level unconnected, no way from entrance", ux, uy, "to exit", dx, dy)
+			forceprint("[Zone:newLevel] Level unconnected, no way from entrance", ux, uy, "to exit", dx, dy)
 			level:removed()
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
@@ -1152,7 +1154,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 
 			print("[LEVEL GENERATION] checking A*", spot.x, spot.y, "to", cx, cy)
 			if spot.x and spot.y and cx and cy and (spot.x ~= cx or spot.y ~= cy) and not a:calc(spot.x, spot.y, cx, cy) then
-				forceprint("Level unconnected, no way from spot", spot.type, spot.subtyp, "at", spot.x, spot.y, "to", cx, cy, spot.check_connectivity)
+				forceprint("[Zone:newLevel] Level unconnected, no way from spot", spot.type, spot.subtyp, "at", spot.x, spot.y, "to", cx, cy, spot.check_connectivity)
 				level:removed()
 				return self:newLevel(level_data, lev, old_lev, game)
 			end

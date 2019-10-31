@@ -242,6 +242,29 @@ function _M:scale(sx, sy)
 	return self
 end
 
+--- Used internally to load a tilemap from a lua map file
+function _M:mapLoad(file)
+	local f, err = loadfile(file)
+	if not f then error(err) end
+	setfenv(f, {})
+	local ok, raw = pcall(f)
+	if not ok then error(raw) end
+
+	raw = raw:split('\n')
+	local h = #raw
+	local w = #raw[1]
+
+	local data = {}
+	for y = 1, h do
+		data[y] = {}
+		local row = raw[y]
+		for x = 1, w do
+			data[y][x] = row:sub(x, x) or ' '
+		end
+	end
+	return data, w, h
+end
+
 --- Used internally to load a tilemap from a tmx file
 function _M:tmxLoad(file)
 	local f = fs.open(file, "r") local data = f:read(10485760) f:close()
@@ -511,6 +534,20 @@ function _M:eliminateByFloodfill(walls)
 	end
 end
 
+function _M:getBorderGroup(group)
+	local border = {list={}}
+	for _, d in ipairs(group.list) do
+		for i = -1, 1 do for j = -1, 1 do if (i ~= 0 or j ~= 0) and self.data[d.y+j] and self.data[d.y+j][d.x+i] then
+			if not self:isInGroup(group, d.x+i, d.y+j) then
+				if not self:isInGroup(border, d.x+i, d.y+j, true) then
+					border.list[#border.list+1] = self:point{x=d.x+i, y=d.y+j}
+				end
+			end
+		end end end
+	end
+	return border
+end
+
 function _M:fillGroup(group, char)
 	-- print("[Tilemap] Filling group of", #group.list, "with", char)
 	for j = 1, #group.list do
@@ -519,17 +556,102 @@ function _M:fillGroup(group, char)
 	end
 end
 
-function _M:isInGroup(group, x, y)
-	if not group.reverse then
-		group.reverse = {}
-		for j = 1, #group.list do
-			local jn = group.list[j]
-			group.reverse[jn.x] = group.reverse[jn.x] or {}
-			group.reverse[jn.x][jn.y] = true
-		end
+function _M:computeGroupReverse(group)
+	group.reverse = {}
+	for j = 1, #group.list do
+		local jn = group.list[j]
+		group.reverse[jn.x] = group.reverse[jn.x] or {}
+		group.reverse[jn.x][jn.y] = true
+	end
+end
+
+function _M:isInGroup(group, x, y, force)
+	if not group.reverse or force then
+		self:computeGroupReverse(group)
 	end
 	return group.reverse[x] and group.reverse[x][y]
 end
+
+function _M:pickGroupSpot(group, mode, what)
+	self:computeGroupReverse(group)
+
+	local function check(x, y)
+		return group.reverse[x] and group.reverse[x][y]
+	end
+
+	local list = table.clone(group.list)
+	while #list > 0 do
+		local jn = rng.tableRemove(list)
+		if mode == "any" or not mode then
+			return self:point{x=jn.x, y=jn.y}
+		elseif mode == "inside-wall" then
+			local g8 = check(jn.x+0, jn.y-1)
+			local g2 = check(jn.x+0, jn.y+1)
+			local g4 = check(jn.x-1, jn.y+0)
+			local g6 = check(jn.x+1, jn.y+0)
+			local g7 = check(jn.x-1, jn.y-1)
+			local g3 = check(jn.x+1, jn.y+1)
+			local g1 = check(jn.x-1, jn.y+1)
+			local g9 = check(jn.x+1, jn.y-1)
+			if not what or what == "any" or what == "straight" then
+				print("==check on ", jn.x, jn.y, "::", g8,g2,g4,g6)
+				if g8 and g2 and not g4 and not g6 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif g4 and g6 and not g2 and not g8 then
+					return self:point{x=jn.x, y=jn.y}
+				end
+			end
+			if what == "any" or what == "diagonal" then
+				if not g8 and not g2 and not g4 and not g6 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif not g4 and not g6 and not g2 and not g8 then
+					return self:point{x=jn.x, y=jn.y}
+				end
+			end
+		elseif mode == "corder" then
+			local g8 = check(jn.x+0, jn.y-1)
+			local g2 = check(jn.x+0, jn.y+1)
+			local g4 = check(jn.x-1, jn.y+0)
+			local g6 = check(jn.x+1, jn.y+0)
+			local g7 = check(jn.x-1, jn.y-1)
+			local g3 = check(jn.x+1, jn.y+1)
+			local g1 = check(jn.x-1, jn.y+1)
+			local g9 = check(jn.x+1, jn.y-1)
+			if not what or what == "any" or what == "straight" then
+				if not g8 and g2 and not g4 and g6 and not g7 and not g3  and not g1 and not g9 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif g4 and not g6 and g2 and not g8  and not g7 and not g3  and not g1 and not g9 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif g4 and not g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif not g4 and g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
+					return self:point{x=jn.x, y=jn.y}
+				end
+			end
+			if what == "any" or what == "diagonal" then
+				if not g4 and not g6 and not g2 and not g8 and g7 and not g3 and g1 and not g7 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif not g4 and not g6 and not g2 and not g8  and g7 and not g3  and not g1 and g9 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and not g1 and g9 then
+					return self:point{x=jn.x, y=jn.y}
+				elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and g1 and not g9 then
+					return self:point{x=jn.x, y=jn.y}
+				end
+			end
+		elseif mode == "has-neighbours" then
+			local nb = 0
+			for i = -1, 1 do for j = -1, 1 do if (i ~= 0 or j ~= 0) and check(jn.x+i, jn.y+j) then
+				nb = nb + 1
+			end end end
+			if nb == what then
+				return self:point{x=jn.x, y=jn.y}
+			end
+		end
+	end
+	return nil
+end
+
 --[=[
 --- Find the biggest rectangle that can fit fully in the given group
 function _M:groupInnerRectangle(group)

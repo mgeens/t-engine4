@@ -17,6 +17,11 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-load("/data/general/grids/basic.lua")
+load("/data/general/grids/basic.lua", function(e)
+	if e.define_as ~= "FLOOR" and e.image == "terrain/marble_floor.png" then
+		e.image = "terrain/grass_burnt1.png"
+	end
+end)
 load("/data/general/grids/forest.lua")
 load("/data/general/grids/water.lua")
+load("/data/general/grids/burntland.lua")

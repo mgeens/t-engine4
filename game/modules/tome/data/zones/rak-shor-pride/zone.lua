@@ -27,6 +27,7 @@ return {
 	width = 50, height = 50,
 	persistent = "zone",
 --	all_remembered = true,
+	no_level_connectivity = true,
 	all_lited = true,
 	day_night = true,
 	ambient_music = {"March.ogg", "weather/desert_base.ogg"},
