@@ -44,22 +44,6 @@ return {
 			door = "DOOR",
 			mapscript = "!main",
 			pride = "vor",
-
-				-- class = "engine.generator.map.Town",
-				-- building_chance = 70,
-				-- max_building_w = 6, max_building_h = 6,
-				-- edge_entrances = {6,4},
-				-- floor = "FLOOR",
-				-- external_floor = "FLOOR",
-				-- wall = "WALL",
-				-- door = "DOOR",
-				-- up = "FLOOR",
-				-- down = "FLOOR",
-
-				-- nb_rooms = {1,1,2,3},
-				-- rooms = {"lesser_vault", "greater_vault"},
-				-- lesser_vaults_list = {"orc-armoury", "double-t", "circle", "hostel", "orc-necromancer", "horror-chamber"},
-				-- lite_room_chance = 100,
 		},
 		actor = {
 			class = "mod.class.generator.actor.Random",
