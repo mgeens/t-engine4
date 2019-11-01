@@ -192,7 +192,7 @@ uberTalent{
 		#DARK_GREEN#Blight:#LAST#  Deals %d blight damage each turn for 5 turns and reduces strength, constitution, and dexterity by %d.
 		#GREY#Darkness:#LAST#  Reduces damage dealt by %d%% for 5 turns.
 		#LIGHT_STEEL_BLUE#Temporal:#LAST#  Slows global action speed by %d%% for 5 turns.
-		#YELLOW#Mind:#LAST#  Confuses (power %d%%) for 5 turns.
+		#ORANGE#Mind:#LAST#  Confuses (power %d%%) for 5 turns.
 
 		Each effect can only happen once per 12 player turns.  This does not count as a typical cooldown.
 		The damage and effect power increase with your Cunning, the threshold with your level, and the apply power is the highest of your mind or spell power.

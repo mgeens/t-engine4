@@ -201,7 +201,7 @@ uberTalent{
 				who:learnTalent(who.T_RUIN, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_RUIN, {ignore_energy=true})
 			else
 				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-				who:addTemporaryValue("all_damage_convert_percent", 50)
+				who:addTemporaryValue("all_damage_convert_percent", 10)
 				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 			end
 		elseif who.is_nature_summon then
@@ -227,7 +227,7 @@ uberTalent{
 				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
 			else
 				who:addTemporaryValue("all_damage_convert", DamageType.BLIGHT)
-				who:addTemporaryValue("all_damage_convert_percent", 50)
+				who:addTemporaryValue("all_damage_convert_percent", 10)
 				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 			end
 		else
