@@ -7569,7 +7569,7 @@ newEntity{ base = "BASE_LEATHER_CAP",
 		talents_types_mastery = { ["cursed/fears"] = 0.2,},
 	},
 	max_power = 45, power_regen = 1,
-	talent_on_mind  = { {chance=8, talent=Talents.T_WAKING_NIGHTMARE, level=1} }
+	use_talent = { id = Talents.T_INSTILL_FEAR, level = 2, power = 18 },
 }
 
 newEntity{ base = "BASE_LEATHER_BOOT",
