@@ -341,7 +341,7 @@ function _M:checkDeps(simple, ignore_special)
 end
 
 function _M:isUnlearnable(t, limit)
-	if config.settings.cheat then return 9999 end
+	-- if config.settings.cheat then return 9999 end
 	if not self.actor.last_learnt_talents then return end
 	if self.on_birth and self.actor:knowTalent(t.id) and not t.no_unlearn_last then return 1 end -- On birth we can reset any talents except a very few
 	local list = self.actor.last_learnt_talents[t.generic and "generic" or "class"]
@@ -350,7 +350,7 @@ function _M:isUnlearnable(t, limit)
 	if limit then min = math.max(1, #list - (max - 1)) end
 	for i = #list, min, -1 do
 		if list[i] == t.id then
-			if not game.state.birth.force_town_respec or not self.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
+			if not self.actor.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
 				return i
 			else
 				return nil, i
