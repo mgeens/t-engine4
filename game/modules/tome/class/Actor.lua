@@ -5058,7 +5058,7 @@ end
 -- @param t_id the id of the talent to learn
 -- @return true if the talent was unlearnt, nil and an error message otherwise
 function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
-	nb = math.floor(nb)
+	if nb then nb = math.floor(nb) end
 	local oldnb = self.talents[t_id] or 0
 	if not engine.interface.ActorTalents.unlearnTalent(self, t_id, nb) then return false end
 
