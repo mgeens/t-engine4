@@ -6766,6 +6766,14 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks SageAcrin!
 			self:specialWearAdd({"wielder","global_speed_add"}, 0.15)
 			game.logPlayer(who, "#RED#You feel yourself lost in the aura of the robe.")
 		end
+		if who.descriptor and who.descriptor.subclass == "Doomed" then
+			local Talents = require "engine.interface.ActorTalents"
+			self.talent_on_mind = {
+				{chance=8, talent=Talents.T_CURSED_BOLT, level=2},
+				{chance=8, talent=Talents.T_WAKING_NIGHTMARE, level=2 }
+			}
+			game.logPlayer(who, "#RED#The robe drapes comfortably over your doomed body.")
+		end
 	end,
 	talent_on_mind  = { {chance=8, talent=Talents.T_HATEFUL_WHISPER, level=2}, {chance=8, talent=Talents.T_AGONY, level=2}  },
 }
