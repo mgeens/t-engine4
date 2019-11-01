@@ -2060,7 +2060,7 @@ function _M:tooltip(x, y, seen_by)
 	if retal > 0 then ts:add("Melee Retaliation: ", {"color", "RED"}, tostring(math.floor(retal)), {"color", "WHITE"}, true ) end
 
 	if self.desc then ts:add(self.desc, true) end
-	if config.settings.cheat and self.descriptor and self.descriptor.classes then
+	if self.descriptor and self.descriptor.classes then
 		ts:add("Classes:", table.concat(self.descriptor.classes or {}, ","), true)
 	end
 
