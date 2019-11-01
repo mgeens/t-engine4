@@ -1666,7 +1666,7 @@ function _M:combatDamage(weapon, adddammod, damage)
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
 	local power = self:combatDamagePower(damage or weapon, totstat)
 	local phys = self:combatPhysicalpower(nil, weapon, totstat)
-	return 0.3 * phys * power * talented_mod
+	return self:rescaleDamage(0.3 * phys * power * talented_mod)
 end
 
 --- Gets the 'power' portion of the damage
