@@ -4897,6 +4897,7 @@ end
 -- @param t_id the id of the talent to learn
 -- @return true if the talent was learnt, nil and an error message otherwise
 function _M:learnTalent(t_id, force, nb, extra)
+	if nb then nb = math.floor(nb) end
 	local just_learnt = not self:knowTalent(t_id)
 	local old_lvl = self:getTalentLevel(t_id)
 	local old_lvl_raw = self:getTalentLevelRaw(t_id)
@@ -5057,6 +5058,7 @@ end
 -- @param t_id the id of the talent to learn
 -- @return true if the talent was unlearnt, nil and an error message otherwise
 function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
+	if nb then nb = math.floor(nb) end
 	local oldnb = self.talents[t_id] or 0
 	if not engine.interface.ActorTalents.unlearnTalent(self, t_id, nb) then return false end
 
@@ -5097,7 +5099,7 @@ function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
 	self:recomputeRegenResources()
-
+game.log("====================== %f", nb)
 	if t.is_spell then self:attr("has_arcane_knowledge", -nb) end
 	if t.is_antimagic then self:attr("forbid_arcane", -nb) end
 	if t.type[1]:find("^chronomancy/bow") or t.type[1]:find("^chronomancy/blade") then self:attr("warden_swap", -nb) end

@@ -350,7 +350,7 @@ function _M:isUnlearnable(t, limit)
 	if limit then min = math.max(1, #list - (max - 1)) end
 	for i = #list, min, -1 do
 		if list[i] == t.id then
-			if not game.state.birth.force_town_respec or not self.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
+			if not self.actor.in_combat or (game.level and game.level.data and game.level.data.allow_respec == "limited") then
 				return i
 			else
 				return nil, i
