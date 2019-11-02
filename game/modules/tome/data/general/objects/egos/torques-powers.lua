@@ -69,7 +69,7 @@ newEntity{
 	keywords = {galeforce=true},
 	level_range = {1, 50},
 	rarity = 10,
-	charm_power_def = {add=0, max=700, floor=true},
+	charm_power_def = {add=0, max=500, floor=true},
 	resolvers.charm(
 		function(self, who)
 			local dam = who:damDesc(engine.DamageType.PHYSICAL, self.use_power.damage(self, who))
@@ -80,7 +80,7 @@ newEntity{
 			local tg = self.use_power.target(self, who)
 			local x, y = who:getTarget(tg)
 			if not x or not y then return nil end
-			local dam = who:mindCrit(self.use_power.damage(self, who))
+			local dam = self.use_power.damage(self, who)
 			local kb = self.use_power.knockback(self, who)
 
 			game.logSeen(who, "%s uses %s %s!", who.name:capitalize(), who:his_her(), self:getName{no_add_name=true, do_color=true})
@@ -115,7 +115,7 @@ newEntity{
 	keywords = {mindblast=true},
 	level_range = {1, 50},
 	rarity = 10,
-	charm_power_def = {add=0, max=700, floor=true},
+	charm_power_def = {add=0, max=500, floor=true},
 	resolvers.charm(function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("blast the opponent's mind dealing %d mind damage and silencing them for 4 turns"):format(dam )
@@ -125,7 +125,7 @@ newEntity{
 			local tg = self.use_power.target(self, who)
 			local x, y = who:getTarget(tg)
 			if not x or not y then return nil end
-			local damage = who:mindCrit(self.use_power.damage(self, who))
+			local damage = self.use_power.damage(self, who)
 			game.logSeen(who, "%s activates %s %s!", who.name:capitalize(), who:his_her(), self:getName({no_add_name = true, do_color = true}))
 			if not x or not y then return nil end
 			who:project(tg, x, y, function(tx, ty)
