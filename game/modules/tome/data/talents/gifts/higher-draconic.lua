@@ -189,9 +189,9 @@ newTalent{
 	require = gifts_req_high4,
 	points = 5,
 	mode = "passive",
-	getDamageIncrease = function(self, t) return self:combatTalentScale(t, 2.5, 20) end,
+	getDamageIncrease = function(self, t) return self:combatTalentLimit(t, 50, 5, 15) end, -- Limit < 50%
 	getResists = function(self, t) return self:combatTalentScale(t, 0.6, 2.5) end,
-	getResistPen = function(self, t) return self:combatTalentLimit(t, 50, 5, 30) end, -- Limit < 50%
+	getResistPen = function(self, t) return self:combatTalentLimit(t, 50, 5, 15) end, -- Limit < 50%
 	passives = function(self, t, p)
 		local dam_inc = t.getDamageIncrease(self, t)
 		local resists = t.getResists(self, t)
