@@ -25,8 +25,8 @@ load("/data/general/grids/mountain.lua")
 
 newEntity{ base = "GENERIC_LEVER",
 	define_as = "GENERIC_LEVER_SAND",
-	subtype = "sand",
-	image = "terrain/sandfloor.png",
+	subtype = "floor",
+	image = "terrain/bamboo/hut_dirt_floor_01.png",
 }
 
 newEntity{
@@ -96,6 +96,7 @@ newEntity{
 	always_remember = true,
 	block_sight = true,
 	is_door = true,
+	is_roost_entrance = true,
 	door_opened = "FENCE_DOOR_OPEN",
 	dig = "FLOOR",
 }
@@ -112,3 +113,39 @@ newEntity{ base = "FENCE_DOOR", define_as = "FENCE_DOOR_HORIZ", add_displays = {
 newEntity{ base = "FENCE_DOOR_OPEN", define_as = "FENCE_DOOR_HORIZ_OPEN", add_displays = {class.new{image="terrain/bamboo/hut_door_hor_open_door_palm_leaves_01.png"}, class.new{image="terrain/bamboo/hut_door_hor_open_door_01.png", z=17}, class.new{image="terrain/bamboo/hut_wall_top_hor_01.png", z=18, display_y=-1}}, door_closed = "FENCE_DOOR_HORIZ"}
 newEntity{ base = "FENCE_DOOR", define_as = "FENCE_DOOR_VERT", add_displays = {class.new{image="terrain/bamboo/palm_door_closed_ver_01.png"}, class.new{image="terrain/bamboo/hut_wall_full_hor_01.png", z=18}}, door_opened = "FENCE_DOOR_OPEN_VERT", dig = "FENCE_DOOR_OPEN_VERT"}
 newEntity{ base = "FENCE_DOOR_OPEN", define_as = "FENCE_DOOR_OPEN_VERT", add_displays = {class.new{image="terrain/bamboo/palm_door_open_bottom_ver_01.png"}, class.new{image="terrain/bamboo/palm_door_open_top_ver_01.png", z=18, display_y=-1, add_mos={{image="terrain/bamboo/hut_wall_full_hor_01.png"}, {image="terrain/bamboo/palm_door_open_bottom_ver_door_01.png"}}}}, door_closed = "FENCE_DOOR_VERT"}
+
+newEntity{
+	define_as = "ROCK_LEVER_DOOR",
+	type = "wall", subtype = "sand",
+	name = "huge loose rock", image = "terrain/sandfloor.png", add_displays = {class.new{z=18, image="terrain/huge_rock.png"}},
+	display = '+', color=colors.GREY, back_color={r=44,g=95,b=43},
+	notice = true,
+	always_remember = true,
+	block_sight = true,
+	block_sense = true,
+	block_esp = true,
+	door_player_stop = "This rock seems to have been sealed off. You need to find a way to open it.",
+	is_door = true,
+	door_opened = "FLOOR",
+	on_lever_change = function(self, x, y, who, val, oldval)
+		local toggle = game.level.map.attrs(x, y, "lever_toggle")
+		local trigger = game.level.map.attrs(x, y, "lever_action") or 1
+		if toggle or (val > oldval and val >= trigger) then
+			game.level.map(x, y, engine.Map.TERRAIN, game.zone.grid_list[self.door_opened])
+			game.log("#VIOLET#You hear a rock crumbling opening.")
+			return true
+		end
+	end,
+}
+
+newEntity{
+	define_as = "ROCK_DOOR",
+	type = "wall", subtype = "sand",
+	name = "huge loose rock", image = "terrain/sandfloor.png", add_displays = {class.new{z=18, image="terrain/huge_rock.png"}},
+	display = '+', color=colors.GREY, back_color={r=44,g=95,b=43},
+	notice = true,
+	always_remember = true,
+	block_sight = true,
+	is_door = true,
+	door_opened = "FLOOR",
+}

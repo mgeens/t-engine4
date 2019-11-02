@@ -19,11 +19,12 @@
 
 load("/data/general/npcs/orc.lua", rarity(3))
 load("/data/general/npcs/orc-gorbat.lua", rarity(0))
-load("/data/general/npcs/cold-drake.lua", rarity(5))
-load("/data/general/npcs/storm-drake.lua", rarity(5))
-load("/data/general/npcs/fire-drake.lua", rarity(5))
-load("/data/general/npcs/venom-drake.lua", rarity(5))
-load("/data/general/npcs/multihued-drake.lua", rarity(8))
+load("/data/general/npcs/cold-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
+load("/data/general/npcs/storm-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
+load("/data/general/npcs/fire-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
+load("/data/general/npcs/venom-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
+load("/data/general/npcs/multihued-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
+load("/data/general/npcs/wild-drake.lua", function(e) e.drake_rarity, e.rarity = e.rarity, nil end)
 
 load("/data/general/npcs/all.lua", rarity(4, 35))
 
