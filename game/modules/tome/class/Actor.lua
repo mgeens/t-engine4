@@ -5099,7 +5099,6 @@ function _M:unlearnTalent(t_id, nb, no_unsustain, extra)
 	if #todel > 0 then for _, eff_id in ipairs(todel) do self:removeEffect(eff_id) end end
 
 	self:recomputeRegenResources()
-game.log("====================== %f", nb)
 	if t.is_spell then self:attr("has_arcane_knowledge", -nb) end
 	if t.is_antimagic then self:attr("forbid_arcane", -nb) end
 	if t.type[1]:find("^chronomancy/bow") or t.type[1]:find("^chronomancy/blade") then self:attr("warden_swap", -nb) end
