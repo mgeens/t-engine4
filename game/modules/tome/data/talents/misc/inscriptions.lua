@@ -186,17 +186,17 @@ newInscription{
 	tactical = {DEFEND = 2, CURE = 2},
 	action = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		self:setEffect(self.EFF_PRIMAL_ATTUNEMENT, data.dur, {power=data.power + data.inc_stat*10, reduce=data.reduce + data.inc_stat})
+		self:setEffect(self.EFF_PRIMAL_ATTUNEMENT, data.dur, {power=data.power + data.inc_stat*10, reduce=math.floor(data.reduce + data.inc_stat * 2)})
 		return true
 	end,
 	info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
 		return ([[Activate the infusion to heal for %d%% of all damage taken (calculated before resistances) and reduce the duration of a random debuff by %d each turn for %d turns.]]):
-			format(data.power+data.inc_stat*10, (data.reduce or 0) + data.inc_stat, data.dur)
+			format(data.power+data.inc_stat*10, math.floor((data.reduce or 0) + data.inc_stat * 2), data.dur)
 	end,
 	short_info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		return ([[affinity %d%%; reduction %d; dur %d; cd %d]]):format(data.power + data.inc_stat*10, (data.reduce or 0) + data.inc_stat, data.dur, data.cooldown )
+		return ([[affinity %d%%; reduction %d; dur %d; cd %d]]):format(data.power + data.inc_stat*10, math.floor((data.reduce or 0) + data.inc_stat * 2), data.dur, data.cooldown )
 	end,
 }
 
