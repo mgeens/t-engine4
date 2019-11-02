@@ -40,10 +40,10 @@ local rooms = tm:findGroupsOf{'r'}
 tm:applyOnGroups(rooms, function(room, idx)
 	tm:fillGroup(room, '.')
 	local border = tm:getBorderGroup(room)
-	local door = tm:pickGroupSpot(border, "inside-wall")
+	local door = border:pickSpot("inside-wall")
 	if door then tm:put(door, '+') end
 
-	local event = tm:pickGroupSpot(room, "any")
+	local event = room:pickSpot("any")
 	if event then self:addSpot(event, "event-spot", "subvault-place") end
 end)
 

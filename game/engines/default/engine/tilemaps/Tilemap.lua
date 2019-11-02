@@ -62,7 +62,22 @@ function _M:makeCharsTable(v, default)
 	return table.reverse(v)
 end
 
-local point_meta = {
+local point_meta
+
+--- Make a point data, can be added
+function _M:point(x, y)
+	if type(x) == "table" then		
+		local p = {x=math.floor(x.x), y=math.floor(x.y)}
+		setmetatable(p, point_meta)
+		return p
+	else
+		local p = {x=math.floor(x), y=math.floor(y)}
+		setmetatable(p, point_meta)
+		return p
+	end
+end
+
+point_meta = {
 	__add = function(a, b)
 		if type(b) == "number" then return _M:point(a.x + b, a.y + b)
 		else return _M:point(a.x + b.x, a.y + b.y) end
@@ -92,21 +107,11 @@ local point_meta = {
 		area = function(p)
 			return p.y * p.x
 		end,
+		clone = function(p)
+			return _M:point(p)
+		end,
 	},
 }
---- Make a point data, can be added
-function _M:point(x, y)
-	if type(x) == "table" then		
-		local p = {x=math.floor(x.x), y=math.floor(x.y)}
-		setmetatable(p, point_meta)
-		return p
-	else
-		local p = {x=math.floor(x), y=math.floor(y)}
-		setmetatable(p, point_meta)
-		return p
-	end
-end
-
 
 --- Returns a point at the center of the map, accounting for merged_pos
 function _M:centerPoint()
@@ -179,6 +184,22 @@ function _M:put(pos, char)
 		elseif type(char) == "table" then char = rng.table(char) end
 		self.data[pos.y][pos.x] = char
 	end
+end
+
+function _M:get(pos)
+	if self:isBound(pos) then
+		return self.data[pos.y][pos.x]
+	end
+end
+
+function _M:isA(pos, ...)
+	if self:isBound(pos) then
+		local pc = self.data[pos.y][pos.x]
+		for _, c in ipairs{...} do
+			if pc == c then return true end
+		end
+	end
+	return false
 end
 
 --- Flip the map
@@ -413,6 +434,186 @@ function _M:pointsBoundingRectangle(list)
 	return from, to
 end
 
+local group_meta
+
+--- Make a point data, can be added
+function _M:group(list)
+	local g = {list=list}
+	setmetatable(g, group_meta)
+	g:updateReverse()
+	return g
+end
+
+group_meta = {
+	__add = function(a, b)
+		local g = _M:group{}
+		for _, p in ipairs(a.list) do g:add(p:clone()) end
+		for _, p in ipairs(b.list) do g:add(p:clone()) end
+		return g
+	end,
+	__sub = function(a, b)
+		local g = _M:group{}
+		for _, p in ipairs(a.list) do g:add(p:clone()) end
+		for _, p in ipairs(b.list) do g:remove(p:clone()) end
+		return g
+	end,
+	__eq = function(a, b)
+		if #a.list ~= #b.list then return false end
+		for _, p in ipairs(b.list) do
+			if not a.reverse[p.x] or not not a.reverse[p.x][p.y] then return false end
+		end
+		return true
+	end,
+	__tostring = function(g)
+		return ("Group(%d points)"):format(#g.list)
+	end,
+	__index = {
+		updateReverse = function(g)
+			g.reverse = {}
+			print("================")
+			table.print(g.list)
+			print("================")
+			for j = 1, #g.list do
+				local jn = g.list[j]
+				print("=====", j, jn)
+				g.reverse[jn.x] = g.reverse[jn.x] or {}
+				g.reverse[jn.x][jn.y] = jn
+			end
+			print("================")
+		end,
+		sortPoints = function(g)
+			table.sort(g.list, function(a, b)
+				if a.x == b.x then return a.y < b.y
+				else return a.x < b.x end
+			end)
+		end,
+		area = function(p)
+			return #p.list
+		end,
+		bounds = function(g)
+			return _M:pointsBoundingRectangle(g.list)
+		end,
+		submap = function(g, map)
+			local from, to = g:bounds()
+			to = to - from + 1
+			local sm = Proxy.new(map, from, to.x, to.y)
+			sm:maskOtherPoints(list, true)
+			return sm
+		end,
+		add = function(g, p)
+			if g.reverse[p.x] and g.reverse[p.x][p.y] then return false end
+			g.list[#g.list+1] = p
+			g.reverse[p.x] = g.reverse[p.x] or {}
+			g.reverse[p.x][p.y] = p
+			return true
+		end,
+		remove = function(g, p)
+			if not g.reverse[p.x] or not g.reverse[p.x][p.y] then return false end
+			for i, pp in ipairs(g.list) do if pp == p then
+				table.remove(g.list, i)
+				break
+			end end
+			g.reverse[p.x][p.y] = nil
+			if not next(g.reverse[p.x]) then g.reverse[p.x] = nil end
+			return true
+		end,
+		hasPoint = function(g, x, y)
+			if type(x) == "table" then x, y = x.x, x.y end
+			return g.reverse[x] and g.reverse[x][y]
+		end,
+		pickSpot = function(group, mode, what, mapcheck)
+			local function check(x, y)
+				if mapcheck then
+					local r = mapcheck(_M:point(x, y))
+					if r ~= nil then return r end
+				end
+				return group.reverse[x] and group.reverse[x][y]
+			end
+
+			local list = table.clone(group.list)
+			while #list > 0 do
+				local jn = rng.tableRemove(list)
+				if mode == "any" or not mode then
+					return jn
+				elseif mode == "inside-wall" then
+					local g8 = check(jn.x+0, jn.y-1)
+					local g2 = check(jn.x+0, jn.y+1)
+					local g4 = check(jn.x-1, jn.y+0)
+					local g6 = check(jn.x+1, jn.y+0)
+					local g7 = check(jn.x-1, jn.y-1)
+					local g3 = check(jn.x+1, jn.y+1)
+					local g1 = check(jn.x-1, jn.y+1)
+					local g9 = check(jn.x+1, jn.y-1)
+					if not what or what == "any" or what == "straight" then
+						if g8 and g2 and not g4 and not g6 then
+							return jn
+						elseif g4 and g6 and not g2 and not g8 then
+							return jn
+						end
+					end
+					if what == "any" or what == "diagonal" then
+						if not g8 and not g2 and not g4 and not g6 then
+							return jn
+						elseif not g4 and not g6 and not g2 and not g8 then
+							return jn
+						end
+					end
+				elseif mode == "corder" then
+					local g8 = check(jn.x+0, jn.y-1)
+					local g2 = check(jn.x+0, jn.y+1)
+					local g4 = check(jn.x-1, jn.y+0)
+					local g6 = check(jn.x+1, jn.y+0)
+					local g7 = check(jn.x-1, jn.y-1)
+					local g3 = check(jn.x+1, jn.y+1)
+					local g1 = check(jn.x-1, jn.y+1)
+					local g9 = check(jn.x+1, jn.y-1)
+					if not what or what == "any" or what == "straight" then
+						if not g8 and g2 and not g4 and g6 and not g7 and not g3  and not g1 and not g9 then
+							return jn
+						elseif g4 and not g6 and g2 and not g8  and not g7 and not g3  and not g1 and not g9 then
+							return jn
+						elseif g4 and not g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
+							return jn
+						elseif not g4 and g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
+							return jn
+						end
+					end
+					if what == "any" or what == "diagonal" then
+						if not g4 and not g6 and not g2 and not g8 and g7 and not g3 and g1 and not g7 then
+							return jn
+						elseif not g4 and not g6 and not g2 and not g8  and g7 and not g3  and not g1 and g9 then
+							return jn
+						elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and not g1 and g9 then
+							return jn
+						elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and g1 and not g9 then
+							return jn
+						end
+					end
+				elseif mode == "has-neighbours" then
+					local nb = 0
+					for i = -1, 1 do for j = -1, 1 do if (i ~= 0 or j ~= 0) and check(jn.x+i, jn.y+j) then
+						nb = nb + 1
+					end end end
+					if nb == what then
+						return jn
+					end
+				end
+			end
+			return nil
+		end,
+		randomNearPoint = function(g, p)
+			local points = {}
+			for i = -1, 1 do for j = -1, 1 do
+				if (i ~= 0 or j ~= 0) and g:hasPoint(p.x + i, p.y + j) then
+					points[#points+1] = g:hasPoint(p.x + i, p.y + j)
+				end
+			end end
+			if #points == 0 then return nil end
+			return rng.table(points)
+		end,
+	},
+}
+
 --- Return a list of groups of tiles that matches the given cond function
 function _M:findGroups(cond)
 	if not self.data then return {} end
@@ -463,12 +664,7 @@ function _M:findGroups(cond)
 		local i, l = next(list)
 		local closed = floodFill(l.x, l.y)
 
-		local from, to = self:pointsBoundingRectangle(closed)
-		to = to - from + 1
-		local map = Proxy.new(self, from, to.x, to.y)
-		map:maskOtherPoints(closed, true)
-
-		groups[#groups+1] = {list=closed, map=map}
+		groups[#groups+1] = self:group(closed)
 		print("[Tilemap] Floodfill group", i, #closed)
 	end
 
@@ -535,12 +731,12 @@ function _M:eliminateByFloodfill(walls)
 end
 
 function _M:getBorderGroup(group)
-	local border = {list={}}
+	local border = self:group{}
 	for _, d in ipairs(group.list) do
 		for i = -1, 1 do for j = -1, 1 do if (i ~= 0 or j ~= 0) and self.data[d.y+j] and self.data[d.y+j][d.x+i] then
-			if not self:isInGroup(group, d.x+i, d.y+j) then
-				if not self:isInGroup(border, d.x+i, d.y+j, true) then
-					border.list[#border.list+1] = self:point{x=d.x+i, y=d.y+j}
+			if not group:hasPoint(d.x+i, d.y+j) then
+				if not border:hasPoint(d.x+i, d.y+j, true) then
+					border:add(self:point{x=d.x+i, y=d.y+j})
 				end
 			end
 		end end end
@@ -554,102 +750,6 @@ function _M:fillGroup(group, char)
 		local jn = group.list[j]
 		self.data[jn.y][jn.x] = char
 	end
-end
-
-function _M:computeGroupReverse(group)
-	group.reverse = {}
-	for j = 1, #group.list do
-		local jn = group.list[j]
-		group.reverse[jn.x] = group.reverse[jn.x] or {}
-		group.reverse[jn.x][jn.y] = true
-	end
-end
-
-function _M:isInGroup(group, x, y, force)
-	if not group.reverse or force then
-		self:computeGroupReverse(group)
-	end
-	return group.reverse[x] and group.reverse[x][y]
-end
-
-function _M:pickGroupSpot(group, mode, what)
-	self:computeGroupReverse(group)
-
-	local function check(x, y)
-		return group.reverse[x] and group.reverse[x][y]
-	end
-
-	local list = table.clone(group.list)
-	while #list > 0 do
-		local jn = rng.tableRemove(list)
-		if mode == "any" or not mode then
-			return self:point{x=jn.x, y=jn.y}
-		elseif mode == "inside-wall" then
-			local g8 = check(jn.x+0, jn.y-1)
-			local g2 = check(jn.x+0, jn.y+1)
-			local g4 = check(jn.x-1, jn.y+0)
-			local g6 = check(jn.x+1, jn.y+0)
-			local g7 = check(jn.x-1, jn.y-1)
-			local g3 = check(jn.x+1, jn.y+1)
-			local g1 = check(jn.x-1, jn.y+1)
-			local g9 = check(jn.x+1, jn.y-1)
-			if not what or what == "any" or what == "straight" then
-				print("==check on ", jn.x, jn.y, "::", g8,g2,g4,g6)
-				if g8 and g2 and not g4 and not g6 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif g4 and g6 and not g2 and not g8 then
-					return self:point{x=jn.x, y=jn.y}
-				end
-			end
-			if what == "any" or what == "diagonal" then
-				if not g8 and not g2 and not g4 and not g6 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif not g4 and not g6 and not g2 and not g8 then
-					return self:point{x=jn.x, y=jn.y}
-				end
-			end
-		elseif mode == "corder" then
-			local g8 = check(jn.x+0, jn.y-1)
-			local g2 = check(jn.x+0, jn.y+1)
-			local g4 = check(jn.x-1, jn.y+0)
-			local g6 = check(jn.x+1, jn.y+0)
-			local g7 = check(jn.x-1, jn.y-1)
-			local g3 = check(jn.x+1, jn.y+1)
-			local g1 = check(jn.x-1, jn.y+1)
-			local g9 = check(jn.x+1, jn.y-1)
-			if not what or what == "any" or what == "straight" then
-				if not g8 and g2 and not g4 and g6 and not g7 and not g3  and not g1 and not g9 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif g4 and not g6 and g2 and not g8  and not g7 and not g3  and not g1 and not g9 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif g4 and not g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif not g4 and g6 and not g2 and g8  and not g7 and not g3  and not g1 and not g9 then
-					return self:point{x=jn.x, y=jn.y}
-				end
-			end
-			if what == "any" or what == "diagonal" then
-				if not g4 and not g6 and not g2 and not g8 and g7 and not g3 and g1 and not g7 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif not g4 and not g6 and not g2 and not g8  and g7 and not g3  and not g1 and g9 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and not g1 and g9 then
-					return self:point{x=jn.x, y=jn.y}
-				elseif not g4 and not g6 and not g2 and not g8  and not g7 and g3  and g1 and not g9 then
-					return self:point{x=jn.x, y=jn.y}
-				end
-			end
-		elseif mode == "has-neighbours" then
-			local nb = 0
-			for i = -1, 1 do for j = -1, 1 do if (i ~= 0 or j ~= 0) and check(jn.x+i, jn.y+j) then
-				nb = nb + 1
-			end end end
-			if nb == what then
-				return self:point{x=jn.x, y=jn.y}
-			end
-		end
-	end
-	return nil
 end
 
 --[=[
@@ -760,7 +860,7 @@ function _M:groupOuterRectangle(group)
 
 	-- Debug
 	-- for i = x1, x2 do for j = y1, y2 do
-	-- 	if not self:isInGroup(group, i, j) then
+	-- 	if not group:hasPoint(i, j) then
 	-- 		if self.data[j][i] == '#' then
 	-- 			self.data[j][i] = 'T'
 	-- 		end

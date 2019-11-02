@@ -49,6 +49,7 @@ return {
 		actor = {
 			class = "mod.class.generator.actor.Random",
 			nb_npc = {35, 40},
+			filters = { {type="humanoid", subtype="orc"}, {type="humanoid", subtype="orc"}, {type="humanoid", subtype="orc"}, {type="humanoid", subtype="orc"}, {}, },
 			guardian = "GORBAT",
 		},
 		object = {

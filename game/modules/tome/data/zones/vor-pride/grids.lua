@@ -25,3 +25,23 @@ end)
 load("/data/general/grids/forest.lua")
 load("/data/general/grids/water.lua")
 load("/data/general/grids/burntland.lua")
+
+newEntity{
+	define_as = "GENERIC_BOOK", image = "terrain/marble_floor.png", add_mos = {{image="terrain/book_generic.png"}},
+	type = "floor", subtype = "floor",
+	name = "book",
+	display = '_', color_r=255, color_g=0, color_b=0,
+	notice = true,
+	always_remember = true,
+}
+
+newEntity{
+	define_as = "CANDLE",
+	type = "floor", subtype = "floor",
+	name = "reading candle", image = "terrain/marble_floor.png",
+	force_clone = true,
+	display = ';', color=colors.GOLD,
+	always_remember = true,
+	nice_tiler = { method="replace", base={"CANDLE", 100, 1, 3}},
+}
+for i = 1, 3 do newEntity{base = "CANDLE", define_as = "CANDLE"..i, embed_particles = {{name="candle", rad=1, args={candle_id="light1"}}} } end

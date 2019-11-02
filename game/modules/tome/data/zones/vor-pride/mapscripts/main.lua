@@ -25,6 +25,9 @@ self:defineTile("X", "BURNT_GROUND", nil, {entity_mod=function(e) e.make_escort 
 self:defineTile('&', "GENERIC_LEVER", nil, nil, nil, {lever=1, lever_kind="pride-doors", lever_spot={type="lever", subtype="door", check_connectivity="entrance"}}, {type="lever", subtype="lever", check_connectivity="entrance"})
 self:defineTile('*', "GENERIC_LEVER_DOOR", nil, nil, nil, {lever_action=2, lever_action_value=0, lever_action_kind="pride-doors"}, {type="lever", subtype="door", check_connectivity="entrance"})
 
+self:defineTile('B', "GENERIC_BOOK")
+self:defineTile('C', "CANDLE", nil, {random_filter={type='humanoid', subtype='orc', special=function(e) return e.pride == mapdata.pride end, random_boss={nb_classes=0, loot_quality="store", loot_quantity=1, no_loot_randart=true, ai_move="move_complex", rank=3.5, force_classes={Archmage=true}}}})
+
 local wfc = WaveFunctionCollapse.new{
 	mode="overlapping",
 	sample=self:getFile("!buildings.tmx", "samples"),
@@ -40,18 +43,32 @@ local rooms = tm:findGroupsOf{'r'}
 tm:applyOnGroups(rooms, function(room, idx)
 	tm:fillGroup(room, '.')
 	local border = tm:getBorderGroup(room)
-	local door = tm:pickGroupSpot(border, "inside-wall")
+	local door = border:pickSpot("inside-wall", "straight", function(p) return tm:isA(p, '#', 'T') end)
 	if door then tm:put(door, '+') end
 
-	local event = tm:pickGroupSpot(room, "any")
-	if event then self:addSpot(event, "event-spot", "subvault-place") end
+	-- A spot for subvaults
+	local event = room:pickSpot("any")
+	if event then
+		self:addSpot(event, "event-spot", "subvault-place")
+		room:remove(event)
+	end
+
+	-- Sometimes an archmage rare that reads a book
+	if rng.percent(25) then
+		local bpos = room:pickSpot("any")
+		if bpos then
+			local cpos = room:randomNearPoint(bpos)
+			if cpos then
+				tm:put(bpos, 'B')
+				tm:put(cpos, 'C')
+			end
+		end
+	end
 end)
 
 -- Complete the map by putting wall in all the remaining blank spaces
 tm:fillAll()
-
 -- if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
 
-tm:printResult()
-
+-- tm:printResult()
 return tm
