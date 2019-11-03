@@ -170,7 +170,7 @@ uberTalent{
 	on_learn = function(self, t)
 		if game.party and game.party:hasMember(self) and game.party.members then
 			for act, def in pairs(game.party.members) do
-				if act ~= self and act.summoner == self then
+				if act ~= self and act.summoner == self and not act.escort_quest then
 					self:callTalent(self.T_BLIGHTED_SUMMONING, "doBlightedSummon", act)
 				end
 			end

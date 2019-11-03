@@ -1948,10 +1948,12 @@ newDamageType{
 	projector = function(src, x, y, type, dam, state)
 		state = initState(state)
 		useImplicitCrit(src, state)
+		local dur = 7
+		if _G.type(dam) == "table" then dam, dur = dam.dam, dam.dur end
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			-- Freeze it, if we pass the test
-			target:setEffect(target.EFF_SLOW, 7, {power=dam, apply_power=src:combatSpellpower()})
+			target:setEffect(target.EFF_SLOW, dur, {power=dam, apply_power=src:combatSpellpower()})
 		end
 	end,
 }
@@ -3006,7 +3008,7 @@ newDamageType{
 				target:setEffect(target.EFF_SANCTITY, 1, {power=dam, no_ct_effect=true})
 			elseif target:canBe("silence") then
 				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
-				target:setEffect(target.EFF_SILENCED, 2, {apply_power=src:combatSpellpower(), min_dur=1}, true)
+				target:setEffect(target.EFF_SILENCED, 2, {apply_power=src:combatSpellpower(), min_dur=1, no_ct_effect=true}, true)
 			else
 				DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				game.logSeen(target, "%s resists the silence!", target.name:capitalize())
@@ -3062,7 +3064,6 @@ newDamageType{
 				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
 				if target:checkHit(src:combatSpellpower(), target:combatPhysicalResist(), 0, 95, 15) and target:canBe("knockback") then
 					target:knockback(src.x, src.y, 1)
-					target:crossTierEffect(target.EFF_OFFBALANCE, src:combatSpellpower())
 					game.logSeen(target, "%s is knocked back!", target.name:capitalize())
 				else
 					game.logSeen(target, "%s resists the knockback!", target.name:capitalize())
@@ -4263,5 +4264,16 @@ newDamageType{
 				DamageType:get(DamageType.LIGHT).projector(src, bx, by, DamageType.LIGHT, dam, state)
 			end
 		end)
+	end,
+}
+
+-- Light + Darkness
+newDamageType{
+	name = "dark light", type = "DARKLIGHT", text_color = "#9D9DC9#",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam / 2, state)
+		DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.LIGHT, dam / 2, state)
 	end,
 }

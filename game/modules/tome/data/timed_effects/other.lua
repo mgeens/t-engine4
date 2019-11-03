@@ -1546,6 +1546,7 @@ newEffect{
 
 	--Harrow
 	callbackOnTemporaryEffect = function(self, eff, eff_id, e, p)
+		if self.turn_procs.curse_of_nightmare_3 then return end
 		if self.__curse_nightmare_recurse then return end
 		self.__curse_nightmare_recurse = true
 		(function()
@@ -1560,6 +1561,7 @@ newEffect{
 					DamageType:get(DamageType.MIND).projector(self, p.src.x, p.src.y, DamageType.DARKNESS, dam)
 					--game.logSeen(self, "#F53CBE#%s harrows '%s'!", self.name:capitalize(), p.src.name)
 					game.logSeen(self, "#F53CBE#%s harrows %s!", self.name:capitalize(), target.name)
+					self.turn_procs.curse_of_nightmare_3 = true
 				else
 					local tgts = {}
 					self:project({type="ball", radius=10}, self.x, self.y, function(px, py)
@@ -1573,6 +1575,7 @@ newEffect{
 						DamageType:get(DamageType.MIND).projector(self, target.x, target.y, DamageType.DARKNESS, harrowDam)
 						--self:logCombat(target, "#F53CBE##Source# harrows #Target#!", self.name:capitalize(), target.name)
 						game.logSeen(self, "#F53CBE#%s harrows %s!", self.name:capitalize(), target.name)
+						self.turn_procs.curse_of_nightmare_3 = true
 					end
 				end
 			end
@@ -1626,12 +1629,12 @@ newEffect{
 		if math.min(eff.unlockLevel, eff.level) >= 4 then
 			-- build chance for a nightmare
 			local def = self.tempeffect_def[self.EFF_CURSE_OF_NIGHTMARES]
-			if not self.turn_procs.CoNightmare then --don't build chance on turn nightmare triggered
+			if not self.turn_procs.curse_of_nightmare_4 then --don't build chance on turn nightmare triggered
 				eff.nightmareChance = (eff.nightmareChance or 0) + def.getNightmareChance(eff.level)
 			end
 
 			-- invoke the nightmare, one per turn
-			if not self.turn_procs.CoNightmare and rng.percent(eff.nightmareChance) then
+			if not self.turn_procs.curse_of_nightmare_4 and rng.percent(eff.nightmareChance) then
 				local radius = def.getNightmareRadius(eff.level)
 
 				-- make sure there is at least one creature to torment
@@ -1689,7 +1692,7 @@ newEffect{
 					end end,
 					false, false)
 
-				self.turn_procs.CoNightmare = true
+				self.turn_procs.curse_of_nightmare_4 = true
 
 				game.logSeen(self, "#F53CBE#The air around %s grows cold and terrifying shapes begin to coalesce. A nightmare has begun.", self.name:capitalize())
 				game:playSoundNear(self, "talents/cloud")
@@ -1906,8 +1909,8 @@ newEffect{
 
 -- Predator is purely for the player's information
 newEffect{
-	name = "PREDATOR", image = "effects/predator.png",
-	desc = "Predator",
+	name = "PREDATOR", image = "talents/mark_prey.png",
+	desc = "Marked Prey",
 	no_stop_enter_worlmap = true,
 	decrease = 0,
 	cancel_on_level_change = true,
@@ -3115,7 +3118,7 @@ newEffect{
 newEffect{
 	name = "2H_PENALTY", image = "talents/unstoppable.png",
 	desc = "Hit Penalty",
-	long_desc = function(self, eff) return ("The target is using a two handed weapon in a single hand, reducing physical power, spellpower and mindpower by %d%% (based on size); also all damage procs from your offhand are reduced by 50%%."):format(20 - math.min(self.size_category - 4, 4) * 5) end,
+	long_desc = function(self, eff) return ("The target is using a two handed weapon in a single hand, reducing accuracy, physical power, spellpower and mindpower by %d%% (based on size); also all damage procs from your offhand are reduced by 50%%."):format(20 - math.min(self.size_category - 4, 4) * 5) end,
 	type = "other", decrease = 0, no_remove = true,
 	subtype = { combat=true, penalty=true },
 	status = "detrimental",
@@ -3887,7 +3890,7 @@ newEffect{
 		local source = eff.src
 		local target = eff.target
 
-		if source.dead or target.dead or not game.level:hasEntity(source) or not game.level:hasEntity(target) or not source:hasLOS(target.x, target.y) or core.fov.distance(self.x, self.y, target.x, target.y) > (eff.range or 10) then
+		if source.dead or target.dead or not game.level:hasEntity(source) or not game.level:hasEntity(target) or not self:canProject(eff.tg, target.x, target.y) then
 			source:removeEffect(source.EFF_FEED)
 			if eff.particles then
 				game.level.map:removeParticleEmitter(eff.particles)
