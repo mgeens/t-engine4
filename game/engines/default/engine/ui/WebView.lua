@@ -62,6 +62,10 @@ end
 function _M:generate()
 	self.mouse:reset()
 	self.key:reset()
+	if not core.webview then
+		self.unusable = true
+		return
+	end
 
 	local handlers = {
 		on_title = function(title) if self.on_title then self.on_title(title) end end,
