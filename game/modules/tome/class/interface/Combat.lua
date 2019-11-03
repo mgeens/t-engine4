@@ -695,7 +695,7 @@ function _M:attackTargetHitProcs(target, weapon, dam, apr, armor, damtype, mult,
 	if self:attr("unharmed_attack_on_hit") then
 		local v = self:attr("unharmed_attack_on_hit")
 		self:attr("unharmed_attack_on_hit", -v)
-		if rng.percent(30) then self:attackTarget(target, nil, 1, true, true) end
+		if rng.percent(50) then self:attackTarget(target, nil, 1, true, true) end
 		self:attr("unharmed_attack_on_hit", v)
 	end
 
@@ -1666,7 +1666,7 @@ function _M:combatDamage(weapon, adddammod, damage)
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
 	local power = self:combatDamagePower(damage or weapon, totstat)
 	local phys = self:combatPhysicalpower(nil, weapon, totstat)
-	return 0.3 * phys * power * talented_mod
+	return self:rescaleDamage(0.3 * phys * power * talented_mod)
 end
 
 --- Gets the 'power' portion of the damage

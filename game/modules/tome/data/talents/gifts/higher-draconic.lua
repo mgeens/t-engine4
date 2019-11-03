@@ -172,18 +172,14 @@ newTalent{
 	mode = "passive",
 	resistKnockback = function(self, t) return self:combatTalentLimit(t, 1, .17, .5) end, -- Limit < 100%
 	resistBlindStun = function(self, t) return self:combatTalentLimit(t, 1, .07, .25) end, -- Limit < 100%
-	getStat = function(self, t) return self:combatTalentScale(t, 1, 12) end,
 	passives = function(self, t, p)
 		self:talentTemporaryValue(p, "knockback_immune", t.resistKnockback(self, t))
 		self:talentTemporaryValue(p, "stun_immune", t.resistBlindStun(self, t))
 		self:talentTemporaryValue(p, "blind_immune", t.resistBlindStun(self, t))
-		self:talentTemporaryValue(p, "inc_stats", {[self.STAT_STR] = t.getStat(self, t)})
-		self:talentTemporaryValue(p, "inc_stats", {[self.STAT_WIL] = t.getStat(self, t)})
 	end,
 	info = function(self, t)
 		return ([[You have mastered your draconic nature.
-		Your Strength and Willpower are increased by %d.
-		You gain %d%% knockback resistance, and your blindness and stun resistances are increased by %d%%.]]):format(t.getStat(self, t), 100*t.resistKnockback(self, t), 100*t.resistBlindStun(self, t))
+		You gain %d%% knockback resistance, and your blindness and stun resistances are increased by %d%%.]]):format(100*t.resistKnockback(self, t), 100*t.resistBlindStun(self, t))
 	end,
 }
 
@@ -193,9 +189,9 @@ newTalent{
 	require = gifts_req_high4,
 	points = 5,
 	mode = "passive",
-	getDamageIncrease = function(self, t) return self:combatTalentScale(t, 2.5, 20) end,
+	getDamageIncrease = function(self, t) return self:combatTalentLimit(t, 50, 5, 15) end, -- Limit < 50%
 	getResists = function(self, t) return self:combatTalentScale(t, 0.6, 2.5) end,
-	getResistPen = function(self, t) return self:combatTalentLimit(t, 50, 5, 30) end, -- Limit < 50%
+	getResistPen = function(self, t) return self:combatTalentLimit(t, 50, 5, 15) end, -- Limit < 50%
 	passives = function(self, t, p)
 		local dam_inc = t.getDamageIncrease(self, t)
 		local resists = t.getResists(self, t)

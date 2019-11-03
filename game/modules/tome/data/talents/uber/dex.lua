@@ -29,7 +29,7 @@ uberTalent{
 		self:attr("show_gloves_combat", -1)
 	end,
 	info = function(self, t)
-		return ([[Each time that you make a melee attack you have a 30%% chance to execute an additional unarmed strike.]])
+		return ([[Each time that you make a melee attack you have a 50%% chance to execute an additional unarmed strike.]])
 		:format()
 	end,
 }

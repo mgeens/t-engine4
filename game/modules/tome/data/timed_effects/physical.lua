@@ -900,7 +900,7 @@ newEffect{
 newEffect{
 	name = "PRIMAL_ATTUNEMENT", image = "talents/infusion__wild.png",
 	desc = "Primal Attunement",
-	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%% and reducing a random debuff duration by %d%%."):format(eff.power, eff.reduce) end,
+	long_desc = function(self, eff) return ("The target is attuned to the wild, increasing all damage affinity by %d%% and reducing a random debuff duration by %d."):format(eff.power, eff.reduce) end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
@@ -918,7 +918,7 @@ newEffect{
 		local eff2 = self:hasEffect(effs[1])
 		if eff2 then 
 			eff2.dur = eff2.dur - eff.reduce
-			if eff2.dur <= 0 then self:removeEffect(eff2) end
+			if eff2.dur <= 0 then self:removeEffect(eff2.effect_id) end
 		end
 	end,
 }

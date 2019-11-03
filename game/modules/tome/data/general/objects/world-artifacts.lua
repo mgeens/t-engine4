@@ -76,10 +76,10 @@ newEntity{ base = "BASE_INFUSION",
 	inscription_kind = "protect",
 	inscription_data = {
 		cooldown = 18,
-		dur = 10,
-		reduce = 1,
+		dur = 5,
+		reduce = 2,
 		power = 10,
-		use_stat_mod = 0.02, -- +2 duration reduction and +20% affinity at 100 stat
+		use_stat_mod = 0.01, -- +2 duration reduction and +10% affinity at 100 stat
 		use_stat = "wil",
 	},
 	inscription_talent = "INFUSION:_PRIMAL",

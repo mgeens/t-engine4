@@ -63,7 +63,7 @@ newTalent{
 	requires_target = true,
 	no_break_stealth = true,
 	getDuration = function(self, t) return 3 end,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 600) end,
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 1, 450) end,
 	speed = "combat",
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)

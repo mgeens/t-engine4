@@ -170,7 +170,7 @@ newEntity{
 		melee_project= { [DamageType.DARKNESS] = resolvers.mbonus_material(15, 5) },
 		combat = {
 			melee_project= { [DamageType.ITEM_DARKNESS_NUMBING] = resolvers.mbonus_material(10, 5) },
-			--talent_on_hit = { [Talents.T_MOONLIGHT_RAY] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=20} },
+			talent_on_hit = { [Talents.T_MOONLIGHT_RAY] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=20} },
 		},
 	},
 }
@@ -545,20 +545,19 @@ newEntity{
 	},
 }
 
---[[ Temp disable prior finding something interesting to put here
 newEntity{
 	power_source = {arcane=true},
-	name = " of dispersion", suffix=true, instant_resolve=true,
-	keywords = {dispersion=true},
+	name = " of spellstriking", suffix=true, instant_resolve=true,
+	keywords = {spellstriking=true},
 	level_range = {20, 50},
 	greater_ego = 1,
 	rarity = 35,
 	cost = 70,
-	--resolvers.charmt(Talents.T_DISPERSE_MAGIC, 3, 20),
 	wielder = {
 		resists={
 			[DamageType.ARCANE] = resolvers.mbonus_material(7, 3),
 		},
+		inc_damage= { [DamageType.ARCANE] = resolvers.mbonus_material(7, 3), },
 		inc_stats = {
 			[Stats.STAT_MAG] = resolvers.mbonus_material(7, 3),
 			[Stats.STAT_WIL] = resolvers.mbonus_material(7, 3),
@@ -566,12 +565,13 @@ newEntity{
 		melee_project = {
 			[DamageType.ARCANE] = resolvers.mbonus_material(15, 4),
 		},
+		combat_spellpower = resolvers.mbonus_material(12, 4),
 		combat = {
 			melee_project={  [DamageType.ARCANE] = resolvers.mbonus_material(15, 4), },
 			talent_on_hit = { [Talents.T_MANATHRUST] = {level=3, chance=10} },
 		},
 	},
-}]]
+}
 
 newEntity{
 	power_source = {nature=true},
