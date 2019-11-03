@@ -122,7 +122,7 @@ newTalent{
 local function makeSunGlyph()
 	local sun_glyph = Trap.new{
 		name = "glyph of sunlight",
-		is_glyph = true,
+		is_glyph = "sunlight",
 		type = "elemental", id_by_type=true, unided_name = "trap",
 		display = '^', color=colors.GOLD, image = "trap/trap_glyph_explosion_02_64.png",
 		disarmable = false,
@@ -182,7 +182,7 @@ end
 local function makeMoonGlyph()
 	local star_glyph = Trap.new{
 		name = "glyph of moonlight",
-		is_glyph = true,
+		is_glyph = "moonlight",
 		type = "elemental", id_by_type=true, unided_name = "trap",
 		display = '^', color=colors.GOLD, image = "trap/trap_glyph_fatigue_01_64.png",
 		disarmable = false,
@@ -244,7 +244,7 @@ end
 local function makeTwilightGlyph()
 	local twi_glyph = Trap.new{
 		name = "glyph of twilight",
-		is_glyph = true,
+		is_glyph = "twilight",
 		type = "elemental", id_by_type=true, unided_name = "trap",
 		display = '^', color=colors.GOLD, image = "trap/trap_glyph_repulsion_01_64.png",
 		disarmable = false,
@@ -433,9 +433,9 @@ newTalent{
 					game.level.map:remove(e.x, e.y, Map.TRAP)
 					if self:getTalentLevel(t) >= 2 then
 						-- Set map effect
-						if trap.name == "glyph of sunlight" then
+						if trap.is_glyph == "sunlight" then
 							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.LIGHT, dam, 0, 5, nil, {type="light_zone"}, nil, false, false)
-						elseif trap.name == "glyph of moonlight" then
+						elseif trap.is_glyph == "moonlight" then
 							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.DARKNESS, dam, 0, 5, nil, {type="shadow_zone"}, nil, false, false)
 						else
 							game.level.map:addEffect(self, e.x, e.y, dur, DamageType.DARKLIGHT, dam, 0, 5, nil, {type="light_dark_zone"}, nil, false, false)

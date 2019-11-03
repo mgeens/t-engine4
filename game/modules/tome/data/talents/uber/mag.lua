@@ -163,7 +163,7 @@ uberTalent{
 	name = "Blighted Summoning",
 	mode = "passive",
 	require = { special={desc="Have summoned at least 100 creatures. More permanent summons may count as more than 1.", fct=function(self)
-		return self:attr("summoned_times") and self:attr("summoned_times") >= 1
+		return self:attr("summoned_times") and self:attr("summoned_times") >= 100
 	end} },
 	cant_steal = true,
 	-- Give the bonus to all summons immediately
