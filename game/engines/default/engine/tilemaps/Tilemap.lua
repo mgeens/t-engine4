@@ -56,6 +56,12 @@ function _M:makeData(w, h, fill_with)
 	return data
 end
 
+function _M:clone()
+	local n = self.new()
+	n.data_w, n.data_h, n.data_size = self.data_w, self.data_h, self.data_size:clone()
+	n.data = table.clone(self.data, true)
+end
+
 function _M:makeCharsTable(v, default)
 	if not v then v = default end
 	if type(v) == "string" then v = {v} end
@@ -107,8 +113,29 @@ point_meta = {
 		area = function(p)
 			return p.y * p.x
 		end,
+		distance = function(p, p2)
+			return core.fov.distance(p.x, p.y, p2.x, p2.y)
+		end,
 		clone = function(p)
 			return _M:point(p)
+		end,
+		pointsTo = function(p1, p2)
+			local l = core.fov.line(p1.x, p1.y, p2.x, p2.y)
+			local list = {p1:clone()}
+			local lx, ly = l:step()
+			while lx do
+				list[#list+1] = _M:point(lx, ly)
+				lx, ly = l:step()
+			end
+			return list
+		end,
+		iterateTo = function(p1, p2)
+			local list = p1:pointsTo(p2)
+			local i = 0
+			return function()
+				i = i + 1
+				if list[i] then return list[i] else return nil end
+			end
 		end,
 	},
 }
@@ -424,7 +451,7 @@ end
 --- Returns the bounding rectangle of a list of points
 function _M:pointsBoundingRectangle(list)
 	local to = self:point(1, 1)
-	local from = self:point(self.data_w, self.data_h)
+	local from = self:point(999999, 999999)
 	for _, p in ipairs(list) do
 		if p.x < from.x then from.x = p.x end
 		if p.x > to.x then to.x = p.x end
@@ -465,39 +492,55 @@ group_meta = {
 		return true
 	end,
 	__tostring = function(g)
-		return ("Group(%d points)"):format(#g.list)
+		return ("Group[%s](%d points)"):format(tostring(g.list), #g.list)
 	end,
 	__index = {
 		updateReverse = function(g)
 			g.reverse = {}
-			print("================")
-			table.print(g.list)
-			print("================")
 			for j = 1, #g.list do
 				local jn = g.list[j]
-				print("=====", j, jn)
 				g.reverse[jn.x] = g.reverse[jn.x] or {}
 				g.reverse[jn.x][jn.y] = jn
 			end
-			print("================")
 		end,
-		sortPoints = function(g)
-			table.sort(g.list, function(a, b)
+		sortPoints = function(g, fct)
+			table.sort(g.list, fct or function(a, b)
 				if a.x == b.x then return a.y < b.y
 				else return a.x < b.x end
 			end)
 		end,
-		area = function(p)
-			return #p.list
+		area = function(g)
+			return #g.list
+		end,
+		center = function(g)
+			if #g.list == 0 then return _M:point(-1, -1) end
+			local c = _M:point(0, 0)
+			for _, p in ipairs(g.list) do c = c + p end
+			c = c / #g.list
+
+			-- If we have the center in the group, easy!
+			if g:hasPoint(c) then return c end
+
+			-- If not, we find the closest point to the center
+			local list = {}
+			for _, p in ipairs(g.list) do
+				list[#list+1] = {p=p, dist=c:distance(p)}
+			end
+			table.sort(list, "dist")
+
+			return list[1]
 		end,
 		bounds = function(g)
 			return _M:pointsBoundingRectangle(g.list)
 		end,
 		submap = function(g, map)
+			local Proxy = require "engine.tilemaps.Proxy"
+
 			local from, to = g:bounds()
 			to = to - from + 1
 			local sm = Proxy.new(map, from, to.x, to.y)
-			sm:maskOtherPoints(list, true)
+			sm:maskOtherPoints(g.list, true)
+			g.map = sm
 			return sm
 		end,
 		add = function(g, p)
@@ -516,6 +559,12 @@ group_meta = {
 			g.reverse[p.x][p.y] = nil
 			if not next(g.reverse[p.x]) then g.reverse[p.x] = nil end
 			return true
+		end,
+		translate = function(g, tp)
+			for i, p in ipairs(g.list) do
+				g.list[i] = p + tp
+			end
+			g:updateReverse()
 		end,
 		hasPoint = function(g, x, y)
 			if type(x) == "table" then x, y = x.x, x.y end
@@ -617,7 +666,6 @@ group_meta = {
 --- Return a list of groups of tiles that matches the given cond function
 function _M:findGroups(cond)
 	if not self.data then return {} end
-	local Proxy = require "engine.tilemaps.Proxy"
 
 	local fills = {}
 	local opens = {}
@@ -685,9 +733,9 @@ end
 
 --- Apply a custom method over the given groups, sorting them from bigger to smaller
 -- It gives the groups in order of bigger to smaller
-function _M:applyOnGroups(groups, fct)
+function _M:applyOnGroups(groups, fct, nosort)
 	if not self.data then return end
-	table.sort(groups, function(a,b) return #a.list > #b.list end)
+	if not nosort then table.sort(groups, function(a,b) return #a.list > #b.list end) end
 	for id, group in ipairs(groups) do
 		fct(group, id)
 	end
@@ -883,16 +931,45 @@ function _M:carveLinearPath(char, from, dir, stop_at, dig_only_into)
 	end
 end
 
+--- Carve out a simple rectangle's border
+function _M:carveBorder(char, from, to, dig_only_into)
+	local list = {}
+	if type(dig_only_into) == "table" then dig_only_into = table.reverse(dig_only_into) end
+	local seens = {}
+	local apply = function(x, y)
+		if seens[x] and seens[x][y] then return end
+		seens[x] = seens[x] or {} seens[x][y] = true
+		if x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h then
+			if not dig_only_into or (type(dig_only_into) == "table" and dig_only_into[self.data[y][x]]) or (type(dig_only_into) == "function" and dig_only_into(x, y, self.data[y][x])) then
+				self.data[y][x] = char
+				list[#list+1] = self:point(x, y)
+			end
+		end
+	end
+	for x = from.x, to.x do
+		apply(x, from.y)
+		apply(x, to.y)
+	end
+	for y = from.y, to.y do
+		apply(from.x, y)
+		apply(to.x,y )
+	end
+	return self:group(list)
+end
+
 --- Carve out a simple rectangle
 function _M:carveArea(char, from, to, dig_only_into)
+	local list = {}
 	if type(dig_only_into) == "table" then dig_only_into = table.reverse(dig_only_into) end
 	for x = from.x, to.x do for y = from.y, to.y do
 		if x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h then
 			if not dig_only_into or (type(dig_only_into) == "table" and dig_only_into[self.data[y][x]]) or (type(dig_only_into) == "function" and dig_only_into(x, y, self.data[y][x])) then
 				self.data[y][x] = char
+				list[#list+1] = self:point(x, y)
 			end
 		end
 	end end
+	return self:group(list)
 end
 
 --- Apply a function over an area
@@ -933,11 +1010,10 @@ end
 
 --- Merge an other Tilemap's data
 function _M:merge(x, y, tm, char_order, empty_char)
-	if tm.unmergable then error("Trying to merge an unmergable tilemap, likely to be a Proxy") end
-
 	if type(x) == "table" then -- If passed a point, shift the parameters
 		x, y, tm, char_order, empty_char = x.x, x.y, y, tm, char_order
 	end
+	if tm.unmergable then error("Trying to merge an unmergable tilemap, likely to be a Proxy") end
 
 	if not self.data or not tm.data then return end
 	-- if x is a table it's a point data so we shift parameters
@@ -1253,7 +1329,9 @@ function _M:tunnel(from, to, char, tunnel_through, tunnel_avoid, config, virtual
 		if t[3] ~= "ignore" and not virtual then
 			-- print("=======TUNN", nx, ny)
 			-- self.map(nx, ny, Map.TERRAIN, self:resolve('=') or self:resolve('.') or self:resolve('floor'))
-			self:put(self:point(nx, ny), char)
+			local char = char
+			if type(char) == "function" then char = char(self:point(nx, ny)) end
+			if char then self:put(self:point(nx, ny), char) end
 		end
 	end
 end

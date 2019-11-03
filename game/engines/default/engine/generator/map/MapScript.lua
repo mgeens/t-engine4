@@ -66,6 +66,10 @@ function _M:regenerate()
 	self.force_regen = true
 end
 
+function _M:redo()
+	self.force_redo = true
+end
+
 function _M:loadFile(mapscript, lev, old_lev, args)
 	local file = self:getFile(mapscript..".lua", "mapscripts")
 	local f, err = loadfile(file)
@@ -113,6 +117,8 @@ function _M:custom(lev, old_lev)
 		return ret
 	elseif self.force_regen then
 		return nil
+	elseif self.force_redo then
+		return self:custom(lev, old_lev)
 	else
 		error("Generator MapScript called without mapscript or custom fields set!")
 	end
