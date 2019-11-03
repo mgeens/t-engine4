@@ -118,7 +118,9 @@ newTalent{
 	action = function(self, t)
 		local amt = self:mindCrit(self.life_regen * t.getMult(self, t))
 
+		self:attr("allow_on_heal", 1)
 		self:heal(amt, t)
+		self:attr("allow_on_heal", -1)
 
 		game:playSoundNear(self, "talents/heal")
 		return true
