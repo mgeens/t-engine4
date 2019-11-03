@@ -5464,6 +5464,13 @@ newEntity{ base = "BASE_WIZARD_HAT", --Thanks SageAcrin!
 			[DamageType.PHYSICAL]	= 10,
 		},
 	},
+	on_wear = function(self, who)
+		if who.descriptor and who.descriptor.subclass == "Doomed" then
+			local Talents = require "engine.interface.ActorTalents"
+			self.talent_on_mind = { {chance=10, talent=Talents.T_DARK_TORRENT, level=2} }
+			game.logPlayer(who, "#RED#Malslek's hatred flows through you.")
+		end
+	end,
 	talent_on_spell = { {chance=10, talent=Talents.T_AGONY, level=2} },
 	talent_on_mind  = { {chance=10, talent=Talents.T_HATEFUL_WHISPER, level=2} },
 }
@@ -6758,6 +6765,14 @@ newEntity{ base = "BASE_CLOTH_ARMOR", --Thanks SageAcrin!
 			self:specialWearAdd({"wielder","solipsism_threshold"}, 0.2)
 			self:specialWearAdd({"wielder","global_speed_add"}, 0.15)
 			game.logPlayer(who, "#RED#You feel yourself lost in the aura of the robe.")
+		end
+		if who.descriptor and who.descriptor.subclass == "Doomed" then
+			local Talents = require "engine.interface.ActorTalents"
+			self.talent_on_mind = {
+				{chance=8, talent=Talents.T_CURSED_BOLT, level=2},
+				{chance=8, talent=Talents.T_WAKING_NIGHTMARE, level=2 }
+			}
+			game.logPlayer(who, "#RED#The robe drapes comfortably over your doomed body.")
 		end
 	end,
 	talent_on_mind  = { {chance=8, talent=Talents.T_HATEFUL_WHISPER, level=2}, {chance=8, talent=Talents.T_AGONY, level=2}  },
