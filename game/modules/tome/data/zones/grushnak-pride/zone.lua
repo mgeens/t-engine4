@@ -57,9 +57,7 @@ return {
 	},
 	post_process = function(level)
 		-- Place a lore note on each level
-		if level.level >= 2 and level.level <= 6 then
-			game:placeRandomLoreObject("GARKUL_HISTORY"..(level.level-1))
-		end
+		game:placeRandomLoreObjectScale("GARKUL_HISTORY", {{1,2}, {3,4}, {5}}, level.level)
 
 		for uid, e in pairs(level.entities) do e.faction = e.hard_faction or "orc-pride" end
 	end,
