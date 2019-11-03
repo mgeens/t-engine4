@@ -2947,7 +2947,7 @@ end
 function _M:unlearnTalentsOnClone()
 	local todel = {}
 	for tid, lev in pairs(self.talents) do
-		if _M.talents_def[tid].unlearn_on_clone then
+		if _M.talents_def[tid] and _M.talents_def[tid].unlearn_on_clone then
 			todel[#todel+1] = tid
 		end
 	end
