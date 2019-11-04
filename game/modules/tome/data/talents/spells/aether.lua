@@ -229,7 +229,7 @@ newTalent{
 
 		for tid, _ in pairs(self.talents) do check(tid) end
 		for tree, _ in pairs(self.talents_types) do
-			for _, checkt in ipairs(self.talents_types_def[tree].talents) do check(checkt.id) end
+			for _, checkt in ipairs(self.talents_types_def[tree] and self.talents_types_def[tree].talents or {}) do check(checkt.id) end
 		end
 
 		local list = {}
