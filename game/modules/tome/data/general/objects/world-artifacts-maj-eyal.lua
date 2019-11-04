@@ -221,7 +221,7 @@ newEntity{ base = "BASE_AMULET",
 			[Stats.STAT_STR] = 6,
 			[Stats.STAT_CON] = 6,
 		},
-		inc_resists={ [DamageType.PHYSICAL] = 20, },
+		resists={ [DamageType.PHYSICAL] = 20, },
 	},
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Halfling" then
