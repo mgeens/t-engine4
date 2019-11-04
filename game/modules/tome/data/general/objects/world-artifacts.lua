@@ -6890,7 +6890,7 @@ newEntity{ base = "BASE_SHIELD",
 		if rng.percent(30) then
 			if not src then return end
 			game.logSeen(src, "The eye locks onto %s, freezing it in place!", src.name:capitalize())
-			if src:canBe("stun") and src:canBe("stone") and src:canBe("instakill") then
+			if src.canBe and src:canBe("stun") and src:canBe("stone") and src:canBe("instakill") then
 				src:setEffect(who.EFF_STONED, 5, {})
 			end
 		end
