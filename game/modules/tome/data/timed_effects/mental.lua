@@ -738,7 +738,7 @@ newEffect{
 
 		if eff.particle then self:removeParticles(eff.particle) end
 		eff.particle = nil
-		eff.particle = self:addParticles(Particles.new("agony", 1, { power = 10 * eff.turn / eff.duration }))
+		eff.particle = self:addParticles(Particles.new("agony", 1, { power = 5 * eff.turn / eff.duration }))
 	end,
 }
 
