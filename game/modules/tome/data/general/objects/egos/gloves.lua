@@ -49,7 +49,7 @@ newEntity{
 		melee_project= { [DamageType.ACID] = resolvers.mbonus_material(10, 5) },
 		combat = {
 			burst_on_crit= { [DamageType.ACID] = resolvers.mbonus_material(10, 5) },
-			talent_on_hit = { [Talents.T_ACID_BREATH] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },
+			talent_on_hit = { [Talents.T_CORROSIVE_BREATH] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },
 		},
 	},
 }
@@ -66,7 +66,7 @@ newEntity{
 		melee_project= { [DamageType.NATURE] = resolvers.mbonus_material(10, 5) },
 		combat = {
 			burst_on_crit= { [DamageType.NATURE] = resolvers.mbonus_material(10, 5) },
-			talent_on_hit = { [Talents.T_POISON_BREATH] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },
+			talent_on_hit = { [Talents.T_VENOMOUS_BREATH] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },
 		},
 	},
 }
