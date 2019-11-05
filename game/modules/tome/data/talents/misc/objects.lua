@@ -19,6 +19,7 @@
 
 newTalentType{ no_silence=true, is_spell=true, type="sher'tul/fortress", name = "fortress", description = "Yiilkgur abilities." }
 newTalentType{ no_silence=true, is_spell=true, type="spell/objects", name = "object spells", description = "Spell abilities of the various objects of the world." }
+newTalentType{ no_silence=true, type="other/objects", name = "object powers", description = "Abilities of the various objects of the world." }
 newTalentType{ type="technique/objects", name = "object techniques", description = "Techniques of the various objects of the world." }
 newTalentType{ type="wild-gift/objects", name = "object techniques", description = "Wild gifts of the various objects of the world." }
 newTalentType{ type="misc/objects", name = "object techniques", description = "Powers of the various objects of the world." }
@@ -28,7 +29,7 @@ newTalentType{ type="misc/objects", name = "object techniques", description = "P
 
 newTalent{
 	name = "charms", short_name = "GLOBAL_CD",
-	type = {"spell/objects",1},
+	type = {"other/objects",1},
 	points = 1,
 	cooldown = 1,
 	no_npc_use = true,
