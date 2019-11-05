@@ -631,10 +631,12 @@ function _M:playerFOV()
 		local range = self:getTalentRange(t)
 		local sqsense = range * range
 
-		for shadow, _ in pairs(game.party.members) do if shadow.is_doomed_shadow and not shadow.dead then
+		for shadow, _ in pairs(game.party.members) do if shadow.is_doomed_shadow and not shadow.dead and shadow.x then
 			local arr = shadow.fov.actors_dist
 			local tbl = shadow.fov.actors
 			local act
+			game.level.map:apply(shadow.x, shadow.y, 0.6)
+			game.level.map:applyExtraLite(shadow.x, shadow.y)
 			for i = 1, #arr do
 				act = arr[i]
 				if act and not act.dead and act.x and tbl[act] and shadow:canSee(act) and tbl[act].sqdist <= sqsense then

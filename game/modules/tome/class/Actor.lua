@@ -6987,6 +6987,10 @@ function _M:canSeeNoCache(actor, def, def_pct)
 		end
 	end
 
+	if actor.is_doomed_shadow and self:knowTalent(self.T_SHADOW_SENSES) then
+		return true, 100
+	end
+
 	-- Blindness means can't see anything
 	if self:attr("blind") then
 
