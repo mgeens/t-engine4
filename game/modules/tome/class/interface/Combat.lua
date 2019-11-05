@@ -2281,7 +2281,7 @@ function _M:combatGetDamageIncrease(type, straight)
 	local inc = a + b
 	if straight then return inc end
 
-	if self.auto_highest_inc_damage and self.auto_highest_inc_damage[type] then
+	if self.auto_highest_inc_damage and self.auto_highest_inc_damage[type] and self.auto_highest_inc_damage[type] > 0 then
 		local highest = self.inc_damage.all or 0
 		for kind, v in pairs(self.inc_damage) do
 			if kind ~= "all" then
