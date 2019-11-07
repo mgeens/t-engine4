@@ -1528,6 +1528,16 @@ function _M:pull(srcx, srcy, dist, recursive)
 	end
 end
 
+--- Force move to a place, with animation
+function _M:forceMoveAnim(x, y)
+	local ox, oy = self.x, self.y
+	self:move(x, y, true)
+	if config.settings.tome.smooth_move > 0 then
+		self:resetMoveAnim()
+		self:setMoveAnim(ox, oy, 8, 5)
+	end
+end
+
 --- Get the "path string" for this actor
 -- See Map:addPathString() for more info
 function _M:getPathString()
