@@ -3451,7 +3451,7 @@ newDamageType{
 	end,
 }
 
--- speed reduction, hateful whisper
+-- speed reduction, mind dam, darkness dam
 newDamageType{
 	name = "nightmare", type = "NIGHTMARE",
 	projector = function(src, x, y, type, dam, state)
@@ -3460,22 +3460,14 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target and src:reactionToward(target) < 0 then
 
-			--hateful whisper
-			if rng.chance(10) and not target:hasEffect(target.EFF_HATEFUL_WHISPER) then
-				--hateful whisper uses talent level of src
-				--[[if src:knowTalent(src.T_HATEFUL_WHISPER) then tHateWhisp = src:getTalentFromId(src.T_HATEFUL_WHISPER) end
-				if src:hasEffect(src.EFF_CURSE_OF_NIGHTMARES) then efNightmare = src.tempeffect_def[src.CURSE_OF_NIGHTMARES] end
-				if tHateWhisp and efNightmare then
-					nightLevel = math.max(1, tHateWhisp.getTalentLevel(tHateWhisp), efNightmare.level - 2)
-				elseif tHateWhisp then
-					nightLevel = tHateWhisp.getTalentLevel(tHateWhisp)
-				elseif effNightmare then
-					nightLevel = math.max(1, efNightmare.level - 2)
-				else nightLevel = 1
-				end]]
-				src:forceUseTalent(src.T_HATEFUL_WHISPER, {ignore_cd=true, ignore_energy=true, force_target=target, force_level=3, ignore_ressources=true})
+			--Mind dam
+			if rng.chance(10) then
+				DamageType:get(DamageType.MIND).projector(src, x, y, DamageType.MIND, dam, state)
 			end
-
+			--Darkness dam
+			if rng.chance(10) then
+				DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam, state)
+			end
 			--slow
 			if rng.chance(10) then
 				target:setEffect(target.EFF_SLOW, 3, {power=0.3})
