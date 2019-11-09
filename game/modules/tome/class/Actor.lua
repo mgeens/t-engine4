@@ -5938,7 +5938,7 @@ function _M:fireTalentCheck(event, ...)
 	if self[store] then upgradeStore(self[store], store) end
 	if self[store] and next(self[store].__priorities) then
 		local old_ps = self.__project_source
-		for _, info in ipairs(self[store].__sorted) do
+		for _, info in ipairsclone(self[store].__sorted) do
 			local priority, kind, stringId, tid = unpack(info)
 			if kind == "effect" then
 				self.__project_source = self.tmp[tid]

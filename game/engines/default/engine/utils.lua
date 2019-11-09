@@ -92,6 +92,21 @@ table.to_strings = function(src, fmt)
 	return tt
 end
 
+--- Same as ipairs but first shallow clone the table so that the base table can be altered safely
+function ipairsclone(t)
+	return ipairs(table.clone(t, false))
+end
+
+--- Same as pairs but first shallow clone the table so that the base table can be altered safely
+function pairsclone(t)
+	return pairs(table.clone(t, false))
+end
+
+--- Same as ripairs but first shallow clone the table so that the base table can be altered safely
+function ripairsclone(t)
+	return ripairs(table.clone(t, false))
+end
+
 function ripairs(t)
 	local i = #t
 	return function()
