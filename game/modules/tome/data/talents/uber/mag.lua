@@ -205,23 +205,23 @@ uberTalent{
 				who:learnTalent(who.T_VIRULENT_DISEASE, true, 3, {no_unlearn=true})
 			end
 		elseif who.is_nature_summon then
-			if who.name == "war hound" then
+			if who.subtype == "canine" then
 				who:learnTalent(who.T_GNAW, true, 3, {no_unlearn=true})
 			elseif who.subtype == "jelly" then
 				who:learnTalent(who.T_CURSE_OF_DEFENSELESSNESS, true, 3, {no_unlearn=true})
-			elseif who.name == "minotaur" then
+			elseif who.subtype == "minotaur" then
 				who:learnTalent(who.T_RUIN, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_RUIN, {ignore_energy=true})
-			elseif who.name == "stone golem" then
+			elseif who.subtype == "stone" then
 				who:learnTalent(who.T_ACID_BLOOD, true, 3, {no_unlearn=true})
 			elseif who.subtype == "ritch" then
 				who:learnTalent(who.T_LIFE_TAP, true, 3, {no_unlearn=true})
 			elseif who.type == "hydra" then
 				who:learnTalent(who.T_BLOOD_SPRAY, true, 3, {no_unlearn=true})
-			elseif who.name == "rimebark" then
+			elseif who.subtype == "plants" then
 				who:learnTalent(who.T_POISON_STORM, true, 3, {no_unlearn=true})
-			elseif who.name == "fire drake" then
+			elseif who.name == "fire drake" or who.name == "fire drake (wild summon)" then
 				who:learnTalent(who.T_FLAME_OF_URH_ROK, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_FLAME_OF_URH_ROK, {ignore_energy=true})
-			elseif who.name == "turtle" then
+			elseif who.subtype == "turtle" then
 				who:learnTalent(who.T_ELEMENTAL_DISCORD, true, 3, {no_unlearn=true}) who:forceUseTalent(who.T_ELEMENTAL_DISCORD, {ignore_energy=true})
 			elseif who.subtype == "spider" then
 				who:learnTalent(who.T_BLOOD_GRASP, true, 3, {no_unlearn=true})
