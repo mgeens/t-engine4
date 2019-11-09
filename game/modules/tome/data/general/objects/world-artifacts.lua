@@ -3705,6 +3705,7 @@ newEntity{ base = "BASE_GAUNTLETS",
 	on_preaddobject = function(self, who, inven) -- generated in an actor's inventory
 		if not self.material_level then self.addedToLevel(self, game.level) end
 	end,
+	cost = 450,
 	wielder = {
 		combat_mindpower=4,
 		combat_mindcrit=3,
