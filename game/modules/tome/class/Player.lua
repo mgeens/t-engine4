@@ -380,6 +380,15 @@ function _M:act()
 	-- Funky shader things !
 	self:updateMainShader()
 
+	if config.settings.tome.life_lost_warning then
+		local perc = (self.shader_old_life - self.life) / self.max_life
+		if perc > (config.settings.tome.life_lost_warning / 100) then
+			game.bignews:say(100, "#LIGHT_RED#LIFE LOST WARNING!")
+			game.key.disable_until = core.game.getTime() + 2000
+			game.mouse.disable_until = core.game.getTime() + 2000
+		end
+	end
+
 	self.shader_old_life = self.life
 	self.old_air = self.air
 	self.old_psi = self.psi
