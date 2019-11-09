@@ -498,7 +498,7 @@ newEntity{
 				return ("#LIGHT_GREEN#20%%#LAST# chance to create vines that bind the target to the ground dealing #YELLOW#%d#LAST# nature damage and pinning them for 3 turns"):format(dam)
 			end,
 			damage=function(who)
-				local dam = math.floor(who:combatStatScale(who:combatMindpower(), 1, 450))
+				local dam = math.floor(who:combatStatScale(who:combatMindpower(), 1, 350))
 				return dam
 			end,
 			fct=function(combat, who, target, dam, special)
@@ -682,7 +682,7 @@ newEntity{
 				return ("#LIGHT_GREEN#20%%#LAST# chance to knock the target back 3 spaces and deal #YELLOW#%d#LAST# physical damage"):format(dam)
 			end,
 			psychokinetic_damage=function(who)
-				local dam = math.floor(who:combatStatScale(who:combatMindpower(), 1, 450))
+				local dam = math.floor(who:combatStatScale(who:combatMindpower(), 1, 350))
 				return dam
 			end,
 			fct=function(combat, who, target, dam, special)
