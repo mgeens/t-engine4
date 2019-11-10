@@ -274,7 +274,6 @@ newTalent{
 	no_npc_use = true,
 	getPower = function(self, t) return self:combatTalentScale(t, 5, 15) end, --damage reduction handled in damage-types.lua
 	getCount = function(self, t) return math.floor(1 + self:getTalentLevel(t) / 2) end, --vision handled in player.lua
-
 	doMarkPrey = function(self, t)
 		self.marked_prey_tbl = {}
 		for __, e in pairs(game.level.entities) do
@@ -284,29 +283,29 @@ newTalent{
 		end
 		self:setEffect(self.EFF_PREDATOR, 1, {power=t.getPower(self, t), count=t.getCount(self, t)})
 	end,
-
 	callbackOnChangeLevel = function(self, t)
-		self.mark_prey = self.mark_prey or {}
-		if self.mark_prey[game.level.id] then t.doMarkPrey(self, t) return end
+		self.mark_prey2 = self.mark_prey2 or {}
+		if self.mark_prey2[game.level.id] then t.doMarkPrey(self, t) return end
 
 		local marks = {}
 		for __, e in pairs(game.level.entities) do
-			if e.rank and e.rank >= 3.2 and self:reactionToward(e) < 0 then
-				marks[#marks+1] = {e=e, rank=e.rank}
+			if e.rank and e.subtype and e.rank >= 3.2 and self:reactionToward(e) < 0 then
+				marks[#marks+1] = {e=e, rank=e.rank, subtype=e.subtype}
 			end
 		end
 
 		if #marks > 0 then table.sort(marks, "rank") else return end
+		self.mark_prey2[game.level.id] = {}
 		for i = 1, t.getCount(self, t) do
 			if #marks > 0 then
 				marks[#marks].e.marked_prey = true
+				self.mark_prey2[game.level.id][i] = marks[#marks].subtype
 				table.remove(marks)
 			else break
 			end
 		end
 
 		t.doMarkPrey(self, t)
-		self.mark_prey[game.level.id] = true
 	end,
 
 	info = function(self, t)

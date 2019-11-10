@@ -1922,21 +1922,19 @@ newEffect{
 		if not game.level then return desc..desc2
 		else for i = 1, eff.count do
 			local e = table.get(self, "marked_prey_tbl", i)
+			local etype = table.get(self, "mark_prey2", game.level.id, i)
 			if e and e.name and not e.dead then
 				local mprank, mpcolour = e:TextRank()
 				desc = desc..("\n%s%s.#LAST#"):format(mpcolour, e.name:capitalize())
 			end
-			if e and e.subtype then
+			if etype then
 				for j = 1, i do
-					local f = table.get(self, "marked_prey_tbl", j)
-					if f and f.subtype and j ~= i and e.subtype == e.subtype == f.subtype then
-						eff.unique_subtype = nil break
-					else
-						eff.unique_subtype = true
-					end
+					local etype2 = table.get(self, "mark_prey2", game.level.id, j)
+					if etype2 and j ~= i and etype == etype2 then eff.unique_subtype = nil break
+					else eff.unique_subtype = true end
 				end
 				if eff.unique_subtype then
-					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(e.subtype:capitalize())
+					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(etype:capitalize())
 				end
 			end
 		end end
