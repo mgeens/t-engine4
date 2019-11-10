@@ -380,7 +380,7 @@ function _M:act()
 	-- Funky shader things !
 	self:updateMainShader()
 
-	if config.settings.tome.life_lost_warning then
+	if config.settings.tome.life_lost_warning and self.shader_old_life then
 		local perc = (self.shader_old_life - self.life) / self.max_life
 		if perc > (config.settings.tome.life_lost_warning / 100) then
 			game.bignews:say(100, "#LIGHT_RED#LIFE LOST WARNING!")

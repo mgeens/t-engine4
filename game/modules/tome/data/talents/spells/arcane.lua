@@ -145,7 +145,7 @@ newTalent{
 	tactical = { MANA = 3, DEFEND = 2, },
 	radius = 5,
 	getMaxAbsorb = function(self, t) return self:combatTalentSpellDamage(t, 50, 450) * (100 + (self:attr("shield_factor") or 0)) / 100 end,
-	getManaRatio = function(self, t) return self:combatTalentLimit(t, 0.4, 1.5, 0.8) end,
+	getManaRatio = function(self, t) return self:combatTalentLimit(t, 0.2, 1.1, 0.4) end,
 	-- Note: effects handled in mod.class.Actor:onTakeHit function
 	getMaxDamage = function(self, t) -- Compute damage limit
 		local max_dam = self.max_mana
@@ -221,7 +221,7 @@ newTalent{
 		local mana_usage = cb.value * ratio
 		local store = cb.value
 
-		if (self:getMana() - mana_usage) / self:getMaxMana() < 0.3 then
+		if (self:getMana() - mana_usage) / self:getMaxMana() < 0.5 then
 			do_explode = true
 			local mana_limit = self:getMaxMana() * 0.3
 			mana_usage = self:getMana() - mana_limit
@@ -285,10 +285,10 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Surround yourself with arcane forces, disrupting any attempts to harm you by creating a shield of pure aether which can absorb %d damage.
-		In combat, the mental focus required to maintain and monitor the shield is too much and you let it run on its own. In this state once the shield power is depleted it will start using your mana to absorb hits, at a ration of %0.2f mana per damage.
+		In combat, the mental focus required to maintain and monitor the shield is too much and you let it run on its own. In this state once the shield power is depleted it will start using your mana to absorb hits, at a ratio of %0.2f mana per damage.
 		Whenever mana is used by the shield it stores a remnant of this energy (up to %d max). When the shield is deactivated any stored energy is released in a radius %d arcane storm that lasts 5 turns, dealing 20%% of the total stored damage each turn.
 		Outside of combat the shield regenerates 10%% of its power each turn and stored energy quickly dissipates.
-		Dropping below 30%% mana or reaching max energy storage will automatically deactivate this talent.
+		Dropping below 50%% mana or reaching max energy storage will automatically deactivate this talent.
 		The shield power improves with your Spellpower.
 		The maximum energy storage is based on your total mana (ignoring sustained spells).
 

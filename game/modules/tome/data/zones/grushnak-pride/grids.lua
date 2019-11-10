@@ -18,6 +18,7 @@
 -- darkgod@te4.org
 
 load("/data/general/grids/basic.lua", function(e) if e.image == "terrain/marble_floor.png" then e.image = "terrain/underground_floor.png" end end)
+load("/data/general/grids/slimy_walls.lua", function(e) if e.image == "terrain/marble_floor.png" then e.image = "terrain/underground_floor.png" end end)
 load("/data/general/grids/underground_slimy.lua")
 load("/data/general/grids/lava.lua")
 load("/data/general/grids/water.lua")
@@ -43,4 +44,3 @@ newEntity{
 	does_block_move = true,
 	pass_projectile = true,
 }
-
