@@ -18,6 +18,7 @@
 -- darkgod@te4.org
 
 local Object = require "mod.class.Object"
+local Grid = require "mod.class.Grid"
 
 newTalent{
 	name = "Pulverizing Auger", short_name="DIG",
@@ -207,7 +208,10 @@ newTalent{
 
 				local e = Object.new{
 					old_feat = oe,
-					name = "stone wall", image = "terrain/marble_floor.png", add_mos={{image="terrain/spell_stonewall_0"..rng.range(1,3)..".png"}},
+					name = "stone wall",
+					image = oe.image,
+					add_mos = table.clone(oe.add_mos or {}, true),
+					add_displays = table.clone(oe.add_displays or {}),
 					display = '#', color_r=255, color_g=255, color_b=255, back_color=colors.GREY,
 					desc = "a summoned wall of stone",
 					type = "wall", --subtype = "floor",
@@ -238,6 +242,7 @@ newTalent{
 					summoner_gain_exp = true,
 					summoner = self,
 				}
+				e.add_displays[#e.add_displays+1] = Grid.new{image="terrain/spell_stonewall_0"..rng.range(1,3)..".png", z=19}
 				e.tooltip = mod.class.Grid.tooltip
 				game.level:addEntity(e)
 				game.level.map(x + i, y + j, Map.TERRAIN, e)
