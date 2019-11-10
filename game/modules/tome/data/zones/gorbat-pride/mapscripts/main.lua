@@ -54,6 +54,7 @@ tm:applyOnGroups(rooms, function(room, idx)
 	if lever and levers_placed < 2 then
 		levers_placed = levers_placed + 1
 		tm:put(lever, '&')
+		room:remove(lever)
 	end
 
 	-- Drakes are not out in the wild in gorbat, they are in the roosts; sometimes there is one more powerful too
@@ -70,12 +71,12 @@ tm:applyOnGroups(rooms, function(room, idx)
 		end
 	end
 end)
-if levers_placed < 2 then return self:regenerate() end
+if levers_placed < 2 then return self:redo() end
 
 -- Complete the map by putting wall in all the remaining blank spaces
 tm:fillAll()
 
--- if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end
+-- if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:redo() end
 
 tm:printResult()
 

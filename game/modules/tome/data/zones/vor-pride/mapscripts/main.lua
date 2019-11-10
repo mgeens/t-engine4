@@ -25,7 +25,7 @@ self:defineTile("X", "BURNT_GROUND", nil, {entity_mod=function(e) e.make_escort 
 self:defineTile('&', "GENERIC_LEVER", nil, nil, nil, {lever=1, lever_kind="pride-doors", lever_spot={type="lever", subtype="door", check_connectivity="entrance"}}, {type="lever", subtype="lever", check_connectivity="entrance"})
 self:defineTile('*', "GENERIC_LEVER_DOOR", nil, nil, nil, {lever_action=2, lever_action_value=0, lever_action_kind="pride-doors"}, {type="lever", subtype="door", check_connectivity="entrance"})
 
-self:defineTile('B', "GENERIC_BOOK")
+self:defineTile('B', {"GENERIC_BOOK1","GENERIC_BOOK2","GENERIC_BOOK3"})
 self:defineTile('C', "CANDLE", nil, {random_filter={type='humanoid', subtype='orc', special=function(e) return e.pride == mapdata.pride end, random_boss={nb_classes=0, loot_quality="store", loot_quantity=1, no_loot_randart=true, ai_move="move_complex", rank=3.5, force_classes={Archmage=true}}}})
 
 local wfc = WaveFunctionCollapse.new{

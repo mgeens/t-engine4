@@ -171,6 +171,7 @@ function _M:generate(lev, old_lev)
 		local define_spot = def.define_spot
 
 		if trigger then
+			if type(trigger) == "table" and trigger.alternate == true then trigger = rng.table(trigger) end
 			local t, mod
 			if type(trigger) == "string" then t = self.zone:makeEntityByName(self.level, "trigger", trigger)
 			elseif type(trigger) == "table" and trigger.random_filter then mod = trigger.entity_mod t = self.zone:makeEntity(self.level, "terrain", trigger.random_filter, nil, true)
@@ -180,6 +181,7 @@ function _M:generate(lev, old_lev)
 		end
 
 		if object then
+			if type(object) == "table" and object.alternate == true then object = rng.table(object) end
 			local o, mod
 			if type(object) == "string" then o = self.zone:makeEntityByName(self.level, "object", object)
 			elseif type(object) == "table" and object.random_filter then mod = object.entity_mod o = self.zone:makeEntity(self.level, "object", object.random_filter, nil, true)
@@ -189,6 +191,7 @@ function _M:generate(lev, old_lev)
 		end
 
 		if trap then
+			if type(trap) == "table" and trap.alternate == true then trap = rng.table(trap) end
 			local t, mod
 			if type(trap) == "string" then t = self.zone:makeEntityByName(self.level, "trap", trap)
 			elseif type(trap) == "table" and trap.random_filter then mod = trap.entity_mod t = self.zone:makeEntity(self.level, "trap", trap.random_filter, nil, true)
@@ -198,6 +201,7 @@ function _M:generate(lev, old_lev)
 		end
 
 		if actor then
+			if type(actor) == "table" and actor.alternate == true then actor = rng.table(actor) end
 			local m, mod
 			if type(actor) == "string" then m = self.zone:makeEntityByName(self.level, "actor", actor)
 			elseif type(actor) == "table" and actor.random_filter then mod = actor.entity_mod m = self.zone:makeEntity(self.level, "actor", actor.random_filter, nil, true)
