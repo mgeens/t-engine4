@@ -36,12 +36,12 @@ return {
 	generator =  {
 		map = {
 			class = "engine.generator.map.MapScript",
-			['<'] = "FLAT_UP6", ['>'] = "FLAT_DOWN4",
-			['.'] = "FLOOR", ['+'] = "DOOR", ['#'] = "WALL",
-			['_'] = "FLOOR", ['O'] = "WALL", 
+			['<'] = "GOTHIC_FLAT_UP6", ['>'] = "GOTHIC_FLAT_DOWN4",
+			['.'] = "GOTHIC_FLOOR", ['+'] = "GOTHIC_DOOR", ['#'] = "GOTHIC_WALL",
+			['_'] = "GOTHIC_FLOOR", ['O'] = "GOTHIC_WALL", 
 			[';'] = "BURNT_GROUND", ['T'] = "BURNT_TREE",
 			['='] = "DEEP_WATER",
-			door = "DOOR",
+			door = "GOTHIC_DOOR",
 			mapscript = "!main",
 			pride = "vor",
 		},
@@ -65,7 +65,7 @@ return {
 	{
 		[1] = {
 			generator = { map = {
-				['<'] = "FLAT_UP_WILDERNESS",
+				['<'] = "GOTHIC_FLAT_UP_WILDERNESS",
 			}, },
 		},
 	},
