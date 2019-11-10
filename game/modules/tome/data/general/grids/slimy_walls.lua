@@ -276,6 +276,7 @@ newEntity{
 	force_clone = true,
 	door_player_stop = "This door seems to have been sealed off. You need to find a way to open it.",
 	is_door = true,
+	special = true,
 	door_opened = "SLIMED_GENERIC_LEVER_DOOR_OPEN",
 	on_lever_change = function(self, x, y, who, val, oldval)
 		local toggle = game.level.map.attrs(x, y, "lever_toggle")
@@ -298,6 +299,7 @@ newEntity{
 	nice_tiler = { method="door3d", north_south="SLIMED_GENERIC_LEVER_DOOR_OPEN_VERT", west_east="SLIMED_GENERIC_LEVER_DOOR_HORIZ_OPEN" },
 	always_remember = true,
 	is_door = true,
+	special = true,
 	door_closed = "SLIMED_GENERIC_LEVER_DOOR",
 	door_player_stop = "This door seems to have been sealed off. You need to find a way to close it.",
 	on_lever_change = function(self, x, y, who, val, oldval)
@@ -322,6 +324,7 @@ newEntity{
 	always_remember = true,
 	lever = false,
 	force_clone = true,
+	special = true,
 	block_move = function(self, x, y, e, act)
 		if act and e.player then
 			if self.lever then
@@ -344,6 +347,7 @@ newEntity{
 	define_as = "SLIMED_GENERIC_TRIGGER_BOOL",
 	type = "trigger", subtype = "bool",
 	lever = false,
+	special = true,
 	on_move = function(self, x, y, e)
 		if e.player then self:leverActivated(x, y, e) end
 	end,

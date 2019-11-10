@@ -164,7 +164,7 @@ tm:put(entry, '<')
 -- Slime it up!
 local replacer = { ['.'] = true, ['#'] = true, ['"'] = true, ['+'] = true }
 for i = 1, tm.data_w do for j = 1, tm.data_h do
-	if (i/tm.data_w) + (j/tm.data_h) > 1 then
+	if (i/tm.data_w) + (j/tm.data_h) > 0.8 then
 		local p = tm:point(i, j)
 		local g = tm:get(p)
 		if replacer[g] then tm:put(p, "@"..g) end
