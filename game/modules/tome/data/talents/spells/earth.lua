@@ -207,7 +207,7 @@ newTalent{
 
 				local e = Object.new{
 					old_feat = oe,
-					name = "stone wall", image = "terrain/granite_wall1.png",
+					name = "stone wall", image = "terrain/marble_floor.png", add_mos={{image="terrain/spell_stonewall_0"..rng.range(1,3)..".png"}},
 					display = '#', color_r=255, color_g=255, color_b=255, back_color=colors.GREY,
 					desc = "a summoned wall of stone",
 					type = "wall", --subtype = "floor",
