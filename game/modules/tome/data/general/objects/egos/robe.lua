@@ -454,7 +454,7 @@ newEntity{
 	power_source = {antimagic=true},
 	name = "slimy ", prefix=true, instant_resolve=true,
 	keywords = {slimy=true},
-	level_range = {1, 50},
+	level_range = {20, 50},
 	rarity = 7,
 	cost = 6,
 	wielder = {
