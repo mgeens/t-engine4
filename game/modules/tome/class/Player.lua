@@ -625,16 +625,15 @@ function _M:playerFOV()
 	end
 
 	--Handle Mark Prey Vision
-	if self:knowTalent(self.T_MARK_PREY) then
-		local t = self:getTalentFromId(self.T_MARK_PREY)
-		for i = 1, t.getCount(self, t) do
-			local e = table.get(self, "marked_prey_tbl", i)
-			if e then
+	if self:hasEffect(self.EFF_PREDATOR) then
+		local uid, e = next(game.level.entities)
+		while uid do
+			if e.marked_prey then
 				game.level.map.seens(e.x, e.y, 0.6)
 			end
+			uid, e = next(game.level.entities, uid)
 		end
 	end
-
 
 	if self:knowTalent(self.T_SHADOW_SENSES) then
 		local t = self:getTalentFromId(self.T_SHADOW_SENSES)

@@ -275,34 +275,47 @@ newTalent{
 	getPower = function(self, t) return self:combatTalentScale(t, 5, 15) end, --damage reduction handled in damage-types.lua
 	getCount = function(self, t) return math.floor(1 + self:getTalentLevel(t) / 2) end, --vision handled in player.lua
 	doMarkPrey = function(self, t)
-		self.marked_prey_tbl = {}
-		for __, e in pairs(game.level.entities) do
-			if e.marked_prey then
-				self.marked_prey_tbl[#self.marked_prey_tbl+1] = e
-			end
+		local ok = false
+		for _, e in pairs(game.level.entities) do
+			if e.marked_prey then ok = true break end
 		end
-		self:setEffect(self.EFF_PREDATOR, 1, {power=t.getPower(self, t), count=t.getCount(self, t)})
+		if ok then self:setEffect(self.EFF_PREDATOR, 1, {power=t.getPower(self, t)})
+		else self:removeEffect(self.EFF_PREDATOR, true, true) end
+	end,
+	on_learn = function(self, t)
+		if self:getTalentLevelRaw(t) == 1 then
+			t.callbackOnChangeLevel(self, t)
+		end
+		t.doMarkPrey(self, t)
+	end,
+	on_unlearn = function(self, t)
+		if self:getTalentLevelRaw(t) == 0 then
+			self:removeEffect(self.EFF_PREDATOR, true, true)
+		else
+			t.doMarkPrey(self, t)
+		end
 	end,
 	callbackOnChangeLevel = function(self, t)
 		self.mark_prey2 = self.mark_prey2 or {}
 		if self.mark_prey2[game.level.id] then t.doMarkPrey(self, t) return end
 
 		local marks = {}
-		for __, e in pairs(game.level.entities) do
-			if e.rank and e.subtype and e.rank >= 3.2 and self:reactionToward(e) < 0 then
-				marks[#marks+1] = {e=e, rank=e.rank, subtype=e.subtype}
+		for _, e in pairs(game.level.entities) do
+			if e.rank and e.subtype and e.rank and self:reactionToward(e) < 0 then
+				marks[#marks+1] = {e=e, rank=e.rank or 0, max_life=e.max_life or 1, subtype=tostring(e.subtype)}
 			end
 		end
+		table.sort(marks, function(a, b)
+			if a.rank == b.rank then return a.max_life < b.max_life
+			else return a.rank < b.rank end
+		end)
 
-		if #marks > 0 then table.sort(marks, "rank") else return end
 		self.mark_prey2[game.level.id] = {}
-		for i = 1, t.getCount(self, t) do
-			if #marks > 0 then
-				marks[#marks].e.marked_prey = true
-				self.mark_prey2[game.level.id][i] = marks[#marks].subtype
-				table.remove(marks)
-			else break
-			end
+		local nb = t.getCount(self, t)
+		while #marks > 0 and nb > 0 do
+			local m = table.remove(marks); nb = nb - 1
+			self.mark_prey2[game.level.id][m.subtype] = true
+			m.e.marked_prey = true
 		end
 
 		t.doMarkPrey(self, t)

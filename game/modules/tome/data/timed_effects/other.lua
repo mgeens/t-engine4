@@ -1917,27 +1917,25 @@ newEffect{
 	decrease = 0,
 	cancel_on_level_change = true,
 	long_desc = function(self, eff)
-		local desc = ("Hunting:")
-		local desc2 = ("\n%d%% Received damage reduction against SubType:"):format(eff.power)
-		if not game.level then return desc..desc2
-		else for i = 1, eff.count do
-			local e = table.get(self, "marked_prey_tbl", i)
-			local etype = table.get(self, "mark_prey2", game.level.id, i)
-			if e and e.name and not e.dead then
-				local mprank, mpcolour = e:TextRank()
-				desc = desc..("\n%s%s.#LAST#"):format(mpcolour, e.name:capitalize())
-			end
-			if etype then
-				for j = 1, i do
-					local etype2 = table.get(self, "mark_prey2", game.level.id, j)
-					if etype2 and j ~= i and etype == etype2 then eff.unique_subtype = nil break
-					else eff.unique_subtype = true end
-				end
-				if eff.unique_subtype then
-					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(etype:capitalize())
-				end
-			end
+		local desc = "Hunting:"
+		local desc2 = ("\n%d%% Received damage reduction against:"):format(eff.power)
+		if not game.level then return desc..desc2 end
+
+		local preys = {}
+		for uid, e in pairs(game.level.entities) do if e.marked_prey then
+			preys[#preys+1] = e
 		end end
+		table.sort(preys, "rank")
+		for _, p in ripairs(preys) do
+			local mprank, mpcolour = p:TextRank()
+			desc = desc..("\n- %s%s#LAST#"):format(mpcolour, p.name:capitalize())
+		end
+
+		local subtypes_list = table.get(self, "mark_prey2", game.level.id)
+		for st, _ in pairs(subtypes_list) do
+			desc2 = desc2..("\n- #ffa0ff#%s#LAST#"):format(tostring(st):capitalize())
+		end
+
 		return desc..desc2
 	end,
 	type = "other",
