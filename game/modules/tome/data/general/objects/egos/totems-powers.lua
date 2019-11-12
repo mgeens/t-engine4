@@ -28,7 +28,7 @@ newEntity{
 	resolvers.charm(
 		function(self, who) 
 			local heal = self.use_power.heal(self, who)
-			return ("heals yourself and all friendly characters within 10 spaces for %d"):
+			return ("heal yourself and all friendly characters within 10 spaces for %d"):
 				format(heal) end,
 		15,
 		function(self, who)
