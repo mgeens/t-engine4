@@ -1921,20 +1921,20 @@ newEffect{
 		local desc2 = ("\n%d%% Received damage reduction against SubType:"):format(eff.power)
 		if not game.level then return desc..desc2
 		else for i = 1, eff.count do
-			if self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] and self.mark_prey[game.level.id][i].name and not self.mark_prey[game.level.id][i].dead then
-				local mprank, mpcolour = self.mark_prey[game.level.id][i]:TextRank()
-				desc = desc..("\n%s%s.#LAST#"):format(mpcolour, self.mark_prey[game.level.id][i].name:capitalize())
+			local e = table.get(self, "marked_prey_tbl", i)
+			local etype = table.get(self, "mark_prey2", game.level.id, i)
+			if e and e.name and not e.dead then
+				local mprank, mpcolour = e:TextRank()
+				desc = desc..("\n%s%s.#LAST#"):format(mpcolour, e.name:capitalize())
 			end
-			if self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] and self.mark_prey[game.level.id][i].subtype then
+			if etype then
 				for j = 1, i do
-					if self.mark_prey[game.level.id][j] and self.mark_prey[game.level.id][j].subtype and j ~= i and self.mark_prey[game.level.id][i].subtype == self.mark_prey[game.level.id][j].subtype then
-						eff.unique_subtype = false break
-					else
-						eff.unique_subtype = true
-					end
+					local etype2 = table.get(self, "mark_prey2", game.level.id, j)
+					if etype2 and j ~= i and etype == etype2 then eff.unique_subtype = nil break
+					else eff.unique_subtype = true end
 				end
-				if eff.unique_subtype and eff.unique_subtype == true then
-					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(self.mark_prey[game.level.id][i].subtype:capitalize())
+				if eff.unique_subtype then
+					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(etype:capitalize())
 				end
 			end
 		end end

@@ -628,8 +628,9 @@ function _M:playerFOV()
 	if self:knowTalent(self.T_MARK_PREY) then
 		local t = self:getTalentFromId(self.T_MARK_PREY)
 		for i = 1, t.getCount(self, t) do
-			if self.mark_prey and self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] then
-				game.level.map.seens(self.mark_prey[game.level.id][i].x, self.mark_prey[game.level.id][i].y, 0.6)
+			local e = table.get(self, "marked_prey_tbl", i)
+			if e then
+				game.level.map.seens(e.x, e.y, 0.6)
 			end
 		end
 	end

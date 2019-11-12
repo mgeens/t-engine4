@@ -460,11 +460,10 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		if target.knowTalent and target:knowTalent(target.T_MARK_PREY) and src.subtype then
 			local tMarkPrey = target:getTalentFromId(target.T_MARK_PREY)
 			for i = 1, tMarkPrey.getCount(target, tMarkPrey) do
-				if target.mark_prey and target.mark_prey[game.level.id] and target.mark_prey[game.level.id][i] then
-					if target.mark_prey[game.level.id][i].subtype and target.mark_prey[game.level.id][i].subtype == src.subtype then
-						dam = dam * (100 - tMarkPrey.getPower(target, tMarkPrey)) / 100
-						break
-					end
+				local etype = table.get(target, "mark_prey2", game.level.id, i)
+				if etype and etype == src.subtype then
+					dam = dam * (100 - tMarkPrey.getPower(target, tMarkPrey)) / 100
+					break
 				end
 			end
 		end
