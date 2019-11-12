@@ -87,7 +87,6 @@ newEntity{ base="BASE_NPC_ORC_VOR", define_as = "VOR",
 		[Talents.T_STAFF_MASTERY]={base=3, every=8, max=5},
 		
 		[Talents.T_METEORIC_CRASH]=1,
-		[Talents.T_ELEMENTAL_SURGE]=1,
 	},
 
 	resolvers.auto_equip_filters("Archmage"),

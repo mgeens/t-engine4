@@ -77,7 +77,6 @@ newEntity{ base="BASE_NPC_ORC_GORBAT", define_as = "GORBAT",
 
 		[Talents.T_BELLOWING_ROAR]={base=7, every=6, max=10},
 		[Talents.T_WING_BUFFET]={base=5, every=6, max=7},
-		[Talents.T_ACIDIC_SKIN]={base=7, every=6, max=10},
 
 		[Talents.T_RIMEBARK]={base=7, every=6, max=10},
 		[Talents.T_RITCH_FLAMESPITTER]={base=10, every=6, max=12},

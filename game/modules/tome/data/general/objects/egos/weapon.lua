@@ -605,7 +605,7 @@ newEntity{
 	power_source = {antimagic=true},
 	name = "manaburning ", prefix=true, instant_resolve=true,
 	keywords = {manaburning=true},
-	level_range = {1, 50},
+	level_range = {20, 50},
 	rarity = 20,
 	cost = 40,
 	combat = {
