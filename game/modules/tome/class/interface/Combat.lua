@@ -195,9 +195,9 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 		for i = 1, #oh_weaps do
 			if i == #oh_weaps and double_weapon and offhand then break end
 			local o = oh_weaps[i]
-			local offmult = self:getOffHandMult(o.combat, mult)
 			local combat = self:getObjectCombat(o, "offhand")
-			if o.special_combat and o.subtype == "shield" and self:knowTalent(self.T_STONESHIELD) then combat = o.special_combat end
+			local offmult = self:getOffHandMult(combat, mult)
+			
 			-- no offhand unarmed attacks
 			if combat and not o.archery then
 				if combat.use_resources and not self:useResources(combat.use_resources, true) then
