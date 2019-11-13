@@ -33,12 +33,8 @@ specialList("actor", {
 })
 rotates = {"default", "90", "180", "270", "flipx", "flipy"}
 
-defineTile(',', "GRASS")
-defineTile(';', "FLOWER")
 defineTile('#', "HARDWALL")
-defineTile('w', "WALL")
-defineTile('X', "TREE")
-defineTile('d', "FLOOR")
+defineTile('!', "DOOR_VAULT")
 
 local mobs = {
    "rattlesnake",
@@ -55,9 +51,9 @@ local mob = rng.tableRemove(mobs)
 defineTile('s', "FLOOR", {random_filter={type="scroll", ego_chance=25}}, {random_filter={name=mob}})
 
 return {
-[[######]],
-[[#sss##]],
-[[#ssswd]],
-[[#sss##]],
-[[######]],
+[[#####]],
+[[#sss#]],
+[[#sss!]],
+[[#sss#]],
+[[#####]],
 }
