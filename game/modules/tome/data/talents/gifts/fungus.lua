@@ -99,7 +99,7 @@ newTalent{
 		local eq = t.getEq(self, t)
 		local turn = t.getTurn(self, t)
 		return ([[Your fungus reaches into the primordial ages of the world, granting you ancient instincts.
-		Each time you receive a direct heal you gain %d%% of a turn per 100 life healed.  This effect can't add energy past 2 stored turns.
+		Each time you receive non-regeneration healing you gain %d%% of a turn per 100 life healed.  This effect can't add energy past 2 stored turns and overhealing is not counted.
 		Also, regeneration effects on you will decrease your equilibrium by %0.1f each turn.
 		The turn gain increases with your Mindpower.]]):
 		format(turn * 100, eq)
