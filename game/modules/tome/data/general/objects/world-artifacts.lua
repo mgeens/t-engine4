@@ -547,7 +547,7 @@ newEntity{ base = "BASE_SHIELD",
 		fatigue = 20,
 		learn_talent = { [Talents.T_BLOCK] = 1, },
 	},
-	on_block = {desc = "30% chance that you'll breath stunning fire in a cone at the attacker (if within range 6).", fct = function(self, who, target, type, dam, eff)
+	on_block = {desc = "30% chance that you'll breathe fire in a cone at the attacker (if within range 6).", fct = function(self, who, target, type, dam, eff)
 	if rng.percent(30) then
 		if not target or not target.x or not target.y or core.fov.distance(who.x, who.y, target.x, target.y) > 6 then return end
 
