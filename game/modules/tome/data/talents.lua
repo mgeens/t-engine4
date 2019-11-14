@@ -74,7 +74,7 @@ damDesc = function(self, type, dam)
 		dam = dam * 0.5
 	end
 	if self:attr("stunned") then
-		dam = dam * 0.4
+		dam = dam * 0.5
 	end
 	if self:attr("invisible_damage_penalty") then
 		dam = dam * util.bound(1 - (self.invisible_damage_penalty / (self.invisible_damage_penalty_divisor or 1)), 0, 1)
