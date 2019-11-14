@@ -1917,27 +1917,25 @@ newEffect{
 	decrease = 0,
 	cancel_on_level_change = true,
 	long_desc = function(self, eff)
-		local desc = ("Hunting:")
-		local desc2 = ("\n%d%% Received damage reduction against SubType:"):format(eff.power)
-		if not game.level then return desc..desc2
-		else for i = 1, eff.count do
-			if self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] and self.mark_prey[game.level.id][i].name and not self.mark_prey[game.level.id][i].dead then
-				local mprank, mpcolour = self.mark_prey[game.level.id][i]:TextRank()
-				desc = desc..("\n%s%s.#LAST#"):format(mpcolour, self.mark_prey[game.level.id][i].name:capitalize())
-			end
-			if self.mark_prey[game.level.id] and self.mark_prey[game.level.id][i] and self.mark_prey[game.level.id][i].subtype then
-				for j = 1, i do
-					if self.mark_prey[game.level.id][j] and self.mark_prey[game.level.id][j].subtype and j ~= i and self.mark_prey[game.level.id][i].subtype == self.mark_prey[game.level.id][j].subtype then
-						eff.unique_subtype = false break
-					else
-						eff.unique_subtype = true
-					end
-				end
-				if eff.unique_subtype and eff.unique_subtype == true then
-					desc2 = desc2..("\n#ffa0ff#%s.#LAST#"):format(self.mark_prey[game.level.id][i].subtype:capitalize())
-				end
-			end
+		local desc = "Hunting:"
+		local desc2 = ("\n%d%% Received damage reduction against:"):format(eff.power)
+		if not game.level then return desc..desc2 end
+
+		local preys = {}
+		for uid, e in pairs(game.level.entities) do if e.marked_prey then
+			preys[#preys+1] = e
 		end end
+		table.sort(preys, "rank")
+		for _, p in ripairs(preys) do
+			local mprank, mpcolour = p:TextRank()
+			desc = desc..("\n- %s%s#LAST#"):format(mpcolour, p.name:capitalize())
+		end
+
+		local subtypes_list = table.get(self, "mark_prey2", game.level.id)
+		for st, _ in pairs(subtypes_list) do
+			desc2 = desc2..("\n- #ffa0ff#%s#LAST#"):format(tostring(st):capitalize())
+		end
+
 		return desc..desc2
 	end,
 	type = "other",
