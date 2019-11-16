@@ -1700,7 +1700,7 @@ newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SKIN_OF_MANY",
 			self:specialWearAdd({"wielder", "talents_types_mastery"}, { ["cunning/stealth"] = 0.4 })
 			self:specialWearAdd({"wielder","confusion_immune"}, 0.4)
 			self:specialWearAdd({"wielder","blind_immune"}, 0.4)
-			game.logPlayer(who, "#DARK_BLUE#The skin seems pleased to be worn by the unliving, and grows silent.")
+			game.logPlayer(who, "#BLUE#The skin seems pleased to be worn by the unliving, and grows silent.")
 		end
 	end,
 }
@@ -4994,7 +4994,7 @@ newEntity{ base = "BASE_GREATSWORD", --Thanks Grayswandir!
 	encumber = 0.1,
 	desc = [[This sword appears weightless, and nearly invisible.]],
 	cost = 400,
-	require = { stat = { str=20, }, },
+	require = { stat = { mag=18, }, },
 	metallic = false,
 	material_level = 2,
 	combat = {
