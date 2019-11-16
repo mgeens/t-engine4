@@ -7982,7 +7982,7 @@ newEntity{ base = "BASE_BATTLEAXE",
 	material_level = 2,
 	combat = {
 		dam = 30,
-		apr = 12,
+		apr = 10,
 		physcrit = 5,
 		dammod = {str=1.2},
 		melee_project={
