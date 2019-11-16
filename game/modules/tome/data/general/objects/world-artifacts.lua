@@ -7981,7 +7981,7 @@ newEntity{ base = "BASE_BATTLEAXE",
 	cost = 100,
 	material_level = 2,
 	combat = {
-		dam = 30,
+		dam = 28,
 		apr = 10,
 		physcrit = 5,
 		dammod = {str=1.2},
