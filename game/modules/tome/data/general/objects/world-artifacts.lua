@@ -285,6 +285,8 @@ newEntity{ base = "BASE_AMULET",
 	cost = 90,
 	material_level = 2,
 	wielder = {
+		slow_projectiles = 15,
+		combat_def = 15,
 		max_encumber = 20,
 		fatigue = -20,
 		avoid_pressure_traps = 1,
@@ -1695,9 +1697,9 @@ newEntity{ base = "BASE_LIGHT_ARMOR", define_as = "SKIN_OF_MANY",
 			local Stats = require "engine.interface.ActorStats"
 			local DamageType = require "engine.DamageType"
 
-			self:specialWearAdd({"wielder", "talents_types_mastery"}, { ["cunning/stealth"] = 0.2 })
-			self:specialWearAdd({"wielder","confusion_immune"}, 0.3)
-			self:specialWearAdd({"wielder","blind_immune"}, 0.3)
+			self:specialWearAdd({"wielder", "talents_types_mastery"}, { ["cunning/stealth"] = 0.4 })
+			self:specialWearAdd({"wielder","confusion_immune"}, 0.4)
+			self:specialWearAdd({"wielder","blind_immune"}, 0.4)
 			game.logPlayer(who, "#DARK_BLUE#The skin seems pleased to be worn by the unliving, and grows silent.")
 		end
 	end,
@@ -4992,16 +4994,16 @@ newEntity{ base = "BASE_GREATSWORD", --Thanks Grayswandir!
 	encumber = 0.1,
 	desc = [[This sword appears weightless, and nearly invisible.]],
 	cost = 400,
-	require = { stat = { str=24, }, },
+	require = { stat = { str=20, }, },
 	metallic = false,
 	material_level = 2,
 	combat = {
-		dam = 24,
+		dam = 26,
 		physspeed=0.9,
 		apr = 25,
 		physcrit = 3,
-		dammod = {str=1.2},
-		melee_project={[DamageType.ARCANE] = 10,},
+		dammod = {str=1.2, mag=0.1},
+		melee_project={[DamageType.ARCANE] = 15,},
 		burst_on_crit = {
 			[DamageType.ARCANE_SILENCE] = 30,
 		},
@@ -5987,14 +5989,14 @@ newEntity{ base = "BASE_AMULET",
 	wielder = {
 		combat_mindpower = 5,
 		enhance_meditate=0.2,
-		inc_stats = { [Stats.STAT_WIL] = 4,},
-		life_regen=0.2,
+		inc_stats = { [Stats.STAT_WIL] = 5,},
+		life_regen=2,
 		damage_affinity={
 			[DamageType.NATURE] = 15,
 		},
 	},
-	max_power = 40, power_regen = 1,
-	use_talent = { id = Talents.T_NATURE_TOUCH, level = 2, power = 40 },
+	max_power = 35, power_regen = 1,
+	use_talent = { id = Talents.T_NATURE_TOUCH, level = 2, power = 35 },
 }
 
 newEntity{ base = "BASE_GAUNTLETS",
@@ -7979,13 +7981,13 @@ newEntity{ base = "BASE_BATTLEAXE",
 	cost = 100,
 	material_level = 2,
 	combat = {
-		dam = 20,
-		apr = 2,
+		dam = 30,
+		apr = 12,
 		physcrit = 5,
 		dammod = {str=1.2},
 		melee_project={
-			[DamageType.LIGHTNING]=10,
-			[DamageType.COLD]=10,
+			[DamageType.LIGHTNING]=15,
+			[DamageType.COLD]=15,
 		},
 		special_on_crit = {desc="inflicts either shocked or wet, chosen at random", fct=function(combat, who, target)
 			if not target or target == self then return end
@@ -7998,8 +8000,8 @@ newEntity{ base = "BASE_BATTLEAXE",
 	},
 	wielder = {
 		inc_damage = {
-			[DamageType.LIGHTNING]=10,
-			[DamageType.COLD]=10,
+			[DamageType.LIGHTNING]=12,
+			[DamageType.COLD]=12,
 		},
 	},
 }
