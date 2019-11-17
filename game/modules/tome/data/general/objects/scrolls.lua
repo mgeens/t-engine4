@@ -180,7 +180,7 @@ newEntity{ base = "BASE_INFUSION",
 			what[eff2] = true
 		end
 		return {
-			cooldown = rng.range(12, 16),
+			cooldown = rng.range(10, 16),
 			dur = rng.range(2, 4),
 			power = resolvers.mbonus_level(10, 15),  -- Low variance because duration and chance for second debuff type is enough randomness
 			use_stat_mod = 0.2,  -- +20% resist all at 100 stat
@@ -342,7 +342,7 @@ newEntity{ base = "BASE_RUNE",
 	cost = 10,
 	inscription_kind = "utility",
 	inscription_data = {
-		cooldown = resolvers.rngrange(16, 24),
+		cooldown = resolvers.rngrange(12, 22),
 		shield = resolvers.mbonus_level(120, 20, function(e, v) return v * 0.06 end),
 		use_stat_mod = 1 -- 1x, applied up to 3 times
 	},
