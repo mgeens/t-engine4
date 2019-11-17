@@ -192,7 +192,7 @@ newEntity{ base = "BASE_INFUSION",
 
 newEntity{ base = "BASE_INFUSION",
 	name = "movement infusion",
-	level_range = {10, 50},
+	level_range = {1, 50},
 	rarity = 20,
 	cost = 30,
 
