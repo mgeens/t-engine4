@@ -96,6 +96,9 @@ newEntity{ define_as = "ATAMATHON", base = "BASE_NPC_CONSTRUCT",
 	autolevel = "warriormage",
 	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", },
 
+	auto_classes={{class="Berserker", start_level=70}},
+	resolvers.auto_equip_filters("Berserker"),
+
 	on_die = function()
 		world:gainAchievement("ATAMATHON", game.player)
 	end
