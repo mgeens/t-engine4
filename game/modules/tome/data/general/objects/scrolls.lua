@@ -208,7 +208,7 @@ newEntity{ base = "BASE_INFUSION",
 newEntity{ base = "BASE_INFUSION",
 	name = "heroism infusion",
 	level_range = {20, 50},
-	rarity = 20,
+	rarity = 30,
 	cost = 40,
 
 	inscription_kind = "utility",
