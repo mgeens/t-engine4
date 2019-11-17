@@ -404,18 +404,18 @@ newEntity{ theme={misc=true, darkness=true}, name="generic infravision radius", 
 newEntity{ theme={misc=true, light=true}, name="generic lite radius", points = 1, rarity = 14, level_range = {1, 50},
 	wielder = { lite = resolvers.randartmax(1, 3), },
 }
-newEntity{ theme={misc=true, mental=true}, name="generic telepathy", points = 60, rarity = 100, level_range = {1, 50}, unique=1,
-	wielder = { esp_all = 1 },
-}
-newEntity{ theme={misc=true, mental=true}, name="generic orc telepathy", points = 2, rarity = 50, level_range = {1, 50}, unique=1,
-	wielder = { esp = {["humanoid/orc"]=1}, },
-}
-newEntity{ theme={misc=true, mental=true}, name="generic dragon telepathy", points = 2, rarity = 40, level_range = {1, 50}, unique=1,
-	wielder = { esp = {dragon=1}, },
-}
-newEntity{ theme={misc=true, mental=true}, name="generic demon telepathy", points = 2, rarity = 40, level_range = {1, 50}, unique=1,
-	wielder = { esp = {["demon/minor"]=1, ["demon/major"]=1}, },
-}
+-- newEntity{ theme={misc=true}, name="generic telepathy", points = 60, rarity = 130, level_range = {1, 50}, unique=1,
+-- 	wielder = { esp_all = 1 },
+-- }
+-- newEntity{ theme={misc=true, mental=true}, name="generic orc telepathy", points = 2, rarity = 50, level_range = {1, 50}, unique=1,
+-- 	wielder = { esp = {["humanoid/orc"]=1}, },
+-- }
+-- newEntity{ theme={misc=true, mental=true}, name="generic dragon telepathy", points = 2, rarity = 40, level_range = {1, 50}, unique=1,
+-- 	wielder = { esp = {dragon=1}, },
+-- }
+-- newEntity{ theme={misc=true, mental=true}, name="generic demon telepathy", points = 2, rarity = 40, level_range = {1, 50}, unique=1,
+-- 	wielder = { esp = {["demon/minor"]=1, ["demon/major"]=1}, },
+-- }
 
 ----------------------------------------------------------------
 -- Melee damage Projection (rare)
