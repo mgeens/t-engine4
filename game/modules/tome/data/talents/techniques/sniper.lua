@@ -204,7 +204,7 @@ newTalent{
 		local cooldown = t.getCooldownReduction(self,t)
 		return ([[Fire an arrow tipped with a smoke bomb inflicting %d%% damage and creating a radius %d cloud of thick, disorientating smoke. Those caught within will have their vision range reduced by %d for 5 turns.
 The distraction caused by this effect reduces the cooldown of your Concealment by %d turns. If the cooldown is reduced to 0, you instantly activate Concealment regardless of whether foes are too close.
-The chance for the smoke bomb to affect your targets increases with your Accuracy.]]):
+The chance for the smoke bomb to affect your targets increases with your Accuracy. This requires a bow to use.]]):
 		format(dam, radius, sight, cooldown)
 	end,
 }
@@ -252,7 +252,7 @@ newTalent{
 		local mark = t.getMarkChance(self,t)
 		return ([[Enter a calm, focused stance, increasing physical power and accuracy by %d, projectile speed by %d%% and the chance to mark targets by an additional %d%%.
 This makes your shots more effective at range, increasing all damage dealt by %0.1f%% per tile travelled beyond 3, to a maximum of %0.1f%% damage at range 8.
-The physical power and accuracy increase with your Dexterity.]]):
+The physical power and accuracy increase with your Dexterity. This requires a bow to use.]]):
 		format(power, speed, mark, dam, dam*5)
 	end,
 }
@@ -285,7 +285,8 @@ newTalent{
 		local dam = t.getDamage(self,t)*100
 		local reduction = t.getDamageReduction(self,t)
 		return ([[Take aim for 1 turn, preparing a deadly shot. During the next turn, this talent will be replaced with the ability to fire a lethal shot dealing %d%% damage and marking the target.
-While aiming, your intense focus causes you to shrug off %d%% incoming damage and all negative effects.]]):
+While aiming, your intense focus causes you to shrug off %d%% incoming damage and all negative effects.
+This requires a bow to use.]]):
 		format(dam, reduction)
 	end,
 }
