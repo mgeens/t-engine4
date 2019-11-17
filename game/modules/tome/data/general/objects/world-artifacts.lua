@@ -2182,7 +2182,7 @@ newEntity{ base = "BASE_AMULET",
 }
 
 newEntity{ base = "BASE_DIGGER",
-	power_source = {technique=true},
+	power_source = {technique=true, arcane=true},
 	unique = true,
 	name = "Pick of Dwarven Emperors", color = colors.GREY, image = "object/artifact/pick_of_dwarven_emperors.png",
 	unided_name = "crude iron pickaxe",
@@ -2194,14 +2194,14 @@ newEntity{ base = "BASE_DIGGER",
 	digspeed = 12,
 	wielder = {
 		resists_pen = { [DamageType.PHYSICAL] = 10, },
-		inc_stats = { [Stats.STAT_STR] = 3, [Stats.STAT_CON] = 3, },
-		combat_mentalresist = 7,
-		combat_physresist = 7,
-		combat_spellresist = 7,
+		inc_stats = { [Stats.STAT_STR] = 5, [Stats.STAT_CON] = 5, },
+		combat_mentalresist = 10,
+		combat_physresist = 10,
+		combat_spellresist = 10,
 		max_life = 50,
 	},
 	max_power = 30, power_regen = 1,
-	use_talent = { id = Talents.T_DIG, level = 4, power = 30 },
+	use_talent = { id = Talents.T_EARTHQUAKE, level = 4, power = 30 },
 	on_wear = function(self, who)
 		if who.descriptor and who.descriptor.race == "Dwarf" then
 			local Stats = require "engine.interface.ActorStats"
