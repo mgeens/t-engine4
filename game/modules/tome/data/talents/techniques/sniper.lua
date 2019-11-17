@@ -285,7 +285,7 @@ newTalent{
 		local dam = t.getDamage(self,t)*100
 		local reduction = t.getDamageReduction(self,t)
 		return ([[Take aim for 1 turn, preparing a deadly shot. During the next turn, this talent will be replaced with the ability to fire a lethal shot dealing %d%% damage and marking the target.
-While aiming, your intense focus causes you to shrug of %d%% incoming damage and all negative effects.]]):
+While aiming, your intense focus causes you to shrug off %d%% incoming damage and all negative effects.]]):
 		format(dam, reduction)
 	end,
 }
