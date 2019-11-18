@@ -55,7 +55,7 @@ newTalent{
 		return true
 	end,
 	info = function(self, t)
-		return ([[Under the cover of your shell, gain %d%% global resistance for %d turns]]):format(t.resistPower(self, t), t.getDuration(self, t))
+		return ([[Under the cover of your shell, gain %d%% all resistance for %d turns]]):format(t.resistPower(self, t), t.getDuration(self, t))
 	end,
 }
 

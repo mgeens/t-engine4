@@ -846,7 +846,7 @@ newEffect{
 newEffect{
 	name = "SHELL_SHIELD", image = "talents/shell_shield.png",
 	desc = "Shell Shield",
-	long_desc = function(self, eff) return ("The target takes cover in its shell, reducing all damage taken by %d%%."):format(eff.power) end,
+	long_desc = function(self, eff) return ("The target takes cover in its shell, gaining %d%% all resist."):format(eff.power) end,
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",
