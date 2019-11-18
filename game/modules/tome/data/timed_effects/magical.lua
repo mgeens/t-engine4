@@ -2240,6 +2240,22 @@ newEffect{
 	end,
 }
 
+newEffect{
+	name = "WOEFUL_CRIPPLE", image = "talents/cripple.png",
+	desc = "Woeful Cripple",
+	long_desc = function(self, eff) return ("The target is crippled, reducing melee, spellcasting and mind speed by %d%%."):format(eff.speed*100) end,
+	type = "magical",
+	subtype = { slow=true },
+	status = "detrimental",
+	parameters = { speed=0.2 },
+	on_gain = function(self, err) return "#Target# is crippled." end,
+	on_lose = function(self, err) return "#Target# is not crippled anymore." end,
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "combat_physspeed", -eff.speed)
+		self:effectTemporaryValue(eff, "combat_spellspeed", -eff.speed)
+		self:effectTemporaryValue(eff, "combat_mindspeed", -eff.speed)
+	end,
+}
 
 newEffect{
 	name = "EPIDEMIC", image = "talents/epidemic.png",

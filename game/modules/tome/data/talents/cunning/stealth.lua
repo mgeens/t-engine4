@@ -149,7 +149,7 @@ newTalent{
 		Any non-instant, non-movement action will break stealth if not otherwise specified.
 
 		Enemies uncertain of your location will still make educated guesses at it.
-		While stealthed, enemies cannot share information about your location with each other and will be delayed in relaying that you exist at all.]]):
+		While stealthed, enemies cannot share information about your location with each other and will be delayed in telling their allies that you exist at all.]]):
 		format(stealthpower, radius, xs)
 	end,
 }
