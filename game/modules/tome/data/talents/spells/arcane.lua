@@ -147,11 +147,13 @@ newTalent{
 	getMaxAbsorb = function(self, t) return self:combatTalentSpellDamage(t, 50, 450) * (100 + (self:attr("shield_factor") or 0)) / 100 end,
 	getManaRatio = function(self, t) return self:combatTalentLimit(t, 0.2, 1.1, 0.4) end,
 	-- Note: effects handled in mod.class.Actor:onTakeHit function
+	getMaxDamageLimit = function(self, t) return self:combatTalentLimit(t, 1200, 400, 1000) end,
 	getMaxDamage = function(self, t) -- Compute damage limit
 		local max_dam = self.max_mana
 		for i, k in pairs(self.sustain_talents) do -- Add up sustain costs to get total mana pool size
 			max_dam = max_dam + (tonumber(self.talents_def[i].sustain_mana) or 0)
 		end
+		max_dam = math.min(max_dam, t.getMaxDamageLimit(self, t))
 		return max_dam * 2 -- Maximum damage is 2x total mana pool
 	end,
 	explode = function(self, t, dam)
@@ -290,10 +292,10 @@ newTalent{
 		Outside of combat the shield regenerates 10%% of its power each turn and stored energy quickly dissipates.
 		Dropping below 50%% mana or reaching max energy storage will automatically deactivate this talent.
 		The shield power improves with your Spellpower.
-		The maximum energy storage is based on your total mana (ignoring sustained spells).
+		The maximum energy storage is based on your total mana (ignoring sustained spells), with a limit at %d effective mana.
 
 		Current shield power: %d
 		Current stored energy: %d]]):
-		format(t.getMaxAbsorb(self, t), t.getManaRatio(self, t), t.getMaxDamage(self, t), self:getTalentRadius(t), self.disruption_shield_power or 0, self.disruption_shield_storage or 0)
+		format(t.getMaxAbsorb(self, t), t.getManaRatio(self, t), t.getMaxDamage(self, t), self:getTalentRadius(t), t.getMaxDamageLimit(self, t), self.disruption_shield_power or 0, self.disruption_shield_storage or 0)
 	end,
 }
