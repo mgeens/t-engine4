@@ -592,7 +592,7 @@ function resolvers.mbonus_material(max, add, pricefct)
 	return {__resolver="mbonus_material",  __resolve_instant=true, max, add, pricefct}
 end
 function resolvers.calc.mbonus_material(t, e)
-	local ml = e.material_level or 1
+	local ml = e.effective_ego_material_level or e.material_level or 1
 	local v = math.ceil(rng.mbonus(t[1], resolvers.current_level, resolvers.mbonus_max_level) * ml / 5) + (t[2] or 0)
 
 	if e.cost and t[3] then
@@ -680,7 +680,7 @@ function resolvers.random_use_talent(types, power)
 	return {__resolver="random_use_talent", __resolve_last=true, types, power}
 end
 function resolvers.calc.random_use_talent(tt, e)
-	local ml = e.material_level or 1
+	local ml = e.effective_ego_material_level or e.material_level or 1
 	local ts = {}
 	for i, t in ipairs(engine.interface.ActorTalents.talents_def) do
 		if t.random_ego and tt[1][t.random_ego] and t.type[2] < ml then ts[#ts+1]=t.id end
@@ -743,7 +743,7 @@ function resolvers.calc.image_material(t, e)
 	if type(t[2]) == "string" and t[2] == "wood" then t[2] = {"elm","ash","yew","elvenwood","dragonbone"} end
 	if type(t[2]) == "string" and t[2] == "nature" then t[2] = {"mossy","vined","thorned","pulsing","living"} end
 	if type(t[2]) == "string" and t[2] == "cloth" then t[2] = {"linen","woollen","cashmere","silk","elvensilk"} end
-	local ml = e.material_level or 1
+	local ml = e.effective_ego_material_level or e.material_level or 1
 	return "object/"..t[1].."_"..t[2][ml]..".png"
 end
 
@@ -792,7 +792,7 @@ function resolvers.calc.moddable_tile(t, e)
 	elseif slot == "gembag" then r = {"gembag_01","gembag_02","gembag_03","gembag_04","gembag_05"}
 	end
 	if not r then return end
-	local ml = e.material_level or 1
+	local ml = e.effective_ego_material_level or e.material_level or 1
 	r = r[util.bound(ml, 1, #r)]
 	if r2 then
 		r2 = r2[util.bound(ml, 1, #r2)]
