@@ -748,7 +748,7 @@ newEffect{
 newEffect{
 	name = "FROZEN", image = "talents/freeze.png",
 	desc = "Frozen",
-	long_desc = function(self, eff) return ("The target is encased in ice. All damage done to it will be split, 40%% absorbed by the ice and 60%% by the target. The target's defense is nullified while in the ice, and it may only attack the ice, but it is also immune to any new detrimental status effects. The target cannot teleport or heal while frozen. %d HP on the iceblock remaining."):format(eff.hp) end,
+	long_desc = function(self, eff) return ("The target is encased in ice. All damage done to it will be split, 40%% absorbed by the ice and 60%% by the target. The target's defense is nullified while in the ice, and it may only attack the ice, but it is also immune to any new detrimental status effects (except Wet and Frozen Feet). The target cannot teleport or heal while frozen. %d HP on the iceblock remaining."):format(eff.hp) end,
 	type = "physical", -- Frozen has some serious effects beyond just being frozen, no healing, no teleport, etc.  But it can be applied by clearly non-magical sources i.e. Ice Breath
 	subtype = { cold=true, stun=true },
 	status = "detrimental",
@@ -779,6 +779,7 @@ newEffect{
 		eff.defid = self:addTemporaryValue("combat_def", -self:combatDefenseBase()-10)
 		eff.rdefid = self:addTemporaryValue("combat_def_ranged", -self:combatDefenseBase()-10)
 		eff.sefid = self:addTemporaryValue("negative_status_effect_immune", 1)
+		eff.seffid = self:addTemporaryValue("negative_status_effect_immune_frozen", 1)
 
 		self:setTarget(self)
 	end,
@@ -793,6 +794,7 @@ newEffect{
 		self:removeTemporaryValue("combat_def", eff.defid)
 		self:removeTemporaryValue("combat_def_ranged", eff.rdefid)
 		self:removeTemporaryValue("negative_status_effect_immune", eff.sefid)
+		if eff.seffid then self:removeTemporaryValue("negative_status_effect_immune_frozen", eff.seffid) end
 		self.color_r = eff.old_r
 		self.color_g = eff.old_g
 		self.color_b = eff.old_b

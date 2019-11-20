@@ -7261,7 +7261,9 @@ function _M:on_set_temporary_effect(eff_id, e, p)
 		p.dur = math.ceil(p.dur * (1 - util.bound(t.getWoundReduction(self, t), 0, 1)))
 	end
 	if e.status == "detrimental" and e.type ~= "other" and self:attr("negative_status_effect_immune") then
-		p.dur = 0
+		if not (self:attr("negative_status_effect_immune_frozen") and (eff_id == self.EFF_WET or eff_id == self.EFF_FROZEN_FEET)) then
+			p.dur = 0
+		end
 	end
 	if e.status == "detrimental" and e.type == "mental" and self:attr("clear_mind_immune") and not e.subtype["cross tier"] then
 		p.dur = 0

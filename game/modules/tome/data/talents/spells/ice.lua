@@ -24,13 +24,13 @@ newTalent{
 	points = 5,
 	random_ego = "attack",
 	mana = 14,
-	cooldown = function(self, t) return math.floor(self:combatTalentLimit(t, 20, 8, 12, true)) end, -- Limit cooldown <20
+	cooldown = 8,
 	tactical = { ATTACK = { COLD = 2.5 }, DISABLE = { stun = 1.5 } },
 	range = 10,
 	direct_hit = true,
 	reflectable = true,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 12, 180) * t.cooldown(self,t) / 6 end, -- Gradually increase burst potential with c/d
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 40, 390) end, -- Gradually increase burst potential with c/d
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
 	target = function(self, t)
 		if necroEssenceDead(self, true) then
@@ -118,6 +118,8 @@ newTalent{
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 10, 320) end,
 	getTargetCount = function(self, t) return math.ceil(self:getTalentLevel(t) + 2) end,
 	action = function(self, t)
+		if self:hasEffect(self.EFF_FROZEN) then self:removeEffect(self.EFF_FROZEN) end
+
 		local max = t.getTargetCount(self, t)
 		for i, act in ipairs(self.fov.actors_dist) do
 			if self:reactionToward(act) < 0 then
@@ -159,6 +161,7 @@ newTalent{
 		* +25%% critical chance against Elites or Bosses
 		All affected foes will get the wet effect.
 		At most, it will affect %d foes.
+		If you are yourself Frozen, it will instantly be destroyed.
 		The damage will increase with your Spellpower.]]):
 		format(damDesc(self, DamageType.COLD, damage), targetcount)
 	end,

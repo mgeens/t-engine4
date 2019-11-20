@@ -1423,7 +1423,7 @@ newDamageType{
 		local target = game.level.map(x, y, Map.ACTOR)
 		if target then
 			local apply = dam.apply_power
-			if target:canBe("pin") and not target:attr("fly") and not target:attr("levitation") then
+			if target:attr("negative_status_effect_immune_frozen") or (target:canBe("pin") and not target:attr("fly") and not target:attr("levitation")) then
 				target:setEffect(target.EFF_FROZEN_FEET, dam.dur, {apply_power=dam.apply_power})
 			end
 
