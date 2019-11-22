@@ -2366,7 +2366,7 @@ newEffect{
 			end
 		end
 		eff.did_block = true
-		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src)
+		self:fireTalentCheck("callbackOnBlock", eff, dam, type, src, blocked)
 
 		return amt
 	end,

@@ -69,6 +69,13 @@ newTalent{
 	hide = true,
 	innate = true,
 	points = 1,
+	target = function(self, t)
+		local ff = true
+		if self.archery_pass_friendly then ff = false end
+		return {type="bolt", range=self:getTalentRange(t), talent=t, display = {particle=particle, trail=trail}, friendlyfire=ff,
+			friendlyblock=ff,
+		}
+	end,
 	stamina = function(self, t)
 		if not self:isTalentActive("T_SKIRMISHER_BOMBARDMENT") or not wardenPreUse(self, t, false, "sling") then return nil end
 
