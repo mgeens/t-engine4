@@ -3390,6 +3390,8 @@ function _M:levelupClass(c_data)
 
 	c_data.last_level = c_data.last_level or 0
 	c_data.start_level = c_data.start_level or 1
+	c_data.max_talent_types = c_data.max_talent_types or 2
+	c_data.learned_talent_types = c_data.learned_talent_types or 0
 	if c_data.calculate_tactical then self.ai_calculate_tactical = true end
 
 	local new_level = math.ceil((self.level - c_data.start_level + 1)*difficulty_adjusted_level_rate/100)
@@ -3572,10 +3574,11 @@ function _M:levelupClass(c_data)
 					print("\t *** auto_levelup IMPROVING TALENT TYPE", tt.tt)
 					local ml = self:getTalentTypeMastery(tt.tt) or 1
 					self:setTalentTypeMastery(tt.tt, ml + (ml <= 1 and 0.2 or 0.1)) -- 0.2 for 1st then 0.1 thereafter
-				else
+				elseif c_data.learned_talent_types < c_data.max_talent_types then
 					print("\t *** auto_levelup LEARNING TALENT TYPE", tt.tt)
 					self:learnTalentType(tt.tt, true)
 					tt.rarity = tt.rarity/2  -- makes talents within an unlocked talent tree more likely to be learned
+					c_data.learned_talent_types = c_data.learned_talent_types + 1
 				end
 				--print("\t *** talent type mastery:", tt, self:getTalentTypeMastery(tt))
 				self.unused_talents_types = self.unused_talents_types - 1
