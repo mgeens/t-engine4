@@ -93,7 +93,6 @@ newEntity{ base="BASE_NPC_ORC_GORBAT", define_as = "GORBAT",
 		[Talents.T_ARMOUR_TRAINING]=3,
 
 		[Talents.T_SPELL_FEEDBACK]=1,
-		[Talents.T_SPINE_OF_THE_WORLD]=1,
 		[Talents.T_MASSIVE_BLOW]=1,
 		[Talents.T_BLIGHTED_SUMMONING]=1,
 	},
