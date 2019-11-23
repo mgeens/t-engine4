@@ -886,7 +886,7 @@ newInscription{
 							orders = {},
 						})
 
-						image:forceUseTalent(image.T_TAUNT, {})
+						image:forceUseTalent(image.T_TAUNT, {ignore_cd=true, no_talent_fail = true})
 					end
 				end
 			end
