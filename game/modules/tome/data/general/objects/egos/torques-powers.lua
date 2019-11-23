@@ -73,7 +73,7 @@ newEntity{
 	resolvers.charm(
 		function(self, who)
 			local dam = who:damDesc(engine.DamageType.PHYSICAL, self.use_power.damage(self, who))
-			return ("project a gust of wind in a cone knocking enemies back %d spaces and dealing %d damage"):format(self.use_power.knockback(self, who), dam)
+			return ("project a gust of wind in a cone knocking enemies back %d spaces and dealing %d physical damage"):format(self.use_power.knockback(self, who), dam)
 		end,
 		15,
 		function(self, who)
