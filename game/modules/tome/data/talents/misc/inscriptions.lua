@@ -997,7 +997,7 @@ newInscription{
 				end
 				return false
 			end,
-			4)
+			8)
 		else
 			target:removeEffectsFilter({type="magical", status="detrimental"}, 999)
 		end
@@ -1007,7 +1007,7 @@ newInscription{
 	end,
 	info = function(self, t)
 		local data = self:getInscriptionData(t.short_name)
-		return ([[Activate the rune to remove 4 beneficial magical sustains from an enemy target or all magical debuffs from you.]]):
+		return ([[Activate the rune to remove 8 beneficial magical sustains from an enemy target or all magical debuffs from you.]]):
 		format()
 	end,
 	short_info = function(self, t)
