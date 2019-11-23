@@ -188,7 +188,7 @@ newEntity{ define_as = "PALE_DRAKE",
 
 		[Talents.T_PHASE_DOOR]=2,
 
-		[Talents.T_ELEMENTAL_SURGE] = 1,
+		[Talents.T_ADEPT] = 1,
 	},
 	resolvers.sustains_at_birth(),
 
