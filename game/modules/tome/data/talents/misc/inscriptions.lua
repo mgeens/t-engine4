@@ -970,11 +970,22 @@ newInscription{
 	type = {"inscriptions/runes", 1},
 	points = 1,
 	is_spell = true,
-	no_npc_use = true, -- Quest reward
 	range = 10,
 	direct_hit = true,
+	target = function(self, t) return {default_target=self, type="hit", nowarning=true, range=self:getTalentRange(t)} end,
+	tactical = {
+		DISABLE = function(self, t, aitarget)
+			local nb = 0
+			for tid, act in pairs(aitarget.sustain_talents) do
+				if act then
+					local talent = aitarget:getTalentFromId(tid)
+					if talent.is_spell then nb = nb + 1 end
+				end
+			end
+			return nb^0.5
+	end},
 	action = function(self, t)
-		local tg = {default_target=self, type="hit", nowarning=true, range=self:getTalentRange(t)}
+		local tg = self:getTalentTarget(t)
 		local x, y, target = self:getTarget(tg)
 		if not (x and y) or not target or not self:canProject(tg, x, y) then return nil end
 
