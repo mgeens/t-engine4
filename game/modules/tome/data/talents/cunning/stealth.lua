@@ -162,6 +162,7 @@ newTalent{
 	points = 5,
 	getMultiplier = function(self, t) return self:combatTalentScale(t, 0.15, 0.40, 0.1) end,
 	getDuration = function(self,t) if self:getTalentLevel(t) >= 3 then return 4 else return 3 end end,
+	no_npc_use = true,  -- Massive damage scaler on almost all forms of attack	
 	passives = function(self, t, p) -- attribute that increases crit multiplier vs targets that cannot see us
 		self:talentTemporaryValue(p, "unseen_critical_power", t.getMultiplier(self, t))
 	end,

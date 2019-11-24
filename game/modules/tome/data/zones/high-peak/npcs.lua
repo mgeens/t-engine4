@@ -122,9 +122,15 @@ newEntity{
 	-- L75ish Normal
 	-- L97-99 Insane
 	auto_classes={
-		{class="Archmage", start_level=77, level_rate=100},
+		{class="Archmage", start_level=77, level_rate=100,
+			max_talent_types = 1,  -- Don't waste points on extra elemental trees or learn 20000 sustains
+			banned_talents = {
+				T_INVISIBILITY=true,  -- Reduces damage dramatically, basically a nerf
+				T_PROBABILITY_TRAVEL=true,  -- Does this even work on AI?  Possibly should kill this on all NPCs
+				T_DISRUPTION_SHIELD=true,  -- Stupid scaling with infinite mana
+			},
+		},
 	},
-
 	autolevel = "caster",
 	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", sense_radius=25, ai_target="target_simple_or_player_radius" },
 	ai_tactic = resolvers.tactic"ranged",

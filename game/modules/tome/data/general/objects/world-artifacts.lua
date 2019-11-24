@@ -549,10 +549,13 @@ newEntity{ base = "BASE_SHIELD",
 		fatigue = 20,
 		learn_talent = { [Talents.T_BLOCK] = 1, },
 	},
-	on_block = {desc = "30% chance that you'll breathe fire in a cone at the attacker (if within range 6).", fct = function(self, who, target, type, dam, eff)
-	if rng.percent(30) then
-		if not target or not target.x or not target.y or core.fov.distance(who.x, who.y, target.x, target.y) > 6 then return end
+	on_block = {desc = "30% chance that you'll breathe fire in a cone at the attacker (if within range 6).  This can only occur up to 4 times per turn.", fct = function(self, who, target, type, dam, eff)
+		local hits = table.get(who.turn_procs, "flame_shield_procs") or 0
+		if hits and hits >= 4 then return end
 
+		if rng.percent(30) then
+		table.set(who.turn_procs, "flame_shield_procs", hits + 1)
+		if not target or not target.x or not target.y or core.fov.distance(who.x, who.y, target.x, target.y) > 6 then return end
 			who:forceUseTalent(who.T_FIRE_BREATH, {ignore_energy=true, no_talent_fail=true, no_equilibrium_fail=true, ignore_cd=true, force_target=target, force_level=2, ignore_ressources=true})
 		end
 	end,
