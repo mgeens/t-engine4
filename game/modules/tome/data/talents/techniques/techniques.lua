@@ -321,6 +321,36 @@ venomous_throw_check = function(self)
 	end
 end
 
+archeryWeaponCheck = function(self, weapon, ammo, silent, weapon_type)
+	if not weapon then
+		if not silent then
+			-- ammo contains error message
+			game.logPlayer(self, ({
+				["disarmed"] = "You are currently disarmed and cannot use this talent.",
+				["no shooter"] = ("You require a %s to use this talent."):format(weapon_type or "missile launcher"),
+				["no ammo"] = "You require ammo to use this talent.",
+				["bad ammo"] = "Your ammo cannot be used.",
+				["incompatible ammo"] = "Your ammo is incompatible with your missile launcher.",
+				["incompatible missile launcher"] = ("You require a %s to use this talent."):format(weapon_type or "bow"),
+			})[ammo] or "You require a missile launcher and ammo for this talent.")
+		end
+		return false
+	else
+		local infinite = ammo and ammo.infinite or self:attr("infinite_ammo")
+		if not ammo or (ammo.combat.shots_left <= 0 and not infinite) then
+			if not silent then game.logPlayer(self, "You do not have enough ammo left!") end
+			return false
+		end
+	end
+	return true
+end
+
+archerPreUse = function(self, t, silent, weapon_type)
+	local weapon, ammo, offweapon, pf_weapon = self:hasArcheryWeapon(weapon_type)
+	weapon = weapon or pf_weapon
+	return archeryWeaponCheck(self, weapon, ammo, silent, weapon_type)
+end
+
 load("/data/talents/techniques/2hweapon.lua")
 load("/data/talents/techniques/2h-assault.lua")
 load("/data/talents/techniques/strength-of-the-berserker.lua")

@@ -213,13 +213,22 @@ tuneParadox = function(self, t, value)
 	end
 end
 
+wardenPreUse = function(self, t, silent, weapon_type)
+	local weapon, ammo, offweapon, pf_weapon = self:hasArcheryWeapon(weapon_type)
+	weapon = weapon or pf_weapon
+	if self:attr("warden_swap") and not weapon and weapon_type == nil or weapon_type == "bow" then
+		weapon, ammo = doWardenPreUse(self, "bow")
+	end
+	return archeryWeaponCheck(self, weapon, ammo, silent, weapon_type)
+end
+
 --- Warden weapon functions
 -- Checks for weapons in main and quickslot
 doWardenPreUse = function(self, weapon, silent)
 	if weapon == "bow" then
 		local bow, ammo, oh, pf_bow= self:hasArcheryWeapon("bow")
 		if not bow and not pf_bow then
-			bow, ammo, oh, pf_bow= self:hasArcheryWeapon("bow", true)
+			bow, ammo, oh, pf_bow= self:hasArcheryWeaponQS("bow")
 		end
 		return bow or pf_bow, ammo
 	end
