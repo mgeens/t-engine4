@@ -322,6 +322,7 @@ newTalent{
 	points = 5,
 	cooldown = 40,
 	sustain_mana = 200,
+	no_npc_use = true,
 	tactical = { ESCAPE = 1, CLOSEIN = 1 },
 	getRange = function(self, t) return math.floor(self:combatScale(self:combatSpellpower(0.06) * self:getTalentLevel(t), 4, 0, 20, 16)) end,
 	activate = function(self, t)
