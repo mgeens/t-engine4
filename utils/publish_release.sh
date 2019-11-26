@@ -20,6 +20,15 @@ if test -f $2; then
 
 			if test "$kind" = "module"; then
 				echo "replace into modules_versions set module='$name', md5='$md5', md5_2='', shown='false';"
+			elif [[ "$name" =~ "tome-ashes-urhrok" ]]; then
+				adv=`unzip -p tmp/t-engine4-linux64-$v/game/addons/ashes-urhrok.teaac tome-ashes-urhrok/init.lua|grep addon_version|sed -e 's@.*{\([0-9]\+\),\([0-9]\+\),\([0-9]\+\)}.*@\1.\2.\3@'`
+				echo "replace into modules_addons_versions set module='tome', addon='$name' , addon_version='$adv', md5='$md5', download_url='https://te4.org/download-dlc/2/ashes-urhrok.teaac';"
+			elif [[ "$name" =~ "tome-orcs" ]]; then
+				adv=`unzip -p tmp/t-engine4-linux64-$v/game/addons/orcs.teaac tome-orcs/init.lua|grep addon_version|sed -e 's@.*{\([0-9]\+\),\([0-9]\+\),\([0-9]\+\)}.*@\1.\2.\3@'`
+				echo "replace into modules_addons_versions set module='tome', addon='$name' , addon_version='$adv', md5='$md5', download_url='https://te4.org/download-dlc/3/orcs.teaac';"
+			elif [[ "$name" =~ "tome-cults" ]]; then
+				adv=`unzip -p tmp/t-engine4-linux64-$v/game/addons/cults.teaac tome-cults/init.lua|grep addon_version|sed -e 's@.*{\([0-9]\+\),\([0-9]\+\),\([0-9]\+\)}.*@\1.\2.\3@'`
+				echo "replace into modules_addons_versions set module='tome', addon='$name' , addon_version='$adv', md5='$md5', download_url='https://te4.org/download-dlc/5/cults.teaac';"
 			else
 				echo "replace into modules_addons_versions set module='tome', addon='$name' , md5='$md5', md5_2 ='';"
 			fi
