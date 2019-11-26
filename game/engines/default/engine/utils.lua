@@ -2846,17 +2846,35 @@ end
 
 function util.send_error_backtrace(msg)
 	local level = 2
-	local trace = {}
+	local errs = {}
 
-	trace[#trace+1] = "backtrace:"
+	errs[#errs+1] = "backtrace:"
 	while true do
 		local stacktrace = debug.getinfo(level, "nlS")
 		if stacktrace == nil then break end
-		trace[#trace+1] = (("    function: %s (%s) at %s:%d"):format(stacktrace.name or "???", stacktrace.what, stacktrace.source or stacktrace.short_src or "???", stacktrace.currentline))
+		errs[#errs+1] = (("    function: %s (%s) at %s:%d"):format(stacktrace.name or "???", stacktrace.what, stacktrace.source or stacktrace.short_src or "???", stacktrace.currentline))
 		level = level + 1
 	end
 
-	profile:sendError(msg, table.concat(trace, "\n"))
+	pcall(function()
+		local beta = engine.version_hasbeta()
+		if game.getPlayer and game:getPlayer(true) and game:getPlayer(true).__created_in_version then
+			table.insert(errs, 1, "Game version (character creation): "..game:getPlayer(true).__created_in_version)
+		end
+		table.insert(errs, 1, "Game version: "..game.__mod_info.version_name..(beta and "-"..beta or ""))
+		local addons = {}
+		for name, data in pairs(game.__mod_info.addons or {}) do
+			local extra = ""
+			-- So ugly!!! :<
+			if data.for_module == "tome" then
+				extra = "["..(data.author[1]=="DarkGod" and "O" or "X")..(engine.version_patch_same(game.__mod_info.version, data.version) and "" or "!").."]"
+			end
+			addons[#addons+1] = name.."-"..data.version_txt..extra
+		end
+		table.insert(errs, 2, "Addons: "..table.concat(addons, ", ").."\n")
+	end)
+
+	profile:sendError(msg, table.concat(errs, "\n"))
 end
 
 function util.uuid()
