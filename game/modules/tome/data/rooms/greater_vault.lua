@@ -28,7 +28,6 @@ for _, f in ipairs(fs.list("/data/maps/vaults/auto/greater/")) do
 		list[#list+1] = f:sub(1, #f - 4)
 	end
 end
-list={"32-chambers"}
 print("[greater_vault] initializing auto list:")
 table.print(list, "---")
 
