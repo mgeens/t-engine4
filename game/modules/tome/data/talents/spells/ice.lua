@@ -43,8 +43,6 @@ newTalent{
 		local tg = self:getTalentTarget(t)
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
-		local _ _, _, _, x, y = self:canProject(tg, x, y)
-		local target = game.level.map(x, y, Map.ACTOR)
 		if not x or not y then return nil end
 
 		if necroEssenceDead(self, true) then
@@ -57,9 +55,12 @@ newTalent{
 		self:project(tg, x, y, DamageType.COLD, dam, {type="freeze"})
 		self:project(tg, x, y, DamageType.FREEZE, {dur=t.getDuration(self, t), hp=70 + dam * 1.5})
 
-		if target and self:reactionToward(target) >= 0 then
-			game:onTickEnd(function() self:alterTalentCoolingdown(t.id, -math.floor((self.talents_cd[t.id] or 0) * 0.33)) end)
-		end
+		tg.type = "hit"
+		self:projectApply(tg, x, y, Map.ACTOR, function(target)
+			if self:reactionToward(target) >= 0 then
+				game:onTickEnd(function() self:alterTalentCoolingdown(t.id, -math.floor((self.talents_cd[t.id] or 0) * 0.33)) end)
+			end
+		end)
 
 		game:playSoundNear(self, "talents/water")
 		return true
