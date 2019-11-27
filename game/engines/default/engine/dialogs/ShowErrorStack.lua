@@ -43,6 +43,7 @@ function _M:init(errs)
 		addons[#addons+1] = name.."-"..data.version_txt..extra
 	end
 	table.insert(errs, 2, "Addons: "..table.concat(addons, ", ").."\n")
+	self.errs_t = errs
 	errs = table.concat(errs, "\n")
 	self.errs = errs
 	Dialog.init(self, "Lua Error", 700, 500)
@@ -127,8 +128,20 @@ function _M:saveError(seen, reported)
 end
 
 function _M:send()
+	local errs = self.errs_t
+	for i, line in ripairs(errs) do pcall(function()
+		local _, _, file = line:find("(/.*.lua):%d+")
+		if file then
+			local sep = fs.getPathSeparator()
+			local rpath = fs.getRealPath(file)
+			table.insert(errs, i+1, "      =from= "..(rpath:gsub("^.*"..sep.."game"..sep, "")))
+		end
+	end) end
+	errs = table.concat(errs, "\n")
+	print(errs)
+
 	game:unregisterDialog(self)
-	profile:sendError(self.what.text, self.errs)
+	profile:sendError(self.what.text, errs)
 	game.log("#YELLOW#Error report sent, thank you.")
 	self:saveError(true, true)
 end

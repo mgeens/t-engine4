@@ -2852,7 +2852,13 @@ function util.send_error_backtrace(msg)
 	while true do
 		local stacktrace = debug.getinfo(level, "nlS")
 		if stacktrace == nil then break end
-		errs[#errs+1] = (("    function: %s (%s) at %s:%d"):format(stacktrace.name or "???", stacktrace.what, stacktrace.source or stacktrace.short_src or "???", stacktrace.currentline))
+		local src = stacktrace.source or stacktrace.short_src or "???"
+		errs[#errs+1] = (("    function: %s (%s) at %s:%d"):format(stacktrace.name or "???", stacktrace.what, src, stacktrace.currentline))
+		if src:prefix("@") then pcall(function()
+			local rpath = fs.getRealPath(src:sub(2))
+			local sep = fs.getPathSeparator()
+			if rpath then errs[#errs+1] = (("      =from= %s"):format(rpath:gsub("^.*"..sep.."game"..sep, ""))) end
+		end) end
 		level = level + 1
 	end
 
