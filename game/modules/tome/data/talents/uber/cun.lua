@@ -227,11 +227,11 @@ uberTalent{
 			self:addObject(self.INVEN_INVEN, o)
 
 			local o1, item1, inven1 = self:findInAllInventoriesBy("define_as", "GEM_TELOS")
-			self:removeObject(inven1, item1, true)
+			if item1 and inven1 then self:removeObject(inven1, item1, true) end
 			local o2, item2, inven2 = self:findInAllInventoriesBy("define_as", "TELOS_TOP_HALF")
-			self:removeObject(inven2, item2, true)
+			if item2 and inven2 then self:removeObject(inven2, item2, true) end
 			local o3, item3, inven3 = self:findInAllInventoriesBy("define_as", "TELOS_BOTTOM_HALF")
-			self:removeObject(inven3, item3, true)
+			if item3 and inven3 then self:removeObject(inven3, item3, true) end
 
 			self:sortInven()
 
