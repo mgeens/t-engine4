@@ -493,6 +493,7 @@ newInscription{
 	type = {"inscriptions/runes", 1},
 	points = 1,
 	is_spell = true,
+	use_only_arcane = 1,
 	no_break_stealth = true,
 	tactical = { MANA = 1 },
 	on_pre_use = function(self, t)
