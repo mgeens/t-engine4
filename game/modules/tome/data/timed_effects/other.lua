@@ -3752,7 +3752,7 @@ newEffect{
 newEffect{
 	name = "STEALTH_SKEPTICAL", image = "talents/stealth.png",
 	desc = "Skeptical",
-	long_desc = function(self, eff) return "The target doesn't believe it's ally truly saw anything in the shadows." end,
+	long_desc = function(self, eff) return "The target doesn't believe its ally truly saw anything in the shadows." end,
 	type = "other",
 	subtype = { },
 	status = "neutral",
