@@ -955,7 +955,7 @@ newInscription{
 	info = function(self, t)
 		return ([[Activate the rune to instantly dissipate the energy of your ailments, cleansing all cross tier effects and 1 physical, mental, and magical effect.
 		You use the dissipated energy to create a shield lasting 3 turns and blocking %d damage per debuff cleansed (not counting cross-tier ones).
-		If there was only cross-tier effects to clean, no shield is created and the rune goes on a 75%% faster cooldown.]])
+		If there were only cross-tier effects to cleanse, no shield is created and the rune goes on a 75%% reduced cooldown.]])
 		:format(t.getShield(self, t) * (100 + (self:attr("shield_factor") or 0)) / 100)
 	end,
 	short_info = function(self, t)
