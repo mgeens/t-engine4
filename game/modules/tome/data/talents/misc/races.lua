@@ -319,13 +319,13 @@ newTalent{
 	on_pre_use = function(self, t) return not self:hasEffect(self.EFF_REGENERATION) end,
 	getHealMod = function(self, t) return self:combatTalentLimit(t, 50, 10, 30) end,
 	action = function(self, t)
-		self:setEffect(self.EFF_REGENERATION, 10, {power=5 + self:getWil() * 0.5})
-		self:setEffect(self.EFF_EMPOWERED_HEALING, 10, {power=t.getHealMod(self, t) / 100})
+		self:setEffect(self.EFF_REGENERATION, 8, {power=5 + math.max(self:getWil(), self:getCon()) * 0.5})
+		self:setEffect(self.EFF_EMPOWERED_HEALING, 8, {power=t.getHealMod(self, t) / 100})
 		return true
 	end,
 	info = function(self, t)
-		return ([[Call upon nature to regenerate your body for %d life every turn and increase healing mod by %d%% for 10 turns.
-		The life healed will increase with your Willpower.]]):format(5 + self:getWil() * 0.5, t.getHealMod(self, t))
+		return ([[Call upon nature to regenerate your body for %d life every turn and increase healing mod by %d%% for 8 turns.
+		The life healed will increase with your Willpower or Constitution (whichever is higher).]]):format(5 + math.max(self:getWil(), self:getCon()) * 0.5, t.getHealMod(self, t))
 	end,
 }
 
