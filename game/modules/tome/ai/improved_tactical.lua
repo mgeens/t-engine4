@@ -719,7 +719,7 @@ newAI("use_improved_tactical", function(self, t_filter, t_list)
 		end
 
 		-- add escape by normal movement to the action list, in case it's better than using a talent		
-		if want.escape > 0.1 and not self:attr("never_move") then
+		if want.escape > 0.1 and not self:attr("never_move") and not self.ai_tactic.never_move_escape then
 			local can_flee, fx, fy
 			-- Note: values are <= weight of move_safe_grid if present
 			-- Could use better testing to make sure fleeing is possible (and prevent back and forth movement)
