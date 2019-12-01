@@ -320,7 +320,7 @@ newTalent{
 	getHealMod = function(self, t) return self:combatTalentLimit(t, 50, 10, 30) end,
 	action = function(self, t)
 		self:setEffect(self.EFF_REGENERATION, 8, {power=5 + math.max(self:getWil(), self:getCon()) * 0.5})
-		self:setEffect(self.EFF_EMPOWERED_HEALING, 8, {power=t.getHealMod(self, t) / 100})
+		self:setEffect(self.EFF_GIFT_WOODS, 8, {power=t.getHealMod(self, t) / 100})
 		return true
 	end,
 	info = function(self, t)
