@@ -24,11 +24,11 @@ newTalent{
 	require = psi_wil_high1,
 	sustain_feedback = 0,
 	mode = "sustained",
-	cooldown = 12,
+	cooldown = 8,
 	tactical = { ATTACKAREA = {MIND = 2}},
 	requires_target = true,
 	proj_speed = 10,
-	range = 7,
+	range = 10,
 	target = function(self, t)
 		return {type="bolt", range=self:getTalentRange(t), talent=t, friendlyfire=false, friendlyblock=false, display={particle="discharge_bolt", trail="lighttrail"}}
 	end,
@@ -102,8 +102,8 @@ newTalent{
 		local damage = t.getDamage(self, t)
 		local charge_ratio = t.getOverchargeRatio(self, t)
 		return ([[Unleash your subconscious on the world around you.  While active, you fire up to %d bolts each turn (one per hostile target) that deal %0.2f mind damage.  Each bolt consumes 5 Feedback.
-		Feedback gains beyond your maximum allowed amount may generate extra bolts (one bolt per %d excess Feedback per target), but no more then %d extra bolts per turn.
-		This effect is a psionic channel, and will break if you move.
+		Feedback gains beyond your maximum allowed amount may generate extra bolts (one bolt per %d excess Feedback per target), but no more than %d extra bolts per turn. 
+		This effect is a psionic channel, increasing the range of Mind Sear, Psychic Lobotomy, and Sunder Mind to 10 but will break if you move.
 		The damage will scale with your Mindpower.]]):format(targets, damDesc(self, DamageType.MIND, damage), charge_ratio, targets)
 	end,
 }
