@@ -1177,16 +1177,16 @@ newEntity{ base = "BASE_KNIFE", -- Thanks Grayswandir!
 		apr = 10,
 		physcrit = 12,
 		dammod = {dex=0.45,str=0.45,},
-		melee_project={[DamageType.FIREBURN] = 10, [DamageType.BLIGHT] = 10,},
 		lifesteal = 6,
-		burst_on_crit = {
-			[DamageType.CORRUPTED_BLOOD] = 20,
+		melee_project = {
 			[DamageType.FIRE] = 20,
+			[DamageType.BLIGHT] = 20,
 		},
 	},
 	wielder = {
 		inc_stats = {[Stats.STAT_MAG] = 5,},
 		resists = {[DamageType.BLIGHT] = 10, [DamageType.FIRE] = 10},
+		learn_talent = { [Talents.T_VIRULENT_DISEASE] = 1, },  -- Passive disease on blight damage proc
 	},
 }
 
