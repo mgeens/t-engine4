@@ -203,6 +203,7 @@ newTalent{
 		local p = self:isTalentActive(t.id)
 		if not p then return end
 		if cb.value <= 0 then return end
+		if self:getMana() / self:getMaxMana() < 0.5 then return end
 		-- if self:reactionToward(src) > 0 then return end
 		self.disruption_shield_power = self.disruption_shield_power or 0
 		self.disruption_shield_storage = self.disruption_shield_storage or 0
