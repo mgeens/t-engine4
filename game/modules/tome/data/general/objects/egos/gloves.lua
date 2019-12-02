@@ -269,7 +269,7 @@ newEntity{
 		life_regen = resolvers.mbonus_material(10, 1, function(e, v) return 0, v end),
 		stamina_regen = resolvers.mbonus_material(15, 5, function(e, v) v=v/10 return 0, v end),
 		combat = {
-			talent_on_hit = { [Talents.T_SLUMBER] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },
+			talent_on_hit = { [Talents.T_NIGHTMARE] = {level=resolvers.genericlast(function(e) return e.material_level end), chance=10} },  -- Breaks on damage but is at least in an AoE.. Maybe just use a mind damage talent?
 		},
 	},
 }
