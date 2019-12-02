@@ -3326,7 +3326,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is poisoned!", "+Deadly Poison" end,
 	on_lose = function(self, err) return "#Target# is no longer poisoned.", "-Deadly Poison" end,
 	-- Damage each turn
-	on_timeout = function(self, eff)
+	on_timeout = function(self, eff, p, ed)
 		if self:attr("purify_poison") then 
 			self:heal(eff.power, eff.src)
 		elseif self.x and self.y then
@@ -3337,7 +3337,7 @@ newEffect{
 			end
 			if dam > 0 and eff.leeching > 0 then
 				local src = eff.src.resolveSource and eff.src:resolveSource()
-				if src then src:heal(dam*eff.leeching/100, eff) end
+				if src then src:heal(dam*eff.leeching/100, ed) end
 			end
 		end
 	end,
