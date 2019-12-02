@@ -762,9 +762,9 @@ newTalent{
 	end,
 	info = function(self, t)
 		return ([[Orcs have been the prey of the other races for thousands of years, with or without justification. They have learnt to withstand things that would break weaker races.
-		When your life goes below 50%% your sheer determination cleanses you of %d mental debuff(s) based on talent level and Willpower.  This can only happen once every 10 turns.
+		When your life goes below 50%% your sheer determination cleanses you of %d mental debuff(s) based on talent level and Willpower.  This can only happen once every %d turns.
 		Also increases physical save by +%d.]]):
-		format(t.getDebuff(self, t), t.getSaves(self, t))
+		format(t.getDebuff(self, t), t.getSaves(self, t), self:getTalentCooldown(t))
 	end,
 }
 
