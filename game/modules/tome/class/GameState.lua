@@ -1534,19 +1534,21 @@ local standard_rnd_boss_adjust = function(b)
 		-- Cap the talent level of disabling talents at the minimum of 1 and floor(level / 10)
 		-- rnd_boss_restrict is the right way to handle this for most things, but the early game we can assume players have no reasonable way to deal with debuff spam
 		-- Tactical tables can have a variety of structures, so we just look in all subtables for a key named "disable"
-		for id, level in pairs(b.talents) do
-			local talent = b:getTalentFromId(id)
-			if talent and talent.tactical and _G.type(talent.tactical) == "table" then
-				table.check(
-					talent.tactical,
-					function(t, where, v, tv)
-						if tv == "string" and (v:lower() == "disable") then
-							b.talents[id] = math.min(b.talents[id], math.max(1, math.floor(b.level / 10)))
-							return false
-						else 
-							return true 
-						end
-					end)
+		if b.level <= 25 then
+			for id, level in pairs(b.talents) do
+				local talent = b:getTalentFromId(id)
+				if talent and talent.tactical and _G.type(talent.tactical) == "table" then
+					table.check(
+						talent.tactical,
+						function(t, where, v, tv)
+							if tv == "string" and (v:lower() == "disable") then
+								b.talents[id] = math.min(b.talents[id], math.max(1, math.floor(b.level / 10)))
+								return false
+							else 
+								return true 
+							end
+						end)
+				end
 			end
 		end
 	print("[entityFilterPost]:  Done nerfing randboss")
