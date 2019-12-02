@@ -4061,6 +4061,7 @@ newEffect{
 	name = "BLIGHT_POISON", image = "effects/poisoned.png",
 	desc = "Blight Poison",
 	long_desc = function(self, eff) return ("The target is poisoned, taking %0.2f blight damage per turn."):format(eff.power) end,
+	charges = function(self, eff) return math.floor(eff.power) end,
 	type = "magical",
 	subtype = { poison=true, blight=true }, no_ct_effect = true,
 	status = "detrimental",
