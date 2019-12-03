@@ -76,7 +76,7 @@ function _M:init(mode)
 	self.c_list = VariableList.new{width=self.iw - 350 - vsep.w, max_height=self.ih, scrollbar=true, sortable=true,
 		direct_draw=function(item, x, y, get_size)
 			if get_size then return 132 end
-			if self.cur_sel_item == item and item.demo_url then
+			if self.cur_sel_item == item and item.demo_url and self.webview and self.webview.view then
 				if last_displayed_item ~= item then
 					self.webview.view:loadURL(item.demo_url)
 				end
