@@ -25,7 +25,7 @@ newTalent{
 	cooldown = 2,
 	psi = 5,
 	range = function(self, t)
-	if self:isTalentActive(self.T_MIND_STORM) then return 10 end
+		if self:isTalentActive(self.T_MIND_STORM) then return 10 end
 		return 7 
 	end,
 	direct_hit = true,
@@ -64,7 +64,7 @@ newTalent{
 	points = 5,
 	cooldown = 8,
 	range = function(self, t)
-	if self:isTalentActive(self.T_MIND_STORM) then return 10 end
+		if self:isTalentActive(self.T_MIND_STORM) then return 10 end
 		return 7 
 	end,
 	psi = 10,
@@ -147,7 +147,7 @@ newTalent{
 	psi = 5,
 	tactical = { ATTACK = { MIND = 2}, DISABLE = 1},
 	range = function(self, t)
-	if self:isTalentActive(self.T_MIND_STORM) then return 10 end
+		if self:isTalentActive(self.T_MIND_STORM) then return 10 end
 		return 7 
 	end,
 	requires_target = true,
