@@ -1662,17 +1662,20 @@ function _M:combatDamage(weapon, adddammod, damage)
 			totstat = totstat + self:getStat(stat) * mod
 		end
 	end
-	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then totstat = totstat + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
+	
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
-	local power = self:combatDamagePower(damage or weapon, totstat)
-	local phys = self:combatPhysicalpower(nil, weapon, totstat)
-	return self:rescaleDamage(0.3 * phys * power * talented_mod)
+	local power = self:combatDamagePower(damage or weapon)
+	local phys = self:combatPhysicalpower(nil, weapon)
+	local statmod = self:rescaleCombatStats(totstat, 25)
+	return self:rescaleDamage(0.3 * (phys + statmod) * power * talented_mod)
 end
 
 --- Gets the 'power' portion of the damage
 function _M:combatDamagePower(weapon_combat, add)
 	if not weapon_combat then return 1 end
 	local power = math.max((weapon_combat.dam or 1) + (add or 0), 1)
+
+	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then power = power + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
 
 	return (math.sqrt(power / 10) - 1) * 0.5 + 1
 end
