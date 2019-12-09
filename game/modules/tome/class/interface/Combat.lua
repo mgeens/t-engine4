@@ -1433,6 +1433,9 @@ function _M:rescaleDamage(dam)
 end
 
 --Diminishing-returns method of scaling combat stats, observing this rule: the first twenty ranks cost 1 point each, the second twenty cost two each, and so on. This is much, much better for players than some logarithmic mess, since they always know exactly what's going on, and there are nice breakpoints to strive for.
+-- raw_combat_stat_value = the value being rescaled
+-- interval = ranks until cost of each effective stat value increases (default 20)
+-- step = increase in cost of raw_combat_stat_value to give 1 effective stat value each rank (default 1)
 function _M:rescaleCombatStats(raw_combat_stat_value, interval, step)
 	local x = raw_combat_stat_value
 	-- the rescaling plot is a convex hull of functions x, 20 + (x - 20) / 2, 40 + (x - 60) / 3, ...
@@ -1667,7 +1670,7 @@ function _M:combatDamage(weapon, adddammod, damage)
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
 	local power = self:combatDamagePower(damage or weapon)
 	local phys = self:combatPhysicalpower(nil, weapon)
-	local statmod = self:rescaleCombatStats(totstat, 30, 0.5)
+	local statmod = self:rescaleCombatStats(totstat, 30, 0.5) -- totstat tends to be lower than values of powers and saves so default interval and step size is too harsh; instead use wider intervals and 0.5 step size
 	return self:rescaleDamage(0.3 * (phys + statmod) * power * talented_mod)
 end
 
