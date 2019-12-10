@@ -307,7 +307,7 @@ newTalent{
 		local damage = self:mindCrit(t.getDamage(self, t))
 		local darkCount = t.getDarkCount(self, t)
 
-		local tg = {type="ball", nolock=true, pass_terrain=false, nowarning=true, friendly_fire=true, default_target=self, range=range, radius=radius, talent=t}
+		local tg = {type="ball", can_autoaccept=true, nolock=true, pass_terrain=false, nowarning=true, friendly_fire=true, default_target=self, range=range, radius=radius, talent=t}
 		local x, y = self:getTarget(tg)
 		if not x or not y then return nil end
 

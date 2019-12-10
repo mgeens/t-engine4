@@ -207,12 +207,12 @@ function _M:display()
 				display_entity = o
 				if o and o.use_talent and o.use_talent.id then
 					local t = a:getTalentFromId(o.use_talent.id)
-					display_entity = t.display_entity
+					display_entity = t and t.display_entity
 				end
 				if o and o.talent_cooldown then
 					local t = a:getTalentFromId(o.talent_cooldown)
 					angle = 360
-					if a:isTalentCoolingDown(t) then
+					if t and a:isTalentCoolingDown(t) then
 						color = {255,0,0}
 						angle = 360 * (1 - (a.talents_cd[t.id] / a:getTalentCooldown(t)))
 						frame = "cooldown"
@@ -385,7 +385,8 @@ function _M:onMouse(button, mx, my, click, on_over, on_click)
 				else
 					if a.hotkey[i][1] == "talent" then
 						local t = self.actor:getTalentFromId(a.hotkey[i][2])
-						local s = t.display_entity:getEntityFinalSurface(nil, 64, 64)
+						local s = nil
+						if t then s = t.display_entity:getEntityFinalSurface(nil, 64, 64) end
 						game.mouse:startDrag(mx, my, s, {kind=a.hotkey[i][1], id=a.hotkey[i][2], source_hotkey_slot=i}, function(drag, used) if not used then self.actor.hotkey[i] = nil self.actor.changed = true end end)
 					elseif a.hotkey[i][1] == "inventory" then
 						local o = a:findInAllInventories(a.hotkey[i][2], {no_add_name=true, force_id=true, no_count=true})
@@ -403,8 +404,10 @@ function _M:onMouse(button, mx, my, click, on_over, on_click)
 					local text = ""
 					if a.hotkey[i] and a.hotkey[i][1] == "talent" then
 						local t = self.actor:getTalentFromId(a.hotkey[i][2])
-						text = tstring{{"color","GOLD"}, {"font", "bold"}, t.name .. (config.settings.cheat and " ("..t.id..")" or ""), {"font", "normal"}, {"color", "LAST"}, true}
-						text:merge(self.actor:getTalentFullDescription(t))
+						if t then
+							text = tstring{{"color","GOLD"}, {"font", "bold"}, t.name .. (config.settings.cheat and " ("..t.id..")" or ""), {"font", "normal"}, {"color", "LAST"}, true}
+							text:merge(self.actor:getTalentFullDescription(t))
+						else text = "Unknown!" end
 					elseif a.hotkey[i] and a.hotkey[i][1] == "inventory" then
 						local o = a:findInAllInventories(a.hotkey[i][2], {no_add_name=true, force_id=true, no_count=true})
 						if o then
