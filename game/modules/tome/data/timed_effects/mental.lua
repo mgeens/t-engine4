@@ -2255,13 +2255,16 @@ newEffect{
 newEffect{
 	name = "FOCUSED_WRATH", image = "talents/focused_wrath.png",
 	desc = "Focused Wrath",
-	long_desc = function(self, eff) return ("The target's subconscious has focused its attention on %s."):format(eff.target.name:capitalize()) end,
+	long_desc = function(self, eff) return ("The target's subconscious has focused, increasing Mind resistance penetration by +%d%% and turning its attention on %s."):format(eff.pen, eff.target.name:capitalize()) end,
 	type = "mental",
 	subtype = { psionic=true },
 	status = "beneficial",
 	parameters = { power = 1 },
 	on_gain = function(self, err) return "#Target#'s subconscious has been focused.", "+Focused Wrath" end,
 	on_lose = function(self, err) return "#Target#'s subconscious has returned to normal.", "-Focused Wrath" end,
+	activate = function(self, eff)
+			self:effectTemporaryValue(eff, "resists_pen", {[DamageType.MIND]=eff.pen})
+		end,
 	on_timeout = function(self, eff)
 		if not eff.target or eff.target.dead or not game.level:hasEntity(eff.target) then
 			self:removeEffect(self.EFF_FOCUSED_WRATH)

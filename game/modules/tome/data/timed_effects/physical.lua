@@ -4292,3 +4292,19 @@ newEffect{
 		end
 	end,
 }
+
+newEffect{
+	name = "GIFT_WOODS", image = "talents/thaloren_wrath.png",
+	desc = "Gift of the Woods",
+	long_desc = function(self, eff) return ("Increases the effectiveness of all healing the target receives by %d%%."):format(eff.power * 100) end,
+	type = "physical",
+	subtype = { nature=true },
+	status = "beneficial",
+	parameters = { power = 0.1 },
+	activate = function(self, eff)
+		eff.tmpid = self:addTemporaryValue("healing_factor", eff.power)
+	end,
+	deactivate = function(self, eff)
+		self:removeTemporaryValue("healing_factor", eff.tmpid)
+	end,
+}
