@@ -27,7 +27,6 @@ newTalent{
 	range = 1,
 	no_message = true,
 	tactical = { ATTACK = { weapon = 1 }, EQUILIBRIUM = 0.5},
-	on_pre_use = function(self, t, silent) if not self:hasMHWeapon() then if not silent then game.logPlayer(self, "You require a mainhand weapon to use this talent.") end return false end return true end,
 	requires_target = true,
 	no_npc_use = true,
 	is_melee = true,

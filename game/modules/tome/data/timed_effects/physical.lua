@@ -156,6 +156,7 @@ newEffect{
 	name = "DEEP_WOUND", image = "talents/bleeding_edge.png",
 	desc = "Deep Wound",
 	long_desc = function(self, eff) return ("Huge cut that bleeds, doing %0.2f physical damage per turn and decreasing all heals received by %d%%."):format(eff.power, eff.heal_factor) end,
+	charges = function(self, eff) return (math.floor(eff.power)) end,	
 	type = "physical",
 	subtype = { wound=true, cut=true, bleed=true },
 	status = "detrimental",
@@ -576,6 +577,10 @@ newEffect{
 	long_desc = function(self, eff)
 		return ("The target has %d%% chance to evade melee and ranged attacks"):format(eff.chance) .. ((eff.defense>0 and (" and gains %d defense"):format(eff.defense)) or "") .. "." 
 	end,
+	charges = function(self, eff)
+		if self:attr("no_evasion") then return 0 end
+		return math.floor(eff.chance).."%"
+	end,
 	type = "physical",
 	subtype = { evade=true },
 	status = "beneficial",
@@ -749,6 +754,7 @@ newEffect{
 	name = "FROZEN", image = "talents/freeze.png",
 	desc = "Frozen",
 	long_desc = function(self, eff) return ("The target is encased in ice. All damage done to it will be split, 40%% absorbed by the ice and 60%% by the target. The target's defense is nullified while in the ice, and it may only attack the ice, but it is also immune to any new detrimental status effects (except Wet and Frozen Feet). The target cannot teleport or heal while frozen. %d HP on the iceblock remaining."):format(eff.hp) end,
+	charges = function(self, eff) return math.floor(eff.hp) end,	
 	type = "physical", -- Frozen has some serious effects beyond just being frozen, no healing, no teleport, etc.  But it can be applied by clearly non-magical sources i.e. Ice Breath
 	subtype = { cold=true, stun=true },
 	status = "detrimental",
@@ -3320,7 +3326,7 @@ newEffect{
 	on_gain = function(self, err) return "#Target# is poisoned!", "+Deadly Poison" end,
 	on_lose = function(self, err) return "#Target# is no longer poisoned.", "-Deadly Poison" end,
 	-- Damage each turn
-	on_timeout = function(self, eff)
+	on_timeout = function(self, eff, p, ed)
 		if self:attr("purify_poison") then 
 			self:heal(eff.power, eff.src)
 		elseif self.x and self.y then
@@ -3331,7 +3337,7 @@ newEffect{
 			end
 			if dam > 0 and eff.leeching > 0 then
 				local src = eff.src.resolveSource and eff.src:resolveSource()
-				if src then src:heal(dam*eff.leeching/100, eff) end
+				if src then src:heal(dam*eff.leeching/100, ed) end
 			end
 		end
 	end,
@@ -3517,6 +3523,7 @@ newEffect{
 	name = "ROGUE_S_BREW", image = "talents/rogue_s_brew_mastery.png",
 	desc = "Rogue's Brew",
 	long_desc = function(self, eff) return ("The target will not die until falling below -%d life."):format(eff.power) end,
+	charges = function(self, eff) return math.floor(eff.power) end,	
 	type = "physical",
 	subtype = { nature=true },
 	status = "beneficial",

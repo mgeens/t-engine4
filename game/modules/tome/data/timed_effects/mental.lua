@@ -1082,6 +1082,7 @@ newEffect{
 	name = "DISPAIR", image = "effects/despair.png",
 	desc = "Despair",
 	long_desc = function(self, eff) return ("The target is in despair, reducing their armour, defence, mindsave and mind resist by %d."):format(-eff.statChange) end,
+	charges = function(self, eff) return math.floor(-eff.statChange) end,	
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1116,6 +1117,7 @@ newEffect{
 	subtype = { fear=true },
 	status = "detrimental",
 	parameters = {},
+	charges = function(self, eff) return (tostring(math.floor(eff.cooldownPower * 100)).."%") end,
 	on_gain = function(self, err) return "#F53CBE##Target# becomes terrified!", "+Terrified" end,
 	on_lose = function(self, err) return "#Target# is no longer terrified", "-Terrified" end,
 	activate = function(self, eff) --cooldown increase handled in class.actor.lua
@@ -1168,6 +1170,7 @@ newEffect{
 	name = "HAUNTED", image = "effects/haunted.png",
 	desc = "Haunted",
 	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each detrimental mental effect to inflict %d mind and darkness damage every turn."):format(eff.damage) end, --perhaps add total.
+	charges = function(self, eff) return (math.floor(eff.damage)) end,	
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
