@@ -24,7 +24,7 @@ newTalent{
 	points = 5,
 	mode = "passive",
 	getLife = function(self, t) return self:combatTalentStatDamage(t, "wil", 10, 600) end,
-	getRegen = function(self, t) return self:combatTalentStatDamage(t, "wil", 1, 30) end,
+	getRegen = function(self, t) return self:combatTalentStatDamage(t, "wil", 1, 20) end,
 	passives = function(self, t, tmptable)
 		self:talentTemporaryValue(tmptable, "max_life", t.getLife(self, t))
 		self:talentTemporaryValue(tmptable, "life_regen", t.getRegen(self, t))
