@@ -75,7 +75,7 @@ newTalent{
 		local heal = (self.life + value) < self.max_life and value or self.max_life - self.life
 		if heal > 0 then
 			local amt = (heal / 100) * (t.getTurn(self, t) * game.energy_to_act)
-			self.energy.value = game.energy_to_act + amt
+			self.energy.value = self.energy.value + amt
 			self.energy.value = math.min(self.energy.value, game.energy_to_act * 2)
 			self.ancestral_healing_display_amt = self.ancestral_healing_display_amt or 0
 			self.ancestral_healing_display_amt = self.ancestral_healing_display_amt + amt
