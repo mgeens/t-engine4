@@ -1670,7 +1670,7 @@ function _M:combatDamage(weapon, adddammod, damage)
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
 	local power = self:combatDamagePower(damage or weapon)
 	local phys = self:combatPhysicalpower(nil, weapon)
-	local statmod = self:rescaleCombatStats(totstat, 36, 1/3) -- totstat tends to be lower than values of powers and saves so default interval and step size is too harsh; instead use wider intervals and 1/3 step size
+	local statmod = self:rescaleCombatStats(totstat, 45, 1/3) -- totstat tends to be lower than values of powers and saves so default interval and step size is too harsh; instead use wider intervals and 1/3 step size
 	return self:rescaleDamage(0.3 * (phys + statmod) * power * talented_mod)
 end
 
