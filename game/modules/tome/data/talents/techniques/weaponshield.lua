@@ -357,6 +357,7 @@ newTalent{
 		self:removeTemporaryValue("never_move", p.nomove)
 		self:removeTemporaryValue("die_at", p.dieat)
 		self:removeTemporaryValue("life", p.extra_life)
+		if self.life <= 0 then self.life = 1 end  -- Don't kill players on deactivation, this does let you use die_at tricks to heal though
 		return true
 	end,
 	info = function(self, t)
@@ -368,6 +369,7 @@ newTalent{
 		end
 		return ([[You brace yourself for the final stand, increasing Defense and Armor by %d, maximum and current life by %d, but making you unable to move.
 		Your stand lets you concentrate on every blow, allowing you to avoid death from normally fatal wounds. You can only die when reaching -%d life.
+		If your life is below 0 when Last Stand ends it will be set to 1.
 		The increase in Defense and Armor is based on your Dexterity, and the increase in life is based on your Constitution and normal maximum life.]]):
 		format(t.getDefense(self, t), hp, hp)
 	end,
