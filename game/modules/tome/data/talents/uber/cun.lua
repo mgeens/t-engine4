@@ -376,7 +376,7 @@ eye_of_the_tiger_data = {
 		reduce = 2,
 	},
 	spell = {
-		desc = "All spell criticals reduce the remaining cooldown of a random spell talent by 2.",
+		desc = "All spell criticals reduce the remaining cooldown of a random spell/corruption/celestial/chronomancy talent by 2.",
 		types = { "^spell/", "^corruption/", "^celestial/", "^chronomancy/" },
 		reduce = 2,
 	},
