@@ -35,13 +35,13 @@ newTalent{
 	requires_target = true,
 	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 15, 170) end,
 	action = function(self, t)
-		local tg = {type="ball", range=self:getTalentRange(t), radius=1, talent=t}
+		local tg = {type="ball", range=self:getTalentRange(t), radius=1}
 		local x, y, target = self:getTarget(tg)
 		if not x or not y then return nil end
 		local _ _, x, y = self:canProject(tg, x, y)
 
 		local dam = self:spellCrit(t.getDamage(self, t))
-		if target then self:project({type="hit", talent=t}, target.x, target.y, DamageType.LIGHT, dam, {type="light"}) end
+		self:project({type="hit", talent=t}, x, y, DamageType.LIGHT, dam, {type="light"})
 
 		-- Add a lasting map effect
 		game.level.map:addEffect(self,
