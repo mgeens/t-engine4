@@ -2013,9 +2013,9 @@ function _M:setupCommands()
 			print("===============")
 		end end,
 		[{"_g","ctrl"}] = function() if config.settings.cheat then
-			game.player:takeHit(100, game.player)
-do return end
 			self:changeLevel(game.level.level + 1)
+do return end
+			game.player:takeHit(100, game.player)
 do return end
 			local f, err = loadfile("/data/general/events/rat-lich.lua")
 			print(f, err)
