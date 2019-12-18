@@ -290,21 +290,26 @@ newEntity{ define_as = "FALLEN_SUN_PALADIN_AERYN",
 		[Talents.T_WEAPONS_MASTERY]=5,
 		[Talents.T_RUSH]=3,
 
-		[Talents.T_CHANT_OF_FORTRESS]=7,
+		[Talents.T_CHANT_OF_FORTRESS]=1,
 		[Talents.T_SUN_BEAM]=7,
 		[Talents.T_BARRIER]=7,
 		[Talents.T_WEAPON_OF_LIGHT]=7,
 		[Talents.T_HEALING_LIGHT]=7,
 		[Talents.T_CRUSADE]=7,
-		[Talents.T_SHIELD_OF_LIGHT]=7,
+		[Talents.T_SHIELD_OF_LIGHT]=1,
 		[Talents.T_SECOND_LIFE]=7,
-		[Talents.T_BATHE_IN_LIGHT]=7,
-		[Talents.T_PROVIDENCE]=7,
+		[Talents.T_BATHE_IN_LIGHT]=3,
+		[Talents.T_PROVIDENCE]=3,
 		[Talents.T_THICK_SKIN]=5,
 
 		[Talents.T_IRRESISTIBLE_SUN]=1,
 	},
-	auto_classes={{class="Sun Paladin", start_level=57, level_rate=100}},
+	auto_classes={{class="Sun Paladin", start_level=57, level_rate=50,
+			banned_talents = {
+				T_SUNCLOAK=true,  -- Hyperscaler for survivability
+			},
+		}
+	},
 	resolvers.sustains_at_birth(),
 }
 
@@ -332,7 +337,12 @@ newEntity{ define_as = "HIGH_SUN_PALADIN_AERYN",
 	
 	no_auto_resists = true,
 
-	auto_classes={{class="Sun Paladin", start_level=57, level_rate=100}},
+	auto_classes={{class="Sun Paladin", start_level=57, level_rate=50,
+			banned_talents = {
+				T_SUNCLOAK=true,  -- Hyperscaler for survivability
+			},
+		}
+	},
 
 	autolevel = "warriormage",
 	ai = "tactical", ai_state = { talent_in=1, ai_move="move_astar", },
@@ -357,16 +367,16 @@ newEntity{ define_as = "HIGH_SUN_PALADIN_AERYN",
 		[Talents.T_WEAPONS_MASTERY]=5,
 		[Talents.T_RUSH]=3,
 
-		[Talents.T_CHANT_OF_FORTRESS]=7,
+		[Talents.T_CHANT_OF_FORTRESS]=1,
 		[Talents.T_SUN_BEAM]=7,
 		[Talents.T_BARRIER]=7,
 		[Talents.T_WEAPON_OF_LIGHT]=7,
 		[Talents.T_HEALING_LIGHT]=7,
 		[Talents.T_CRUSADE]=7,
-		[Talents.T_SHIELD_OF_LIGHT]=7,
+		[Talents.T_SHIELD_OF_LIGHT]=1,
 		[Talents.T_SECOND_LIFE]=7,
-		[Talents.T_BATHE_IN_LIGHT]=7,
-		[Talents.T_PROVIDENCE]=7,
+		[Talents.T_BATHE_IN_LIGHT]=3,
+		[Talents.T_PROVIDENCE]=3,
 		[Talents.T_THICK_SKIN]=5,
 
 		[Talents.T_IRRESISTIBLE_SUN]=1,

@@ -1082,6 +1082,7 @@ newEffect{
 	name = "DISPAIR", image = "effects/despair.png",
 	desc = "Despair",
 	long_desc = function(self, eff) return ("The target is in despair, reducing their armour, defence, mindsave and mind resist by %d."):format(-eff.statChange) end,
+	charges = function(self, eff) return math.floor(-eff.statChange) end,	
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -1116,6 +1117,7 @@ newEffect{
 	subtype = { fear=true },
 	status = "detrimental",
 	parameters = {},
+	charges = function(self, eff) return (tostring(math.floor(eff.cooldownPower * 100)).."%") end,
 	on_gain = function(self, err) return "#F53CBE##Target# becomes terrified!", "+Terrified" end,
 	on_lose = function(self, err) return "#Target# is no longer terrified", "-Terrified" end,
 	activate = function(self, eff) --cooldown increase handled in class.actor.lua
@@ -1168,6 +1170,7 @@ newEffect{
 	name = "HAUNTED", image = "effects/haunted.png",
 	desc = "Haunted",
 	long_desc = function(self, eff) return ("The target is haunted by a feeling of dread, causing each detrimental mental effect to inflict %d mind and darkness damage every turn."):format(eff.damage) end, --perhaps add total.
+	charges = function(self, eff) return (math.floor(eff.damage)) end,	
 	type = "mental",
 	subtype = { fear=true },
 	status = "detrimental",
@@ -2255,13 +2258,16 @@ newEffect{
 newEffect{
 	name = "FOCUSED_WRATH", image = "talents/focused_wrath.png",
 	desc = "Focused Wrath",
-	long_desc = function(self, eff) return ("The target's subconscious has focused its attention on %s."):format(eff.target.name:capitalize()) end,
+	long_desc = function(self, eff) return ("The target's subconscious has focused, increasing Mind resistance penetration by +%d%% and turning its attention on %s."):format(eff.pen, eff.target.name:capitalize()) end,
 	type = "mental",
 	subtype = { psionic=true },
 	status = "beneficial",
 	parameters = { power = 1 },
 	on_gain = function(self, err) return "#Target#'s subconscious has been focused.", "+Focused Wrath" end,
 	on_lose = function(self, err) return "#Target#'s subconscious has returned to normal.", "-Focused Wrath" end,
+	activate = function(self, eff)
+			self:effectTemporaryValue(eff, "resists_pen", {[DamageType.MIND]=eff.pen})
+		end,
 	on_timeout = function(self, eff)
 		if not eff.target or eff.target.dead or not game.level:hasEntity(eff.target) then
 			self:removeEffect(self.EFF_FOCUSED_WRATH)

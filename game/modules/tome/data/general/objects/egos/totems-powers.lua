@@ -24,7 +24,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=0, max=600, floor=true},
+	charm_power_def = {add=50, max=600, floor=true},
 	resolvers.charm(
 		function(self, who) 
 			local heal = self.use_power.heal(self, who)
@@ -61,7 +61,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=0, max=600, floor=true},  -- Higher damage because the damage can be cleansed and is delayed
+	charm_power_def = {add=50, max=600, floor=true},  -- Higher damage because the damage can be cleansed and is delayed
 	resolvers.charm(function(self, who)
 			local dam = who:damDesc(engine.DamageType.NATURE, self.use_power.damage(self, who))
 			return ("sting an enemy dealing %d nature damage over 7 turns and reducing their healing by 50%%%%"):format(dam, 50)

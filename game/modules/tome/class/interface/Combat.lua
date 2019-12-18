@@ -1433,20 +1433,24 @@ function _M:rescaleDamage(dam)
 end
 
 --Diminishing-returns method of scaling combat stats, observing this rule: the first twenty ranks cost 1 point each, the second twenty cost two each, and so on. This is much, much better for players than some logarithmic mess, since they always know exactly what's going on, and there are nice breakpoints to strive for.
-function _M:rescaleCombatStats(raw_combat_stat_value, interval)
+-- raw_combat_stat_value = the value being rescaled
+-- interval = ranks until cost of each effective stat value increases (default 20)
+-- step = increase in cost of raw_combat_stat_value to give 1 effective stat value each interval (default 1)
+function _M:rescaleCombatStats(raw_combat_stat_value, interval, step)
 	local x = raw_combat_stat_value
 	-- the rescaling plot is a convex hull of functions x, 20 + (x - 20) / 2, 40 + (x - 60) / 3, ...
 	-- we find the value just by applying minimum over and over
 	local result = x
 	interval = interval or 20
-	local shift, tier, base = 2, interval, interval
+	step = step or 1
+	local shift, tier, base = 1 + step, interval, interval
 	while true do
 		local nextresult = tier + (x - base) / shift
 		if nextresult < result then
 			result = nextresult
 			base = base + interval * shift
 			tier = tier + interval
-			shift = shift + 1
+			shift = shift + step
 		else
 			return math.floor(result)
 		end
@@ -1662,17 +1666,20 @@ function _M:combatDamage(weapon, adddammod, damage)
 			totstat = totstat + self:getStat(stat) * mod
 		end
 	end
-	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then totstat = totstat + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
+	
 	local talented_mod = 1 + self:combatTrainingPercentInc(weapon)
-	local power = self:combatDamagePower(damage or weapon, totstat)
-	local phys = self:combatPhysicalpower(nil, weapon, totstat)
-	return self:rescaleDamage(0.3 * phys * power * talented_mod)
+	local power = self:combatDamagePower(damage or weapon)
+	local phys = self:combatPhysicalpower(nil, weapon)
+	local statmod = self:rescaleCombatStats(totstat, 45, 1/3) -- totstat tends to be lower than values of powers and saves so default interval and step size is too harsh; instead use wider intervals and 1/3 step size
+	return self:rescaleDamage(0.3 * (phys + statmod) * power * talented_mod)
 end
 
 --- Gets the 'power' portion of the damage
 function _M:combatDamagePower(weapon_combat, add)
 	if not weapon_combat then return 1 end
 	local power = math.max((weapon_combat.dam or 1) + (add or 0), 1)
+
+	if self:knowTalent(self["T_FORM_AND_FUNCTION"]) then power = power + self:callTalent(self["T_FORM_AND_FUNCTION"], "getDamBoost", weapon) end
 
 	return (math.sqrt(power / 10) - 1) * 0.5 + 1
 end

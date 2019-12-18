@@ -899,7 +899,7 @@ newEffect{
 			self:doFOV() -- update actors seen
 			for i = 1, #self.fov.actors_dist do
 				act = self.fov.actors_dist[i]
-				if act and self:reactionToward(act) < 0 and not act.dead and act:isNear(eff.x, eff.y, maxdist) then
+				if act and self:reactionToward(act) < 0 and not act.dead and eff.x and act:isNear(eff.x, eff.y, maxdist) then
 					local sx, sy = util.findFreeGrid(act.x, act.y, 1, true, {[engine.Map.ACTOR]=true})
 					if sx then acts[#acts+1] = {act, sx, sy} end
 				end
@@ -3752,7 +3752,7 @@ newEffect{
 newEffect{
 	name = "STEALTH_SKEPTICAL", image = "talents/stealth.png",
 	desc = "Skeptical",
-	long_desc = function(self, eff) return "The target doesn't believe it's ally truly saw anything in the shadows." end,
+	long_desc = function(self, eff) return "The target doesn't believe its ally truly saw anything in the shadows." end,
 	type = "other",
 	subtype = { },
 	status = "neutral",

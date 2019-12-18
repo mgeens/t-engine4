@@ -51,7 +51,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 10,
 
-	charm_power_def = {add=0, max=600, floor=true},
+	charm_power_def = {add=50, max=600, floor=true},
 	resolvers.charm(function(self, who)
 		local dam = who:damDesc(engine.DamageType.LIGHTNING, self.use_power.damage(self, who))
 		local radius = self.use_power.radius
@@ -102,7 +102,7 @@ newEntity{
 		}
 	end),
 
-	charm_power_def = {add=0, max=500, floor=true},
+	charm_power_def = {add=50, max=500, floor=true},
 	resolvers.charm(function(self, who)
 			local dt = engine.DamageType[self.elem[3]:capitalize()]
 			local dam = who:damDesc(dt, self.use_power.damage(self, who))
@@ -137,7 +137,7 @@ newEntity{
 	level_range = {1, 50},
 	rarity = 8,
 
-	charm_power_def = {add=0, max=600, floor=true},
+	charm_power_def = {add=50, max=600, floor=true},
 	resolvers.charm(
 		function(self, who) 
 			local shield = self.use_power.shield(self, who) * (100 + (who:attr("shield_factor") or 0)) / 100
