@@ -56,7 +56,7 @@ echo "SQL:"
 IFS=$'\n'
 steammd5=''
 regex="^([^ ]*) : (.*)\[(.*)\]"
-for line in `cat $md5def`; do
+for line in `cat $md5steam`; do
 	if [[ $line =~ $regex ]]; then
 		md5="${BASH_REMATCH[1]}"
 		kind="${BASH_REMATCH[2]}"
