@@ -95,6 +95,7 @@ newTalent{
 			game.logSeen(target, "%s resists the disarm!", target.name:capitalize())
 		end
 
+		game:playSoundNear(self, "talents/arcane")
 		return true
 	end,
 	info = function(self, t)

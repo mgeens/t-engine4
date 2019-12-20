@@ -41,6 +41,7 @@ newTalent{
 			local h1x, h1y = self:attachementSpot("hand1", true) if h1x then self:talentParticles(ret, {type="shader_shield", args={img="shadowhands_01", dir=180, a=0.7, size_factor=0.4, x=h1x, y=h1y-0.1}, shader={type="flamehands", time_factor=slow and 700 or 1000}}) end
 			local h2x, h2y = self:attachementSpot("hand2", true) if h2x then self:talentParticles(ret, {type="shader_shield", args={img="shadowhands_01", dir=180, a=0.7, size_factor=0.4, x=h2x, y=h2y-0.1}, shader={type="flamehands", time_factor=not slow and 700 or 1000}}) end
 		end
+		game:playSoundNear(self, "talents/arcane")
 		return ret
 	end,
 	deactivate = function(self, t, p)
@@ -84,6 +85,7 @@ newTalent{
 	getAtkSpeed = function(self, t) return self:combatTalentScale(t, 2.2, 11, 0.75) end,
 	activate = function(self, t)
 		local speed = t.getAtkSpeed(self, t)/100
+		game:playSoundNear(self, "talents/arcane")
 		return {
 			regen = self:addTemporaryValue("mana_regen", t.getManaRegen(self, t)),
 			ps = self:addTemporaryValue("combat_physspeed", speed),
@@ -144,6 +146,8 @@ newTalent{
 				game.logSeen(target, "%s is not dazed!", target.name:capitalize())
 			end
 		end
+		
+		game:playSoundNear(self, "talents/arcane")
 		return true
 	end,
 	info = function(self, t)
