@@ -947,7 +947,7 @@ function _M:getTalentDesc(item)
 			text:add({"color","YELLOW"}, "This talent can alter the world in a permanent way; as such, you can never unlearn it once known.", {"color","LAST"}, true, true)
 		elseif could_unlearn then
 			local max = tostring(self.actor:lastLearntTalentsMax(t.generic and "generic" or "class"))
-			text:add({"color","LIGHT_BLUE"}, "This talent was recently learnt; you can still unlearn it if you are in a quiet area like a #{bold}#town#{normal}#.", true, "The last ", max, t.generic and " generic" or " class", " talents you learnt are always unlearnable.", {"color","LAST"}, true, true)
+			text:add({"color","LIGHT_BLUE"}, "This talent was recently learnt; you can still unlearn it if you are out of combat or in a quiet area like a #{bold}#town#{normal}#.", true, "The last ", max, t.generic and " generic" or " class", " talents you learnt are always unlearnable.", {"color","LAST"}, true, true)
 		end
 
 		local traw = self.actor:getTalentLevelRaw(t.id)
