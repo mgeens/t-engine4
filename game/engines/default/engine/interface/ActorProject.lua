@@ -342,7 +342,7 @@ function _M:canProject(t, x, y)
 	return is_hit, stop_x, stop_y, stop_radius_x, stop_radius_y
 end
 
-function _M:projectCollect(t, x, y, kind, cond, tgts)
+function _M:projectCollect(t, x, y, kind, cond, tgts, particles)
 	tgts = tgts or {}
 	self:project(t, x, y, function(px, py)
 		local tgt = game.level.map(px, py, kind)
@@ -357,11 +357,11 @@ function _M:projectCollect(t, x, y, kind, cond, tgts)
 			if cond(tgt, px, py) then ok = true end
 		end
 		if ok then tgts[tgt] = {x=px, y=py, dist=core.fov.distance(self.x, self.y, px, py)} end
-	end)
+	end, nil, particles)
 	return tgts
 end
 
-function _M:projectApply(t, x, y, kind, fct, cond)
+function _M:projectApply(t, x, y, kind, fct, cond, particles)
 	tgts = tgts or {}
 	self:project(t, x, y, function(px, py)
 		local tgt = game.level.map(px, py, kind)
@@ -376,7 +376,7 @@ function _M:projectApply(t, x, y, kind, fct, cond)
 			if not cond or cond(tgt, px, py) then ok = true end
 		end
 		if ok then fct(tgt, px, py) end
-	end)
+	end, nil, particles)
 	return tgts
 end
 

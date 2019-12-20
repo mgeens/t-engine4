@@ -1180,7 +1180,9 @@ function resolvers.calc.racial(t, e)
 	if not racials[race] then return end
 
 	local levelup_talents = e._levelup_talents or {}
-	for tid, level in pairs(racials[race]) do
+	local rcls = racials[race]
+	if type(rcls) == "function" then rcls = rcls(e) end
+	for tid, level in pairs(rcls) do
 		levelup_talents[tid] = table.clone(level)
 	end
 	e._levelup_talents = levelup_talents

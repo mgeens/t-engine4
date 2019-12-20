@@ -59,6 +59,13 @@ function math.scale(i, imin, imax, dmin, dmax)
 	return bi * dm / bm + dmin
 end
 
+function math.boundscale(i, imin, imax, dmin, dmax)
+	local bi = i - imin
+	local bm = imax - imin
+	local dm = dmax - dmin
+	return util.bound(bi * dm / bm + dmin, dmin, dmax)
+end
+
 function math.triangle_area(p1, p2, p3)
 	local u = {x=p2.x - p1.x, y=p2.y - p1.y}
 	local v = {x=p3.x - p1.x, y=p3.y - p1.y}

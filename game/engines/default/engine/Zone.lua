@@ -111,6 +111,11 @@ function _M:init(short_name, dynamic)
 	end
 
 	self.short_name = short_name
+	if short_name:find("+", 1, 1) then
+		self.from_addon = short_name:gsub("%+.*$", "")
+	else
+		self.from_addon = "base"
+	end
 	self.specific_base_level = self.specific_base_level or {}
 	if not self:load(dynamic) then
 		self.level_range = self.level_range or {1,1}
@@ -723,6 +728,7 @@ function _M:finishEntity(level, type, e, ego_filter)
 
 	e:resolve(nil, true)
 	e:check("finish", e, self, level)
+	self:triggerHook{"Zone:finishEntity", type=type, e=e}
 	return e
 end
 
