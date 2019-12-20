@@ -363,13 +363,14 @@ newTalent{
 	points = 5,
 	equilibrium = 7,
 	cooldown = 10,
-	no_npc_use = true,
+	tactical = { DISABLE = 2 },
 	no_energy = true,
 	requires_target = true,
 	range = 10,
 	direct_hit = true,
 	getRad = function(self, t) return self:combatTalentScale(t, 3, 7) end,
 	getDur = function(self, t) return self:combatTalentScale(t, 3, 8) end,
+	getDamage = function(self, t) return 10 + self:combatTalentMindDamage(t, 10, 33) end,
 	target = function(self, t) return {type="hit", range=self:getTalentRange(t)} end,
 	action = function(self, t)
 		local tg = self:getTalentTarget(t)
@@ -377,13 +378,14 @@ newTalent{
 		if not target or target == self then return nil
 
 		else
-			target:setEffect(target.EFF_SUMMON_CONTROL, t.getDur(self, t), {range=t.getRad(self,t), src=self})
+			target:setEffect(target.EFF_SUMMON_CONTROL, t.getDur(self, t), {range=t.getRad(self,t), src=self, power=t.getDamage(self,t)})
 		end
 
 		game:playSoundNear(self, "talents/spell_generic")
 		return true
 	end,
 	info = function(self, t)
-		return ([[Mark a creature with pheromones, signalling to all of your summons within %d tiles of it to shift aggression towards the marked creature for %d turns.]]):format(t.getRad(self,t), t.getDur(self,t))
+		return ([[Mark a creature with pheromones, signalling to all of your summons within %d tiles to shift aggression towards the marked creature for %d turns. Marked targets will receive %d%% increased damage from your summons and your summons will change target to it.
+		The increased damage from your summons will increase with your Mindpower]]):format(t.getRad(self,t), t.getDur(self,t), t.getDamage(self,t))
 	end,
 }

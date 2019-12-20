@@ -91,35 +91,35 @@ newEffect{
 newEffect{
 	name = "SUMMON_CONTROL", image = "talents/summon_control.png", --Backwards compatibility
 	desc = "Pheromones",
-	long_desc = function(self, eff) return ("The target has been marked as the focus for all summons within %d radius."):format(eff.range) end,
+	long_desc = function(self, eff) return ("The target has been marked as the focus for all nature summons within %d radius, receiving %d%% increased damage from nature summons."):format(eff.range, eff.power) end,
 	type = "mental",
 	subtype = { focus=true },
 	status = "detrimental",
-	parameters = { },
+	parameters = { power = 10 },
 	on_gain = function(self, err) return "Summons flock towards #Target#.", true end,
 	on_lose = function(self, err) return "#Target# is no longer being targeted by summons.", true end,
 	on_timeout = function(self, eff)
-
-			self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
-			if target.summoner == eff.src then
-				target:setTarget(self)
-			end
-			end)
-
+		self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
+		local target = game.level.map(px, py, Map.ACTOR)
+		if not target then return end
+		if target.summoner == eff.src then
+			target:setTarget(self)
+		end
+		end)
 	end,
 	activate = function(self, eff)
-			self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
-			local target = game.level.map(px, py, Map.ACTOR)
-			if not target then return end
-			if target.summoner == eff.src then
-				target:setTarget(self)
-			end
-			end)
+		eff.tmpid = self:addTemporaryValue("inc_nature_summon", eff.power)
 
+		self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
+		local target = game.level.map(px, py, Map.ACTOR)
+		if not target then return end
+		if target.summoner == eff.src then
+			target:setTarget(self)
+		end
+		end)
 	end,
 	deactivate = function(self, eff)
+		self:removeTemporaryValue("inc_nature_summon", eff.tmpid)
 	end,
 }
 
