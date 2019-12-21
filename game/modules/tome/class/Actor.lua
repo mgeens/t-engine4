@@ -361,6 +361,12 @@ end
 function _M:runStop() end
 function _M:restStop() end
 
+function _M:hasDescriptor(kind, value)
+	if not self.descriptor then return false end
+	if self.descriptor[kind] ~= value then return false end
+	return true
+end
+
 function _M:getSpeed(speed_type)
 	if type(speed_type) == "number" then return speed_type end
 

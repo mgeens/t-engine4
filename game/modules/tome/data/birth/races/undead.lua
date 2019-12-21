@@ -59,7 +59,7 @@ newBirthDescriptor{
 		starting_zone = "blighted-ruins",
 		starting_level = 3, starting_level_force_down = true,
 		starting_quest = "start-undead",
-		undead = 1,
+		undead = 1, true_undead = 1,
 		forbid_nature = 1,
 		inscription_forbids = { ["inscriptions/infusions"] = true },
 		resolvers.inscription("RUNE:_SHIELDING", {cooldown=14, dur=5, power=130}, 1),
