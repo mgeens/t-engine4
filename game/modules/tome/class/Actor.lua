@@ -7832,7 +7832,7 @@ function _M:doWearTinker(wear_inven, wear_item, wear_o, base_inven, base_item, b
 
 	wear_o.tinkered = {}
 	local forbid = wear_o:check("on_tinker", base_o, self)
-	if wear_o.object_tinker then
+	if not forbid and wear_o.object_tinker then
 		for k, e in pairs(wear_o.object_tinker) do
 			wear_o.tinkered[k] = base_o:addTemporaryValue(k, e)
 		end
