@@ -2132,8 +2132,8 @@ end
 
 --- Computes physical resistance
 --- Fake denotes a check not actually being made, used by character sheets etc.
-function _M:combatPhysicalResist(fake)
-	local add = 0
+function _M:combatPhysicalResist(fake, add)
+	add = add or 0
 	if not fake then
 		add = add + (self:checkOnDefenseCall("physical") or 0)
 	end
@@ -2162,8 +2162,8 @@ end
 
 --- Computes spell resistance
 --- Fake denotes a check not actually being made, used by character sheets etc.
-function _M:combatSpellResist(fake)
-	local add = 0
+function _M:combatSpellResist(fake, add)
+	add = add or 0
 	if not fake then
 		add = add + (self:checkOnDefenseCall("spell") or 0)
 	end
@@ -2190,8 +2190,8 @@ end
 
 --- Computes mental resistance
 --- Fake denotes a check not actually being made, used by character sheets etc.
-function _M:combatMentalResist(fake)
-	local add = 0
+function _M:combatMentalResist(fake, add)
+	add = add or 0
 	if not fake then
 		add = add + (self:checkOnDefenseCall("mental") or 0)
 	end
