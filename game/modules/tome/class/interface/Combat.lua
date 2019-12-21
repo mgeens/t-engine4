@@ -2248,7 +2248,7 @@ end
 function _M:combatGetResistPen(type, straight)
 	if not self.resists_pen then return 0 end
 	local pen = (self.resists_pen.all or 0) + (self.resists_pen[type] or 0)
-	if straight then return pen end
+	if straight then return math.min(pen, 70) end
 	local add = 0
 
 	if self.auto_highest_resists_pen and self.auto_highest_resists_pen[type] then
@@ -2267,7 +2267,7 @@ function _M:combatGetResistPen(type, straight)
 		add = add + t.getPenetration(self, t)
 	end
 
-	return pen + add
+	return math.min(pen + add, 70)
 end
 
 --- Returns the damage affinity
