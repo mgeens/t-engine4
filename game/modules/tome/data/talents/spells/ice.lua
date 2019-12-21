@@ -30,7 +30,7 @@ newTalent{
 	direct_hit = true,
 	reflectable = true,
 	requires_target = true,
-	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 40, 390) end, -- Gradually increase burst potential with c/d
+	getDamage = function(self, t) return self:combatTalentSpellDamage(t, 30, 300) end,
 	getDuration = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
 	target = function(self, t)
 		if necroEssenceDead(self, true) then
