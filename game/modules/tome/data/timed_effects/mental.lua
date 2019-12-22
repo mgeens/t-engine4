@@ -108,7 +108,7 @@ newEffect{
 		end)
 	end,
 	activate = function(self, eff)
-		eff.tmpid = self:addTemporaryValue("inc_nature_summon", eff.power)
+		self:effectTemporaryValue(eff, "inc_nature_summon", eff.power)
 
 		self:project({type="ball", range=0, friendlyfire=false, radius=eff.range}, self.x, self.y, function(px, py)
 		local target = game.level.map(px, py, Map.ACTOR)
@@ -119,7 +119,6 @@ newEffect{
 		end)
 	end,
 	deactivate = function(self, eff)
-		self:removeTemporaryValue("inc_nature_summon", eff.tmpid)
 	end,
 }
 

@@ -343,15 +343,14 @@ newEffect{
 	parameters = {threshold = 1, blocks = 1,},
 	on_gain = function(self, err) return "#Target# summons a storm to protect them!", "+Stormshield" end,
 	on_lose = function(self, err) return "#Target#'s storm dissipates.", "-Stormshield" end,
-	activate = function(self, eff) return
+	activate = function(self, eff)
 	if core.shader.active(4) then
-			eff.particle = self:addParticles(Particles.new("shader_ring_rotating", 1, {rotation=0, radius=1.0, img="lightningshield"}, {type="lightningshield"}))
+			self:effectParticles(eff, {type="shader_ring_rotating", args={rotation=0, radius=1.0, img="lightningshield"}, shader={type="lightningshield"}})
 		else
-			eff.particle = self:addParticles(Particles.new("stormshield", 1))
+			self:effectParticles(eff, {type = "stormshield"})
 		end
 	end,
 	deactivate = function(self, eff)
-		self:removeParticles(eff.particle)
 	end,
 	callbackOnTakeDamage = function(self, eff, src, x, y, type, dam, state)
 		if dam < eff.threshold then return end
