@@ -2524,12 +2524,17 @@ function _M:setupMouse(reset)
 		if not config.settings.tome.disable_mouse_targeting and self:targetMouse(button, mx, my, xrel, yrel, event) then return end
 
 		-- Cheat kill
-		if config.settings.cheat and button == "right" and core.key.modState("ctrl") and core.key.modState("shift") and not xrel and not yrel and event == "button" and self.zone and not self.zone.wilderness then
-			local target = game.level.map(tmx, tmy, Map.ACTOR)
-			if target then
-				target:die(game.player)
+		if config.settings.cheat then
+			if button == "right" and core.key.modState("ctrl") and core.key.modState("shift") and core.key.modState("alt") and not xrel and not yrel and event == "button" and self.zone and not self.zone.wilderness then
+				local target = game.level.map(tmx, tmy, Map.ACTOR)
+				if target then game._cheat_move_actor = target game.log("#GOLD#CHEAT MOVE ACTOR %s: ctrl+shift+alt+right click on an empty map spot to move it", target.name)
+				elseif game._cheat_move_actor then game._cheat_move_actor:move(tmx, tmy, true) end
+				return
+			elseif button == "right" and core.key.modState("ctrl") and core.key.modState("shift") and not xrel and not yrel and event == "button" and self.zone and not self.zone.wilderness then
+				local target = game.level.map(tmx, tmy, Map.ACTOR)
+				if target then target:die(game.player) end
+				return
 			end
-			return
 		end
 
 		-- Handle Use menu
