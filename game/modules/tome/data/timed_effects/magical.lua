@@ -227,9 +227,11 @@ newEffect{
 	on_lose = function(self, err) return "#Target#'s skin returns to normal.", "-Reflective Skin" end,
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("reflect_damage", eff.power)
+		self:addShaderAura("reflective_skin", "awesomeaura", {time_factor=5500, alpha=0.6, flame_scale=0.6}, "particles_images/arcaneshockwave.png")
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("reflect_damage", eff.tmpid)
+		self:removeShaderAura("reflective_skin")
 	end,
 }
 
