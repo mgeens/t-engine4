@@ -1908,6 +1908,59 @@ function _M:colorStats(stat)
 	end
 end
 
+-- Get the combat stats for weapon by inventory and slot
+function _M:getCombatStats(type, inven_id, item)
+	local o = table.get(self:getInven(inven_id), item)
+	local mean
+	local ammo
+	local atk
+	local dmg
+	local apr
+	local crit
+	local crit_power = 0
+	local aspeed
+	local range
+	local mspeed
+	local dam, archery
+	ammo = table.get(self:getInven("QUIVER"), 1)
+	archery = o and o.archery and ammo and ammo.archery_ammo == o.archery and ammo.combat and (type ~= "offhand" or self:attr("can_offshoot")) and (type ~= "psionic" or self:attr("psi_focus_combat")) -- ranged combat
+	if type == "psionic" then
+		if not o or o.archery and not archery then return end
+		self:attr("use_psi_combat", 1)
+	end
+	if not o or (o.archery and not archery) or self:attr("disarmed") then -- unarmed
+		mean = self.combat
+		dmg = self:combatDamage(mean) * (mean.dam_mult or 1)
+		atk = self:combatAttack(mean)
+		apr = self:combatAPR(mean)
+		crit = self:combatCrit(mean)
+		crit_power = mean.crit_power
+		aspeed = 1/self:combatSpeed(mean)
+		archery = false
+	else -- weapon combat
+		mean = o and (o.special_combat and (o.slot == self.inven[inven_id].name or self:knowTalent(self.T_STONESHIELD)) and o.special_combat) or self:getObjectCombat(o, type == "psionic" and "mainhand" or type) or self.combat -- handles stone wardens
+		if archery then -- ranged combat
+			dam = ammo.combat
+			atk = self:combatAttackRanged(mean, dam)
+			dmg = self:combatDamage(mean, nil, dam) * (mean.dam_mult or 1)
+			apr = self:combatAPR(mean) + (dam.apr or 0)
+			crit_power = (mean.crit_power or 0) + (dam.crit_power or 0)
+			range = math.max(mean.range or 6, self:attr("archery_range_override") or 1)
+			mspeed = 10 + (self.combat.travel_speed or 0) + (mean.travel_speed or 0) + (dam.travel_speed or 0)
+		else -- melee combat
+			dam = o.combat
+			atk = self:combatAttack(mean)
+			dmg = self:combatDamage(mean) * (type == "offhand" and mean.talented ~= "shield" and self:getOffHandMult(dam) or 1) * (mean.dam_mult or 1)
+			apr = self:combatAPR(mean)
+			crit_power = mean.crit_power
+		end
+		crit = self:combatCrit(dam)
+		aspeed = 1/self:combatSpeed(mean)
+	end
+	if type == "psionic" then self:attr("use_psi_combat", -1) end
+	return {obj=o, atk=atk, dmg=dmg, apr=apr, crit=crit, crit_power=crit_power or 0, aspeed=aspeed, range=range, mspeed=mspeed, archery=archery, mean=mean, ammo=ammo, block=mean.block, talented=mean.talented}
+end
+
 function _M:tooltip(x, y, seen_by)
 	if seen_by and not seen_by:canSee(self) then return end
 	local factcolor, factstate, factlevel = "#ANTIQUE_WHITE#", "neutral", Faction:factionReaction(self.faction, game.player.faction)
