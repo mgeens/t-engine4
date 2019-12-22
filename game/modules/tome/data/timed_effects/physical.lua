@@ -2379,10 +2379,12 @@ newEffect{
 	activate = function(self, eff)
 		eff.tmpid = self:addTemporaryValue("block", eff.power)
 		if eff.properties.sp then eff.spell = self:addTemporaryValue("combat_spellresist", eff.power) end
+		eff.particle = self:addParticles(Particles.new("block", 1))
 	end,
 	deactivate = function(self, eff)
 		self:removeTemporaryValue("block", eff.tmpid)
 		if eff.properties.sp then self:removeTemporaryValue("combat_spellresist", eff.spell) end
+		self:removeParticles(eff.particle)
 	end,
 }
 
