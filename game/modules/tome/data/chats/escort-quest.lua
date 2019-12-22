@@ -52,6 +52,7 @@ local reward_types = {
 			types = {
 				["wild-gift/call"] = 1.0,
 			},
+			saves = { mental = 12 },
 			talents = {
 				[Talents.T_NATURE_TOUCH] = 1,
 				[Talents.T_EARTH_S_EYES] = 1,
@@ -84,6 +85,7 @@ local reward_types = {
 				[Talents.T_PSIBLADES] = 1,
 				[Talents.T_THORN_GRAB] = 1,
 			},
+			saves = { spell = 12 },
 			stats = {
 				[Stats.STAT_WIL] = 5,
 				[Stats.STAT_DEX] = 5,
@@ -126,6 +128,7 @@ local reward_types = {
 				[Talents.T_SKATE] = 1,
 				[Talents.T_TELEKINETIC_LEAP] = 1,
 			},
+			saves = { spell = 12, phys = 12 },
 			stats = {
 				[Stats.STAT_CUN] = 5,
 				[Stats.STAT_WIL] = 5,
@@ -153,6 +156,7 @@ local reward_types = {
 				[Talents.T_RESONANCE_FIELD] = 1,
 				[Talents.T_CONVERSION] = 1,
 			},
+			saves = { spell = 12, mental = 12 },
 			stats = {
 				[Stats.STAT_CUN] = 5,
 				[Stats.STAT_WIL] = 5,
@@ -179,6 +183,7 @@ local reward_types = {
 				[Talents.T_SLEEP] = 1,
 				[Talents.T_DREAM_WALK] = 1,
 			},
+			saves = { spell = 12 },
 			stats = {
 				[Stats.STAT_WIL] = 5,
 				[Stats.STAT_CUN] = 5,
