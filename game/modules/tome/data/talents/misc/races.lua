@@ -34,7 +34,7 @@ racial_req4 = {
 ------------------------------------------------------------------
 -- Highers' powers
 ------------------------------------------------------------------
-newTalentType{ type="race/higher", name = "higher", generic = true, description = "The various racial bonuses a character can have." }
+newTalentType{ type="race/higher", name = "higher", generic = true, is_spell = true, description = "The various racial bonuses a character can have." }
 
 newTalent{
 	short_name = "HIGHER_HEAL",  -- Backwards compatibility, two tier 1 racials were swapped
