@@ -199,11 +199,19 @@ newTalent{
 		local max = t.getMaxAbsorb(self, t)
 		self.disruption_shield_power = math.min(self.disruption_shield_power + max / 10, max)
 	end,
+	doLostMana = function(self, t, mana)
+		if (self:getMana() - mana) / self:getMaxMana() < 0.5 then
+			self:forceUseTalent(self.T_DISRUPTION_SHIELD, {ignore_energy=true})
+		end
+	end,
 	callbackOnHit = function(self, t, cb, src, dt)
 		local p = self:isTalentActive(t.id)
 		if not p then return end
 		if cb.value <= 0 then return end
-		if self:getMana() / self:getMaxMana() < 0.5 then return end
+		if self:getMana() / self:getMaxMana() < 0.5 then
+			self:forceUseTalent(self.T_DISRUPTION_SHIELD, {ignore_energy=true})
+			return
+		end
 		-- if self:reactionToward(src) > 0 then return end
 		self.disruption_shield_power = self.disruption_shield_power or 0
 		self.disruption_shield_storage = self.disruption_shield_storage or 0

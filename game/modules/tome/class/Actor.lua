@@ -5328,6 +5328,16 @@ function _M:paradoxDoAnomaly(chance, paradox, def)
 end
 
 -- Overwrite incParadox to set up threshold log messages
+local previous_incMana = _M.incMana
+function _M:incMana(mana)
+	if mana < 0 and self:isTalentActive(self.T_DISRUPTION_SHIELD) then
+		self:callTalent(self.T_DISRUPTION_SHIELD, "doLostMana", mana)
+	end
+
+	return previous_incMana(self, mana)
+end
+
+-- Overwrite incParadox to set up threshold log messages
 local previous_incParadox = _M.incParadox
 
 function _M:incParadox(paradox)
