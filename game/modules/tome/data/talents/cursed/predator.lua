@@ -27,6 +27,7 @@ newTalent{
 	require = cursed_lev_req1,
 	mode = "passive",
 	points = 5,
+	no_npc_use = true,
 	getATK = function(self, t) return self:combatTalentScale(t, 0.18, 1.2) end,
 	-- ATK bonus handled in Combat.lua with comment: -- Predator apr bonus
 	getAPR = function(self, t) return self:combatTalentScale(t, 0.09, 0.6) end,
@@ -65,6 +66,7 @@ newTalent{
 	points = 5,
 	cooldown = 10,
 	no_energy = true,
+	no_npc_use = true,
 	radius = function(self, t) return 4 end,
 	getMiasmaCount = function(self, t) return self:combatTalentScale(t, 3, 6) end,
 	getDamage = function(self, t) return self:combatTalentMindDamage(t, 0, 60) end,
@@ -247,6 +249,7 @@ newTalent{
 	mode = "passive",
 	require = cursed_lev_req3,
 	points = 5,
+	no_npc_use = true,
 	getStealthPower = function(self, t) return self:combatTalentMindDamage(t, 0, 70) end,
 	getPhysPower = function(self, t) return self:combatTalentMindDamage(t, 20, 70) end,
 	passives = function(self, t, p)
