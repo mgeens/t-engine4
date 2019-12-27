@@ -2040,6 +2040,24 @@ function _M:applyRandomClass(b, data, instant)
 		end
 		if not mclass then return end
 
+		-- THE MOTHER OF ALL HACKS!
+		-- Make sure brawlers rares dont get absurdly powerful
+		if class.npc_class_use_default_combat_table then
+			b.combat_old = table.clone(b.combat or {}, true)
+			b.combat = {
+				dam=1,
+				atk=1, apr=0,
+				physcrit=0,
+				physspeed =1,
+				dammod = { str=1 },
+				damrange=1.1,
+				talented = "unarmed",
+				npc_brawler_combat_hack_enabled = true,
+			}
+			if b.combat_old.sound then b.combat.sound = b.combat_old.sound end
+			if b.combat_old.sound_miss then b.combat.sound_miss = b.combat_old.sound_miss end
+		end
+
 		print("[applyRandomClass]", b.uid, b.name, "Adding class", class.name, mclass.name)
 		-- add class to list and build inherent power sources
 		b.descriptor = b.descriptor or {}
@@ -2480,6 +2498,24 @@ function _M:applyRandomClassNew(b, data, instant)
 		if not mclass then
 			print("[applyRandomClassNew] ### ABORTING ###", b.uid, b.name, "No main class type for", class.name)
 			return
+		end
+
+		-- THE MOTHER OF ALL HACKS!
+		-- Make sure brawlers rares dont get absurdly powerful
+		if class.npc_class_use_default_combat_table then
+			b.combat_old = table.clone(b.combat or {}, true)
+			b.combat = {
+				dam=1,
+				atk=1, apr=0,
+				physcrit=0,
+				physspeed =1,
+				dammod = { str=1 },
+				damrange=1.1,
+				talented = "unarmed",
+				npc_brawler_combat_hack_enabled = true,
+			}
+			if b.combat_old.sound then b.combat.sound = b.combat_old.sound end
+			if b.combat_old.sound_miss then b.combat.sound_miss = b.combat_old.sound_miss end
 		end
 
 		print("[applyRandomClassNew]", b.uid, b.name, "Adding class", class.name, mclass.name, "level_rate", level_rate)
