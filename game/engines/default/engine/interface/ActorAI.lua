@@ -61,12 +61,16 @@ end
 function _M:init(t)
 	self.ai_state = self.ai_state or {}
 	self.ai_target = self.ai_target or {}
+	self.ai_actors_seen = self.ai_actors_seen or {}  -- List of actors the AI has had LOS of at least once (regardless of target)
 	self:autoLoadedAI()
 end
 
 function _M:autoLoadedAI()
 	-- Make the table with weak values, so that threat list does not prevent garbage collection
 	setmetatable(self.ai_target, {__mode='v'})
+
+	self.ai_actors_seen = self.ai_actors_seen or {}
+	setmetatable(self.ai_actors_seen, {__mode='v'})
 end
 
 function _M:aiCanPass(x, y)
@@ -130,6 +134,11 @@ function _M:doAI()
 	-- If we have a target but it is dead (it was not yet garbage collected but it'll come)
 	-- we forget it
 	self:clearAITarget()
+
+	-- Keep track of actors we've actually seen at least once in our own FOV, NPC calls doFOV right before doAI
+	for i,v in ipairs(self.fov.actors_dist) do
+		self.ai_actors_seen[v] = v
+	end
 
 	-- Update the ai_target table
 	local target_pos = self.ai_target.actor and self.fov and self.fov.actors and self.fov.actors[self.ai_target.actor]

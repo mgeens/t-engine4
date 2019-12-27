@@ -200,8 +200,10 @@ function _M:seen_by(who)
 	if self.dont_pass_target then return end -- This means that ghosts can alert other NPC's but not vice versa ;)
 	local who_target = who.ai_target and who.ai_target.actor
 	if not (who_target and who_target.x) then return end
+	if not (who and who.ai_actors_seen[who_target]) then return end  -- Only pass target if we've seen them via FOV at least once, this limits chain aggro
 	if self.ai_target and self.ai_target.actor == who_target then return end
 	if not rng.percent(who:getRankTalkativeAdjust()) then return end
+
 	-- Only receive (usually) hostile targets from allies
 	if self:reactionToward(who) <= 0 or not who.ai_state._pass_friendly_target and who:reactionToward(who_target) > 0 then return end
 	
@@ -210,7 +212,7 @@ function _M:seen_by(who)
 	-- Check if it's actually a being of cold machinery and not of blood and flesh
 	if not who.aiSeeTargetPos then return end
 	if self.ai_target.actor and not who_target:attr("stealthed_prevents_targetting") then
-		-- Pass last seen coordinates
+		-- Pass last seen coordinates if we already have the same target
 		if self.ai_target.actor == who_target then
 			-- Adding some type-safety checks, but this isn't fixing the source of the errors
 			local last_seen = {turn=0}
