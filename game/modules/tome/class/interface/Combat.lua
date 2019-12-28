@@ -2411,6 +2411,19 @@ function _M:hasWeaponType(type)
 	return weapon
 end
 
+--- Check if the actor has a weapon offhand
+function _M:hasOffWeaponType(type)
+	if self:attr("disarmed") then
+		return nil, "disarmed"
+	end
+
+	if not self:getInven("OFFHAND") then return end
+	local weapon = self:getInven("OFFHAND")[1]
+	if not weapon then return nil end
+	if type and weapon.combat.talented ~= type then return nil end
+	return weapon
+end
+
 --- Check if the actor has a cursed weapon
 function _M:hasCursedWeapon()
 	if self:attr("disarmed") then

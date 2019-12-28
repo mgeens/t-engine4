@@ -107,6 +107,38 @@ newTalent{
 }
 
 newTalent{
+	name = "Attune Mindstar",
+	type = {"wild-gift/objects", 1},
+	cooldown = 5,
+	points = 5,
+	no_unlearn_last = true,
+	no_npc_use = true,
+	message = function(self, t)
+		return ("@Source@ refocuses the energies of %s mindstar."):format(self:his_her())
+	end,
+	action = function(self, t)
+		local apply = function(o)
+			if not o.combat or not o.wielder or not o.wielder.learn_talent or not o.wielder.learn_talent[self.T_ATTUNE_MINDSTAR] then return end
+			if o.combat.damtype == DamageType.NATURE then
+				o.combat.damtype = DamageType.MIND
+				game.logPlayer(self, "You attune your %s to deal #ORANGE#mind#LAST# damage.", o:getName{do_color=1})
+			elseif o.combat.damtype == DamageType.MIND then
+				o.combat.damtype = DamageType.NATURE
+				game.logPlayer(self, "You attune your %s to deal #LIGHT_GREEN#nature#LAST# damage.", o:getName{do_color=1})
+			end
+		end
+
+		local mh = self:hasWeaponType("mindstar")
+		local oh = self:hasOffWeaponType("mindstar")
+		if mh then apply(mh) end
+		if oh then apply(oh) end
+	end,
+	info = function(self, t)
+		return ([[Alter the flow of energies through a staff.]])
+	end,
+}
+
+newTalent{
 	name = "Command Staff",
 	type = {"spell/objects", 1},
 	cooldown = 5,
