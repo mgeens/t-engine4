@@ -240,8 +240,8 @@ function _M:seen_by(who)
 		local range_factor = 1.2
 		if distallyhostile + core.fov.distance(self.x, self.y, who.x, who.y) > math.min(10, math.max(self.sight, self.infravision or 0, self.heightened_senses or 0, self.sense_radius or 0))*range_factor then return end
 
-		-- Don't believe allies if they saw the target over 10 turns ago
-		if (game.turn - (who.ai_state.target_last_seen.turn or game.turn)) / (game.energy_to_act / game.energy_per_tick) > 10 then return end 
+		-- Don't believe allies if they saw the target over 7 turns ago
+		if (game.turn - (who.ai_state.target_last_seen.turn or game.turn)) / (game.energy_to_act / game.energy_per_tick) > 7 then return end
 	end
 
 	print("[NPC:seen_by] Passing target", who_target.name, "from", who.uid, who.name, "to", self.uid, self.name)
