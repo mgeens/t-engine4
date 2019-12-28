@@ -124,10 +124,7 @@ newChat{ id="prides-dead-orbs-missing-undeath",
 		{"Thank you, my lady.", 
 		jump="prides-dead-orbs-missing",
 		action = function(npc, player)
-			local quest_artifacts = mod.class.Object:loadList("/data/general/objects/quest-artifacts.lua")
-			local orb = quest_artifacts["ORB_UNDEATH"]:clone()
-			orb:resolve()
-			orb:resolve(nil, true)
+			local orb = game.zone:makeEntityByName(game.level, "object", "ORB_UNDEATH", true)
 			orb:identify(true)
 			game.zone:addEntity(game.level, orb, "object")
 			player:addObject(player:getInven("INVEN"), orb)
@@ -141,10 +138,7 @@ newChat{ id="prides-dead-orbs-missing-elements",
 		{"Thank you, my lady.", 
 		jump="prides-dead-orbs-missing",
 		action = function(npc, player)
-			local quest_artifacts = mod.class.Object:loadList("/data/general/objects/quest-artifacts.lua")
-			local orb = quest_artifacts["ORB_ELEMENTS"]:clone()
-			orb:resolve()
-			orb:resolve(nil, true)
+			local orb = game.zone:makeEntityByName(game.level, "object", "ORB_ELEMENTS", true)
 			orb:identify(true)
 			game.zone:addEntity(game.level, orb, "object")
 			player:addObject(player:getInven("INVEN"), orb)
@@ -158,10 +152,7 @@ newChat{ id="prides-dead-orbs-missing-destruction",
 		{"Thank you, my lady.", 
 		jump="prides-dead-orbs-missing",
 		action = function(npc, player)
-			local quest_artifacts = mod.class.Object:loadList("/data/general/objects/quest-artifacts.lua")
-			local orb = quest_artifacts["ORB_DESTRUCTION"]:clone()
-			orb:resolve()
-			orb:resolve(nil, true)
+			local orb = game.zone:makeEntityByName(game.level, "object", "ORB_DESTRUCTION", true)
 			orb:identify(true)
 			game.zone:addEntity(game.level, orb, "object")
 			player:addObject(player:getInven("INVEN"), orb)
@@ -175,10 +166,7 @@ newChat{ id="prides-dead-orbs-missing-dragon",
 		{"Thank you, my lady.", 
 		jump="prides-dead-orbs-missing",
 		action = function(npc, player)
-			local quest_artifacts = mod.class.Object:loadList("/data/general/objects/quest-artifacts.lua")
-			local orb = quest_artifacts["ORB_DRAGON"]:clone()
-			orb:resolve()
-			orb:resolve(nil, true)
+			local orb = game.zone:makeEntityByName(game.level, "object", "ORB_DRAGON", true)
 			orb:identify(true)
 			game.zone:addEntity(game.level, orb, "object")
 			player:addObject(player:getInven("INVEN"), orb)
