@@ -245,6 +245,12 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 			end
 		end
 
+		-- Pheremones 
+		if src.is_nature_summon and target:attr("inc_nature_summon") then 
+			inc = inc + target:attr("inc_nature_summon")
+			print("[PROJECTOR] after nature summon increase dam", dam + (dam * inc) / 100)
+		end
+		
 		-- Rigor mortis
 		if src.necrotic_minion and target:attr("inc_necrotic_minions") then
 			inc = inc + target:attr("inc_necrotic_minions")

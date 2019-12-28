@@ -27,7 +27,8 @@ if level.level == zone.max_level then self:defineTile(">", 'FLOOR') else self:de
 self:defineTile("O", "FLOOR", nil, {random_filter={type='humanoid', subtype='orc', special=function(e) return e.pride == mapdata.pride end, random_boss={nb_classes=1, loot_quality="store", loot_quantity=3, ai_move="move_complex", rank=4,}}})
 self:defineTile("X", "FLOOR", nil, {entity_mod=function(e) e.make_escort = nil return e end, random_filter={type='humanoid', subtype='orc', special=function(e) return e.pride == mapdata.pride end, random_boss={nb_classes=1, loot_quality="store", loot_quantity=1, no_loot_randart=true, ai_move="move_complex", rank=3}}}, nil, {no_teleport=true})
 self:defineTile("d", "FENCE_FLOOR", nil, {random_filter={special_rarity="drake_rarity"}}, nil, {special="roost"})
-self:defineTile("D", "FENCE_FLOOR", nil, {entity_mod=function(e) e.make_escort = nil return e end, random_filter={special_rarity="drake_rarity", special=function(e) return e.rank == 3 end, random_boss={nb_classes=1, loot_quality="store", loot_quantity=1, no_loot_randart=true, ai_move="move_complex", rank=3.5}}}, nil, {special="roost"})
+self:defineTile("D", "FENCE_FLOOR", nil, {entity_mod=function(e) e.make_escort = nil return e end, random_filter={special_rarity="drake_rarity", special=function(e) return e.rank == 3 end, random_boss={nb_classes=1, loot_quality="store", loot_quantity=1, loot_unique=true, no_loot_randart=true, ai_move="move_complex", rank=3.5}}}, nil, {special="roost"}) --drops a fixedart
+self:defineTile("R", "FENCE_FLOOR", nil, {entity_mod=function(e) e.make_escort = nil return e end, random_filter={special_rarity="drake_rarity", special=function(e) return e.rank == 3 end, random_boss={nb_classes=1, loot_quality="store", loot_quantity=1, ai_move="move_complex", rank=3.5}}}, nil, {special="roost"}) --drops a randart
 self:defineTile('&', "GENERIC_LEVER_SAND", nil, nil, nil, {special="roost", lever=1, lever_kind="pride-doors", lever_spot={type="lever", subtype="door", check_connectivity="entrance"}}, {type="lever", subtype="lever", check_connectivity="entrance"})
 self:defineTile('*', "ROCK_LEVER_DOOR", nil, nil, nil, {lever_action=2, lever_action_value=0, lever_action_kind="pride-doors"}, {type="lever", subtype="door", check_connectivity="entrance"})
 
@@ -63,7 +64,7 @@ tm:applyOnGroups(rooms, function(room, idx)
 		local drake = room:pickSpot("any")
 		if drake then
 			local boss = rng.percent(25) and not had_boss
-			tm:put(drake, boss and 'D' or 'd')
+			tm:put(drake, boss and (rng.percent(65) and 'D' or 'R') or 'd')
 			room:remove(drake)
 			if boss then had_boss = true end
 		else
