@@ -70,7 +70,7 @@ function _M:autoLoadedAI()
 	setmetatable(self.ai_target, {__mode='v'})
 
 	self.ai_actors_seen = self.ai_actors_seen or {}
-	setmetatable(self.ai_actors_seen, {__mode='v'})
+	setmetatable(self.ai_actors_seen, {__mode='k'})
 end
 
 function _M:aiCanPass(x, y)
@@ -137,7 +137,7 @@ function _M:doAI()
 
 	-- Keep track of actors we've actually seen at least once in our own FOV, NPC calls doFOV right before doAI
 	for i,v in ipairs(self.fov.actors_dist) do
-		self.ai_actors_seen[v] = v
+		self.ai_actors_seen[v] = true
 	end
 
 	-- Update the ai_target table
