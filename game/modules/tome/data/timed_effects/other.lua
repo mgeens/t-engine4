@@ -3631,7 +3631,7 @@ newEffect{
 
 newEffect{
 	name = "DEMI_GODMODE",
-	desc = "Demigod Mode", --image = "",
+	desc = "Demigod Mode", image = "effects/darkgod.png",
 	long_desc = function(self, eff) return ("DEMI-GODMODE: Target has 10000 additional life and regenerates 2000 life per turn.  It deals +500%% damage, and has full ESP."):format() end,
 	type = "other",
 	subtype = { cheat=true },
@@ -3662,7 +3662,7 @@ newEffect{
 
 newEffect{
 	name = "GODMODE",
-	desc = "God Mode", --image = "",
+	desc = "God Mode", image = "effects/darkgod.png",
 	long_desc = function(self, eff) return ("GODMODE: Target is invulnerable to damage, immune to bad status effects, deals +10000%% damage (100%% penetration), does not need to breathe, and has full ESP."):format() end,
 	type = "other",
 	subtype = { cheat=true },

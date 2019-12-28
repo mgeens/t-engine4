@@ -41,6 +41,7 @@ local wyrm_types = {
    storm={"storm drake", "storm wyrm"},
    venom={"venom drake", "venom wyrm"}
 }
+
 local wyrm_types_names = {"cold", "fire", "storm", "venom"}
 roomCheck(function(room, zone, level, map)
    local wyrm_types_name = rng.table(wyrm_types_names)
@@ -55,6 +56,7 @@ roomCheck(function(room, zone, level, map)
    end
    return true
 end)
+
 local check_sleep = function(self)
    if game.level.wyrm_awoken == true then
       return true
@@ -68,6 +70,7 @@ local check_sleep = function(self)
    end
    return true
 end
+
 local aggro_wyrm = function()
    if game.level.wyrm_awoken == true then
       return false
@@ -82,18 +85,22 @@ local aggro_wyrm = function()
    game.log("#CRIMSON#The dragons awaken from their slumber detecting their loot being stolen!")
    return true
 end
+
 local aggro_wyrm_takehit = function(self, value, src)
-   aggro_wyrm()
+   self:aggro_wyrm()
    return value
 end
+
 local aggro_wyrm_grid = function(chance)
    local g = game.zone.grid_list.FLOOR:clone()
+   g.aggro_wyrm_chance = chance
+   g.aggro_wyrm = aggro_wyrm
    g.on_move = function(self, x, y, actor, forced)
       if not actor.player then return end
       if forced then return end
       if game.level.wyrm_awoken then return end
-      if not rng.percent(chance) then return end
-      aggro_wyrm()
+      if not rng.percent(self.aggro_wyrm_chance) then return end
+      self:aggro_wyrm()
    end
    return g
 end
@@ -106,6 +113,7 @@ defineTile('W', "FLOOR", nil,
       e.on_seen = check_sleep
       e.on_act = check_sleep
       e.on_takehit = aggro_wyrm_takehit
+      e.aggro_wyrm = aggro_wyrm
       e.sleeping_wyrm = true
       return e
    end,
@@ -121,6 +129,7 @@ defineTile('D', "FLOOR", nil,
       e.on_seen = check_sleep
       e.on_act = check_sleep
       e.on_takehit = aggro_wyrm_takehit
+      e.aggro_wyrm = aggro_wyrm
       e.sleeping_wyrm = true
       return e
    end,

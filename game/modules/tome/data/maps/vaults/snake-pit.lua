@@ -18,7 +18,7 @@
 -- darkgod@te4.org
 
 startx = 3
-starty = 4
+starty = 5
 
 setStatusAll{no_teleport=true, room_map = {can_open=false}}
 specialList("actor", {
@@ -26,6 +26,7 @@ specialList("actor", {
    "/data/general/npcs/molds.lua",
    "/data/general/npcs/feline.lua",
    "/data/general/npcs/ant.lua",
+   "/data/zones/ritch-tunnels/npcs.lua",
    "/data/general/npcs/sandworm.lua",
    "/data/general/npcs/spider.lua",
    "/data/general/npcs/vermin.lua",
@@ -33,17 +34,20 @@ specialList("actor", {
 })
 rotates = {"default", "90", "180", "270", "flipx", "flipy"}
 
+defineTile(',', data.floor or data['.'] or "FLOOR")
 defineTile('#', "HARDWALL")
-defineTile('!', "DOOR_VAULT")
+defineTile('w', "WALL")
+defineTile('d', "FLOOR", {random_filter={type="tool", subtype="digger", name="iron pickaxe", ego_chance=-1000, ego_chance=-1000}})
 
 local mobs = {
    "rattlesnake",
    "green worm mass",
-   "giant ice ant",
+   "giant brown ant",
    "snow cat",
    "green mold",
    "giant grey rat",
    "giant spider",
+   "ritch flamespitter",
    "sandworm"
 }
 local mob = rng.tableRemove(mobs)
@@ -51,9 +55,11 @@ local mob = rng.tableRemove(mobs)
 defineTile('s', "FLOOR", {random_filter={type="scroll", ego_chance=25}}, {random_filter={name=mob}})
 
 return {
-[[#####]],
-[[#sss#]],
-[[#sss!]],
-[[#sss#]],
-[[#####]],
+[[,,,,,,,,]],
+[[,######,]],
+[[,#sss##,]],
+[[,#ssswd,]],
+[[,#sss##,]],
+[[,######,]],
+[[,,,,,,,,]],
 }
