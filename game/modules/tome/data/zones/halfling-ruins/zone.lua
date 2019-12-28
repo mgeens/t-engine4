@@ -36,7 +36,7 @@ return {
 			class = "engine.generator.map.Roomer",
 			nb_rooms = 10,
 			rooms = {"random_room", {"money_vault",5}, {"lesser_vault",8}},
-			lesser_vaults_list = {"circle","rat-nest","skeleton-mage-cabal"},
+			lesser_vaults_list = {"circle","rat-nest","skeleton-mage-cabal","worms"},
 			lite_room_chance = 100,
 			['.'] = "FLOOR",
 			['#'] = "WALL",

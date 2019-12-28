@@ -17,26 +17,35 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=true}}
 specialList("actor", {
-	"/data/general/npcs/snake.lua",
+   "/data/general/npcs/snow-giant.lua",
 })
+
+specialList("terrain", {
+        "/data/general/grids/mountain.lua",
+        "/data/general/grids/king_of_the_hill_terrain.lua",
+})
+
 rotates = {"default", "90", "180", "270", "flipx", "flipy"}
 
-defineTile(',', "GRASS")
-defineTile(';', "FLOWER")
-defineTile('#', "WALL")
-defineTile('X', "TREE")
-defineTile('x', "DOOR_VAULT")
+defineTile('#', "HARDMOUNTAIN_WALL")
+defineTile('.', "ROCKY_GROUND")
+defineTile('v', "CLIFFSIDE")
+defineTile('!', "DOOR_VAULT")
 
-defineTile('s', "FLOOR", {random_filter={type="scroll", ego_chance=25}}, {random_filter={name="rattlesnake"}})
+defineTile('$', "ROCKY_GROUND", {random_filter={add_levels=20, type="money"}})
+
+defineTile('T', "ROCKY_GROUND", {random_filter={add_levels=5, tome_mod="gvault"}}, {random_filter={add_levels=8, name = "snow giant thunderer"}} )
+defineTile('G', "ROCKY_GROUND", nil, {random_filter={add_levels=5, name = "snow giant boulder thrower"}} )
 
 return {
-[[,,,,,,,,,]],
-[[,#####,,,]],
-[[;#sss#,X,]],
-[[,#sssx,,,]],
-[[,#sss#,,,]],
-[[,#####;,,]],
-[[,,,,,,,,,]],
+ [[###########]],
+ [[#.........#]],
+ [[#.vvvvvvv.#]],
+ [[#.v.....v.#]],
+ [[#.v.vGT.v.#]],
+ [[#.v.v$G.v.#]],
+ [[#.v.vvvvv.#]],
+ [[#.v.......#]],
+ [[#!#########]],
 }
