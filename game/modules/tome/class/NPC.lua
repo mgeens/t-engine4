@@ -526,7 +526,7 @@ end
 -- it will return estimates, to throw the AI a bit off
 -- @param target the target we are tracking
 -- @return x, y coords to move/cast to
-function _M:aiSeeTargetPos(target)
+function _M:aiSeeTargetPos(target, add_spread, max_spread)
 	if not (target and target.x) then return self.x, self.y end
 	local tx, ty = target.x, target.y
 
@@ -535,5 +535,5 @@ function _M:aiSeeTargetPos(target)
 	if self.rank > 3 and target.canMove and not target:canMove(self.x, self.y, true) then
 		return util.bound(tx, 0, game.level.map.w - 1), util.bound(ty, 0, game.level.map.h - 1)
 	end
-	return ActorAI.aiSeeTargetPos(self, target)
+	return ActorAI.aiSeeTargetPos(self, target, add_spread, max_spread)
 end
