@@ -40,7 +40,7 @@ return {
 			class = "engine.generator.map.Roomer",
 			nb_rooms = 10,
 			rooms = {"random_room", {"money_vault",5}, {"lesser_vault",8}},
-			lesser_vaults_list = {"circle","amon-sul-crypt","rat-nest","skeleton-mage-cabal","snake-pit"},
+			lesser_vaults_list = {"circle","amon-sul-crypt","rat-nest","skeleton-mage-cabal"},
 			lite_room_chance = 100,
 			['.'] = "FLOOR",
 			['#'] = "WALL",
@@ -124,9 +124,9 @@ return {
 			['.'] = "FLOOR",
 			['+'] = "DOOR",
 
-			nb_rooms = {0,1,1,2},
+			nb_rooms = {1,1,2},
 			rooms = {"lesser_vault"},
-			lesser_vaults_list = {"circle","amon-sul-crypt","rat-nest","skeleton-mage-cabal","snake-pit"},
+			lesser_vaults_list = {"circle","amon-sul-crypt","skeleton-mage-cabal","collapsed-tower"},
 			lite_room_chance = 100,
 		},
 		actor = {
