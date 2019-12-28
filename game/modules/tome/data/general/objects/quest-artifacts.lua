@@ -17,6 +17,9 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
+load("/data/general/objects/rods.lua")
+load("/data/general/objects/cloth-armors.lua")
+
 local Stats = require "engine.interface.ActorStats"
 
 -- The staff of absorption, the reason the game exists!
