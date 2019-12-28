@@ -17,26 +17,37 @@
 -- Nicolas Casalini "DarkGod"
 -- darkgod@te4.org
 
-setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=true}}
-specialList("actor", {
-	"/data/general/npcs/snake.lua",
-})
+startx = 1
+starty = 2
+
+setStatusAll{no_teleport=true, vault_only_door_open=true}
 rotates = {"default", "90", "180", "270", "flipx", "flipy"}
 
-defineTile(',', "GRASS")
-defineTile(';', "FLOWER")
-defineTile('#', "WALL")
-defineTile('X', "TREE")
-defineTile('x', "DOOR_VAULT")
+specialList("actor", {
+   "/data/general/npcs/aquatic_demon.lua",
+   "/data/general/npcs/horror_aquatic.lua",
+   "/data/general/npcs/naga.lua",
+})
 
-defineTile('s', "FLOOR", {random_filter={type="scroll", ego_chance=25}}, {random_filter={name="rattlesnake"}})
+specialList("terrain", {
+        "/data/general/grids/water.lua",
+        "/data/general/grids/basic.lua",
+})
+
+defineTile('#', "HARDWALL")
+defineTile('~', "WATER_FLOOR")
+defineTile('X', "DOOR_VAULT")
+defineTile('%', "DOOR")
+defineTile('8', "WATER_FLOOR", {random_filter={add_levels=18, tome_mod="gvault"}}, {random_filter={add_levels=20}})
 
 return {
-[[,,,,,,,,,]],
-[[,#####,,,]],
-[[;#sss#,X,]],
-[[,#sssx,,,]],
-[[,#sss#,,,]],
-[[,#####;,,]],
-[[,,,,,,,,,]],
+   [[~~~~~~~~~~~~~]],
+   [[~###########~]],
+   [[~X8%8%8%8%8#~]],
+   [[~#########%#~]],
+   [[~#8%8%8%8%8#~]],
+   [[~#%#########~]],
+   [[~#8%8%8%8%8X~]],
+   [[~###########~]],
+   [[~~~~~~~~~~~~~]],
 }
