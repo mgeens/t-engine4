@@ -134,7 +134,7 @@ newTalent{
 		if oh then apply(oh) end
 	end,
 	info = function(self, t)
-		return ([[Alter the flow of energies through a staff.]])
+		return ([[Alter the flow of energies of your equiped mindstars, changing their damage type between nature and mind.]])
 	end,
 }
 
