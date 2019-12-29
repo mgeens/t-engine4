@@ -1551,7 +1551,7 @@ local standard_rnd_boss_adjust = function(b)
 				end
 			end
 		end
-	print("[entityFilterPost]:  Done nerfing randboss")
+	_G.print("[entityFilterPost]:  Done nerfing randboss")
 	end
 end  -- End of standard_rnd_boss_adjust
 
