@@ -100,8 +100,9 @@ local make_poltergeist = function(type)
         class = "Archmage"
         e.autolevel = "caster"
 		e.max_mana = e.max_mana + 250 -- protect staffs from being dumb and having 0 mana left over after sustains
+        e.ai_tactic = resolvers.tactic"ranged"
         e[#e+1] = resolvers.talents{
-            [Talents.T_CHANNEL_STAFF]={base=1, every=10, max=5},
+            [Talents.T_MANATHRUST]={base=1, every=10, max=5},
             [Talents.T_FLAME]={base=1, every=10, max=5},
         }
     elseif o.subtype == "dagger" then
@@ -144,6 +145,7 @@ local make_poltergeist = function(type)
 	elseif o.subtype == "whip" then
 		class = "Corruptor"
 		e.autolevel = "caster"
+        e.ai_tactic = resolvers.tactic"ranged"
 		e[#e+1] = resolvers.talents{
 			[Talents.T_CORRUPTED_NEGATION]={base=3, every=12, max=6},
 			[Talents.T_DRAIN]={base=5, every=10, max=7},
