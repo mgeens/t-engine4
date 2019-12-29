@@ -22,117 +22,82 @@ local Talents = require("engine.interface.ActorTalents")
 setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=true}}
 
 local turret = function(version)
-   local NPC = require "mod.class.NPC"
-   local m = NPC.new{
-         type = "construct", subtype = "crystal", image="trap/trap_beam.png",
-         display = "t",
-         body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, QUIVER=1 },
-         life_rating = 20,
-         rank = 2,
-         inc_damage = { all = -75, },
-   
-         open_door = true,
-         cut_immune = 1,
-         blind_immune = 1,
-         fear_immune = 1,
-         poison_immune = 1,
-         disease_immune = 1,
-         stone_immune = 1,
-         see_invisible = 30,
-         no_breath = 1,
-         infravision = 10,
-         never_move = 1,
-   
-         autolevel = "caster",
-         level_range = {1, nil}, exp_worth = 1,
-         stats = { mag=16, con=22 },
-         size_category = 2,
-         name = "elemental crystal", color=colors.BLUE,
-         combat = { dam=resolvers.rngavg(1,2), atk=2, apr=0, dammod={str=0.4} },
-         combat_armor = 10, combat_def = 0,
-         talent_cd_reduction={[Talents.T_ELEMENTAL_BOLT]=3, },
-   
-         resolvers.talents{
-            [Talents.T_ELEMENTAL_BOLT]={base=1, every=5, max=9},
-         },
-   
-         ai = "dumb_talented_simple", ai_state = { ai_move="move_complex", talent_in=3, },
-      
-      }
-   return m
-end
+	local NPC = require "mod.class.NPC"
+	return NPC.new{
+		type = "construct", subtype = "crystal", image="trap/trap_beam.png",
+		display = "t",
+		body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, QUIVER=1 },
+		life_rating = 20,
+		rank = 2,
+		inc_damage = { all = -75, },
 
-local id = "collapsed-tower-"..game.turn
+		open_door = true,
+		cut_immune = 1,
+		blind_immune = 1,
+		fear_immune = 1,
+		poison_immune = 1,
+		disease_immune = 1,
+		stone_immune = 1,
+		see_invisible = 30,
+		no_breath = 1,
+		infravision = 10,
+		never_move = 1,
 
-local changer = function()
-   local npcs = mod.class.NPC:loadList{"/data/general/npcs/thieve.lua"}
-   local objects = mod.class.Object:loadList("/data/general/objects/objects.lua")
-   local terrains = mod.class.Grid:loadList("/data/general/grids/basic.lua")
-   terrains.DOWN.change_level_shift_back = true
-   terrains.DOWN.change_zone_auto_stairs = true
-   terrains.DOWN.name = "stairs back to "..game.zone.name
-   terrains.DOWN.change_zone = game.zone.short_name
-   local zone = mod.class.Zone.new(id, {
-      name = "collapsed tower",
-      level_range = {game.zone.base_level, game.zone.base_level},
-      __applied_difficulty = true, -- Difficulty already applied to parent zone
-      level_scheme = "player",
-      max_level = 1,
-      width = 20, height = 20,
-      ambient_music = "Swashing the buck.ogg",
-      reload_lists = false,
-      persistent = "zone",
-      
-      no_worldport = game.zone.no_worldport,
-      min_material_level = util.getval(game.zone.min_material_level),
-      max_material_level = util.getval(game.zone.max_material_level),
-      generator = {
-         map = {
-            class = "engine.generator.map.Static",
-            map = "zones/collapsed-tower",
-         },
-         trap = { nb_trap = {0, 0} },
-         object = { nb_object = {0, 0} },
-         actor = { nb_npc = {0, 0} },
-      },
-      npc_list = npcs,
-      grid_list = terrains,
-      object_list = objects,
-      trap_list = mod.class.Trap:loadList("/data/general/traps/natural_forest.lua"),
-   })
-   return zone
+		autolevel = "caster",
+		level_range = {1, nil}, exp_worth = 1,
+		stats = { mag=16, con=22 },
+		size_category = 2,
+		name = "elemental crystal", color=colors.BLUE,
+		combat = { dam=resolvers.rngavg(1,2), atk=2, apr=0, dammod={str=0.4} },
+		combat_armor = 10, combat_def = 0,
+		talent_cd_reduction={[Talents.T_ELEMENTAL_BOLT]=3, },
+
+		resolvers.talents{
+			[Talents.T_ELEMENTAL_BOLT]={base=1, every=5, max=9},
+		},
+
+		ai = "dumb_talented_simple", ai_state = { ai_move="move_complex", talent_in=3, },
+	}
 end
 
 local stairs = function()
-   local terrains = mod.class.Grid:loadList("/data/general/grids/basic.lua")
-   local g = terrains.FLOOR:clone()
-   g.name = "collapsed tower"
-   g.always_remember = true
-   g.display='>' g.color_r=0 g.color_g=0 g.color_b=255 g.notice = true
-   g.change_level=1 g.change_zone=id g.glow=true
-   g:removeAllMOs()
-   if engine.Map.tiles.nicer_tiles then
-      g.add_displays = g.add_displays or {}
-      g.add_displays[#g.add_displays+1] = mod.class.Grid.new{image="terrain/stair_up.png", z=5}
-   end
-   g.nice_tiler = nil
-   g:altered()
-   g:initGlow()
-   g.real_change = changer
-   g.change_level_check = function(self)
-      game:changeLevel(1, self.real_change(self.change_zone), {temporary_zone_shift=true, direct_switch=true})
-      self.change_level_check = nil
-      self.real_change = nil
-      self.special_minimap = colors.VIOLET
-      return true
-   end
-   return g
+	local terrains = mod.class.Grid:loadList("/data/general/grids/basic.lua")
+	return game.state:dynamicZoneEntry(terrains.UP, "collapsed-tower", {
+		name = "collapsed tower",
+		level_range = {game.zone.base_level, game.zone.base_level},
+		__applied_difficulty = true, -- Difficulty already applied to parent zone
+		level_scheme = "player",
+		max_level = 1,
+		width = 20, height = 20,
+		ambient_music = "Swashing the buck.ogg",
+		persistent = "zone",
+		
+		no_worldport = true,
+		min_material_level = util.getval(game.zone.min_material_level),
+		max_material_level = util.getval(game.zone.max_material_level),
+		generator = {
+			map = {
+				class = "engine.generator.map.Static",
+				map = "zones/collapsed-tower",
+			},
+			trap = { nb_trap = {0, 0} },
+			object = { nb_object = {0, 0} },
+			actor = { nb_npc = {0, 0} },
+		}
+	}, {
+		npc_list = {"/data/general/npcs/thieve.lua"},
+		object_list = {"/data/general/objects/objects.lua"},
+		grid_list = {"/data/general/grids/basic.lua"},
+		trap_list = {"/data/general/traps/natural_forest.lua"},
+	},
+	function(zone, goback)
+		goback("stairs back to %s", zone.grid_list.DOWN)
+	end)
 end
 
-
 specialList("terrain", {
-   "/data/general/grids/water.lua",
-   "/data/general/grids/forest.lua",
+	"/data/general/grids/water.lua",
+	"/data/general/grids/forest.lua",
 }, true)
 border = 0
 --rotates = {"default", "90", "180", "270", "flipx", "flipy"}
@@ -148,13 +113,13 @@ defineTile('#', "WALL")
 defineTile('X', "TREE")
 
 specialList("actor", {
-   "/data/general/npcs/construct.lua",
-   "/data/general/npcs/plant.lua",
-   "/data/general/npcs/skeleton.lua",
-   "/data/general/npcs/bear.lua",   
+	"/data/general/npcs/construct.lua",
+	"/data/general/npcs/plant.lua",
+	"/data/general/npcs/skeleton.lua",
+	"/data/general/npcs/bear.lua",   
 })
 specialList("trap", {
-   "/data/general/traps/natural_forest.lua",
+	"/data/general/traps/natural_forest.lua",
 })
 
 defineTile('a', "FLOOR", {random_filter={add_levels=5, tome_mod="vault"}}, nil)

@@ -2831,6 +2831,12 @@ function rng.rarityTable(t, rarity_field)
 	end
 end
 
+function util.has_upvalues(fct)
+	local n, v = debug.getupvalue(fct, 1)
+	if not n then return false end
+	return true
+end
+
 function util.show_function_calls()
 	debug.sethook(function(event, line)
 		local t = debug.getinfo(2)

@@ -3085,6 +3085,78 @@ function _M:startEvents()
 	end
 end
 
+function _M:dynamicZoneEntry(g, id, zone_def, zone_lists, zone_alter)
+	if zone_alter and config.settings.cheat then
+		if util.has_upvalues(zone_alter) then
+			error("Zone alter method has upvalues. This will explode upon save reload! Fix it!")
+		end
+	end
+
+	id = id.."-"..game.turn.."-"..core.game.getTime()
+
+	local g = g:clone()
+	g.name = zone_def.name
+	g.always_remember = true
+	g.change_level = 1
+	g.change_zone = id
+	g.glow = true
+	g:removeAllMOs()
+	g:altered()
+	g:initGlow()
+	g.dynamic_zone = { id=id, def=zone_def, lists=zone_lists, alter=zone_alter }
+	g.real_change = function(self)
+		local def = self.dynamic_zone.def
+
+		-- Dynamic zones ALWAYS embed their lists
+		def.reload_lists = true
+
+		def.__embed_lists_def = self.dynamic_zone.lists
+		if self.dynamic_zone.alter then
+			def.__alter_back_def = {short_name=game.zone.short_name, name=game.zone.name}
+			def.__alter_back_fct = function(backdef, name, base_terrain)
+				base_terrain.change_level_shift_back = true
+				base_terrain.change_zone_auto_stairs = true
+				base_terrain.name = name:format(backdef.name)
+				base_terrain.change_zone = backdef.short_name
+			end
+			def.__alter_back_custom = self.dynamic_zone.alter
+		end
+		def.embed_lists = function(zone)
+			-- A few default lists
+			zone.npc_list = {}
+			zone.object_list = {}
+			zone.trap_list = {}
+			zone.grid_list = {}
+
+			-- Now load the ones we are given, either with default classes or custom ones
+			for list, listdef in pairs(zone.__embed_lists_def) do
+				local entries = listdef
+				local class = "engine.Entity"
+				if entries.class_name then class = entries.class_name
+				elseif list == "npc_list" then class = "mod.class.NPC"
+				elseif list == "object_list" then class = "mod.class.Object"
+				elseif list == "trap_list" then class = "mod.class.Trap"
+				elseif list == "grid_list" then class = "mod.class.Grid"
+				end
+				zone[list] = require(class):loadList(entries)
+			end
+
+			-- Alter whatever we need. Most likely the exit, so we provide an easy function for that
+			if zone.__alter_back_fct then
+				zone.__alter_back_custom(zone, function(name, base_terrain) zone.__alter_back_fct(zone.__alter_back_def, name, base_terrain) end)
+			end
+		end
+		return mod.class.Zone.new(self.dynamic_zone.id, def)
+	end
+	g.change_level_check = function(self)
+		game:changeLevel(1, self:real_change(), {temporary_zone_shift=true, direct_switch=true})
+		self.change_level_check = nil
+		self.real_change = nil
+		return true
+	end
+	return g
+end
+
 function _M:alternateZone(short_name, ...)
 	if not world:hasSeenZone(short_name) and not config.settings.cheat and not world:hasAchievement("VAMPIRE_CRUSHER") then print("Alternate layout for "..short_name.." refused: never visited") return "DEFAULT" end
 

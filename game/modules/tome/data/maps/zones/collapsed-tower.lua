@@ -24,40 +24,39 @@ setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=t
 local turret = function()
    local NPC = require "mod.class.NPC"
    local m = NPC.new{
-      type = "construct", subtype = "crystal", image="trap/trap_beam.png",
-      display = "t",
-      body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, QUIVER=1 },
-      life_rating = 20,
-      rank = 2,
-      inc_damage = { all = -75, },
+	type = "construct", subtype = "crystal", image="trap/trap_beam.png",
+	display = "t",
+	body = { INVEN = 10, MAINHAND=1, OFFHAND=1, BODY=1, QUIVER=1 },
+	life_rating = 20,
+	rank = 2,
+	inc_damage = { all = -75, },
 
-      open_door = true,
-      cut_immune = 1,
-      blind_immune = 1,
-      fear_immune = 1,
-      poison_immune = 1,
-      disease_immune = 1,
-      stone_immune = 1,
-      see_invisible = 30,
-      no_breath = 1,
-      infravision = 10,
-      never_move = 1,
+	open_door = true,
+	cut_immune = 1,
+	blind_immune = 1,
+	fear_immune = 1,
+	poison_immune = 1,
+	disease_immune = 1,
+	stone_immune = 1,
+	see_invisible = 30,
+	no_breath = 1,
+	infravision = 10,
+	never_move = 1,
 
-      autolevel = "caster",
-      level_range = {1, nil}, exp_worth = 1,
-      stats = { mag=16, con=22 },
-      size_category = 2,
-      name = "arcane crystal", color=colors.BLUE,
-      combat = { dam=resolvers.rngavg(1,2), atk=2, apr=0, dammod={str=0.4} },
-      combat_armor = 10, combat_def = 0,
-      talent_cd_reduction={[Talents.T_ELEMENTAL_BOLT]=3, },
+	autolevel = "caster",
+	level_range = {1, nil}, exp_worth = 1,
+	stats = { mag=16, con=22 },
+	size_category = 2,
+	name = "arcane crystal", color=colors.BLUE,
+	combat = { dam=resolvers.rngavg(1,2), atk=2, apr=0, dammod={str=0.4} },
+	combat_armor = 10, combat_def = 0,
+	talent_cd_reduction={[Talents.T_ELEMENTAL_BOLT]=3, },
 
-      resolvers.talents{
-         [Talents.T_ELEMENTAL_BOLT]={base=1, every=5, max=10},
-      },
+	resolvers.talents{
+		[Talents.T_ELEMENTAL_BOLT]={base=1, every=5, max=10},
+	},
 
-      ai = "dumb_talented_simple", ai_state = { ai_move="move_complex", talent_in=3, },
-   
+	ai = "dumb_talented_simple", ai_state = { ai_move="move_complex", talent_in=3, },
    }
    return m
 end
