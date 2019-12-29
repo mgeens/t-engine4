@@ -2375,7 +2375,7 @@ function _M:onTakeHit(value, src, death_note)
 	if value > 0 and self:knowTalent(self.T_MITOSIS) and self:isTalentActive(self.T_MITOSIS) then
 		local t = self:getTalentFromId(self.T_MITOSIS)
 		local chance = t.getChance(self, t)
-		local perc = math.min(1, 3 * value / self.life)
+		local perc = math.min(1, 3 * value / math.max(self.life, 1))
 		if rng.percent(chance * perc) then
 			t.spawn(self, t, value * 2)
 		end
