@@ -148,7 +148,6 @@ local make_poltergeist = function(type)
 			[Talents.T_DRAIN]={base=5, every=10, max=7},
 			[Talents.T_BLOOD_GRASP]={base=4, every=5, max=7},
 		}
-		game.log("#LIGHT_RED#ERROR GENERATING: %s", o.name)
     elseif o.type == "weapon" and o.slot_forbid == "OFFHAND" then
         class = "Berserker"
         e.autolevel = "warrior"
@@ -171,7 +170,6 @@ local make_poltergeist = function(type)
 			[Talents.T_SHADOW_WARRIORS]={base=1, every=8, max=6},
 			[Talents.T_REPROACH]={base=5, every=10, max=5},
         }
-		game.log("#LIGHT_RED#ERROR GENERATING: %s", o.name)
     end
     e[#e+1] = resolvers.auto_equip_filters(class)
 
