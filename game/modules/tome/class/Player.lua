@@ -265,7 +265,7 @@ function _M:describeFloor(x, y, force)
 				obj.__transmo_pre = true
 				if self:pickupFloor(i, true) then
 					desc = false
-					if not obj.quest and not obj.plot then obj.__transmo = true end
+					if self:transmoFilter(obj, self) then obj.__transmo = true end
 				end
 				obj.__transmo_pre = nil
 			end

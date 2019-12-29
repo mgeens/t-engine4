@@ -7716,7 +7716,7 @@ function _M:getEncumberTitleUpdator(title)
 end
 
 function _M:transmoPricemod(o) if o.type == "gem" then return 0.40 else return 0.05 end end
-function _M:transmoFilter(o) if o:getPrice() <= 0 or o.quest then return false end return true end
+function _M:transmoFilter(o) if o:getPrice() <= 0 or o.quest or o.plot or o.no_transmo then return false end return true end
 function _M:transmoInven(inven, idx, o, transmo_source)
 	local price = 0
 	o:forAllStack(function(so) price = price + math.min(so:getPrice() * self:transmoPricemod(so), 25) end)  -- handle stacked objects individually
