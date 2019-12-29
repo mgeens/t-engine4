@@ -259,7 +259,7 @@ function _M:aiSeeTargetPos(target, add_spread, max_spread)
 			if target.last_special_movement and LSeen.GCknown_turn and (target.last_special_movement > LSeen.GCknown_turn) then 
 				spread = max_spread  -- If the target has done a "special" movement, such as teleporting a long distance or out of LOS, max out our randomness so we don't cheat chasing them with teleports or whatever
 			else
-				spread = spread + math.min(max_spread, add_spread + math.floor((game.turn - (LSeen.GCknown_turn or game.turn)) / (game.energy_to_act / game.energy_per_tick))) -- Limit spread to 10 tiles
+				spread = spread + math.min(max_spread, add_spread + (self:attr("ai_spread_add") or 0) + math.floor((game.turn - (LSeen.GCknown_turn or game.turn)) / (game.energy_to_act / game.energy_per_tick))) -- Limit spread to 10 tiles
 			end
 			tx, ty = util.bound(tx + rng.range(-spread, spread), 0, game.level.map.w - 1), util.bound(ty + rng.range(-spread, spread), 0, game.level.map.h - 1)
 			
