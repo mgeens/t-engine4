@@ -353,6 +353,7 @@ newTalent{
 	points = 5,
 	equilibrium = 10,
 	cooldown = 6,
+	requires_target = true,
 	tactical = { ATTACKAREA = {PHYSICAL=2}, },
 	radius = function(self, t) return math.floor(self:combatTalentScale(t, 3, 7)) end,
 	getDamage = function(self, t) return self:combatTalentStatDamage(t, "wil", 60, 330) end,
