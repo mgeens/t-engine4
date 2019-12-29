@@ -3582,11 +3582,11 @@ function _M:levelupClass(c_data)
 			if self.extra_talent_point_every and c_data.last_level % self.extra_talent_point_every == 0 then self.unused_talents = self.unused_talents + 1 end
 			if self.extra_generic_point_every and c_data.last_level % self.extra_generic_point_every == 0 then self.unused_generics = self.unused_generics + 1 end
 
-			-- At levels 10, 20 and 36 and then every 30 levels, we gain a new talent type
-			if c_data.last_level == 10 or c_data.last_level == 20 or c_data.last_level == 36 or (c_data.last_level > 50 and (c_data.last_level - 6) % 30 == 0) then
+			-- At levels 10, 20 and 34 and then every 30 levels, we gain a new talent type
+			if c_data.last_level == 10 or c_data.last_level == 20 or c_data.last_level == 34 or (c_data.last_level > 50 and (c_data.last_level - 4) % 30 == 0) then
 				self.unused_talents_types = self.unused_talents_types + 1
 			end
-			-- if c_data.last_level == 30 or c_data.last_level == 42 then self.unused_prodigies = self.unused_prodigies + 1 end
+			-- if c_data.last_level == 25 or c_data.last_level == 42 then self.unused_prodigies = self.unused_prodigies + 1 end
 		elseif type(self.no_points_on_levelup) == "function" then
 			self:no_points_on_levelup()
 		end
@@ -3838,8 +3838,8 @@ function _M:levelup()
 		if self.extra_talent_point_every and self.level % self.extra_talent_point_every == 0 then self.unused_talents = self.unused_talents + 1 end
 		if self.extra_generic_point_every and self.level % self.extra_generic_point_every == 0 then self.unused_generics = self.unused_generics + 1 end
 
-		-- At levels 10, 20 and 36 and then every 30 levels, we gain a new talent type
-		if self.level == 10 or self.level == 20 or self.level == 34 or (self.level > 50 and (self.level - 6) % 30 == 0) then
+		-- At levels 10, 20 and 34 and then every 30 levels, we gain a new talent type
+		if self.level == 10 or self.level == 20 or self.level == 34 or (self.level > 50 and (self.level - 4) % 30 == 0) then
 			self.unused_talents_types = self.unused_talents_types + 1
 		end
 		if self.level == 25 or self.level == 42 then

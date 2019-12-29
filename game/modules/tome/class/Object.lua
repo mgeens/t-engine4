@@ -447,7 +447,7 @@ function _M:descAttribute(attr)
 			return c.block.." block"
 		end
 	elseif attr == "ARMOR" then
-		return (self.wielder and self.wielder.combat_def or 0).." def, "..(self.wielder and self.wielder.combat_armor or 0).." armour"
+		return (self.wielder and self.wielder.combat_def and math.round(self.wielder.combat_def) or 0).." def, "..(self.wielder and self.wielder.combat_armor and math.round(self.wielder.combat_armor) or 0).." armour"
 	elseif attr == "ATTACK" then
 		return (self.wielder and self.wielder.combat_atk or 0).." accuracy, "..(self.wielder and self.wielder.combat_apr or 0).." apr, "..(self.wielder and self.wielder.combat_dam or 0).." power"
 	elseif attr == "MONEY" then

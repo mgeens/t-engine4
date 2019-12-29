@@ -2281,6 +2281,7 @@ end
 --	@param data.ai = ai_type <"tactical" if rank>3 or base.ai>
 --	@param data.ai_tactic = tactical weights table for the tactical ai <nil - generated based on talents>
 --	@param data.no_loot_randart set true to not drop a randart <nil>
+--  @param data.loot_fixedart set true to drop a fixedart <nil>
 --	@param data.on_die set true to run base.rng_boss_on_die and base.rng_boss_on_die_custom on death <nil>
 --	@param data.name_scheme <randart_name_rules.default>
 --	@param data.post = function(b, data) to run last to finish generation
@@ -2374,6 +2375,7 @@ function _M:createRandomBoss(base, data)
 	-- Boss worthy drops
 	b[#b+1] = resolvers.drops{chance=100, nb=data.loot_quantity or 3, {tome_drops=data.loot_quality or "boss"} }
 	if not data.no_loot_randart then b[#b+1] = resolvers.drop_randart{} end
+	if data.loot_unique then b[#b+1] = resolvers.drops{chance=100, nb=1, {unique=true, not_properties={"lore"}} } end
 
 	-- On die
 	if data.on_die then
@@ -2658,6 +2660,7 @@ end
 --	@field data.ai = ai_type <"tactical" if rank>3 or base.ai>
 --	@field data.ai_tactic = tactical weights table for the tactical ai <nil - generated based on talents>
 --	@field data.no_loot_randart set true to not drop a randart <nil>
+--  @field data.loot_fixedart set true to drop a fixedart <nil>
 --	@field data.on_die set true to run base.rng_boss_on_die and base.rng_boss_on_die_custom on death <nil>
 --	@field data.name_scheme <randart_name_rules.default>
 --	@field data.post = function(b, data) to run last to finish generation
@@ -2746,7 +2749,8 @@ function _M:createRandomBossNew(base, data)
 	-- Boss worthy drops
 	b[#b+1] = resolvers.drops{chance=100, nb=data.loot_quantity or 3, {tome_drops=data.loot_quality or "boss"} }
 	if not data.no_loot_randart then b[#b+1] = resolvers.drop_randart{} end
-
+	if data.loot_unique then b[#b+1] = resolvers.drops{chance=100, nb=1, {unique=true, not_properties={"lore"}} } end
+	
 	-- On die
 	if data.on_die then
 		b.rng_boss_on_die = b.on_die
