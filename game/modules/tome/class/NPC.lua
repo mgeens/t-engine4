@@ -462,7 +462,7 @@ function _M:addedToLevel(level, x, y)
 
 			for tid, lev in pairs(talents) do
 				local t = self:getTalentFromId(tid)
-				if t.points ~= 1 then
+				if t.points ~= 1 and not t.no_difficulty_boost then
 					self:learnTalent(tid, true, math.floor(lev*(talent_mult - 1)))
 				end
 			end
