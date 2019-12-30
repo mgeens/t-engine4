@@ -102,8 +102,8 @@ newTalent{
 	mode = "passive",
 	points = 5,
 	require = techs_req3,
-	critpower = function(self, t) return self:combatTalentScale(t, 6, 25, 0.75) end,
-	getAPR = function(self, t) return self:combatTalentScale(t, 5, 20, 0.75) end,
+	critpower = function(self, t) return self:combatTalentScale(t, 6, 25) end,
+	getAPR = function(self, t) return self:combatTalentScale(t, 5, 20) end,
 	passives = function(self, t, p)
 		self:talentTemporaryValue(p, "combat_critical_power", t.critpower(self, t))
 		self:talentTemporaryValue(p, "combat_apr", t.getAPR(self, t))
