@@ -206,7 +206,7 @@ local make_poltergeist = function(type)
         e.resist = {all=20}
         e.auto_classes={
             {class=class, start_level=10, level_rate=80},
-            {class="Cursed", start_level=20, level_rate=40}
+            {class=(rng.percent(65) and "Cursed" or "Doomed"), start_level=20, level_rate=40}
         }
     elseif type == "normal" then
         e.name = "Animated " .. o.name
