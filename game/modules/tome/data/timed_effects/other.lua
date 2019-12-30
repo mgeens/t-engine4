@@ -3824,7 +3824,8 @@ newEffect{
 	desc = "Feeding",
 	long_desc = function(self, eff) return ("%s is feeding from %s."):format(self.name:capitalize(), eff.target.name) end,
 	type = "other",
-	subtype = { psychic_drain=true },
+	subtype = { },
+	no_stop_enter_worlmap = true, cancel_on_level_change = true,
 	status = "beneficial",
 	parameters = { },
 	activate = function(self, eff, ed)
@@ -3924,6 +3925,7 @@ newEffect{
 	subtype = { psychic_drain=true },
 	status = "detrimental",
 	remove_on_clone = true,
+	no_stop_enter_worlmap = true, cancel_on_level_change = true,
 	no_remove = true,
 	parameters = { },
 	activate = function(self, eff)
