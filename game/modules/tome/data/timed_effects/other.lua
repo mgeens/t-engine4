@@ -3974,3 +3974,18 @@ newEffect{
 		end
 	end,
 }
+
+newEffect{
+	name = "DOZING", image = "talents/sleep.png",
+	desc = "Dozing",
+	long_desc = function(self, eff) return "The target is completely asleep, unable to act." end,
+	type = "other",
+	subtype = { sleep=true },
+	status = "detrimental",
+	parameters = { },
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "dont_act", 1)
+	end,
+	deactivate = function(self, eff)
+	end,
+}
