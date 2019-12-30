@@ -53,7 +53,7 @@ function _M:init(errs)
 	self.errmd5 = errmd5
 
 	fs.mkdir("/error-reports")
-	local errdir = "/error-reports/"..game.__mod_info.short_name.."-"..game.__mod_info.version_name
+	local errdir = "/error-reports/"..game.__mod_info.version_name
 	self.errdir = errdir
 	fs.mkdir(errdir)
 	local infos = {}
@@ -68,7 +68,26 @@ function _M:init(errs)
 		if infos.reported then reason = "You #LIGHT_GREEN#already reported#WHITE# that error, you do not have to do it again (unless you feel the situation is different)."
 		else reason = "You have already got this error but #LIGHT_RED#never reported#WHITE# it, please do."
 		end
-	else reason = "You have #LIGHT_RED#never seen#WHITE# that error, please report it."
+	else
+		reason = "You have #LIGHT_RED#never seen#WHITE# that error, please report it."
+
+		game:onTickEnd(function() print(pcall(function()
+			fs.mkdir("/error-logs")
+			local errlogdir = "/error-logs/"..game.__mod_info.version_name
+			fs.mkdir(errlogdir)
+			local f = fs.open(errlogdir.."/"..os.date("%Y-%m-%d_%H-%M-%S")..".txt", "w")
+			truncate_printlog(5000)
+			local log = get_printlog()
+			for _, line in ipairs(log) do
+				local max = 1
+				for k, _ in pairs(line) do max = math.max(max, k) end
+				local list = {}
+				for i = 1, max do list[i] = tostring(line[i]) end
+				f:write(table.concat(list, "\t").."\n")
+			end
+			f:write("\n\nERROR:\n"..errs.."\n")
+			f:close()
+		end)) end)
 	end
 
 	self:saveError(true, infos.reported)
