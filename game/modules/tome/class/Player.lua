@@ -574,6 +574,25 @@ function _M:playerFOV()
 		end, true, true, true)
 	end
 
+	-- See everything and ignore all forms of blocking, dev mode feature
+	if self:attr("omnivision") then
+		self:computeFOV(self:attr("omnivision"), "we_need_useless_string_not_nil", function(x, y)
+			local ok = false
+			if game.level.map(x, y, game.level.map.ACTOR) then ok = true end
+			if game.level.map(x, y, game.level.map.OBJECT) then ok = true end
+			if game.level.map(x, y, game.level.map.TRAP) then
+				game.level.map(x, y, game.level.map.TRAP):setKnown(self, true, x, y)
+				game.level.map.remembers(x, y, true)
+				game.level.map:updateMap(x, y)
+				ok = true
+			end
+
+			if ok then
+				game.level.map.seens(x, y, 0.6)
+			end
+		end, true, true, true)
+	end
+
 	-- Handle arcane eye
 	if self:hasEffect(self.EFF_ARCANE_EYE) then
 		local eff = self:hasEffect(self.EFF_ARCANE_EYE)

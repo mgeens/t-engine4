@@ -3976,6 +3976,23 @@ newEffect{
 }
 
 newEffect{
+	name = "OMNIVISION", image = "talents/track.png",
+	desc = "Sensing Everything",
+	long_desc = function(self, eff) return "Improves senses, allowing the detection of everything." end,
+	type = "other",
+	subtype = { sense=true },
+	status = "beneficial",
+	parameters = { range=10,},
+	activate = function(self, eff)
+		self:effectTemporaryValue(eff, "omnivision", eff.range)
+		game.level.map.changed = true
+	end,
+	deactivate = function(self, eff)
+
+	end,
+}
+
+newEffect{
 	name = "DOZING", image = "talents/sleep.png",
 	desc = "Dozing",
 	long_desc = function(self, eff) return "The target is completely asleep, unable to act." end,
