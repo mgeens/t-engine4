@@ -185,7 +185,7 @@ newEntity{
 			m:resolve()
 			who:logCombat(target or {name = "a spot nearby"}, "#Source# points %s %s at #target#, releasing a writhing tentacle!", who:his_her(), self:getName({do_color = true, no_add_name = true}))
 			game.zone:addEntity(game.level, m, "actor", x, y)
-			m.remove_from_party_on_death = true,
+			m.remove_from_party_on_death = true
 			game.party:addMember(m, {
 				control=false,
 				type="summon",
