@@ -22,7 +22,7 @@ starty = 7
 
 setStatusAll{no_teleport=true}
 rotates = {"default", "90", "180", "270", "flipx", "flipy"}
-
+unique = "sleeping_dragon_vault"
 defineTile('o', "WALL")
 defineTile('.', "FLOOR")
 defineTile('#', "HARDWALL")
