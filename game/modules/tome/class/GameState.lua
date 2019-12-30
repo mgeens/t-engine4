@@ -828,7 +828,11 @@ function _M:spawnWorldAmbush(enc, dx, dy, kind)
 		},
 
 		reload_lists = false,
-		npc_list = mod.class.NPC:loadList("/data/general/npcs/all.lua", nil, nil, function(e) e.make_escort=nil end),
+		npc_list = mod.class.NPC:loadList("/data/general/npcs/all.lua", nil, nil, 
+			function(e) 
+				e.make_escort=nil
+				e.instakill_immune = 1
+			end),
 		grid_list = terrains,
 		object_list = mod.class.Object:loadList("/data/general/objects/objects.lua"),
 		trap_list = {},
