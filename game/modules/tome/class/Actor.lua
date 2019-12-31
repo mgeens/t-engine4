@@ -8002,6 +8002,12 @@ function _M:checkStillInCombat()
 
 	-- Ok no more in combat!
 	self.in_combat = nil
+	for tid, _ in pairs(self.sustain_talents) do
+		local t = self:getTalentFromId(tid)
+		if t.deactivate_on and t.deactivate_on.no_combat then
+			self:forceUseTalent(tid, {ignore_energy=true})
+		end
+	end
 	self:updateInCombatStatus()
 end
 
