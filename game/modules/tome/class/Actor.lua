@@ -8005,7 +8005,7 @@ function _M:checkStillInCombat()
 	for tid, _ in pairs(self.sustain_talents) do
 		local t = self:getTalentFromId(tid)
 		if t.deactivate_on and t.deactivate_on.no_combat then
-			self:forceUseTalent(tid, {ignore_energy=true})
+			self:forceUseTalent(tid, {ignore_energy=true, ignore_cd=true})
 		end
 	end
 	self:updateInCombatStatus()
