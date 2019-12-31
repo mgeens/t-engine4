@@ -540,7 +540,7 @@ newTalent{
 		local dammod = sentry:getDammod(o.combat or {})
 		if qo then
 			dammod = {}
-			for stat, mod in pairs(sentry:getDammod(qo.combat.dammod or {})) do
+			for stat, mod in pairs(sentry:getDammod(qo.combat or {})) do
 				dammod[stat] = (dammod[stat] or 0) + mod
 			end
 		end
