@@ -1153,12 +1153,8 @@ function _M:restStep()
 		self:fireTalentCheck("callbackOnWait")
 
 		-- Disable sustains that deactivate on rest
-		for tid, _ in pairs(self.sustain_talents) do
-			local t = self:getTalentFromId(tid)
-			if t.deactivate_on and t.deactivate_on.rest then
-				self:forceUseTalent(tid, {ignore_energy=true, ignore_cd=true})
-			end
-		end
+		self:checkSustainDeactivate("rest")
+
 		return true
 	end
 end
@@ -1237,12 +1233,7 @@ function _M:runCheck(ignore_memory)
 	if noticed then return false, noticed end
 	local can, noticed = engine.interface.PlayerRun.runCheck(self)
 	if can then
-		for tid, _ in pairs(self.sustain_talents) do
-			local t = self:getTalentFromId(tid)
-			if t.deactivate_on and t.deactivate_on.run then
-				self:forceUseTalent(tid, {ignore_energy=true, ignore_cd=true})
-			end
-		end
+		self:checkSustainDeactivate("run")
 	end
 	return can, noticed
 end

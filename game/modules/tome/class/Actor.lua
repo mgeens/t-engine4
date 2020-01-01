@@ -8002,12 +8002,7 @@ function _M:checkStillInCombat()
 
 	-- Ok no more in combat!
 	self.in_combat = nil
-	for tid, _ in pairs(self.sustain_talents) do
-		local t = self:getTalentFromId(tid)
-		if t.deactivate_on and t.deactivate_on.no_combat then
-			self:forceUseTalent(tid, {ignore_energy=true, ignore_cd=true})
-		end
-	end
+	self:checkSustainDeactivate("no_combat")
 	self:updateInCombatStatus()
 end
 
@@ -8059,6 +8054,21 @@ function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
 				game.level.map:particleEmitter(px, py, 1, particles.type, particles.args)
 			end
 			DamageType:projectingFor(self, nil)
+		end
+	end
+end
+
+function _M:checkSustainDeactivate(check)
+	for tid, _ in pairs(self.sustain_talents) do
+		local t = self:getTalentFromId(tid)
+		if t.deactivate_on and t.deactivate_on[check] then
+			local ok = false
+			if type(t.deactivate_on[check]) == "function" then
+				ok = t.deactivate_on[check](self, t)
+			else
+				ok = true
+			end
+			if ok then self:forceUseTalent(tid, {ignore_energy=true, ignore_cd=true}) end
 		end
 	end
 end
