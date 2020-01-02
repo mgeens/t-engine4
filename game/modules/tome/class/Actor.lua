@@ -8059,7 +8059,7 @@ function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
 end
 
 function _M:checkSustainDeactivate(check)
-	for tid, _ in pairs(self.sustain_talents) do
+	for tid, _ in pairsclone(self.sustain_talents) do
 		local t = self:getTalentFromId(tid)
 		if t.deactivate_on and t.deactivate_on[check] then
 			local ok = false
