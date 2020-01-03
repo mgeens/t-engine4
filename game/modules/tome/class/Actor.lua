@@ -143,6 +143,7 @@ _M.temporary_values_conf.ai_move = "last"
 
 -- Misc
 _M.temporary_values_conf.death_dialog = "last"
+_M.temporary_values_conf.visual_force_day_time = "last"
 
 _M.projectile_class = "mod.class.Projectile"
 

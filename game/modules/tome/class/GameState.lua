@@ -981,6 +981,12 @@ function _M:dayNightCycle()
 
 	local hour, minute = game.calendar:getTimeOfDay(game.turn)
 	hour = hour + (minute / 60)
+	
+	local player = game:getPlayer(true)
+	if player and player.visual_force_day_time then
+		hour = player.visual_force_day_time
+	end
+
 	local tint = {r = 0.1, g = 0.1, b = 0.1}
 	local startTint = {r = 0.1, g = 0.1, b = 0.1}
 	local endTint = {r = 0.1, g = 0.1, b = 0.1}
