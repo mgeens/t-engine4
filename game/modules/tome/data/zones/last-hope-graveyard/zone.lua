@@ -101,6 +101,7 @@ return {
 			fct = function(self, x, y, who)
 				local x, y = util.findFreeGrid(who.x, who.y, 5, true, {[engine.Map.ACTOR]=true})
 				if self.sumomn_npc and x and y then
+					self.sumomn_npc.instakill_immune = 1
 					game.zone:addEntity(game.level, self.sumomn_npc, "actor", x, y)
 					self.sumomn_npc = nil
 					game.log("You were not the first here: the corpse was turned into an undead.")

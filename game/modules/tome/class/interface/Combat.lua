@@ -1246,6 +1246,7 @@ end
 
 --- Gets the defense ranged
 function _M:combatDefense(fake, add)
+	if self.combat_precomputed_defense then return self.combat_precomputed_defense end
 	local base_defense = self:combatDefenseBase(true)
 	if not fake then base_defense = self:combatDefenseBase() end
 	local d = math.max(0, base_defense + (add or 0))
@@ -1255,6 +1256,7 @@ end
 
 --- Gets the defense ranged
 function _M:combatDefenseRanged(fake, add)
+	if self.combat_precomputed_defense then return self.combat_precomputed_defense end
 	local base_defense = self:combatDefenseBase(true)
 	if not fake then base_defense = self:combatDefenseBase() end
 	local d = math.max(0, base_defense + (self.combat_def_ranged or 0) + (add or 0))
@@ -1341,6 +1343,7 @@ function _M:combatAttackBase(weapon, ammo)
 	return atk
 end
 function _M:combatAttack(weapon, ammo)
+	if self.combat_precomputed_accuracy then return self.combat_precomputed_accuracy end
 	local stats
 	if self:attr("use_psi_combat") then stats = (self:getCun(100, true) - 10) * (0.6 + self:callTalent(self.T_RESONANT_FOCUS, "bonus")/100)
 	elseif weapon and weapon.wil_attack then stats = self:getWil(100, true) - 10
@@ -1357,6 +1360,7 @@ function _M:combatAttack(weapon, ammo)
 end
 
 function _M:combatAttackRanged(weapon, ammo)
+	if self.combat_precomputed_accuracy then return self.combat_precomputed_accuracy end
 	local stats
 	if self:attr("use_psi_combat") then stats = (self:getCun(100, true) - 10) * (0.6 + self:callTalent(self.T_RESONANT_FOCUS, "bonus")/100)
 	elseif weapon and weapon.wil_attack then stats = self:getWil(100, true) - 10
@@ -1689,6 +1693,7 @@ function _M:combatDamagePower(weapon_combat, add)
 end
 
 function _M:combatPhysicalpower(mod, weapon, add)
+	if self.combat_precomputed_physpower then return self.combat_precomputed_physpower end
 	mod = mod or 1
 	add = add or 0
 
@@ -1744,6 +1749,7 @@ end
 
 --- Gets spellpower
 function _M:combatSpellpower(mod, add)
+	if self.combat_precomputed_spellpower then return self.combat_precomputed_spellpower end
 	mod = mod or 1
 	add = add or 0
 
@@ -2059,6 +2065,8 @@ end
 
 --- Gets mindpower
 function _M:combatMindpower(mod, add)
+	if self.combat_precomputed_mindpower then return self.combat_precomputed_mindpower end
+
 	mod = mod or 1
 	add = add or 0
 
