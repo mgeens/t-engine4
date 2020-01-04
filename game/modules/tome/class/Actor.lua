@@ -2081,9 +2081,8 @@ function _M:tooltip(x, y, seen_by)
 	ts:add("#0080FF#S. save#FFFFFF#:  ", self:colorStats("combatSpellResist"), true)
 	ts:add("#FFD700#M. power#FFFFFF#: ", self:colorStats("combatMindpower"), "  ")
 	ts:add("#0080FF#M. save#FFFFFF#:  ", self:colorStats("combatMentalResist"), true)
-	if self:knowTalent(self.T_STEAM_POOL) then
-		ts:add("#FFD700#St. power#FFFFFF#: ", self:colorStats("combatSteampower"), true)
-	end
+	self:triggerHook{"Actor:tooltip", ts=ts, x=x, y=y, seen_by=seen_by}
+
 	ts:add({"color", "WHITE"})
 
 	if (150 + (self.combat_critical_power or 0) ) > 150 then
