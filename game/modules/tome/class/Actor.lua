@@ -1764,11 +1764,11 @@ end
 
 function _M:getRankTalkativeAdjust()
 	if self.rank == 1 then return 1
-	elseif self.rank == 2 then return 4
-	elseif self.rank == 3 then return 9
-	elseif self.rank == 3.2 then return 12
-	elseif self.rank == 3.5 then return 15
-	elseif self.rank == 4 then return 25
+	elseif self.rank == 2 then return 15
+	elseif self.rank == 3 then return 15
+	elseif self.rank == 3.2 then return 15
+	elseif self.rank == 3.5 then return 30
+	elseif self.rank == 4 then return 30
 	elseif self.rank == 5 then return 50
 	elseif self.rank >= 10 then return 100
 	else return 0
@@ -8059,7 +8059,7 @@ function _M:projectDoAct(typ, tg, damtype, dam, particles, px, py, tmp)
 end
 
 function _M:checkSustainDeactivate(check)
-	for tid, _ in pairs(self.sustain_talents) do
+	for tid, _ in pairsclone(self.sustain_talents) do
 		local t = self:getTalentFromId(tid)
 		if t.deactivate_on and t.deactivate_on[check] then
 			local ok = false
