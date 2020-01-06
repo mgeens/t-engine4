@@ -170,6 +170,8 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 		break_stealth = true
 	end
 
+	local totaldam = 0
+
 	if not speed and not self:attr("disarmed") and not self:isUnarmed() and not force_unarmed then
 		local double_weapon
 		-- All weapons in main hands
@@ -179,7 +181,8 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 				if combat and not o.archery then
 					if o.double_weapon and not double_weapon then double_weapon = o end
 					print("[ATTACK] attacking with (mainhand)", o.name)
-					local s, h = self:attackTargetWith(target, combat, damtype, mult)
+					local s, h, _curdam = self:attackTargetWith(target, combat, damtype, mult)
+					if _curdam then totaldam = totaldam + _curdam end
 					speed = math.max(speed or 0, s)
 					hit = hit or h
 					if hit and not sound then sound = combat.sound
@@ -205,7 +208,8 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 				else
 					offhand = true
 					print("[ATTACK] attacking with (offhand)", o.name)
-					local s, h = self:attackTargetWith(target, combat, damtype, offmult)
+					local s, h, _curdam = self:attackTargetWith(target, combat, damtype, offmult)
+					if _curdam then totaldam = totaldam + _curdam end
 					speed = math.max(speed or 0, s)
 					hit = hit or h
 					if hit and not sound then sound = combat.sound
@@ -220,7 +224,8 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 	if not speed and self.combat then
 		print("[ATTACK] attacking with innate combat")
 		local combat = self:getObjectCombat(nil, "barehand")
-		local s, h = self:attackTargetWith(target, combat, damtype, mult)
+		local s, h, _curdam = self:attackTargetWith(target, combat, damtype, mult)
+		if _curdam then totaldam = totaldam + _curdam end
 		speed = math.max(speed or 0, s)
 		hit = hit or h
 		if hit and not sound then sound = combat.sound
@@ -249,7 +254,7 @@ function _M:attackTarget(target, damtype, mult, noenergy, force_unarmed)
 	-- Cancel stealth!
 	if break_stealth then self:breakStealth() end
 	self:breakLightningSpeed()
-	return hit
+	return hit, totaldam
 end
 
 --- Determines the combat field to use for this item
