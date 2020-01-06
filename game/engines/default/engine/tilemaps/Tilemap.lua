@@ -428,7 +428,7 @@ function _M:countNeighbours(where, kind, replace)
 	if type(kind) == "table" then kind = table.reverse(kind)
 	else kind = {[kind]=true} end
 	local pos = {}
-	for i = -1, 1 do for j = -1, 1 do if i ~= 0 and j ~= 0 then
+	for i = -1, 1 do for j = -1, 1 do if i ~= 0 or j ~= 0 then
 		local p = where + self:point(i, j)
 		local c = self:get(p)
 		if c and kind[c] then
