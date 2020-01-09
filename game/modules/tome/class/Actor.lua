@@ -1931,11 +1931,11 @@ function _M:getCombatStats(type, inven_id, item)
 	end
 	if not o or (o.archery and not archery) or self:attr("disarmed") then -- unarmed
 		mean = self.combat
-		dmg = self:combatDamage(mean) * (mean.dam_mult or 1)
+		dmg = self:combatDamage(mean) * (mean and mean.dam_mult or 1)
 		atk = self:combatAttack(mean)
 		apr = self:combatAPR(mean)
 		crit = self:combatCrit(mean)
-		crit_power = mean.crit_power
+		crit_power = mean and mean.crit_power or 0
 		aspeed = 1/self:combatSpeed(mean)
 		archery = false
 	else -- weapon combat
@@ -1943,17 +1943,17 @@ function _M:getCombatStats(type, inven_id, item)
 		if archery then -- ranged combat
 			dam = ammo.combat
 			atk = self:combatAttackRanged(mean, dam)
-			dmg = self:combatDamage(mean, nil, dam) * (mean.dam_mult or 1)
+			dmg = self:combatDamage(mean, nil, dam) * (mean and mean.dam_mult or 1)
 			apr = self:combatAPR(mean) + (dam.apr or 0)
-			crit_power = (mean.crit_power or 0) + (dam.crit_power or 0)
-			range = math.max(mean.range or 6, self:attr("archery_range_override") or 1)
-			mspeed = 10 + (self.combat.travel_speed or 0) + (mean.travel_speed or 0) + (dam.travel_speed or 0)
+			crit_power = (mean and mean.crit_power or 0) + (dam.crit_power or 0)
+			range = math.max(mean and mean.range or 6, self:attr("archery_range_override") or 1)
+			mspeed = 10 + (self.combat.travel_speed or 0) + (mean and mean.travel_speed or 0) + (dam.travel_speed or 0)
 		else -- melee combat
 			dam = o.combat
 			atk = self:combatAttack(mean)
-			dmg = self:combatDamage(mean) * (type == "offhand" and mean.talented ~= "shield" and self:getOffHandMult(dam) or 1) * (mean.dam_mult or 1)
+			dmg = self:combatDamage(mean) * (type == "offhand" and mean and mean.talented ~= "shield" and self:getOffHandMult(dam) or 1) * (mean.dam_mult or 1)
 			apr = self:combatAPR(mean)
-			crit_power = mean.crit_power
+			crit_power = mean and mean.crit_power or 0
 		end
 		crit = self:combatCrit(dam)
 		aspeed = 1/self:combatSpeed(mean)
