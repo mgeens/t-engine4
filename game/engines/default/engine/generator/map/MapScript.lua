@@ -272,7 +272,7 @@ end
 
 function _M:checkConnectivity(dst, src, type, subtype)
 	local data = {}
-	if type(src) == "string" then data.check_connectivity = src
+	if _G.type(src) == "string" then data.check_connectivity = src
 	else data.check_connectivity = {x=src.x-1, y=src.y-1} end
 	self:addSpot(dst, type or "static", subtype or "static", data)
 end

@@ -1044,7 +1044,7 @@ function _M:merge(x, y, tm, char_order, empty_char)
 	x = math.floor(x)
 	y = math.floor(y)
 	
-	char_order = table.reverse(char_order or {})
+	if type(char_order) ~= "function" then char_order = table.reverse(char_order or {}) end
 	
 	empty_char = empty_char or {' '}
 	if type(empty_char) == "string" then empty_char = {empty_char} end
@@ -1059,11 +1059,17 @@ function _M:merge(x, y, tm, char_order, empty_char)
 				local c = tm.data[j][i]
 				if not empty_char[c] then
 					local sc = self.data[sj][si]
-					local sc_o = char_order[sc] or 0
-					local c_o = char_order[c] or 0
+					if type(char_order) == "table" then
+						local sc_o = char_order[sc] or 0
+						local c_o = char_order[c] or 0
 
-					if c_o >= sc_o then
-						self.data[sj][si] = tm.data[j][i]
+						if c_o >= sc_o then
+							self.data[sj][si] = tm.data[j][i]
+						end
+					else
+						if char_order(si, sj, sc, c) then
+							self.data[sj][si] = tm.data[j][i]
+						end
 					end
 				end
 			end
