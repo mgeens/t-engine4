@@ -23,3 +23,7 @@ steam_appid.txt
 oprofile_data/
 game/modules/tome/data/gfx/ts-gfx*
 game/engines/default/modules/boot/data/gfx/ts-gfx*
+debug-recompile.sh
+profiling-recompile.sh
+recompile.sh
+
