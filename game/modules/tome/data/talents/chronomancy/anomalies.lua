@@ -1850,8 +1850,7 @@ newTalent{
 					game.level:addEntity(g)
 				end
 
-				src:project({type="ball", radius=radius}, x, y, engine.DamageType.FIRE, dam/2)
-				src:project({type="ball", radius=radius}, x, y, engine.DamageType.PHYSICAL, dam/2)
+				src:project({type="ball", radius=radius}, x, y, engine.DamageType.METEOR, dam)
 				src:project({type="ball", radius=radius}, x, y, function(px, py)
 					local target = game.level.map(px, py, engine.Map.ACTOR)
 					if target then

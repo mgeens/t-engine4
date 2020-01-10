@@ -536,7 +536,7 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		print("[PROJECTOR] final dam after hooks and callbacks", dam)
 
 		local dead
-		dead, dam = target:takeHit(dam, src, {damtype=type, source_talent=source_talent, initial_dam=initial_dam})
+		dead, dam = target:takeHit(dam, src, {damtype=type, damstate=state, source_talent=source_talent, initial_dam=initial_dam})
 
 		-- Log damage for later
 		if not DamageType:get(type).hideMessage then
@@ -4266,5 +4266,18 @@ newDamageType{
 		useImplicitCrit(src, state)
 		DamageType:get(DamageType.DARKNESS).projector(src, x, y, DamageType.DARKNESS, dam / 2, state)
 		DamageType:get(DamageType.LIGHT).projector(src, x, y, DamageType.LIGHT, dam / 2, state)
+	end,
+}
+
+-- Fire + Physical
+newDamageType{
+	name = "meteor", type = "METEOR", text_color = "#CRIMSON#",
+	projector = function(src, x, y, type, dam, state)
+		state = initState(state)
+		useImplicitCrit(src, state)
+		state.is_meteor = true
+		local realdam1 = DamageType:get(DamageType.PHYSICAL).projector(src, x, y, DamageType.PHYSICAL, dam / 2, state)
+		local realdam2 = DamageType:get(DamageType.FIRE).projector(src, x, y, DamageType.FIRE, dam / 2, state)
+		return (realdam1 or 0) + (realdam2 or 0)
 	end,
 }

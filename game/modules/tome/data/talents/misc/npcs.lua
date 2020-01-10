@@ -2050,8 +2050,7 @@ newTalent{
 					game.level:addEntity(g)
 				end
 
-				src:project({type="ball", radius=2, selffire=false}, x, y, engine.DamageType.FIRE, dam/2)
-				src:project({type="ball", radius=2, selffire=false}, x, y, engine.DamageType.PHYSICAL, dam/2)
+				src:project({type="ball", radius=2, selffire=false}, x, y, engine.DamageType.METEOR, dam)
 				if core.shader.allow("distort") then game.level.map:particleEmitter(x, y, 2, "shockwave", {radius=2}) end
 				game:getPlayer(true):attr("meteoric_crash", 1)
 			end
