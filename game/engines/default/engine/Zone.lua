@@ -1045,6 +1045,9 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	self._level_generation_count = self._level_generation_count + 1
 	forceprint("[Zone:newLevel]", self.short_name, "beginning level generation, count:", self._level_generation_count)
 	if self._level_generation_count > self._max_level_generation_count then
+		-- Cancel capture, shouldnt be needed but paranoia is cool
+		game:onTickEndCapture(nil)
+
 		forceprint("[Zone:newLevel] ABORTING level generation after too many failures.")
 		return game.level -- returns the (last generated, failed) level
 	end
@@ -1070,14 +1073,18 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	-- Setup the level in the game
 	game:setLevel(level)
 
+	-- Catch all calls to onTickEnd, we will merge them at the end ONLY if successful
+	local ontickend_catcher = {}
+	game:onTickEndCapture(ontickend_catcher)
+
 	-- Generate the map
 	local generator = self:getGenerator("map", level, level_data.generator.map)
 	
 	local ux, uy, dx, dy, spots = generator:generate(lev, old_lev)
 	if level.force_recreate then
-
 		forceprint("[Zone:newLevel] map generator "..generator.__CLASSNAME.." forced recreation: ",level.force_recreate)
 		level:removed()
+		game:onTickEndCapture(nil)
 		return self:newLevel(level_data, lev, old_lev, game)
 	end
 
@@ -1095,6 +1102,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 		if level.force_recreate then
 			forceprint("[Zone:newLevel] post_process_map "..generator.__CLASSNAME.." forced recreation: ",level.force_recreate)
 			level:removed()
+			game:onTickEndCapture(nil)
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
 	end
@@ -1147,6 +1155,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 		if level.force_recreate then
 			forceprint("[Zone:newLevel] post_process "..generator.__CLASSNAME.." forced recreation: ",level.force_recreate)
 			level:removed()
+			game:onTickEndCapture(nil)
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
 	end
@@ -1158,6 +1167,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 		if ux and uy and dx and dy and (ux ~= dx or uy ~= dy) and not a:calc(ux, uy, dx, dy) then
 			forceprint("[Zone:newLevel] Level unconnected, no way from entrance", ux, uy, "to exit", dx, dy)
 			level:removed()
+			game:onTickEndCapture(nil)
 			return self:newLevel(level_data, lev, old_lev, game)
 		end
 	end
@@ -1175,6 +1185,7 @@ function _M:newLevel(level_data, lev, old_lev, game)
 			if spot.x and spot.y and cx and cy and (spot.x ~= cx or spot.y ~= cy) and not a:calc(spot.x, spot.y, cx, cy) then
 				forceprint("[Zone:newLevel] Level unconnected, no way from spot", spot.type, spot.subtyp, "at", spot.x, spot.y, "to", cx, cy, spot.check_connectivity)
 				level:removed()
+				game:onTickEndCapture(nil)
 				return self:newLevel(level_data, lev, old_lev, game)
 			end
 		end
@@ -1189,6 +1200,10 @@ function _M:newLevel(level_data, lev, old_lev, game)
 	if config.settings.cheat then
 		map:applyAll(function(x, y, where, e) e:checkForUpvalues() end)
 	end
+
+	-- Stop the capture and merge what we've got
+	game:onTickEndCapture(nil)
+	game:onTickEndMerge(ontickend_catcher)
 
 	return level
 end

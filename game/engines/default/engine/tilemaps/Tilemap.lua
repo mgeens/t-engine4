@@ -249,6 +249,9 @@ end
 
 --- Rotate the map
 function _M:rotate(angle)
+	if angle == "random" then angle = rng.table{0, 90, 180, 270} end
+	if angle == 0 then return self end
+
 	local function rotate_coords(i, j)
 		local ii, jj = i, j
 		if angle == 90 then ii, jj = j, self.data_w - i + 1
