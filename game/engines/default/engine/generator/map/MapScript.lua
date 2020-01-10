@@ -67,7 +67,6 @@ function _M:regenerate()
 end
 
 function _M:redo()
-	util.show_backtrace()
 	self.force_redo = true
 end
 
