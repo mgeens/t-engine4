@@ -461,7 +461,7 @@ newEntity{ theme={physical=true, defense=true}, name="generic die at", points = 
 }
 
 newEntity{ theme={defense=true, misc=true}, name="generic ignore crit", points = 1, rarity = 15, level_range = {1, 50},
-	wielder = { ignore_direct_crits = resolvers.randartmax(5, 15), },
+	wielder = { ignore_direct_crits = resolvers.randartmax(4, 20), },
 }
 
 newEntity{ theme={defense=true, spell=true, temporal=true}, name="generic void", points = 1, rarity = 20, level_range = {1, 50},
