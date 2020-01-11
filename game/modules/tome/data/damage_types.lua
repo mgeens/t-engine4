@@ -124,11 +124,12 @@ setDefaultProjector(function(src, x, y, type, dam, state)
 		print("[PROJECTOR] starting dam", type, dam)
 
 		local ignore_direct_crits = target:attr 'ignore_direct_crits'
-		if crit_power > 1 and ignore_direct_crits and rng.percent(ignore_direct_crits) then -- reverse crit damage
+		if crit_power > 1 and ignore_direct_crits then -- Reduce the post crit damage, we have to do this here since most crits are calculated before knowing their target
 			dam = dam / crit_power
-			crit_power = 1
+			local reduce = (crit_power - 1) * (ignore_direct_crits / 100)
+			crit_power = math.max(1, crit_power - reduce)
+			dam = dam * crit_power
 			print("[PROJECTOR] crit power reduce dam", dam)
-			game.logSeen(target, "%s shrugs off the critical damage!", target.name:capitalize())
 		end
 		if crit_power > 1 then
 			-- Add crit bonus power for being unseen (direct damage only, diminished with range)
