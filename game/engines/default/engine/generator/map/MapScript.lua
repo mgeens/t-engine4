@@ -42,7 +42,15 @@ end
 function _M:resolve(c, list, force)
 	if force then return Generator.resolve(self, c, list, force) end
 	if self.self_tiles[c] then
-		return Generator.resolve(self, self.self_tiles[c].grid or '.', list, true)
+		if type(self.self_tiles[c].grid) == "table" and self.self_tiles[c].grid.__ATOMIC then
+			local res = self.self_tiles[c].grid
+			if res.force_clone then res = res:clone() end
+			res:resolve()
+			res:resolve(nil, true)
+			return res
+		else
+			return Generator.resolve(self, self.self_tiles[c].grid or '.', list, true)
+		end
 	else
 		return Generator.resolve(self, c, list, force)
 	end

@@ -47,7 +47,7 @@ local g = game.state:dynamicZoneEntry(game.level.map(x, y, engine.Map.TERRAIN):c
 			min_floor = 1200,
 			floor = "CAVEFLOOR",
 			wall = "CAVEWALL",
-			up = "CAVE_LADDER_UP_WILDERNESS",
+			up = "DYNAMIC_ZONE_EXIT",
 			door = "CAVEFLOOR",
 		},
 		actor = {

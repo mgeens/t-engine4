@@ -75,7 +75,7 @@ defineTile('.', "FLOOR")
 defineTile('#', "HARDWALL")
 defineTile('+', "DOOR")
 defineTile('!', "DOOR_VAULT")
-defineTile('>', "DOWN")
+defineTile('>', "DYNAMIC_ZONE_EXIT")
 
 
 defineTile('b', "FLOOR", {random_filter={add_levels=10, tome_mod="gvault"}}, {random_filter={add_levels=5, name="skeleton magus"}})

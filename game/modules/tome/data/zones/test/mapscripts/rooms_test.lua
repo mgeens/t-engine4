@@ -23,15 +23,17 @@ local tm = Tilemap.new(self.mapsize, '#')
 
 -- self.data.greater_vaults_list = {"32-chambers"}
 local room_factory = Rooms.new(self, "random_room")
-local vault_factory = Rooms.new(self, "lesser_vault")
+local vault_factory = Rooms.new(self, "greater_vault")
 
+local nb_vault = 0
 local rooms = {}
 for i = 1, 20 do
-	local proom = (rng.percent(20) and vault_factory or room_factory):generateRoom()
+	local proom = (nb_vault > 0 and vault_factory or room_factory):generateRoom()
 	local pos = proom and tm:findRandomArea(nil, tm.data_size, proom.data_w, proom.data_h, '#', 1)
 	if pos then
 		tm:merge(pos, proom:build())
 		rooms[#rooms+1] = proom
+		nb_vault = nb_vault - 1
 	end
 end
 
@@ -54,15 +56,19 @@ for i = 1, 20 do
 	end
 end
 
-if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, edges_surplus=0}) then return self:regenerate() end
+if not loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms, door_chance=60, edges_surplus=0}) then return self:redo() end
 -- loadMapScript("lib/connect_rooms_multi", {map=tm, rooms=rooms})
 
 
 self:setEntrance(tm:locateTile('<'))
 self:setExit(rooms[#rooms]:centerPoint()) tm:put(rooms[#rooms]:centerPoint(), '>')
 
+
 -- Elimitate the rest
--- if tm:eliminateByFloodfill{'#', 'T'} < 600 then return self:regenerate() end
+-- if tm:eliminateByFloodfill{'#', 'T'} < 600 then return self:redo() end
+
+local spot = tm:point(1, 1)
+loadMapScript("lib/subvault", {map=tm, spot=spot, char="V"})
 
 tm:printResult()
 
