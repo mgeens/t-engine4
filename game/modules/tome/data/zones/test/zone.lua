@@ -43,6 +43,7 @@ return {
 			[';'] = "GRASS", ['T'] = "TREE",
 			['='] = "DEEP_WATER",
 			mapscript = "!rooms_test",
+			-- greater_vaults_list = {"portal-vault"},
 			-- mapscript = "!bsp_islands",
 			-- mapscript = "!cavernous_forest",
 			-- mapscript = "!testroom2",
