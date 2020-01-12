@@ -56,6 +56,10 @@ function _M:makeData(w, h, fill_with)
 	return data
 end
 
+function _M:erase(fill_with)
+	self.data = self:makeData(self.data_w, self.data_h, fill_with or '#')
+end
+
 function _M:clone()
 	local n = self.new()
 	n.data_w, n.data_h, n.data_size = self.data_w, self.data_h, self.data_size:clone()
@@ -317,7 +321,7 @@ function _M:mapLoad(file)
 end
 
 --- Used internally to load a tilemap from a tmx file
-function _M:tmxLoad(file)
+function _M:tmxLoad(file, select_layer)
 	local f = fs.open(file, "r") local data = f:read(10485760) f:close()
 	local map = lom.parse(data)
 	local mapprops = {}
@@ -356,39 +360,41 @@ function _M:tmxLoad(file)
 	end
 
 	for _, layer in ipairs(map:findAll("layer")) do
-		local mapdata = layer:findOne("data")
-		if mapdata.attr.encoding == "base64" then
-			local b64 = mime.unb64(mapdata[1]:trim())
-			local data
-			if mapdata.attr.compression == "zlib" then data = zlib.decompress(b64)
-			elseif not mapdata.attr.compression then data = b64
-			else error("tmx map compression unsupported: "..mapdata.attr.compression)
-			end
-			local gid, i = nil, 1
-			local x, y = 1, 1
-			while i <= #data do
-				gid, i = struct.unpack("<I4", data, i)				
-				populate(x, y, gid)
-				x = x + 1
-				if x > w then x = 1 y = y + 1 end
-			end
-		elseif mapdata.attr.encoding == "csv" then
-			local data = mapdata[1]:gsub("[^,0-9]", ""):split(",")
-			local x, y = 1, 1
-			for i, gid in ipairs(data) do
-				gid = tonumber(gid)
-				populate(x, y, gid)
-				x = x + 1
-				if x > w then x = 1 y = y + 1 end
-			end
-		elseif not mapdata.attr.encoding then
-			local data = mapdata:findAll("tile")
-			local x, y = 1, 1
-			for i, tile in ipairs(data) do
-				local gid = tonumber(tile.attr.gid)
-				populate(x, y, gid)
-				x = x + 1
-				if x > w then x = 1 y = y + 1 end
+		if not select_layer or layer.attr.name == select_layer then
+			local mapdata = layer:findOne("data")
+			if mapdata.attr.encoding == "base64" then
+				local b64 = mime.unb64(mapdata[1]:trim())
+				local data
+				if mapdata.attr.compression == "zlib" then data = zlib.decompress(b64)
+				elseif not mapdata.attr.compression then data = b64
+				else error("tmx map compression unsupported: "..mapdata.attr.compression)
+				end
+				local gid, i = nil, 1
+				local x, y = 1, 1
+				while i <= #data do
+					gid, i = struct.unpack("<I4", data, i)				
+					populate(x, y, gid)
+					x = x + 1
+					if x > w then x = 1 y = y + 1 end
+				end
+			elseif mapdata.attr.encoding == "csv" then
+				local data = mapdata[1]:gsub("[^,0-9]", ""):split(",")
+				local x, y = 1, 1
+				for i, gid in ipairs(data) do
+					gid = tonumber(gid)
+					populate(x, y, gid)
+					x = x + 1
+					if x > w then x = 1 y = y + 1 end
+				end
+			elseif not mapdata.attr.encoding then
+				local data = mapdata:findAll("tile")
+				local x, y = 1, 1
+				for i, tile in ipairs(data) do
+					local gid = tonumber(tile.attr.gid)
+					populate(x, y, gid)
+					x = x + 1
+					if x > w then x = 1 y = y + 1 end
+				end
 			end
 		end
 	end

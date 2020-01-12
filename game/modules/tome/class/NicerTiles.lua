@@ -1233,7 +1233,7 @@ psitechwall = { method="walls", type="psitechwall", forbid={}, use_type=true, ex
 	default91i={add_displays={{image="terrain/psicave/psitechwall_73d_1.png", display_y=-1, z=16}}, min=1, max=1},
 
 	default2={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_8_0%d.png"}}, min=1, max=3},
-	default2p={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_pillar_bottom_0%d.png"}}, min=1, max=3},
+	default2p={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_pillar_bottom_0%d.png"}}, min=1, max=2},
 	default1={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_inner_1_01.png"}}, min=1, max=1},
 	default3={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_inner_3_01.png"}}, min=1, max=1},
 	default1i={image="terrain/psicave/psitech_floor_1_01.png", add_mos={{image="terrain/psicave/psitech_V3_7_01.png"}}, min=1, max=1},
