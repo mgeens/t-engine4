@@ -145,7 +145,7 @@ newEntity{ theme={defense=true, physical=true}, name="generic def", points = 1, 
 				},
 }
 newEntity{ theme={defense=true, physical=true}, name="generic armor", points = 1, rarity = 10, level_range = {1, 50},
-	wielder = { combat_armor = resolvers.randartmax(2, 8), },
+	wielder = { combat_armor = resolvers.randartmax(2, 16), },
 }
 newEntity{ theme={defense=true}, name="generic life regeneration", points = 1, rarity = 11, level_range = {1, 50},
 	wielder = { life_regen = resolvers.randartmax(2, 4), },
@@ -461,7 +461,7 @@ newEntity{ theme={physical=true, defense=true}, name="generic die at", points = 
 }
 
 newEntity{ theme={defense=true, misc=true}, name="generic ignore crit", points = 1, rarity = 15, level_range = {1, 50},
-	wielder = { ignore_direct_crits = resolvers.randartmax(5, 15), },
+	wielder = { ignore_direct_crits = resolvers.randartmax(4, 20), },
 }
 
 newEntity{ theme={defense=true, spell=true, temporal=true}, name="generic void", points = 1, rarity = 20, level_range = {1, 50},
