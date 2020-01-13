@@ -120,6 +120,10 @@ point_meta = {
 		distance = function(p, p2)
 			return core.fov.distance(p.x, p.y, p2.x, p2.y)
 		end,
+		addDir = function(p, dir)
+			local dx, dy = util.dirToCoord(dir)
+			return _M:point(p.x + dx, p.y + dy)
+		end,
 		clone = function(p)
 			return _M:point(p)
 		end,
@@ -414,7 +418,7 @@ function _M:hasResult()
 end
 
 --- Locate a specific tile
-function _M:locateTile(char, erase, min_x, min_y, max_x, max_y)
+function _M:locateTile(char, erase, min_x, min_y, max_x, max_y, allow_position)
 	local res = {}
 	min_x = min_x or 1
 	min_y = min_y or 1
@@ -422,7 +426,7 @@ function _M:locateTile(char, erase, min_x, min_y, max_x, max_y)
 	max_y = max_y or self.data_h
 	for i = min_x, max_x do
 		for j = min_y, max_y do
-			if self.data[j][i] == char then
+			if self.data[j][i] == char and (not allow_position or allow_position(self:point(i, j))) then
 				res[#res+1] = self:point(i, j)
 				if erase then self.data[j][i] = erase end
 			end
@@ -524,6 +528,10 @@ group_meta = {
 		return ("Group[%s](%d points)"):format(tostring(g.list), #g.list)
 	end,
 	__index = {
+		print = function(g)
+			print(g)
+			for i, p in ipairs(g.list) do print(" - "..p.x.." x "..p.y) end
+		end,
 		updateReverse = function(g)
 			g.reverse = {}
 			for j = 1, #g.list do
@@ -800,7 +808,7 @@ function _M:eliminateByFloodfill(walls)
 	if g and #g.list > 0 then
 		print("[Tilemap] Ok floodfill with main group size", #g.list)
 		self:eliminateGroups(walls[1], groups)
-		return #g.list
+		return #g.list, g
 	else
 		print("[Tilemap] Floodfill left nothing")
 		return 0
@@ -948,9 +956,10 @@ function _M:groupOuterRectangle(group)
 end
 
 --- Carve out a simple linear path from coords until a tile is reached
-function _M:carveLinearPath(char, from, dir, stop_at, dig_only_into)
+function _M:carveLinearPath(char, from, dir, stop_at, dig_only_into, ignore_first)
 	local x, y = math.floor(from.x), math.floor(from.y)
 	local dx, dy = util.dirToCoord(dir)
+	if ignore_first then x, y = x + dx, y + dy end
 	if type(dig_only_into) == "table" then dig_only_into = table.reverse(dig_only_into) end
 	while x >= 1 and x <= self.data_w and y >= 1 and y <= self.data_h and self.data[y][x] ~= stop_at do
 		if not dig_only_into or (type(dig_only_into) == "table" and dig_only_into[self.data[y][x]]) or (type(dig_only_into) == "function" and dig_only_into(x, y, self.data[y][x])) then 
