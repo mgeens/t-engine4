@@ -38,7 +38,9 @@ newEntity{
 	size_category = 3,
 
 	resolvers.racial(),
-
+	rnd_boss_init = function(self, data)
+        self.inc_damage.all = (self.inc_damage.all or 0) - 30  -- Compensate for high base damage talents
+    end,
 	open_door = true,
 	resolvers.sustains_at_birth(),
 	resolvers.inscriptions(3, "infusion"),
