@@ -47,6 +47,11 @@ tm:applyOnGroups(rooms, function(room, idx)
 	if event then self:addSpot(event, "event-spot", "subvault-place") end
 end)
 
+if rng.percent(15) and not game.state:doneEvent("renegade-undead") then 
+	game.state:doneEvent("renegade-undead",1) -- special vault! can only show once per game and only in rak'shor pride; contains exceptionally difficult foes and exceptional loot
+	game.level.data.generator.map.greater_vaults_list = {"renegade-undead"}
+end
+
 -- Complete the map by putting wall in all the remaining blank spaces
 tm:fillAll()
 
