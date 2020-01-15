@@ -76,6 +76,11 @@ tm:applyOnGroups(bsp.rooms, function(room, idx)
 	end
 end, true)
 
+if rng.percent(22) and not game.state:doneEvent("grushnak-armory") then 
+	game.state:doneEvent("grushnak-armory",1) -- special vault! can only show once per game and only in grushnak pride; contains exceptionally difficult foes and exceptional loot
+	game.level.data.generator.map.greater_vaults_list = {"grushnak-armory"}
+end
+
 -- Ensure enough size
 if tm:eliminateByFloodfill{'#', '"', 'T'} < 350 then return self:redo() end
 
