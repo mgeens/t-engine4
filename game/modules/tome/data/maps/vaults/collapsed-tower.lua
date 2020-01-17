@@ -53,7 +53,7 @@ local turret = function(version)
 		talent_cd_reduction={[Talents.T_ELEMENTAL_BOLT]=3, },
 
 		resolvers.talents{
-			[Talents.T_ELEMENTAL_BOLT]={base=1, every=5, max=9},
+			[Talents.T_ELEMENTAL_BOLT]={base=2, every=4, max=8},
 		},
 
 		ai = "dumb_talented_simple", ai_state = { ai_move="move_complex", talent_in=3, },
