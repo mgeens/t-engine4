@@ -58,7 +58,7 @@ if vaultvariations == 1 then -- Gloomy theme
       end,
       random_filter={name="honey tree", add_levels=4}}
    )
-   defineTile('P', "FLOOR", nil,
+   defineTile('P', "GRASS", nil,
       {entity_mod=function(e)
          e.make_escort = nil
          e.name = rng.table{"gloomy ", "deformed ", "sick "}..e.name
@@ -131,7 +131,7 @@ elseif vaultvariations == 2 then -- FLooded theme
 
 else -- Normal theme
    defineTile('T', "GRASS", nil, {random_filter={name="honey tree", add_levels=4}})
-   defineTile('P', "FLORR", nil, {random_filter={name="giant venus flytrap", add_levels=4}})
+   defineTile('P', "GRASS", nil, {random_filter={name="giant venus flytrap", add_levels=4}})
    defineTile('B', "FLOOR", nil, {random_filter={name="brown bear", add_levels=4}})
    defineTile('i', "FLOOR", {random_filter={add_levels=4, tome_mod="vault"}})
    return {
