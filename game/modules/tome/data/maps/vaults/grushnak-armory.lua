@@ -18,14 +18,14 @@
 -- darkgod@te4.org
 
 specialList("actor", {
-    "/data/general/npcs/orc-grushnak.lua",
+	"/data/general/npcs/orc-grushnak.lua",
 	"/data/general/npcs/orc.lua",
-    "/data/general/npcs/bear.lua",
+	"/data/general/npcs/bear.lua",
 })
 
 specialList("terrain", {
-		"/data/general/grids/basic.lua",
-		"/data/zones/grushnak-pride/grids.lua",
+	"/data/general/grids/basic.lua",
+	"/data/zones/grushnak-pride/grids.lua",
 })
 
 setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=true}}   

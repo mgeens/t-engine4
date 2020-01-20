@@ -25,9 +25,9 @@ specialList("actor", {
 })
 
 specialList("terrain", {
-		"/data/general/grids/bone.lua",
-		"/data/general/grids/gothic.lua",
-		"/data/general/grids/basic.lua",
+	"/data/general/grids/bone.lua",
+	"/data/general/grids/gothic.lua",
+	"/data/general/grids/basic.lua",
 })
 
 setStatusAll{no_teleport=true, vault_only_door_open=true, room_map = {can_open=true}}

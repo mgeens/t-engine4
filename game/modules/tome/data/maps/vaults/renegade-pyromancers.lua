@@ -24,11 +24,11 @@ specialList("actor", {
 })
 
 specialList("terrain", {
-        "/data/general/grids/burntland.lua",
-		"/data/general/grids/lava.lua",
-		"/data/general/grids/gothic.lua",
-		"/data/general/grids/basic.lua",
-		"/data/zones/vor-pride/grids.lua",
+	"/data/general/grids/burntland.lua",
+	"/data/general/grids/lava.lua",
+	"/data/general/grids/gothic.lua",
+	"/data/general/grids/basic.lua",
+	"/data/zones/vor-pride/grids.lua",
 })
 
 setStatusAll{no_teleport=true}
