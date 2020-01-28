@@ -67,6 +67,11 @@ tm:applyOnGroups(rooms, function(room, idx)
 	end
 end)
 
+if rng.percent(15) and not game.state:doneEvent("renegade-pyromancers") then 
+	game.state:doneEvent("renegade-pyromancers",1) -- special vault! can only show once per game and only in vor pride; contains exceptionally difficult foes and exceptional loot
+	game.level.data.generator.map.greater_vaults_list = {"renegade-pyromancers"}
+end
+		
 -- Complete the map by putting wall in all the remaining blank spaces
 tm:fillAll()
 -- if tm:eliminateByFloodfill{'#', 'T'} < 400 then return self:regenerate() end

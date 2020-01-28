@@ -42,7 +42,6 @@ return {
 			class = "engine.generator.map.Roomer",
 			nb_rooms = 10,
 			rooms = {"random_room"},
-			lesser_vaults_list = {"flooded-prison"},
 			lite_room_chance = 0,
 			['.'] = {"WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR_BUBBLE"},
 			['#'] = "WATER_WALL",
@@ -90,6 +89,7 @@ return {
 			generator = {
 				map =  {
 					rooms = {"random_room",{"lesser_vault",7}},
+					lesser_vaults_list = {"flooded-prison"},
 				},
 				actor = {
 					filters = {{special_rarity="water_rarity"}},
@@ -101,6 +101,7 @@ return {
 			generator = is_flooded and {
 				map = {
 					rooms = {"random_room",{"lesser_vault",5}},
+					lesser_vaults_list = {"flooded-prison"},
 					down = "SHERTUL_FORTRESS_FLOOD",
 					['.'] = {"WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR","WATER_FLOOR_BUBBLE"},
 					force_last_stair = true,
@@ -112,6 +113,8 @@ return {
 				},
 			} or {
 				map = {
+					rooms = {"random_room",{"lesser_vault",5}},
+					lesser_vaults_list = {"worms"},
 					['.'] = "FLOOR",
 					['#'] = "WALL",
 					up = "UP",
