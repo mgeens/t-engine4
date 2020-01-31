@@ -179,22 +179,25 @@ newEntity{ base = "BASE_RING",
 		name = function(self, who)
 			local dam = self.use_power.damage(self, who)
 			return ("summon a radius %d tidal wave that expands slowly over %d turns, dealing %0.2f cold and %0.2f physical damage (based on Willpower) each turn, knocking opponents back, and lowering their stun resistance"):
-			format(self.use_power:radius(who), self.use_power.duration(self, who), who:damDesc(engine.DamageType.COLD, dam/2), who:damDesc(engine.DamageType.PHYSICAL, dam/2))
+			format(self.use_power.radius(self, who), self.use_power.duration, who:damDesc(engine.DamageType.COLD, dam/2), who:damDesc(engine.DamageType.PHYSICAL, dam/2))
 		end,
 		power = 60,
-		radius = function(self, who) return 1 end,
-		duration = function(self, who) return 7 end,
+		range = 0,
+		radius = function(self, who) return 1 + 0.4 * self.use_power.duration end,
+		duration = 7,
 		damage = function(self, who) return who:combatStatScale("wil", 15, 40) end,
 		tactical = {ESCAPE = 1.5, ATTACKAREA = {COLD = 1.5, PHYSICAL = 1.5}},
+		requires_target = true,
+		target = function(self, who) return {type="ball", range=0, radius=self.use_power.radius(self, who), selffire=false} end,
 		use = function(self, who)
-			local duration = 7
-			local radius = self.use_power.radius(self, who)
+			local duration = self.use_power.duration
+			local initial_radius = 1
 			local dam = self.use_power.damage(self, who)
 			-- Add a lasting map effect
 			local wave = game.level.map:addEffect(who,
 				who.x, who.y, duration,
 				engine.DamageType.WAVE, {dam=dam, x=who.x, y=who.y, apply_wet=1},
-				radius,
+				initial_radius,
 				5, nil,
 				engine.MapEffect.new{color_br=30, color_bg=60, color_bb=200, effect_shader="shader_images/water_effect1.png"},
 				function(e, update_shape_only)
