@@ -27,3 +27,4 @@ debug-recompile.sh
 profiling-recompile.sh
 recompile.sh
 
+/.idea/
